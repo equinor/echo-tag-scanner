@@ -1,0 +1,21 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "useBuiltIns": "usage",
+        "corejs": 3,
+        "targets": "> 0.25%, not dead"
+        // "targets": {
+        //     "esmodules": true
+        // }
+      }
+    ],
+    ["@babel/preset-react",
+    {
+      "runtime": "automatic" // This ensures new JSX transform works until Babel 8 is ready.
+    }],
+    "@babel/preset-typescript"
+  ],
+  "plugins": ["@babel/plugin-transform-runtime"]
+}

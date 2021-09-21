@@ -1,0 +1,7 @@
+.env
+env.sh
+.d.ts
+scripts/*.js
+/build/*
+/webpack/*
+/node_modules/*

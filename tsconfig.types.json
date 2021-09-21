@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationDir": "build/types",
+    "esModuleInterop": true,
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "src/App.tsx"
+  ],
+  "exclude": [
+    "node_modules", 
+    "build", 
+    "dist", 
+    "rollup.config.js",
+    "src/components/**/*",
+    "src/container/**/*"
+  ]
+}

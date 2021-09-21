@@ -87,7 +87,7 @@ export function definePlugins(env, rootPath) {
         new CopyPlugin({
           patterns: [
             {
-              from: join(rootPath, '/src/typings/SmartPortal.d.ts'),
+              from: join(rootPath, '/src/typings/EchoCameraWeb.d.ts'),
               to: join(rootPath, '/build/index.d.ts')
             }
           ]

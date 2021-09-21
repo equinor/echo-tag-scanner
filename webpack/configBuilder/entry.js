@@ -13,7 +13,7 @@ import { join } from 'path';
 export function defineEntry(env) {
   switch (env) {
     case 'prod':
-      return { index: join(rootPath, '/src/setup.ts') };
+      return { index: join(rootPath, '/src/setup.tsx') };
     default:
       return {
         index: join(rootPath, '/src/index.tsx')

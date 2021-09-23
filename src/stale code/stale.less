@@ -1,0 +1,207 @@
+.carouselIcon {
+    position: relative;
+    grid-area: carousel;
+
+    > i > svg {
+        fill: var(--color-primary);
+    }
+
+    .counter {
+        background: #007079;
+        position: absolute;
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        color: white;
+        text-align: center;
+        bottom: 0;
+        right: -15px;
+        transition: all 0.3s ease;
+    }
+    .hideCounter {
+        height: 0;
+        width: 0;
+    }
+}
+
+
+// Icons
+
+.icon {
+    > svg {
+        fill: var(--color-primary);
+    }
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--color-primary);
+    border-radius: 50%;
+    padding: 1rem;
+}
+
+
+
+.selectEl {
+    display: none;
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    height: 40px;
+    transform: translate(0%, -50%);
+    width: 30%;
+    text-overflow: ellipsis;
+    font-family: "Equinor";
+    font-size: var(--root-font-size);
+    box-sizing: border-box;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    background-color: var(--color-black-alt6);
+    padding: 0.8rem;
+    border-bottom: 1px solid var(--color-primary);
+    outline: 1px solid transparent;
+    transition: 0.3s ease;
+}
+
+
+.cameraSwitch {
+    display: contents;
+    position: relative;
+
+    svg {
+        opacity: 0;
+    }
+}
+
+
+.moveRight {
+    transform: translateX(30px);
+}
+.moveLeft {
+    transform: translateX(-22px);
+}
+
+.zoom {
+    display: none;
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    &::before,
+    &::after {
+        color: white;
+        font-weight: bolder;
+        font-size: 20px;
+        position: absolute;
+        top: 0;
+    }
+
+    &::before {
+        content: "-";
+        left: -15px;
+    }
+
+    &::after {
+        content: "+";
+        right: -15px;
+    }
+}
+
+.modeOptions {
+    position: relative;
+    list-style-type: none;
+    display: flex;
+    margin: 0;
+    margin-top: 10px;
+
+    > li {
+        margin-right: 10px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    &::after {
+        content: "";
+        height: 10px;
+        width: 10px;
+        border-radius: 50%;
+        background: #007079;
+        position: absolute;
+        bottom: -70%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transition: left 0.3s ease;
+    }
+}
+
+.toggleCamera {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+}
+
+.topNav {
+    display: flex;
+    justify-content: space-around;
+    background-color: white;
+    height: 35px;
+}
+
+.buttonHide {
+    display: none;
+}
+
+.icons {
+    cursor: pointer;
+    height: "45px";
+    width: "45px";
+}
+
+
+.shutter {
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transform: scale(1);
+    transition: transform 0.2s ease-in-out;
+    grid-area: shutter;
+
+    &:active {
+        transform: scale(1.2);
+        transition: 0.1s;
+    }
+}
+
+
+.innerVideo {
+    display: inline-block;
+    position: relative;
+}
+
+.recordingCounter {
+    color: white;
+    font-size: 20px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+}
+
+
+.toolbar {
+    display: flex;
+    height: 100%;
+    > i {
+        margin-left: var(--small-margin);
+    }
+    align-items: center;
+    justify-content: flex-end;
+    background-color: var(--color-white);
+    padding: 0 var(--small-padding);
+}

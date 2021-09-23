@@ -1,6 +1,7 @@
 import { useState, useEffect, FC } from 'react';
 import { Route, Switch, Redirect, BrowserRouter } from 'react-router-dom';
 import EchoCore from '@equinor/echo-core';
+import { STIDCamera } from './STIDCamera';
 
 const App: FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -19,11 +20,15 @@ const App: FC = () => {
     }
   }, [isAuthenticated]);
 
+  const tempCloseCameraCallback = () => {
+    console.log('i like fishes');
+  };
+
   return (
     <BrowserRouter>
       <Switch>
         <Route exact path="/camera">
-          <main>Camera</main>
+          <STIDCamera closeCamera={tempCloseCameraCallback} />
         </Route>
         <Route path="/*" render={() => <Redirect to="/camera" />} />
       </Switch>

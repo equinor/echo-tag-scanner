@@ -2,7 +2,6 @@
 An Echo module for recognising tag numbers with a camera.
 
 ## First time development setup
-https://github.com/equinor/smart-portal
 1. Clone the repo
 2. ```npm install```
 3. ```npm run predev``` -> get your self-signed certificates

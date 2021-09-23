@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDeviceType } from '@hooks';
-import { CapturePreviewerItem } from './capturePreviewer/CapturePreviewer';
+import { CapturePreviewerItem } from '../capturePreviewer/CapturePreviewer';
 
 type State = {
   cameraMode: 'video' | 'photo';

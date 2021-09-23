@@ -1,0 +1,22 @@
+.cameraControlsWrapper {
+    display: grid;
+    grid-template-rows: 0.3fr 1fr;
+    height: 100%;
+    align-items: center;
+}
+.cameraControls {
+    display: grid;
+    grid-template-columns: [availablecell]1fr [shutter]1fr [carousel]1fr;
+    justify-items: center;
+    align-items: center;
+    width: 100%;
+
+    label {
+        margin-right: 1.5em;
+    }
+
+    select {
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+}

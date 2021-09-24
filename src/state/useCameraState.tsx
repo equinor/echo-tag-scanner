@@ -19,7 +19,7 @@ type State = {
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-const UseCameraState = (
+const useCameraState = (
   video: React.RefObject<HTMLVideoElement>,
   canvas: React.RefObject<HTMLCanvasElement>,
   input: React.RefObject<HTMLInputElement>,
@@ -145,6 +145,7 @@ const UseCameraState = (
   };
 
   const toggleTorch = () => {
+    console.info('turning on torch');
     if (state.mediaStream) {
       const track = state.mediaStream.getTracks()[0];
       const constraints = track.getConstraints();
@@ -399,4 +400,4 @@ const UseCameraState = (
   };
 };
 
-export default UseCameraState;
+export { useCameraState };

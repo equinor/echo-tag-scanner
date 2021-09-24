@@ -1,19 +1,24 @@
-import { CameraButton, Shutter } from '@components';
+import { CameraButton, ScannerButton } from '@components';
 import styles from './styles.less';
 
-const CameraControls = (): JSX.Element => {
+interface CameraControlsProps {
+  onScanning: () => void;
+  onToggleTorch: () => void;
+}
+
+const CameraControls = (props: CameraControlsProps): JSX.Element => {
   const stub = () => {
     console.info('stub');
   };
 
   return (
-    <div role="group" className={styles.cameraControlsWrapper}>
-      <div className={styles.cameraControls}>
-        <CameraButton name="flash_off" onClick={stub} />
-        <Shutter />
+    <section className={styles.cameraControlsWrapper}>
+      <div className={styles.cameraControls} role="toolbar">
+        <CameraButton name="flash_off" onClick={props.onToggleTorch} />
+        <ScannerButton onClick={props.onScanning} />
         <CameraButton name="camera" onClick={stub} />
       </div>
-    </div>
+    </section>
   );
 };
 

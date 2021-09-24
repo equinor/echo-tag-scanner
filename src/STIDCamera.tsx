@@ -1,8 +1,8 @@
 /*eslint no-eq-null: "off"*/
-import { FC, useRef, useEffect } from 'react';
+import { FC, useRef, useEffect, useState } from 'react';
 import styles from './styles.less';
-import useCameraState from './state/useCameraState';
-import { CameraControls, Viewfinder } from '@components';
+import { useCameraState } from './state/useCameraState';
+import { CameraControls, Viewfinder, Toast } from '@components';
 
 type STIDCamera = {
   closeCamera: () => void;
@@ -33,10 +33,16 @@ const STIDCamera: FC<STIDCamera> = ({ closeCamera, handleFile }) => {
     }
   }, [state.mediaStream, state.showCarousel]);
 
+  const [noTagsDetectedToast, setNoTagsDetectedToast] = useState(false);
+  const onScanning = () => {
+    setNoTagsDetectedToast(!noTagsDetectedToast);
+  };
+
   return (
     <main className={styles.cameraWrapper}>
       <Viewfinder canvasRef={canvasRef} videoRef={videoRef} />
-      <CameraControls />
+      <CameraControls onToggleTorch={toggleTorch} onScanning={onScanning} />
+      {noTagsDetectedToast && <Toast open message="Scanning" />}
     </main>
   );
 };

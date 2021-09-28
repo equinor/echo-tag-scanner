@@ -2,7 +2,7 @@
 import { FC, useRef, useEffect, useState } from 'react';
 import styles from './styles.less';
 import { useCameraState } from './state/useCameraState';
-import { CameraControls, Viewfinder, Toast } from '@components';
+import { CameraControls, Viewfinder, Toast, GestureHandler } from '@components';
 
 type STIDCamera = {
   closeCamera: () => void;
@@ -41,6 +41,7 @@ const STIDCamera: FC<STIDCamera> = ({ closeCamera, handleFile }) => {
   return (
     <main className={styles.cameraWrapper}>
       <Viewfinder canvasRef={canvasRef} videoRef={videoRef} />
+      <GestureHandler />
       <CameraControls onToggleTorch={toggleTorch} onScanning={onScanning} />
       {noTagsDetectedToast && <Toast open message="Scanning" />}
     </main>

@@ -7,13 +7,13 @@ import path from 'path';
 
 /**
  * Defines how webpack outputs bundled files.
- * @param {"dev"|"prod"|"test"|undefined} env - the stringified environment name.
+ * @param {"dev"|"prod"|"test"|"standaloneProd"|undefined} env - the stringified environment name.
  * @param {string} rootPath - the root path of the webserver.
  * @returns {WebpackOutput} webpack.output
  */
 export function defineOutput(env, rootPath) {
   // no need for content hash as caching is irrelevant due to npm versions.
-  if (env === 'prod') {
+  if (env === 'prod' || env === 'standaloneProd') {
     return {
       path: path.join(rootPath, '/build/'),
       clean: true,

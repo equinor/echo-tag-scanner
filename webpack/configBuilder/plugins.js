@@ -16,7 +16,7 @@ import CopyPlugin from 'copy-webpack-plugin';
 
 /** Handles the templating of index.html */
 let htmlWebPackPlugin = new HtmlWebPackPlugin({
-  template: join(rootPath, '/webpack/templates/index.html'),
+  template: './webpack/templates/index.html',
   filename: './index.html',
   // favicon: './public/favicon.ico',
   inject: true
@@ -49,7 +49,7 @@ export function defineBasePlugins() {
 
 /**
  * Creates an array of webpack plugins that will be used in the build process.
- * @param {"prod"|"dev"|"remote"|"analyze"} env
+ * @param {"prod"|"dev"|"remote"|"analyze"|"standaloneProd"} env
  * @param {string} rootPath - The root of the webserver.
  * @returns {WebpackPlugin[]}
  */
@@ -84,6 +84,19 @@ export function definePlugins(env, rootPath) {
     case 'prod':
       return [
         progressReport,
+        new CopyPlugin({
+          patterns: [
+            {
+              from: join(rootPath, '/src/typings/EchoCameraWeb.d.ts'),
+              to: join(rootPath, '/build/index.d.ts')
+            }
+          ]
+        }),
+        new Dotenv({ path: envFile })
+      ];
+    case 'standaloneProd':
+      return [
+        ...defineBasePlugins(),
         new CopyPlugin({
           patterns: [
             {

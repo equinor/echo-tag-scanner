@@ -149,7 +149,7 @@ function defineFonts() {
 
 /**
  * Creates a webpack.module.rules object for specific build environments.
- * @param {"prod"|"dev"|"remote"} env
+ * @param {"prod"|"dev"|"remote"|"standaloneProd"} env
  * @returns {RuleSetRule[]} A env specific webpack module rule definition.
  */
 export function defineModules(env) {
@@ -163,6 +163,10 @@ export function defineModules(env) {
     case "prod":
       return {
         rules: [transpiler, globalCSS, moduledLess, images],
+      };
+    case "standaloneProd":
+      return {
+        rules: [markup, transpiler, globalCSS, moduledLess, images],
       };
     default:
       return {

@@ -7,7 +7,7 @@ import { join } from 'path';
 
 /**
  * Defines a WebpackEntry config object.
- * @param {"dev"|"prod"|"test"|undefined} env The environment indentifier.
+ * @param {"dev"|"prod"|"test"|"standaloneProd"|undefined} env The environment indentifier.
  * @returns {WebpackEntry} webpack.entry
  */
 export function defineEntry(env) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useDeviceType } from '@hooks';
 import { CapturePreviewerItem } from '../capturePreviewer/CapturePreviewer';
+import { ExtendedMediaTrackCapabilities, ExtendedMediaTrackSettings } from '@types';
 
 type State = {
   cameraMode: 'video' | 'photo';
@@ -22,9 +22,7 @@ type State = {
 const useCameraState = (
   video: React.RefObject<HTMLVideoElement>,
   canvas: React.RefObject<HTMLCanvasElement>,
-  input: React.RefObject<HTMLInputElement>,
-  select: React.RefObject<HTMLSelectElement>,
-  close: () => void
+  input: React.RefObject<HTMLInputElement>
 ) => {
   let chunks: Blob[] = [];
   const [state, setState] = useState<State>({
@@ -41,7 +39,6 @@ const useCameraState = (
     mediaStream: null,
     torchEnabled: false
   });
-  const [deviceType] = useDeviceType();
 
   useEffect(() => {
     if (!state.recordingStatus && state.mediaStream === null) {
@@ -63,6 +60,9 @@ const useCameraState = (
           const videoFile = new File([blob], `videoCapture${state.mediaCaptures.length + 1}.mp4`, {
             type: 'video/mp4'
           });
+
+          // TODO: address this potential rerender issue.
+          // eslint-disable-next-line react-hooks/exhaustive-deps
           chunks = [];
           // const videoURL = window.URL.createObjectURL(blobs);
           const files = [...state.mediaCaptures];
@@ -92,57 +92,19 @@ const useCameraState = (
     }
   }, [state.recordingStatus, state.mediaStream]);
 
-  const getStream = (newConstraints?: MediaStreamConstraints) => {
+  async function getStream(newConstraints?: MediaStreamConstraints) {
     let stream: MediaStream;
     const settings = newConstraints ?? {
       video: { facingMode: 'environment' }
     };
-    navigator.mediaDevices
-      .getUserMedia(settings)
-      .then(async (mediaStream) => {
-        stream = mediaStream;
-        await setOptimalConstraints(mediaStream);
-        setMedia(stream, { videoBitsPerSecond: 3000000 });
-        return navigator.mediaDevices.enumerateDevices();
-      })
-      .then((devices) => getCameraSelection(devices, stream))
-      .catch((e) => {
-        console.error(e.toString());
-      });
-  };
+    const usermedia = await navigator.mediaDevices.getUserMedia(settings);
+    await setContraints(usermedia);
 
-  const getCameraSelection = (devices: MediaDeviceInfo[], stream: MediaStream) => {
-    const { current: selectElement } = select;
-    const currentDevice = stream.getTracks()[0].label;
-
-    const videoDevices =
-      deviceType === 'mobile'
-        ? devices.filter(
-            (device) =>
-              device.kind === 'videoinput' && device.label.toLowerCase().indexOf('back') !== -1
-          )
-        : devices.filter((device) => device.kind === 'videoinput');
-
-    if (selectElement !== null && selectElement.childElementCount === 0) {
-      // sets device options
-      if (videoDevices.length === 1) {
-        return console.info('dont show select');
-      }
-      const options: HTMLOptionElement[] = [];
-      videoDevices.map((videoDevice) => {
-        const option = document.createElement('option');
-        option.value = videoDevice.deviceId;
-        option.label = videoDevice.label;
-        if (videoDevice.label === currentDevice) {
-          options.unshift(option);
-        } else {
-          options.push(option);
-        }
-      });
-      selectElement.style.display = 'block';
-      return options.map((option) => selectElement.appendChild(option));
+    async function setContraints(mediaStream: MediaStream) {
+      stream = mediaStream;
+      setMedia(stream, { videoBitsPerSecond: 3000000 });
     }
-  };
+  }
 
   const toggleTorch = () => {
     console.info('turning on torch');
@@ -152,6 +114,9 @@ const useCameraState = (
       track
         .applyConstraints({
           ...constraints,
+
+          // torch is not typed in MediaContraintsSet for some reason.
+          //@ts-expect-errorts-ignore
           advanced: [{ torch: !state.torchEnabled }]
         })
         .then(() => {
@@ -164,37 +129,6 @@ const useCameraState = (
           console.info('Your device does not support the torch functionality.');
         });
     }
-  };
-
-  const setOptimalConstraints = (mediaStream: MediaStream) => {
-    const track = mediaStream.getTracks()[0];
-    const constraints = track.getConstraints();
-    const { height, width } = track.getConstraints();
-    let update;
-
-    if (deviceType === 'mobile') {
-      update = {
-        ...constraints,
-        width: { min: width, max: width },
-        height: { min: height, max: height }
-      };
-    } else if (deviceType === 'tablet') {
-      update = {
-        ...constraints,
-        width: { min: width, max: width },
-        height: { min: height, max: height }
-      };
-    } else {
-      update = {
-        ...constraints,
-        width: { min: width, max: width },
-        height: { min: height, max: height }
-      };
-    }
-    return track.applyConstraints(update).catch((error) => {
-      console.info('Something went wrong when we tried to set contraints.');
-      console.error(error);
-    });
   };
 
   const setMedia = (stream: MediaStream, options: MediaRecorderOptions) => {
@@ -243,7 +177,7 @@ const useCameraState = (
       if (canvas?.current && video?.current && canvas.current.getContext && width && height) {
         canvas.current.width = width ?? 1;
         canvas.current.height = height ?? 1;
-        canvas.current?.getContext('2d').drawImage(video?.current, 0, 0, width, height);
+        canvas.current?.getContext('2d')?.drawImage(video?.current, 0, 0, width, height);
 
         canvas.current?.toBlob(async (blob) => {
           //image from canvas is converted to a file and then set to state.
@@ -300,21 +234,26 @@ const useCameraState = (
   const sleep = (ms = 0) => new Promise((r) => setTimeout(r, ms));
   const allowZoom = (mediaStream: MediaStream) => {
     const track = mediaStream.getVideoTracks()[0];
-    const capabilities = track.getCapabilities();
-    const settings = track.getSettings();
+    const capabilities: ExtendedMediaTrackCapabilities = track.getCapabilities();
+    console.log('%c⧭', 'color: #731d1d', capabilities);
+    const settings: ExtendedMediaTrackSettings = track.getSettings();
+    console.log('%c⧭', 'color: #807160', settings);
     const { current: zoomInput } = input;
 
     if (!('zoom' in capabilities) && zoomInput) {
-      return;
+      // zoomInput.style.background = 'black';
     } else {
       if (zoomInput) {
-        zoomInput.min = capabilities?.zoom?.min;
-        zoomInput.max = capabilities?.zoom?.max;
-        zoomInput.step = capabilities?.zoom?.step;
-        zoomInput.value = settings?.zoom;
+        zoomInput.min = assignZoomSettings('min');
+        zoomInput.max = assignZoomSettings('max');
+        zoomInput.step = assignZoomSettings('step');
+        zoomInput.value = assignZoomSettings('value');
         zoomInput.oninput = (e) => {
+          console.log(e);
           track
             .applyConstraints({
+              // torch is not typed in MediaContraintsSet for some reason.
+              //@ts-expect-errorts-ignore
               advanced: [{ zoom: e.target.value }]
             })
             .catch((error) => {
@@ -323,8 +262,29 @@ const useCameraState = (
             });
         };
         zoomInput.hidden = false;
-        zoomInput.style.display = 'block';
       }
+    }
+
+    /**
+     * Returns a string representation of zoom capabilities.
+     * @param type The property of capability.zoom
+     */
+    function assignZoomSettings(type: 'min' | 'max' | 'step' | 'value'): string {
+      if (type === 'value') {
+        if (settings.zoom) {
+          return String(settings.zoom);
+        } else {
+          return '1';
+        }
+      }
+      if (capabilities.zoom) {
+        if (capabilities.zoom[type]) {
+          return String(capabilities.zoom[type]);
+        }
+      }
+      // If zoom capabilities does not exist, we need to return a stringified zero
+      // to prevent "undefined" to be assigned to the zoom slider.
+      return '0';
     }
   };
 
@@ -382,8 +342,6 @@ const useCameraState = (
         (URL || webkitURL).revokeObjectURL(preview.objectUrl);
       }
     });
-
-    close();
   }, [state.mediaStream]);
 
   return {

@@ -4,17 +4,21 @@ import styles from './styles.less';
 
 interface ZoomSliderProps {
   zoomInputRef: Ref<HTMLInputElement>;
+  deviceZoomCapable?: boolean;
 }
 
 const ZoomSlider = (props: ZoomSliderProps): JSX.Element => {
   return (
     <div className={styles.edsSlider}>
       <Slider
+        disabled={!props.deviceZoomCapable}
         value={1}
-        min={1} // 1x zoom
-        max={5} // max 5x zoom. This should be queried from the device if possible.
+        // 1x zoom
+        min={1}
+        // max 5x zoom. This should be queried from the device if possible.
+        max={5}
         step={0.5}
-        ariaLabelledby="simple-slider"
+        ariaLabelledby="zoom-slider"
         minMaxDots={false}
         minMaxValues={false}
         ref={props.zoomInputRef}

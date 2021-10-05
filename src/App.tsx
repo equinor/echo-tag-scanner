@@ -23,10 +23,9 @@ const App: FC = () => {
   return (
     <BrowserRouter>
       <Switch>
-        <Route exact path="/camera">
+        <Route>
           <EchoCamera />
         </Route>
-        <Route path="/*" render={() => <Redirect to="/camera" />} />
       </Switch>
     </BrowserRouter>
   );

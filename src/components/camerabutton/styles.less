@@ -1,14 +1,14 @@
 .buttonResting {
     border-radius: 100%;
     border-style: solid;
-    border-color: var(--colorFgIntense);
+    border-color: var(--black);
     border-width: 3px;
-    width: 10rem;
-    height: 10rem;
+    width: 5rem;
+    height: 5rem;
     background-color: white;
 
     &:active {
-        background-color: var(--colorFgFadedMore);
+        background-color: var(--equiGreen2);
     }
 }
 
@@ -17,11 +17,15 @@
     border-style: solid;
     border-color: black;
     border-width: 3px;
-    width: 10rem;
-    height: 10rem;
+    width: 5rem;
+    height: 5rem;
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
     transform: scale(1);
     animation: pulse 2s infinite;
+
+    &:active {
+        background-color: var(--equiGreen2);
+    }
 }
 
 .iconButton {
@@ -32,6 +36,10 @@
     border-radius: 100%;
     width: 55px;
     height: 55px;
+
+    &:active {
+        background-color: var(--equiBlue1);
+    }
 
     &:disabled {
         background-color: var(--disabledColor);

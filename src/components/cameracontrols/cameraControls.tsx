@@ -17,7 +17,7 @@ const CameraControls = (props: CameraControlsProps): JSX.Element => {
     <section className={styles.cameraControlsWrapper}>
       <div className={styles.cameraControls} role="toolbar">
         <CameraButton
-          name="flash_off"
+          name="lightbulb"
           onClick={props.onToggleTorch}
           label="torch"
           supported={props.capabilities.torch}

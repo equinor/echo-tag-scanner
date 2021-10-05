@@ -6,7 +6,9 @@ import { ExtendedMediaTrackSupportedConstraints } from '@types';
 import { getCapabilities } from '@utils';
 
 const EchoCamera: FC = () => {
-  getCapabilities(); // check console logs
+  // This should be removed in prod as it introduces a render delay.
+  getCapabilities();
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomInputRef = useRef<HTMLInputElement>(null);
@@ -27,10 +29,9 @@ const EchoCamera: FC = () => {
   };
 
   const onToggleTorch = () => {
-    try {
-      toggleTorch();
-    } catch (err) {
-      console.log(err);
+    const toggleStatus = toggleTorch();
+    console.log('%c⧭', 'color: #007300', toggleStatus);
+    if (toggleStatus === false) {
       setTorchNotSupportedToast(true);
     }
   };
@@ -38,7 +39,9 @@ const EchoCamera: FC = () => {
   return (
     <main className={styles.cameraWrapper}>
       <Viewfinder canvasRef={canvasRef} videoRef={videoRef} />
-      {capabilities.zoom && <ZoomSlider zoomInputRef={zoomInputRef} />}
+
+      <ZoomSlider zoomInputRef={zoomInputRef} deviceZoomCapable={capabilities.zoom} />
+
       <CameraControls
         onToggleTorch={onToggleTorch}
         onScanning={onScanning}
@@ -47,14 +50,14 @@ const EchoCamera: FC = () => {
       {noTagsDetectedToast && (
         <Toast
           open
-          message="Placeholder for scanning notification"
+          message="Placeholder for scanning notification."
           onClose={() => setNoTagsDetectedToast(false)}
         />
       )}
       {torchNotSupportedToast && (
         <Toast
           open
-          message="Light functionality is not supported on your device"
+          message="We were not able to turn on the lights."
           onClose={() => setTorchNotSupportedToast(false)}
         />
       )}

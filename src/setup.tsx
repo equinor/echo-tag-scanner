@@ -1,5 +1,5 @@
 import { EchoModuleApi } from '@equinor/echo-core';
-import App from './App';
+import { App } from './App';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const setup = (api: EchoModuleApi) => {

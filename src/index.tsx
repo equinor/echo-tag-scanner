@@ -1,5 +1,5 @@
 import { render } from 'react-dom';
-import App from './App';
+import { App } from './App';
 import reportWebVitals from './reportWebVitals';
 import '@equinor/echo-framework/dist/index.css';
 import EchoCore from '@equinor/echo-core';

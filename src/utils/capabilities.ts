@@ -1,3 +1,6 @@
+/**
+ * Logs device and browser capabilities.
+ */
 async function getCapabilities(): Promise<void> {
   try {
     const mediaCapabilities = await navigator.mediaDevices.getUserMedia({

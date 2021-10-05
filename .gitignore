@@ -22,6 +22,8 @@ local.log
 .env.development.local
 .env.test.local
 .env.production.local
+*.less.d.ts
+/webpack/remote.babel.js
 
 env-config.js
 /public/env-config.js
@@ -35,4 +37,5 @@ src/test/testdoc.pdf
 
 /.vs
 debug.log
+
 

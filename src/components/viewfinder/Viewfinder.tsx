@@ -10,7 +10,13 @@ interface ViewfinderProps {
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   return (
     <>
-      <video ref={props.videoRef} className={styles.viewfinder} autoPlay {...props.videoOptions} />
+      <video
+        playsInline // needed for the viewfinder to work in Safari
+        ref={props.videoRef}
+        className={styles.viewfinder}
+        autoPlay
+        {...props.videoOptions}
+      />
       <canvas className={styles.canvas} ref={props.canvasRef} {...props.canvasOptions} />
     </>
   );

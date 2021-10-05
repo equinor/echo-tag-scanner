@@ -1,33 +1,18 @@
-.icon {
-    background-color: var(--color-white);
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--color-primary);
-    border-radius: 50%;
-    padding: var(--small-padding);
-    &:active {
-        background-color: var(--color-black-alt4);
-    }
-}
-
-.borderless {
-    border: 0;
-}
-
-.disabled {
-    background-color: var(--color-black-alt4);
-}
-
-.shutter {
+.buttonResting {
     border-radius: 100%;
     border-style: solid;
-    border-color: black;
+    border-color: var(--colorFgIntense);
     border-width: 3px;
     width: 10rem;
     height: 10rem;
+    background-color: white;
+
+    &:active {
+        background-color: var(--colorFgFadedMore);
+    }
 }
 
-.shutterScanning {
+.buttonScanning {
     border-radius: 100%;
     border-style: solid;
     border-color: black;
@@ -47,6 +32,12 @@
     border-radius: 100%;
     width: 55px;
     height: 55px;
+
+    &:disabled {
+        background-color: var(--disabledColor);
+    }
+
+    
 
     .icon {
         width: 60%;

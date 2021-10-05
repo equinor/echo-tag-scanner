@@ -13,6 +13,7 @@
         "analyze": "webpack serve --mode production --config ./webpack/analyze.babel.js",
         "build:webpack": "webpack --mode production --config ./webpack/prod.babel.js",
         "build": "npm run build:webpack",
+        "standaloneBuild": "webpack --mode development --config ./webpack/standaloneProd.babel.js",
         "pretypes": "rimraf build/types/*",
         "types": "tsc -p tsconfig.json",
         "test": "echo \"Error: no test specified\" && exit 1",

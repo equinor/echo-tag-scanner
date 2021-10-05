@@ -1,10 +1,11 @@
-import { Button, Icon } from '@equinor/eds-core-react';
-import { themeConst } from '@equinor/echo-components';
+import { Icon } from '@equinor/eds-core-react';
 import styles from './styles.less';
 
 interface CameraButtonProps {
   name: string;
   onClick?: () => void;
+  supported?: boolean;
+  label?: string;
 }
 
 /**
@@ -12,16 +13,26 @@ interface CameraButtonProps {
  * @param name An identifier from EDS system icons.
  * @param onClick callback.
  */
-const CameraButton = (props: CameraButtonProps, ...rest: unknown[]): JSX.Element => (
-  <button
-    className={styles.iconButton}
-    onClick={props.onClick}
-    style={{ border: '1px solid' }}
-    {...rest}
-  >
-    <Icon name={props.name ?? 'placeholder_icon'} color="white" className={styles.icon} />
-  </button>
-);
+const CameraButton = (props: CameraButtonProps, ...rest: unknown[]): JSX.Element => {
+  function createLabel() {
+    if (props.supported) {
+      return <Icon name={props.name ?? 'placeholder_icon'} color="white" />;
+    } else {
+      return <Icon name={props.name ?? 'placeholder_icon'} color="white" />;
+    }
+  }
+  return (
+    <button
+      className={styles.iconButton}
+      onClick={props.onClick}
+      style={{ border: '1px solid' }}
+      disabled={!props.supported}
+      {...rest}
+    >
+      {createLabel()}
+    </button>
+  );
+};
 
 interface ShutterProps {
   isActive?: boolean;
@@ -35,7 +46,7 @@ interface ShutterProps {
  */
 const ScannerButton = (props: ShutterProps): JSX.Element => (
   <button
-    className={props.isActive ? styles.shutterScanning : styles.shutter}
+    className={props.isActive ? styles.buttonScanning : styles.buttonResting}
     disabled={props.isDisabled}
     onClick={props.onClick}
   />

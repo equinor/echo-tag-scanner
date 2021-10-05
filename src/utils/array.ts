@@ -3,24 +3,26 @@
  * If immutable flag is provided, it will take a copy, remove and return.
  */
 function removeFromArray<T>(
-  target: Array<T>,
+  target: T[],
   deleteIndex: number,
   immutable?: boolean
-): Array<T> | void {
-  if (immutable) {
+): T[] | undefined {
+  if (immutable && Array.isArray(target)) {
     return removeAndFilter([...target]);
   } else {
-    removeAndFilter();
+    return removeAndFilter();
   }
 
-  function removeAndFilter(targetClone?: Array<T>) {
-    if (Reflect.deleteProperty(targetClone || target, deleteIndex)) {
-      return (targetClone || target).filter((t) => Boolean(t));
-    } else {
-      console.warn(
-        'Could not remove indice, returning unaltered array. Maybe propertyKey is invalid or array is write protected?'
-      );
-      return targetClone || target;
+  function removeAndFilter(targetClone?: T[]) {
+    if (typeof (targetClone || target) === 'object') {
+      if (Reflect.deleteProperty(targetClone || target, deleteIndex)) {
+        return (targetClone || target).filter((t) => Boolean(t));
+      } else {
+        console.warn(
+          'Could not remove indice, returning unaltered array. Maybe propertyKey is invalid or array is write protected?'
+        );
+        return targetClone || target;
+      }
     }
   }
 }

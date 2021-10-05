@@ -24,6 +24,7 @@ module.exports = {
     // e.g. "@typescript-eslint/explicit-function-return-type": "off",
     'no-multi-spaces': ['error'],
     '@typescript-eslint/no-use-before-define': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off',
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
     'react/react-in-jsx-scope': 'off',

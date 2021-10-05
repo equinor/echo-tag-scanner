@@ -106,7 +106,7 @@ const useCameraState = (
     }
   }
 
-  const toggleTorch = () => {
+  const toggleTorch = (): boolean => {
     console.info('turning on torch');
     if (state.mediaStream) {
       const track = state.mediaStream.getTracks()[0];
@@ -124,11 +124,14 @@ const useCameraState = (
             ...prevState,
             torchEnabled: !state.torchEnabled
           }));
+          return true;
         })
-        .catch(() => {
-          console.info('Your device does not support the torch functionality.');
+        .catch((reason) => {
+          console.error('We were not able to turn on the lights.', reason);
         });
     }
+
+    return false;
   };
 
   const setMedia = (stream: MediaStream, options: MediaRecorderOptions) => {

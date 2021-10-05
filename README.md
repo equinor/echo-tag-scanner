@@ -10,12 +10,12 @@ An Echo module for recognising tag numbers with a camera.
 
 ## Local development with EchopediaWeb
 In order to test Smart Portal running locally under EchopediaWeb, a soft-link between the repos can be created with [yalc](https://www.npmjs.com/package/yalc).
-1. (in Smart-Portal) ```npm run build```
-2. (in Smart-Portal) ```npx yalc publish```
+1. (in Echo Camera) ```npm run build```
+2. (in Echo Camera) ```npx yalc publish```
 3. (in EchopediaWeb) ```npx yalc add @equinor/smart-portal```
 4.  (in EchopediaWeb) ```npm install```
 5. (in EchopediaWeb) ```npm start```
-6. (in Smart-Portal) make your changes then ```npm run build && npx yalc push```
+6. (in Echo Camera) make your changes then ```npm run build && npx yalc push```
 
 EchopediaWeb dev server will recompile and you changes should be reflected in the browser.
 

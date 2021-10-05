@@ -345,6 +345,7 @@ const useCameraState = (
         (URL || webkitURL).revokeObjectURL(preview.objectUrl);
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.mediaStream]);
 
   return {

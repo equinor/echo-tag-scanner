@@ -9,10 +9,6 @@ interface CameraControlsProps {
 }
 
 const CameraControls = (props: CameraControlsProps): JSX.Element => {
-  const stub = () => {
-    console.info('stub');
-  };
-
   return (
     <section className={styles.cameraControlsWrapper}>
       <div className={styles.cameraControls} role="toolbar">

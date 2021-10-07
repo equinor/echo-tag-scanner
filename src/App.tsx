@@ -2,6 +2,7 @@ import { useState, useEffect, FC } from 'react';
 import { Route, Switch, Redirect, BrowserRouter } from 'react-router-dom';
 import EchoCore from '@equinor/echo-core';
 import { EchoCamera } from './EchoCamera';
+import { ErrorBoundary } from './services';
 
 const App: FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,7 +25,9 @@ const App: FC = () => {
     <BrowserRouter>
       <Switch>
         <Route>
-          <EchoCamera />
+          <ErrorBoundary>
+            <EchoCamera />
+          </ErrorBoundary>
         </Route>
       </Switch>
     </BrowserRouter>

@@ -62,7 +62,7 @@ class ErrorBoundary extends Component {
         <main className={styles.main}>
           <article className={styles.errorWrapper}>
             <section>
-              <Typography variant="h1">An error as occured</Typography>
+              <Typography variant="h1">An error has occured</Typography>
               <Typography variant="ingress">Check the messages below.</Typography>
             </section>
             <aside className={styles.errorAdditionalInfo}>

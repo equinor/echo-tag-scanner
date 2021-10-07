@@ -3,12 +3,8 @@ import styles from './styles.less';
 import { useCameraState } from './state/useCameraState';
 import { CameraControls, Viewfinder, Toast, ZoomSlider } from '@components';
 import { ExtendedMediaTrackSupportedConstraints } from '@types';
-import { getCapabilities } from '@utils';
 
 const EchoCamera: FC = () => {
-  // This should be removed in prod as it introduces a render delay.
-  getCapabilities();
-
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomInputRef = useRef<HTMLInputElement>(null);

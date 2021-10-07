@@ -1,2 +1,2 @@
 export { removeFromArray } from './array';
-export { getCapabilities } from './capabilities';
+export { getCapabilities, getCapabilitiesRaw } from './capabilities';

@@ -1,6 +1,6 @@
 {
     "name": "@equinor/echo-camera-web",
-    "version": "0.5.1",
+    "version": "0.5.2-experimental",
     "private": false,
     "license": "MIT",
     "module": "./build/index.js",

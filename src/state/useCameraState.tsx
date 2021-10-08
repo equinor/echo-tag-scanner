@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CapturePreviewerItem } from '../capturePreviewer/CapturePreviewer';
+import { CapturePreviewerItem } from '../stale code/capturePreviewer/CapturePreviewer';
 import { ExtendedMediaTrackCapabilities, ExtendedMediaTrackSettings } from '@types';
 
 type State = {

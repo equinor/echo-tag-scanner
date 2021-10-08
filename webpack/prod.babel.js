@@ -28,7 +28,6 @@ const config = {
 
   externals: [
     '@equinor/echo-utils',
-    '@equinor/echo-components',
     '@equinor/echo-core',
     '@equinor/echo-framework',
     '@equinor/eds-core-react',

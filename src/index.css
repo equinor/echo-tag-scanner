@@ -4,9 +4,7 @@
   box-sizing: border-box;
 }
 
-html {
-  font-size: 8px;
-}
+
 
 html, body {
   width: 100vw;
@@ -17,9 +15,6 @@ html, body {
   scrollbar-width: none;  /* Firefox */
 }
 
-body > * {
-  font-size: 16px;
-}
 
 #root {
   width: 100%;

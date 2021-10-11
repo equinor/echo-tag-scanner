@@ -41,6 +41,7 @@
         "@babel/preset-typescript": "^7.13.0",
         "@babel/register": "^7.13.16",
         "@equinor/echo-base": "^0.3.3",
+        "@equinor/echo-components": "^0.1.17",
         "@equinor/echo-core": "^0.3.22",
         "@equinor/echo-framework": "0.3.11",
         "@equinor/echo-utils": "^0.2.2",
@@ -106,5 +107,10 @@
             "not dead",
             "not op_mini all"
         ]
+    },
+    "dependencies": {
+        "buffer": "^6.0.3",
+        "crypto-browserify": "^3.12.0",
+        "stream-browserify": "^3.0.0"
     }
 }

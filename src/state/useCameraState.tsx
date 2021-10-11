@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CapturePreviewerItem } from '../stale code/capturePreviewer/CapturePreviewer';
+import { CapturePreviewerItem } from '../stalecode/capturePreviewer/CapturePreviewer';
 import { ExtendedMediaTrackCapabilities, ExtendedMediaTrackSettings } from '@types';
 
 type State = {
@@ -110,7 +110,7 @@ const useCameraState = (
     console.info('turning on torch');
     if (state.mediaStream) {
       const track = state.mediaStream.getTracks()[0];
-      const constraints = track.getConstraints();
+      const constraints = track?.getConstraints();
       track
         .applyConstraints({
           ...constraints,

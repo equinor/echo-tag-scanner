@@ -3,3 +3,4 @@ export type {
   ExtendedMediaTrackCapabilities,
   ExtendedMediaTrackSettings
 } from './camera';
+export type { MadOCRStatus, MadOCRFunctionalLocations } from './madOcr';

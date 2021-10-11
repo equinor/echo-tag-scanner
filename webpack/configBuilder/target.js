@@ -13,7 +13,6 @@
    switch (env) {
      case 'dev':
      case 'remote':
-     case 'analyze':
        return 'web';
      default:
        return 'browserslist';

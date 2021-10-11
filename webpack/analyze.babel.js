@@ -17,10 +17,10 @@ const config = {
   entry: defineEntry('analyze'),
   devtool: false,
   module: defineModules('analyze'),
-  resolve: defineResolves(rootPath),
+  resolve: defineResolves(rootPath, 'analyze'),
   plugins: definePlugins('analyze'),
   optimization: defineOptimizations(),
-  output: defineOutput(rootPath),
+  output: defineOutput('analyze', rootPath),
   target: defineTarget('analyze'),
 
   // in order to ignore built-in modules like path, fs, etc.

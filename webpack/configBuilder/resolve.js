@@ -27,10 +27,15 @@ export function defineResolves(env, rootPath) {
       '@utils': join(rootPath, '/src/utils/'),
       '@models': join(rootPath, '/src/models/'),
       '@workers': join(rootPath, '/src/workers/'),
-      '@enums': join(rootPath, '/src/enums/'),
+      '@enums': join(rootPath, '/src/enums/')
       // '@icons': join(rootPath, '/src/'),
       // '@images': join(rootPath, '/src/'),
       // '@fonts': join(rootPath, '/src/'),
+    },
+    fallback: {
+      crypto: require.resolve('crypto-browserify'),
+      buffer: require.resolve('buffer/'),
+      stream: require.resolve('stream-browserify')
     }
   };
 }

@@ -36,7 +36,10 @@ const config = {
     'react',
     'react-dom',
     'react-router-dom',
-    'styled-components'
+    'styled-components',
+    'buffer',
+    'crypto-browserify',
+    'stream-browserify'
   ]
 };
 export default config;

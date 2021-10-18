@@ -33,7 +33,6 @@ class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error: unknown, errorInfo: unknown): void {
-    console.info('componentDidCatch');
     if (error instanceof DOMException) {
       switch (error.name) {
         case 'AbortError':

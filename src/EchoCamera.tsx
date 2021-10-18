@@ -10,7 +10,6 @@ const EchoCamera: FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomInputRef = useRef<HTMLInputElement>(null);
-  const notificationRef = useRef<HTMLButtonElement>(null);
   const { state, toggleTorch } = useCameraState(videoRef, canvasRef, zoomInputRef);
   const capabilities: ExtendedMediaTrackSupportedConstraints =
     navigator.mediaDevices.getSupportedConstraints();

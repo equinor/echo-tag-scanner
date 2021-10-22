@@ -35,7 +35,6 @@
         "react-dom": ">=17.0.1",
         "react-router-dom": ">=5.2.0",
         "stream-browserify": "^3.0.0"
-
     },
     "devDependencies": {
         "@azure/msal-node": "^1.0.3",
@@ -49,6 +48,7 @@
         "@equinor/echo-components": "^0.1.17",
         "@equinor/echo-core": "^0.3.16",
         "@equinor/echo-framework": "0.3.11",
+        "@equinor/echo-search": "^0.1.28",
         "@equinor/echo-utils": "^0.2.1",
         "@equinor/eds-core-react": "^0.13.1",
         "@equinor/eds-icons": "^0.7.0",

@@ -16,6 +16,17 @@ type State = {
   mediaRecorder: null | MediaRecorder;
   mediaAvailable?: boolean;
   torchEnabled: boolean;
+  clientCapability: ClientCapability;
+};
+
+type ClientCapability = {
+  torchFeature?: FeatureCapability;
+  zoomFeature?: FeatureCapability;
+};
+
+type FeatureCapability = {
+  browserIsCapable: boolean;
+  deviceIsCapable: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -25,6 +36,7 @@ const useCameraState = (
   input: React.RefObject<HTMLInputElement>
 ) => {
   let chunks: Blob[] = [];
+  const clientCapability: ClientCapability = {};
   const [state, setState] = useState<State>({
     cameraMode: 'photo',
     recordingStatus: false,
@@ -37,7 +49,8 @@ const useCameraState = (
     showSelect: false,
     mediaRecorder: null,
     mediaStream: null,
-    torchEnabled: false
+    torchEnabled: false,
+    clientCapability: {}
   });
 
   useEffect(() => {
@@ -110,6 +123,13 @@ const useCameraState = (
     console.info('turning on torch');
     if (state.mediaStream) {
       const track = state.mediaStream.getTracks()[0];
+      const capabilities = track.getCapabilities();
+      clientCapability.torchFeature = {
+        deviceIsCapable: Reflect.has(capabilities, 'torch'),
+        // torch is not typed in MediaContraintsSet for some reason.
+        //@ts-expect-errorts-ignore
+        browserIsCapable: navigator.mediaDevices.getSupportedConstraints().torch
+      };
       const constraints = track.getConstraints();
       track
         .applyConstraints({
@@ -128,6 +148,7 @@ const useCameraState = (
         })
         .catch((reason) => {
           console.error('We were not able to turn on the lights.', reason);
+          return false;
         });
     }
 
@@ -242,9 +263,16 @@ const useCameraState = (
     const settings: ExtendedMediaTrackSettings = track.getSettings();
     console.log('%c⧭', 'color: #807160', settings);
     const { current: zoomInput } = input;
+    clientCapability.zoomFeature = {
+      deviceIsCapable: Reflect.has(capabilities, 'zoom'),
+
+      // zoom is not typed in MediaContraintsSet for some reason.
+      //@ts-expect-errorts-ignore
+      browserIsCapable: navigator.mediaDevices.getSupportedConstraints().zoom
+    };
 
     if (!('zoom' in capabilities) && zoomInput) {
-      // zoomInput.style.background = 'black';
+      zoomInput.disabled = true;
     } else {
       if (zoomInput) {
         zoomInput.min = assignZoomSettings('min');
@@ -358,7 +386,8 @@ const useCameraState = (
     turnCameraOff,
     deleteMedia,
     toggleTorch,
-    getCameraDimensions
+    getCameraDimensions,
+    clientCapability
   };
 };
 

@@ -4,11 +4,17 @@ interface ToastProps extends SnackbarProps {
   message: string;
   open: boolean;
   onClose?: () => void;
+  className?: string;
 }
 
 const Toast = (props: ToastProps): JSX.Element => {
   return (
-    <Snackbar open={props.open} onClose={props.onClose} autoHideDuration={1000}>
+    <Snackbar
+      className={props.className}
+      open={props.open}
+      onClose={props.onClose}
+      autoHideDuration={1000000}
+    >
       {props.message}
     </Snackbar>
   );

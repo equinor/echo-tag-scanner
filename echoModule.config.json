@@ -1,0 +1,21 @@
+{
+    "bundler": "webpack",
+    "manifest": {
+        "name": "Echo Camera Web",
+        "key": "echo-camera-web",
+        "shortName": "ecw",
+        "path": "/echocameraweb",
+        "description": "A web based tag scanner",
+        "private": false
+    },
+    "server": {
+        "contentBase": "/build",
+        "port": 3000,
+        "open": true,
+        "host": "localhost",
+        "logging": "none"
+    },
+    "devMiddleware": {
+        "stats": "errors-warnings"
+    }
+}

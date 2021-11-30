@@ -11,7 +11,7 @@
     "server": {
         "contentBase": "/build",
         "port": 3000,
-        "open": true,
+        "open": false,
         "host": "localhost",
         "logging": "none"
     },

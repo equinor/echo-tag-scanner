@@ -1,4 +1,4 @@
-import { getNotificationDispatcher } from '@utils';
+import { getNotificationDispatcher } from '../../utils';
 
 const mockedTagNumbers = ['63JA001', 'tagnumber123', ''];
 

@@ -1,3 +1,4 @@
+import React from 'react';
 import { Slider } from '@equinor/eds-core-react';
 import { Ref } from 'react';
 import styles from './styles.less';

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 import styles from './styles.less';
 
 const GestureHandler = (): JSX.Element => {

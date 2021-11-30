@@ -8,6 +8,8 @@ declare namespace StylesLessNamespace {
     pulse: string;
     shutter: string;
     shutterScanning: string;
+    buttonScanning: string;
+    buttonResting: string;
   }
 }
 

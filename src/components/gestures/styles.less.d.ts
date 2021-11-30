@@ -2,6 +2,7 @@
 declare namespace StylesLessNamespace {
   export interface IStylesLess {
     gestureArea: string;
+    debugOutput: string;
   }
 }
 

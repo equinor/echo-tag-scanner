@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import React, { Component } from 'react';
 import { Typography, Button } from '@equinor/eds-core-react';
 import styles from './styles.less';
 

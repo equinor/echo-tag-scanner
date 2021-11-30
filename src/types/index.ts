@@ -3,3 +3,5 @@ export type {
   ExtendedMediaTrackCapabilities,
   ExtendedMediaTrackSettings
 } from './camera';
+
+export * from './http';

@@ -1,5 +1,6 @@
-import { CameraButton, ScannerButton } from '@components';
-import { ExtendedMediaTrackSupportedConstraints } from '@types';
+import React from 'react';
+import { CameraButton, ScannerButton } from '../../components';
+import { ExtendedMediaTrackSupportedConstraints } from '../../types';
 import { useState } from 'react';
 import styles from './styles.less';
 

@@ -1,3 +1,4 @@
+import React from 'react';
 import { Icon } from '@equinor/eds-core-react';
 import styles from './styles.less';
 

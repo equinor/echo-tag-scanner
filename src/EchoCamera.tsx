@@ -1,10 +1,10 @@
-import { FC, useRef, useEffect } from 'react';
+import React, { FC, useRef, useEffect } from 'react';
 import styles from './styles.less';
 import { useCameraState } from './state/useCameraState';
-import { CameraControls, Viewfinder, ZoomSlider } from '@components';
-import { ExtendedMediaTrackSupportedConstraints } from '@types';
-import { NotificationHandler, doScanning } from '@services';
-import { getNotificationDispatcher } from '@utils';
+import { CameraControls, Viewfinder, ZoomSlider } from './components';
+import { ExtendedMediaTrackSupportedConstraints } from './types';
+import { NotificationHandler, doScanning } from './services';
+import { getNotificationDispatcher } from './utils';
 import EchoCore from '@equinor/echo-core';
 
 const EchoCamera: FC = () => {

@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CapturePreviewerItem } from '../capturePreviewer/CapturePreviewer';
-import { ExtendedMediaTrackCapabilities, ExtendedMediaTrackSettings } from '@types';
+import { ExtendedMediaTrackCapabilities, ExtendedMediaTrackSettings } from '../types';
 
 type State = {
   cameraMode: 'video' | 'photo';
   recordingStatus: boolean;
   recordingPaused: boolean;
   mediaCaptures: File[];
-  mediaPreviews: CapturePreviewerItem[];
   showCarousel: boolean;
   showSelect: boolean;
   mediaStream: MediaStream | null;
@@ -42,7 +40,6 @@ const useCameraState = (
     recordingStatus: false,
     recordingPaused: false,
     mediaCaptures: [],
-    mediaPreviews: [],
     isUploading: false,
     file: undefined,
     showCarousel: false,
@@ -79,21 +76,15 @@ const useCameraState = (
           chunks = [];
           // const videoURL = window.URL.createObjectURL(blobs);
           const files = [...state.mediaCaptures];
-          const mediaPreviews = [...state.mediaPreviews];
           files.push(videoFile);
           const preview = URL.createObjectURL(videoFile);
           const revokeOperation = function revoke(preview: string) {
             (URL || webkitURL).revokeObjectURL(preview);
           };
-          mediaPreviews.push({
-            objectUrl: preview,
-            revoke: revokeOperation,
-            type: 'video'
-          });
+
           setState((prevState) => ({
             ...prevState,
             mediaCaptures: files,
-            mediaPreviews: mediaPreviews,
             recordingStatus: false
           }));
         };
@@ -206,7 +197,6 @@ const useCameraState = (
         canvas.current?.toBlob(async (blob) => {
           //image from canvas is converted to a file and then set to state.
           const files = [...state.mediaCaptures];
-          const mediaPreviews = [...state.mediaPreviews];
           let file: File;
           if (blob) {
             file = new File([blob], `capture${state.mediaCaptures.length + 1}.JPEG`, {
@@ -217,16 +207,10 @@ const useCameraState = (
             const revokeOperation = function revoke(preview: string) {
               URL.revokeObjectURL(preview);
             };
-            mediaPreviews.push({
-              objectUrl: preview,
-              revoke: revokeOperation,
-              type: 'image'
-            });
           }
           setState((prevState) => ({
             ...prevState,
             mediaCaptures: files,
-            mediaPreviews: mediaPreviews,
             recordingStatus: false
           }));
         });
@@ -320,16 +304,6 @@ const useCameraState = (
   };
 
   const deleteMedia = (deleteIndex: number) => {
-    const newMediaPreviews = (function deleteMediaPreview() {
-      if (state.mediaPreviews.length <= 1) {
-        return [];
-      }
-      const copy = state.mediaPreviews.map((preview) => preview);
-      const deletedPreview = copy.splice(deleteIndex, 1)[0];
-      deletedPreview.revoke(deletedPreview.objectUrl);
-      return copy;
-    })();
-
     const newMediaCaptures = (function deleteMediaCapture() {
       if (state.mediaCaptures.length <= 1) {
         return [];
@@ -341,7 +315,6 @@ const useCameraState = (
 
     setState((prevState) => ({
       ...prevState,
-      mediaPreviews: newMediaPreviews,
       mediaCaptures: newMediaCaptures
     }));
   };
@@ -368,11 +341,6 @@ const useCameraState = (
       state.mediaStream.getTracks().map((track) => track.stop());
     }
 
-    state.mediaPreviews.forEach(function revokeObjectUrls(preview) {
-      if (preview.objectUrl) {
-        (URL || webkitURL).revokeObjectURL(preview.objectUrl);
-      }
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.mediaStream]);
 

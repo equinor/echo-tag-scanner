@@ -11,11 +11,7 @@ const EchoCamera: FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomInputRef = useRef<HTMLInputElement>(null);
-  const { state, toggleTorch, clientCapability } = useCameraState(
-    videoRef,
-    canvasRef,
-    zoomInputRef
-  );
+  const { state, toggleTorch } = useCameraState(videoRef, canvasRef, zoomInputRef);
   const state2 = EchoCore.moduleState.useAppModuleState(state);
   console.log('%c⧭', 'color: #733d00', state2);
   const capabilities: ExtendedMediaTrackSupportedConstraints =

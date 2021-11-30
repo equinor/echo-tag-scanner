@@ -24,7 +24,7 @@ function inspectApiResult(result: string): boolean {
 
 async function apiFetch(): Promise<string> {
   // Do API fetch here, waiting and stuffs.
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve(mockedTagNumbers[0]);
     }, 1000);

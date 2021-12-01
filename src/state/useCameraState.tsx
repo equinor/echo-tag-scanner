@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CapturePreviewerItem } from '../capturePreviewer/CapturePreviewer';
 import { ExtendedMediaTrackCapabilities, ExtendedMediaTrackSettings } from '@types';
 
 type State = {
@@ -7,7 +6,7 @@ type State = {
   recordingStatus: boolean;
   recordingPaused: boolean;
   mediaCaptures: File[];
-  mediaPreviews: CapturePreviewerItem[];
+  mediaPreviews: any[];
   showCarousel: boolean;
   showSelect: boolean;
   mediaStream: MediaStream | null;

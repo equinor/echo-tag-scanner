@@ -29,7 +29,6 @@ class Camera extends CoreCamera {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const numberedZoom = Number(ev.target.value);
-    console.log('%c⧭', 'color: #1d3f73', numberedZoom);
     if (typeof numberedZoom === 'number' && ev.target && this.isValidZoom(numberedZoom)) {
       this.zoom(numberedZoom);
     }

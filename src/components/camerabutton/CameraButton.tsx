@@ -13,7 +13,7 @@ interface CameraButtonProps {
  * @param name An identifier from EDS system icons.
  * @param onClick callback.
  */
-const CameraButton = (props: CameraButtonProps, ...rest: unknown[]): JSX.Element => {
+const CameraButton = (props: CameraButtonProps): JSX.Element => {
   function createLabel() {
     if (props.supported) {
       return <Icon name={props.name ?? 'placeholder_icon'} color="white" />;
@@ -27,7 +27,6 @@ const CameraButton = (props: CameraButtonProps, ...rest: unknown[]): JSX.Element
       onClick={props.onClick}
       style={{ border: '1px solid' }}
       disabled={!props.supported}
-      {...rest}
     >
       {createLabel()}
     </button>

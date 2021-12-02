@@ -9,7 +9,7 @@ export interface CoreCameraProps {
 
 class CoreCamera {
   private _cameraEnabled = true;
-  private _capture: Blob[] = [];
+  private _capture?: Blob;
   private _mediaStream?: MediaStream;
   private _canvas?: RefObject<HTMLCanvasElement>;
   private _viewfinder?: RefObject<HTMLVideoElement>;
@@ -35,7 +35,7 @@ class CoreCamera {
     return this._cameraEnabled;
   }
 
-  public get capture(): Blob[] {
+  public get capture(): Blob | undefined {
     return this._capture;
   }
 
@@ -88,7 +88,7 @@ class CoreCamera {
     }
   }
 
-  public async capturePhoto(): Promise<Blob | undefined> {
+  public async capturePhoto(): Promise<void> {
     const videoTracks = this._mediaStream?.getVideoTracks();
 
     if (Array.isArray(videoTracks) && videoTracks.length === 1) {
@@ -96,10 +96,10 @@ class CoreCamera {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       if (globalThis.ImageCapture) {
-        return await capture(videoTracks[0]);
+        this._capture = await capture(videoTracks[0]);
       } else {
         // use legacy frame capture
-        legacyCapture.call(this);
+        this._capture = await legacyCapture.call(this);
       }
     }
 
@@ -109,10 +109,34 @@ class CoreCamera {
     }
 
     /**
-     * @this {CoreCamera}
+     * Captures a photo for browsers that does not support ImageCapture.
+     * @this CoreCamera
      */
-    async function legacyCapture() {
-      console.info('legacy capture', this);
+    async function legacyCapture(): Promise<Blob | undefined> {
+      if (this._canvas?.current != null) {
+        const settings = this._videoTrack?.getSettings();
+        if (settings) {
+          if (typeof settings.height === 'number' && typeof settings.width === 'number') {
+            this._canvas.current.width = settings.width;
+            this._canvas.current.height = settings.height;
+            const canvasContext = this._canvas.current.getContext('2d');
+
+            if (canvasContext && this._viewfinder?.current != null) {
+              canvasContext.drawImage(
+                this._viewfinder?.current,
+                0,
+                0,
+                settings.width,
+                settings.height
+              );
+              this._canvas.current.toBlob((blob: Blob) => {
+                return blob;
+              });
+            }
+          }
+        }
+      }
+      return undefined;
     }
   }
 

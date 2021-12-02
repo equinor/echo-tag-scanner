@@ -31,6 +31,8 @@ async function apiFetch(): Promise<string> {
   });
 }
 
+// TODO: implement
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function apiRejection(reason: unknown) {
   // Handle errors here, 404, 502 and stuffs.
   // Use notification or let the issue go unhandled to make ErrorBoundary do the work.

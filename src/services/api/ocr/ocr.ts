@@ -1,8 +1,7 @@
-import { eventHub } from '@equinor/echo-base';
 import { getFunctionalLocationsResources } from '../resources/resources';
 import { baseApiClient } from '../base/base';
-import { ErrorRecord, ErrorRegistry } from '@enums';
-import { EchoCameraError } from '@types';
+import { ErrorRegistry } from '@enums';
+import { handleError } from '@utils';
 
 export async function getFunctionalLocations(image: Blob): Promise<unknown> {
   try {
@@ -13,12 +12,4 @@ export async function getFunctionalLocations(image: Blob): Promise<unknown> {
   }
 }
 
-function handleError(record: ErrorRecord, devMessage: unknown) {
-  if (devMessage instanceof Error) {
-    eventHub.emit(record.key, {
-      severity: record.severity || 'low',
-      userMessage: record.userMessage,
-      devMessage: devMessage
-    } as EchoCameraError);
-  }
-}
+export const ocrApi = { getFunctionalLocations };

@@ -13,24 +13,32 @@ const EchoCamera: FC = () => {
   // Instansiate the camera core class.
   useEffect(
     function mountCamera() {
+      console.log('mounting');
       const props: CameraProps = {
         viewfinder: videoRef
       };
       cameraRef.current = new Camera(props);
     },
-    [cameraRef]
+    // Needs to monitor .current for correct behavior.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cameraRef.current]
   );
 
   // Setup the zoom slider with the min, max and step values.
-  useEffect(function setupZoom() {
-    if (zoomInputRef?.current != null && cameraRef?.current != null) {
-      zoomInputRef.current.min = assignZoomSettings('min');
-      zoomInputRef.current.max = assignZoomSettings('max');
-      zoomInputRef.current.step = assignZoomSettings('step');
-      zoomInputRef.current.value = assignZoomSettings('value');
-      zoomInputRef.current.oninput = cameraRef.current?.alterZoom;
-    }
-  });
+  useEffect(
+    function setupZoom() {
+      if (zoomInputRef?.current != null && cameraRef?.current != null) {
+        zoomInputRef.current.min = assignZoomSettings('min');
+        zoomInputRef.current.max = assignZoomSettings('max');
+        zoomInputRef.current.step = assignZoomSettings('step');
+        zoomInputRef.current.value = assignZoomSettings('value');
+        zoomInputRef.current.oninput = cameraRef.current?.alterZoom;
+      }
+    },
+    // Needs to monitor .current for correct behavior.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [zoomInputRef.current]
+  );
 
   function assignZoomSettings(type: 'min' | 'max' | 'step' | 'value'): string {
     if (cameraRef?.current != null) {

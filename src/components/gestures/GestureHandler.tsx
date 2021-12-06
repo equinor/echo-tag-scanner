@@ -80,11 +80,9 @@ const GestureHandler = (): JSX.Element => {
           console.info('a pinch zoom has been detected, user is zooming in', currentPinchDiff);
           // Handle zoom here
           gestureAreaRef.current.style.border = 'solid';
-          console.log('%c⧭', 'color: #733d00', debugOutput.current);
 
           if (debugOutput.current) {
             const test = document.getElementById('diff');
-            console.log('%c⧭', 'color: #e50000', test);
 
             if (test) {
               test.innerHTML = '' + currentPinchDiff;
@@ -96,11 +94,9 @@ const GestureHandler = (): JSX.Element => {
           console.info('a pinch zoom has been detected, user is zooming out', currentPinchDiff);
           // Handle zoom here
           gestureAreaRef.current.style.border = 'dashed';
-          console.log('%c⧭', 'color: #733d00', debugOutput.current);
 
           if (debugOutput.current) {
             const test = document.getElementById('diff');
-            console.log('%c⧭', 'color: #e50000', test);
             if (test) {
               test.innerHTML = '' + currentPinchDiff;
             }

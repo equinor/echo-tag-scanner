@@ -3,6 +3,7 @@ import styles from './styles.less';
 import { Camera, CameraProps } from './state/Camera';
 import { CameraControls, Viewfinder, ZoomSlider } from '@components';
 import { NotificationHandler } from '@services';
+import { getNotificationDispatcher } from '@utils';
 
 const EchoCamera: FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -15,7 +16,8 @@ const EchoCamera: FC = () => {
     function mountCamera() {
       console.log('mounting');
       const props: CameraProps = {
-        viewfinder: videoRef
+        viewfinder: videoRef,
+        canvas: canvasRef
       };
       cameraRef.current = new Camera(props);
     },
@@ -65,7 +67,11 @@ const EchoCamera: FC = () => {
 
   const onScanning = async () => {
     if (cameraRef?.current != null) {
-      cameraRef.current.scan();
+      const tagNumbers = await cameraRef.current.scan();
+      console.log('%c⧭', 'color: #cc0036', tagNumbers);
+      if (tagNumbers && Array.isArray(tagNumbers?.results) && tagNumbers.results.length > 0) {
+        getNotificationDispatcher(tagNumbers?.results.toString())();
+      }
     }
   };
 

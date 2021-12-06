@@ -4,6 +4,7 @@ import { ErrorRegistry } from '@enums';
 
 export interface CoreCameraProps {
   viewfinder: RefObject<HTMLVideoElement>;
+  canvas: RefObject<HTMLCanvasElement>;
   additionalCaptureOptions?: DisplayMediaStreamConstraints;
 }
 
@@ -19,16 +20,33 @@ class CoreCamera {
 
   constructor(props: CoreCameraProps) {
     this._viewfinder = props.viewfinder;
-    this.enableStream(props.additionalCaptureOptions);
+    this._canvas = props.canvas;
 
-    if (this._mediaStream) {
+    // Request camera usage.
+    this.promptCameraUsage(props.additionalCaptureOptions).then(onApproval.bind(this), onRejection);
+
+    function onApproval(mediaStream: MediaStream) {
+      this._mediaStream = mediaStream;
       this._videoTrack = this._mediaStream.getVideoTracks()[0];
-
-      if (this._videoTrack) {
-        this._capabilities = this._videoTrack.getCapabilities();
-        this._settings = this.videoTrack?.getSettings();
+      this._capabilities = this._videoTrack.getCapabilities();
+      this._settings = this.videoTrack?.getSettings();
+      if (this._viewfinder?.current) {
+        this._viewfinder.current.srcObject = mediaStream;
       }
     }
+
+    function onRejection(reason: unknown) {
+      console.log(reason);
+    }
+  }
+
+  private async promptCameraUsage(additionalCaptureOptions?: DisplayMediaStreamConstraints) {
+    const mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      ...additionalCaptureOptions
+    });
+
+    return mediaStream;
   }
 
   public get cameraEnabled(): boolean {
@@ -88,7 +106,7 @@ class CoreCamera {
     }
   }
 
-  public async capturePhoto(): Promise<void> {
+  protected async capturePhoto(): Promise<void> {
     const videoTracks = this._mediaStream?.getVideoTracks();
 
     if (Array.isArray(videoTracks) && videoTracks.length === 1) {
@@ -99,7 +117,12 @@ class CoreCamera {
         this._capture = await capture(videoTracks[0]);
       } else {
         // use legacy frame capture
-        this._capture = await legacyCapture.call(this);
+        legacyCapture
+          .call(this)
+          .then((stillFrame) => {
+            this._capture = stillFrame;
+          })
+          .catch((error: string) => console.log(error));
       }
     }
 
@@ -113,47 +136,33 @@ class CoreCamera {
      * @this CoreCamera
      */
     async function legacyCapture(): Promise<Blob | undefined> {
-      if (this._canvas?.current != null) {
-        const settings = this._videoTrack?.getSettings();
-        if (settings) {
-          if (typeof settings.height === 'number' && typeof settings.width === 'number') {
-            this._canvas.current.width = settings.width;
-            this._canvas.current.height = settings.height;
-            const canvasContext = this._canvas.current.getContext('2d');
+      return new Promise((resolve, reject) => {
+        if (this._canvas?.current != null) {
+          const settings = this._videoTrack?.getSettings();
+          if (settings) {
+            if (typeof settings.height === 'number' && typeof settings.width === 'number') {
+              this._canvas.current.width = settings.width;
+              this._canvas.current.height = settings.height;
+              const canvasContext = this._canvas.current.getContext('2d');
 
-            if (canvasContext && this._viewfinder?.current != null) {
-              canvasContext.drawImage(
-                this._viewfinder?.current,
-                0,
-                0,
-                settings.width,
-                settings.height
-              );
-              this._canvas.current.toBlob((blob: Blob) => {
-                return blob;
-              });
+              if (canvasContext && this._viewfinder?.current != null) {
+                canvasContext.drawImage(
+                  this._viewfinder?.current,
+                  0,
+                  0,
+                  settings.width,
+                  settings.height
+                );
+                this._canvas.current.toBlob((blob: Blob) => {
+                  resolve(blob);
+                });
+              }
             }
           }
+        } else {
+          reject('Could not find a canvas to capture a frame to.');
         }
-      }
-      return undefined;
-    }
-  }
-
-  /**
-   * Enables the viewfinder on a video element.
-   * @param additionalCaptureOptions video track options.
-   */
-  private async enableStream(
-    additionalCaptureOptions?: DisplayMediaStreamConstraints
-  ): Promise<void> {
-    if (this._viewfinder?.current) {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        ...additionalCaptureOptions
       });
-      this._mediaStream = mediaStream;
-      this._viewfinder.current.srcObject = mediaStream;
     }
   }
 }

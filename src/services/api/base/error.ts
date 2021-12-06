@@ -42,12 +42,8 @@ export class BaseApiParseError extends BaseApiClientError {
   }
 }
 
-export function isBaseApiError(error: unknown): boolean {
-  if (
-    error instanceof BaseApiParseError ||
-    error instanceof BaseApiClientRequestFailedError ||
-    error instanceof BaseApiError
-  ) {
+export function isBaseApiError(error: unknown): error is BaseApiError {
+  if (error instanceof BaseApiError) {
     return true;
   } else {
     return false;

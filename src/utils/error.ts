@@ -10,7 +10,7 @@ function handleError(record: ErrorRecord, devMessage: unknown): void {
     eventHub.emit(record.key, {
       severity: record.severity || 'low',
       userMessage: record.userMessage,
-      devMessage: devMessage
+      devMessage: devMessage?.originalError ?? devMessage
     } as EchoCameraError);
   }
 }

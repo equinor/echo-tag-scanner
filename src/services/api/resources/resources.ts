@@ -2,30 +2,32 @@ import BaseResources from '../base/resources';
 
 import { combineUrls, parseParams } from '@utils';
 
-export function getFunctionalLocationsResources(
-  image: Blob,
-  providedInstCode?: string
-): { url: string; body: FormData } {
-  const instCode = parseInstCode(providedInstCode);
-  const url = combineUrls(BaseResources.baseApiUrl, instCode, 'ocr', 'get-tags');
-  const formData = new FormData();
-  formData.append('image', image);
+export function getFunctionalLocationsResources(image: Blob): {
+  url: string;
+  body: Blob;
+  init: RequestInit;
+} {
+  const boundary = `------------------------------${Math.random().toString(36).substring(2)}`;
+
+  // request url
+  const url = combineUrls(BaseResources.baseApiUrl, 'ocr', 'get-tags');
+
+  //headers
+  const init: RequestInit = {
+    headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` }
+  };
 
   return {
     url,
-    body: formData
+    body: createBlob(image, boundary),
+    init
   };
 }
 
-function parseInstCode(providedInstCode?: string): string {
-  const params = parseParams<{ instCode?: string }>(globalThis.location.search);
-  const instCode = providedInstCode ?? params.instCode;
-
-  if (!instCode) {
-    throw new Error('No instcode was provided or was found in url params.');
-  }
-
-  return instCode;
+function createBlob(imageBlob: Blob, boundary: string) {
+  const appendingMeta = `--${boundary}\r\nContent-Disposition: form-data; name="files"; filename="ocr_img.JPG"\r\nContent-Type: image/jpeg\r\n\r\n`;
+  const prependingMeta = `\r\n--${boundary}--`;
+  return new Blob([appendingMeta, imageBlob, prependingMeta]);
 }
 
 export default {

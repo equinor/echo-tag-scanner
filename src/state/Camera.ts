@@ -1,6 +1,7 @@
 import { CoreCamera, CoreCameraProps } from './CoreCamera';
 import { getNotificationDispatcher } from '@utils';
-import { doScanning } from '@services';
+import { getFunctionalLocations } from '@services';
+import { MadOCRFunctionalLocations } from '@types';
 
 export type CameraProps = CoreCameraProps;
 
@@ -17,7 +18,6 @@ class Camera extends CoreCamera {
   public toggleTorch = (): void => {
     try {
       this._torchState = !this._torchState;
-
       this.torch(this._torchState);
     } catch (error) {
       console.log(error);
@@ -40,10 +40,17 @@ class Camera extends CoreCamera {
     }
   }
 
-  public async scan(): Promise<void> {
+  public async scan(): Promise<MadOCRFunctionalLocations | undefined> {
     // handle scanning logic
     this._scanningNotification();
-    await doScanning();
+    await this.capturePhoto();
+
+    if (this.capture) {
+      console.log('CAPTURE', this.capture);
+      return await getFunctionalLocations(this.capture);
+    } else {
+      return undefined;
+    }
   }
 }
 

@@ -25,7 +25,7 @@ const App: FC = () => {
     <BrowserRouter>
       <Switch>
         <Route>
-          <ErrorBoundary>
+          <ErrorBoundary stackTraceEnabled>
             <EchoCamera />
           </ErrorBoundary>
         </Route>

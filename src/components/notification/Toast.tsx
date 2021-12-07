@@ -13,7 +13,7 @@ const Toast = (props: ToastProps): JSX.Element => {
       className={props.className}
       open={props.open}
       onClose={props.onClose}
-      autoHideDuration={1000000}
+      autoHideDuration={1000}
     >
       {props.message}
     </Snackbar>

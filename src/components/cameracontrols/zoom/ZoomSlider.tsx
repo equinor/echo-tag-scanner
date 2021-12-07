@@ -4,20 +4,18 @@ import styles from './styles.less';
 
 interface ZoomSliderProps {
   zoomInputRef: Ref<HTMLInputElement>;
-  deviceZoomCapable?: boolean;
+  zoomOptions?: MediaSettingsRange;
 }
 
 const ZoomSlider = (props: ZoomSliderProps): JSX.Element => {
   return (
     <div className={styles.edsSlider}>
       <Slider
-        disabled={!props.deviceZoomCapable}
+        disabled={Boolean(props.zoomOptions)}
         value={1}
-        // 1x zoom
-        min={1}
-        // max 5x zoom. This should be queried from the device if possible.
-        max={5}
-        step={0.5}
+        min={props.zoomOptions?.min ?? 1}
+        max={props.zoomOptions?.max ?? 5}
+        step={props.zoomOptions?.step ?? 0.5}
         ariaLabelledby="zoom-slider"
         minMaxDots={false}
         minMaxValues={false}
@@ -26,25 +24,5 @@ const ZoomSlider = (props: ZoomSliderProps): JSX.Element => {
     </div>
   );
 };
-
-// const StockSlider = () => {
-//   const [zoomValue, setZoomValue] = useState(1);
-//   return (
-//     <div className={styles.sliderBackdrop}>
-//       <input
-//         type="range"
-//         value={zoomValue}
-//         min={1}
-//         max={10}
-//         step={0.5}
-//         onChange={(e) => {
-//           console.log(e.target.value);
-//           setZoomValue(Number(e.target.value));
-//         }}
-//         ref={zoomInputRef}
-//       />
-//     </div>
-//   );
-// };
 
 export { ZoomSlider };

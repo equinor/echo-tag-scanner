@@ -7,9 +7,7 @@ export type CameraProps = CoreCameraProps;
 
 class Camera extends CoreCamera {
   private _torchState = false;
-  private _scanningNotification = getNotificationDispatcher(
-    'Placeholder for scanning notification.'
-  );
+  private _scanningNotification = getNotificationDispatcher('Scanning...');
 
   constructor(props: CameraProps) {
     super(props);

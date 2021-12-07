@@ -1,6 +1,6 @@
 import BaseResources from '../base/resources';
 
-import { combineUrls, parseParams } from '@utils';
+import { combineUrls } from '@utils';
 
 export function getFunctionalLocationsResources(image: Blob): {
   url: string;

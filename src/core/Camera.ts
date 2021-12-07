@@ -44,7 +44,6 @@ class Camera extends CoreCamera {
     await this.capturePhoto();
 
     if (this.capture) {
-      console.log('CAPTURE', this.capture);
       return await getFunctionalLocations(this.capture);
     } else {
       return undefined;

@@ -36,7 +36,7 @@ class CoreCamera {
     }
 
     function onRejection(reason: unknown) {
-      console.log(reason);
+      console.error(reason);
     }
   }
 

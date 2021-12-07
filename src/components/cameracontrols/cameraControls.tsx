@@ -34,8 +34,6 @@ const CameraControls = (props: CameraControlsProps): JSX.Element => {
         />
 
         <ScannerButton onClick={onScanning} isActive={isScanning} />
-        {/** For flipping to selfie mode. This may not be necessary. */}
-        {/* <CameraButton name="camera" onClick={stub} label="flip" /> */}
       </div>
     </section>
   );

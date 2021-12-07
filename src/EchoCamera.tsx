@@ -70,11 +70,7 @@ const EchoCamera: FC = () => {
   const onScanning = async () => {
     if (cameraRef?.current != null) {
       const tagNumbers = await cameraRef.current.scan();
-      if (
-        tagNumbers &&
-        Array.isArrayextractFunctionalLocation(tagNumbers?.results) &&
-        tagNumbers.results.length > 0
-      ) {
+      if (tagNumbers && Array.isArray(tagNumbers?.results) && tagNumbers.results.length > 0) {
         // TODO: Handle multiple OCR results.
         const extract = extractFunctionalLocation(tagNumbers.results[0]);
         if (extract.tagNumber) {

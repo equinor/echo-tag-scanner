@@ -22,18 +22,17 @@ class Camera extends CoreCamera {
     }
   };
 
-  public alterZoom = (ev: Event): void => {
-    // Not sure why Event.prototype.target.value is not resolved at compile time.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const numberedZoom = Number(ev.target.value);
-    if (typeof numberedZoom === 'number' && ev.target && this.isValidZoom(numberedZoom)) {
-      this.zoom(numberedZoom);
+  public alterZoom = (ev: React.FormEvent<HTMLDivElement>, newValue: number | number[]): void => {
+    console.log('%c⧭', 'color: #cc7033', newValue);
+    if (typeof newValue === 'number' && ev.target && this.isValidZoom(newValue)) {
+      this.zoom(newValue);
     }
+
+    // TODO: Handle zoom errors
   };
 
   private isValidZoom(zoomValue: number) {
-    if (this.capabilities?.zoom) {
+    if (this.capabilities?.zoom && typeof zoomValue === 'number') {
       return zoomValue >= this.capabilities?.zoom?.min && zoomValue <= this.capabilities?.zoom?.max;
     }
   }

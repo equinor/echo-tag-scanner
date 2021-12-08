@@ -26,6 +26,7 @@ class CoreCamera {
     this.promptCameraUsage(props.additionalCaptureOptions).then(onApproval.bind(this), onRejection);
 
     function onApproval(mediaStream: MediaStream) {
+      console.info('Camera usage was approved');
       this._mediaStream = mediaStream;
       this._videoTrack = this._mediaStream.getVideoTracks()[0];
       this._capabilities = this._videoTrack.getCapabilities();
@@ -36,6 +37,7 @@ class CoreCamera {
     }
 
     function onRejection(reason: unknown) {
+      console.info('Camera usage was rejected.');
       console.error(reason);
     }
   }

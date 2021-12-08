@@ -3,19 +3,22 @@ import { Ref } from 'react';
 import styles from './styles.less';
 
 interface ZoomSliderProps {
+  onSlide: (event: React.FormEvent<HTMLDivElement>, newValue: number | number[]) => void;
   zoomInputRef: Ref<HTMLInputElement>;
   zoomOptions?: MediaSettingsRange;
 }
 
 const ZoomSlider = (props: ZoomSliderProps): JSX.Element => {
+  console.log(props);
   return (
     <div className={styles.edsSlider}>
       <Slider
-        disabled={Boolean(props.zoomOptions)}
+        onChange={props.onSlide}
+        disabled={!Boolean(props.zoomOptions)}
         value={1}
-        min={props.zoomOptions?.min ?? 1}
-        max={props.zoomOptions?.max ?? 5}
-        step={props.zoomOptions?.step ?? 0.5}
+        min={props.zoomOptions?.min}
+        max={props.zoomOptions?.max}
+        step={props.zoomOptions?.step}
         ariaLabelledby="zoom-slider"
         minMaxDots={false}
         minMaxValues={false}

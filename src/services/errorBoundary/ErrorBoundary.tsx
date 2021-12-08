@@ -103,6 +103,9 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
 
   render(): React.ReactNode {
     if (this.state.hasError) {
+      console.group('ErrorBoundary');
+      console.info(this.state);
+      console.groupEnd();
       if (this.state.severity === 'high') {
         return (
           <>

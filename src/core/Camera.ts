@@ -7,9 +7,7 @@ export type CameraProps = CoreCameraProps;
 
 class Camera extends CoreCamera {
   private _torchState = false;
-  private _scanningNotification = getNotificationDispatcher(
-    'Placeholder for scanning notification.'
-  );
+  private _scanningNotification = getNotificationDispatcher('Scanning...');
 
   constructor(props: CameraProps) {
     super(props);
@@ -46,7 +44,6 @@ class Camera extends CoreCamera {
     await this.capturePhoto();
 
     if (this.capture) {
-      console.log('CAPTURE', this.capture);
       return await getFunctionalLocations(this.capture);
     } else {
       return undefined;

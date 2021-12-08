@@ -5,6 +5,7 @@ interface ToastProps extends SnackbarProps {
   open: boolean;
   onClose?: () => void;
   className?: string;
+  autoHideDuration?: number;
 }
 
 const Toast = (props: ToastProps): JSX.Element => {
@@ -13,7 +14,7 @@ const Toast = (props: ToastProps): JSX.Element => {
       className={props.className}
       open={props.open}
       onClose={props.onClose}
-      autoHideDuration={1000000}
+      autoHideDuration={props.autoHideDuration ?? 1000}
     >
       {props.message}
     </Snackbar>

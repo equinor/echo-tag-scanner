@@ -1,15 +1,17 @@
 import { FC, useRef, useEffect } from 'react';
 import styles from './styles.less';
-import { Camera, CameraProps } from './state/Camera';
+import { Camera, CameraProps } from './core/Camera';
 import { CameraControls, Viewfinder, ZoomSlider } from '@components';
 import { NotificationHandler } from '@services';
-import { getNotificationDispatcher } from '@utils';
+import { getNotificationDispatcher, extractFunctionalLocation } from '@utils';
+import EchoFramework from '@equinor/echo-framework';
 
 const EchoCamera: FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomInputRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<Camera>();
+  const tagSearch = EchoFramework.Hooks.useSetActiveTagNo();
 
   // Instansiate the camera core class.
   useEffect(
@@ -68,9 +70,15 @@ const EchoCamera: FC = () => {
   const onScanning = async () => {
     if (cameraRef?.current != null) {
       const tagNumbers = await cameraRef.current.scan();
-      console.log('%c⧭', 'color: #cc0036', tagNumbers);
       if (tagNumbers && Array.isArray(tagNumbers?.results) && tagNumbers.results.length > 0) {
-        getNotificationDispatcher(tagNumbers?.results.toString())();
+        // TODO: Handle multiple OCR results.
+        const extract = extractFunctionalLocation(tagNumbers.results[0]);
+        if (extract.tagNumber) {
+          tagSearch(extract.tagNumber);
+          getNotificationDispatcher(tagNumbers?.results.toString())();
+        }
+      } else {
+        getNotificationDispatcher('We did not recognize any tag numbers.')();
       }
     }
   };
@@ -82,11 +90,15 @@ const EchoCamera: FC = () => {
       }
     };
 
+    const onToggleUnsupportedTorch = () => {
+      getNotificationDispatcher('The torch is not supported on this device.');
+    };
+
     if (cameraRef?.current != null) {
       if (cameraRef?.current.capabilities?.zoom) {
         return onToggleTorch;
       } else {
-        return undefined;
+        return onToggleUnsupportedTorch;
       }
     }
   }
@@ -98,7 +110,7 @@ const EchoCamera: FC = () => {
 
         <ZoomSlider
           zoomInputRef={zoomInputRef}
-          deviceZoomCapable={Boolean(cameraRef?.current?.capabilities?.zoom)}
+          zoomOptions={cameraRef?.current?.capabilities?.zoom}
         />
 
         <CameraControls onToggleTorch={provideTorchToggling()} onScanning={onScanning} />

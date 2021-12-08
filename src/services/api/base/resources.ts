@@ -8,10 +8,6 @@ function env() {
 }
 
 function apiUrl() {
-  // TODO: this should probably use these variables instead of process.env
-  // return window._env_;
-
-  // dotenv-webpack requires DIRECT reference to output the variable
   const apiUrl = env().REACT_APP_API_URL ?? process.env.REACT_APP_API_URL;
 
   if (!apiUrl) {

@@ -1,6 +1,5 @@
 import { getFunctionalLocationsResources } from '../resources/resources';
 import { baseApiClient } from '../base/base';
-import { isBaseApiError } from '../base/error';
 import { ErrorRegistry } from '@enums';
 import { handleError } from '@utils';
 import { MadOCRFunctionalLocations } from '@types';
@@ -9,16 +8,9 @@ export async function getFunctionalLocations(image: Blob): Promise<MadOCRFunctio
   try {
     const { url, body, init } = getFunctionalLocationsResources(image);
 
-    return await (
-      await baseApiClient.postAsync<MadOCRFunctionalLocations>(url, body, init)
-    ).data;
+    return (await baseApiClient.postAsync<MadOCRFunctionalLocations>(url, body, init)).data;
   } catch (error) {
-    if (isBaseApiError(error)) {
-      throw handleError(ErrorRegistry.ocrError, error.toString());
-    }
-    throw handleError(ErrorRegistry.ocrError, error);
+    throw handleError(ErrorRegistry.ocrError, error as Error);
   }
 }
-
-
 export const ocrApi = { getFunctionalLocations };

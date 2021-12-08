@@ -36,7 +36,7 @@ class CoreCamera {
     }
 
     function onRejection(reason: unknown) {
-      console.log(reason);
+      console.error(reason);
     }
   }
 
@@ -70,8 +70,6 @@ class CoreCamera {
   }
 
   protected zoom(zoomValue: number): void {
-    // TODO: Error handling
-
     if (this._capabilities?.zoom) {
       this._videoTrack
         ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })

@@ -10,43 +10,37 @@ const EchoCamera: FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomInputRef = useRef<HTMLInputElement>(null);
+  console.log('%c⧭', 'color: #40fff2', zoomInputRef);
   const cameraRef = useRef<Camera>();
+  console.log('%c⧭', 'color: #607339', cameraRef);
   const tagSearch = EchoFramework.Hooks.useSetActiveTagNo();
 
   // Instansiate the camera core class.
-  useEffect(
-    function mountCamera() {
-      console.log('mounting');
+  useEffect(function mountCamera() {
+    console.log('mounting');
+    if (cameraRef.current == null) {
       const props: CameraProps = {
         viewfinder: videoRef,
         canvas: canvasRef
       };
+      console.info('instanciating camera');
       cameraRef.current = new Camera(props);
-    },
-    // Needs to monitor .current for correct behavior.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cameraRef.current]
-  );
+    }
 
-  // Setup the zoom slider with the min, max and step values.
-  useEffect(
-    function setupZoom() {
-      if (zoomInputRef?.current != null && cameraRef?.current != null) {
-        zoomInputRef.current.min = assignZoomSettings('min');
-        zoomInputRef.current.max = assignZoomSettings('max');
-        zoomInputRef.current.step = assignZoomSettings('step');
-        zoomInputRef.current.value = assignZoomSettings('value');
-        zoomInputRef.current.oninput = cameraRef.current?.alterZoom;
-      }
-    },
-    // Needs to monitor .current for correct behavior.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [zoomInputRef.current]
-  );
+    // Setup the zoom slider with the min, max and step values.
+    if (zoomInputRef?.current != null) {
+      zoomInputRef.current.min = assignZoomSettings('min');
+      zoomInputRef.current.max = assignZoomSettings('max');
+      zoomInputRef.current.step = assignZoomSettings('step');
+      zoomInputRef.current.value = '1';
+    }
+  }, []);
 
+  console.log('%c⧭', 'color: #ff6600', zoomInputRef);
   function assignZoomSettings(type: 'min' | 'max' | 'step' | 'value'): string {
     if (cameraRef?.current != null) {
       const camera = cameraRef.current;
+      console.log('%c⧭', 'color: #5200cc', camera);
       if (type === 'value') {
         if (camera.settings?.zoom) {
           return String(camera.settings.zoom);
@@ -109,6 +103,7 @@ const EchoCamera: FC = () => {
         <Viewfinder canvasRef={canvasRef} videoRef={videoRef} />
 
         <ZoomSlider
+          onSlide={cameraRef.current?.alterZoom}
           zoomInputRef={zoomInputRef}
           zoomOptions={cameraRef?.current?.capabilities?.zoom}
         />

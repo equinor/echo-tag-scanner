@@ -9,7 +9,6 @@ interface ZoomSliderProps {
 }
 
 const ZoomSlider = (props: ZoomSliderProps): JSX.Element => {
-  console.log(props);
   return (
     <div className={styles.edsSlider}>
       <Slider

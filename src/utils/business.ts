@@ -1,8 +1,8 @@
-type ExtractedFunctionalLocation = {
-  sapPlantId?: number;
-  tagNumber?: string;
-};
+import { ExtractedFunctionalLocation } from '@types';
 
+/**
+ * Splits a functional location into its consecutive parts SAP plant ID and tagnumber.
+ */
 export function extractFunctionalLocation(input: string): ExtractedFunctionalLocation {
   const parts = input.split('-');
   const extract: ExtractedFunctionalLocation = {
@@ -10,12 +10,14 @@ export function extractFunctionalLocation(input: string): ExtractedFunctionalLoc
     tagNumber: undefined
   };
 
-  if (parts[0] != null) {
-    extract.sapPlantId = Number(parts[0]);
-  }
+  if (parts.length >= 2) {
+    if (parts[0] != null) {
+      extract.sapPlantId = parts[0];
+      // Remove the SAP Plant ID
+      parts.shift();
 
-  if (parts[1] != null) {
-    extract.tagNumber = parts[1];
+      extract.tagNumber = parts.join('-');
+    }
   }
 
   return extract;

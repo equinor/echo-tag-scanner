@@ -1,29 +1,29 @@
-import { FC, useRef, useEffect } from 'react';
+import { FC, useRef, useState, useEffect } from 'react';
 import styles from './styles.less';
 import { Camera, CameraProps } from './core/Camera';
-import { CameraControls, Viewfinder, ZoomSlider } from '@components';
+import { CameraControls, Viewfinder, ZoomSlider, SearchResults } from '@components';
 import { NotificationHandler } from '@services';
 import { getNotificationDispatcher, extractFunctionalLocation } from '@utils';
-import EchoFramework from '@equinor/echo-framework';
+import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from './types';
+import { useSetActiveTagNo } from '@hooks';
 
 const EchoCamera: FC = () => {
+  const [functionalLocations, setFunctionalLocations] = useState<
+    ExtractedFunctionalLocation[] | undefined
+  >(undefined);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomInputRef = useRef<HTMLInputElement>(null);
-  console.log('%c⧭', 'color: #40fff2', zoomInputRef);
   const cameraRef = useRef<Camera>();
-  console.log('%c⧭', 'color: #607339', cameraRef);
-  const tagSearch = EchoFramework.Hooks.useSetActiveTagNo();
+  const tagSearch = useSetActiveTagNo();
 
   // Instansiate the camera core class.
   useEffect(function mountCamera() {
-    console.log('mounting');
     if (cameraRef.current == null) {
       const props: CameraProps = {
         viewfinder: videoRef,
         canvas: canvasRef
       };
-      console.info('instanciating camera');
       cameraRef.current = new Camera(props);
     }
 
@@ -36,11 +36,9 @@ const EchoCamera: FC = () => {
     }
   }, []);
 
-  console.log('%c⧭', 'color: #ff6600', zoomInputRef);
   function assignZoomSettings(type: 'min' | 'max' | 'step' | 'value'): string {
     if (cameraRef?.current != null) {
       const camera = cameraRef.current;
-      console.log('%c⧭', 'color: #5200cc', camera);
       if (type === 'value') {
         if (camera.settings?.zoom) {
           return String(camera.settings.zoom);
@@ -63,17 +61,25 @@ const EchoCamera: FC = () => {
 
   const onScanning = async () => {
     if (cameraRef?.current != null) {
-      const tagNumbers = await cameraRef.current.scan();
-      if (tagNumbers && Array.isArray(tagNumbers?.results) && tagNumbers.results.length > 0) {
-        // TODO: Handle multiple OCR results.
-        const extract = extractFunctionalLocation(tagNumbers.results[0]);
-        if (extract.tagNumber) {
-          tagSearch(extract.tagNumber);
-          getNotificationDispatcher(tagNumbers?.results.toString())();
+      const madOcrFunctionalLocations = await cameraRef.current.scan();
+      if (madOcrFunctionalLocations && Array.isArray(madOcrFunctionalLocations?.results)) {
+        const locations = filterFalsePositives(madOcrFunctionalLocations);
+        if (locations.length > 1) {
+          setFunctionalLocations(locations);
+        } else {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore This var has already been checked and filtered above.
+          tagSearch(locations[0].tagNumber);
         }
       } else {
         getNotificationDispatcher('We did not recognize any tag numbers.')();
       }
+    }
+
+    function filterFalsePositives(locations: MadOCRFunctionalLocations) {
+      return locations.results
+        .map((location) => extractFunctionalLocation(location))
+        .filter((location) => location.sapPlantId && location.tagNumber);
     }
   };
 
@@ -110,6 +116,13 @@ const EchoCamera: FC = () => {
 
         <CameraControls onToggleTorch={provideTorchToggling()} onScanning={onScanning} />
         <NotificationHandler />
+        {functionalLocations && functionalLocations.length > 1 && (
+          <SearchResults
+            functionalLocations={functionalLocations}
+            onTagSearch={tagSearch}
+            onClose={() => setFunctionalLocations(undefined)}
+          />
+        )}
       </main>
     );
   } else {

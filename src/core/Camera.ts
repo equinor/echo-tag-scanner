@@ -23,7 +23,6 @@ class Camera extends CoreCamera {
   };
 
   public alterZoom = (ev: React.FormEvent<HTMLDivElement>, newValue: number | number[]): void => {
-    console.log('%c⧭', 'color: #cc7033', newValue);
     if (typeof newValue === 'number' && ev.target && this.isValidZoom(newValue)) {
       this.zoom(newValue);
     }

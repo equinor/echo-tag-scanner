@@ -1,9 +1,19 @@
 import { FC, useRef, useState, useEffect } from 'react';
 import styles from './styles.less';
+import styled from 'styled-components';
 import { Camera, CameraProps } from './core/Camera';
-import { CameraControls, Viewfinder, ZoomSlider, SearchResults } from '@components';
+import {
+  CameraControls,
+  Viewfinder,
+  ZoomSlider,
+  SearchResults,
+  ScanningIndicator
+} from '@components';
 import { NotificationHandler } from '@services';
-import { getNotificationDispatcher, extractFunctionalLocation } from '@utils';
+import {
+  getNotificationDispatcher as dispatchNotification,
+  extractFunctionalLocation
+} from '@utils';
 import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from './types';
 import { useSetActiveTagNo } from '@hooks';
 
@@ -11,6 +21,8 @@ const EchoCamera: FC = () => {
   const [functionalLocations, setFunctionalLocations] = useState<
     ExtractedFunctionalLocation[] | undefined
   >(undefined);
+  const [isScanning, setIsScanning] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomInputRef = useRef<HTMLInputElement>(null);
@@ -59,20 +71,57 @@ const EchoCamera: FC = () => {
     return '0';
   }
 
-  const onScanning = async () => {
+  const onScanning = () => {
+    setIsScanning(true);
+    setFunctionalLocations(undefined);
     if (cameraRef?.current != null) {
-      const madOcrFunctionalLocations = await cameraRef.current.scan();
-      if (madOcrFunctionalLocations && Array.isArray(madOcrFunctionalLocations?.results)) {
-        const locations = filterFalsePositives(madOcrFunctionalLocations);
-        if (locations.length > 1) {
-          setFunctionalLocations(locations);
-        } else {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          //@ts-ignore This var has already been checked and filtered above.
-          tagSearch(locations[0].tagNumber);
+      (function notifyUserLongScan() {
+        setTimeout(() => {
+          if (isScanning) {
+            dispatchNotification('Hang tight, the scan appears to be taking longer than usual.')();
+          }
+        }, 3000);
+      })();
+
+      // We won't make the user wait more than 10 seconds for the scanning results.
+      const scanTookTooLong: Promise<MadOCRFunctionalLocations> = new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({ results: [] });
+        }, 10000);
+      });
+
+      const scanOpponent: Promise<MadOCRFunctionalLocations | undefined> = new Promise(
+        (resolve) => {
+          resolve(cameraRef?.current?.scan());
         }
-      } else {
-        getNotificationDispatcher('We did not recognize any tag numbers.')();
+      );
+
+      // Start the scan race.
+      Promise.race([scanOpponent, scanTookTooLong]).then((locations) =>
+        handleDetectedLocations(locations)
+      ).catch((reason) => console.error("Quietly failing: ", reason));
+
+      /**
+       * Handles the parsing and filtering of functional locations that was returned from the API.
+       */
+      function handleDetectedLocations(madOcrFunctionalLocations?: MadOCRFunctionalLocations) {
+        setIsScanning(false);
+        if (
+          madOcrFunctionalLocations &&
+          Array.isArray(madOcrFunctionalLocations?.results) &&
+          madOcrFunctionalLocations.results.length > 0
+        ) {
+          const locations = filterFalsePositives(madOcrFunctionalLocations);
+          if (locations.length > 1) {
+            setFunctionalLocations(locations);
+          } else {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //@ts-ignore This var has already been checked and filtered above.
+            tagSearch(locations[0].tagNumber);
+          }
+        } else {
+          dispatchNotification('We did not recognize any tag numbers.')();
+        }
       }
     }
 
@@ -91,7 +140,7 @@ const EchoCamera: FC = () => {
     };
 
     const onToggleUnsupportedTorch = () => {
-      getNotificationDispatcher('The torch is not supported on this device.');
+      dispatchNotification('The torch is not supported on this device.')();
     };
 
     if (cameraRef?.current != null) {
@@ -116,18 +165,33 @@ const EchoCamera: FC = () => {
 
         <CameraControls onToggleTorch={provideTorchToggling()} onScanning={onScanning} />
         <NotificationHandler />
-        {functionalLocations && functionalLocations.length > 1 && (
-          <SearchResults
-            functionalLocations={functionalLocations}
-            onTagSearch={tagSearch}
-            onClose={() => setFunctionalLocations(undefined)}
-          />
-        )}
+        <DialogueWrapper>
+          {functionalLocations && functionalLocations.length > 1 && (
+            <SearchResults
+              functionalLocations={functionalLocations}
+              onTagSearch={tagSearch}
+              onClose={() => setFunctionalLocations(undefined)}
+            />
+          )}
+          {isScanning && <ScanningIndicator />}
+        </DialogueWrapper>
       </main>
     );
   } else {
     return null;
   }
 };
+
+const DialogueWrapper = styled.section`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  // The height of this wrapper is based on the bottom offset
+  // of the zoom slider and camera controls (20% and 5% respectively).
+  height: calc(100% - 20% - 5%);
+  width: 100%;
+`;
 
 export { EchoCamera };

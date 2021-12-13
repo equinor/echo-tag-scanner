@@ -16,8 +16,10 @@ class Camera extends CoreCamera {
     this.torch(this._torchState);
   };
 
-  public alterZoom = (ev: React.FormEvent<HTMLDivElement>, newValue: number | number[]): void => {
-    if (typeof newValue === 'number' && ev.target && this.isValidZoom(newValue)) {
+  public alterZoom = (ev: React.FormEvent<HTMLDivElement>, newValue: number[] | number): void => {
+    if (Array.isArray(newValue) && ev.target && this.isValidZoom(newValue[0])) {
+      this.zoom(newValue[0]);
+    } else if (typeof newValue === 'number') {
       this.zoom(newValue);
     }
   };

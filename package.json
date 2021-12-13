@@ -1,6 +1,6 @@
 {
     "name": "@equinor/echo-camera-web",
-    "version": "0.9.4",
+    "version": "0.9.5",
     "private": false,
     "license": "MIT",
     "module": "./build/index.js",
@@ -23,6 +23,9 @@
         "lint:fix": "eslint --ext .js,.jsx,.ts,.tsx src --fix --color"
     },
     "peerDependencies": {
+        "@equinor/echo-base": "^0.4.0",
+        "@equinor/echo-search": "^0.11.5",
+
         "@equinor/echo-components": "^0.2.2",
         "@equinor/echo-core": "^0.3.32",
         "@equinor/echo-framework": "^0.4.0",
@@ -30,11 +33,13 @@
         "@equinor/eds-core-react": "^0.14.3",
         "@equinor/eds-icons": "^0.8.0",
         "buffer": "^6.0.3",
+        "core-js": "^3.14.0",
         "crypto-browserify": "^3.12.0",
         "react": ">=17.0.1",
         "react-dom": ">=17.0.1",
         "react-router-dom": ">=5.2.0",
-        "stream-browserify": "^3.0.0"
+        "stream-browserify": "^3.0.0",
+        "styled-components": "^5.3.3"
     },
     "devDependencies": {
         "@azure/msal-node": "^1.0.3",
@@ -52,9 +57,8 @@
         "@equinor/echo-utils": "^0.2.3",
         "@equinor/eds-core-react": "^0.14.3",
         "@equinor/eds-icons": "^0.7.0",
-        "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
-        "@svgr/webpack": "^5.5.0",
-        "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
+        "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
+        "@svgr/webpack": "^6.1.1",
         "@types/react": "^17.0.1",
         "@types/react-dom": "^17.0.1",
         "@types/react-router-dom": "^5.1.7",
@@ -96,7 +100,7 @@
         "style-loader": "^2.0.0",
         "styled-components": "^5.3.3",
         "typescript": "^4.2.4",
-        "typings": "^2.1.1",
+        "typings": "^0.6.10",
         "url-loader": "^4.1.1",
         "web-vitals": "^1.1.1",
         "webpack": "^5.38.1",
@@ -117,5 +121,8 @@
             "not dead",
             "not op_mini all"
         ]
+    },
+    "dependencies": {
+        "@teamsupercell/typings-for-css-modules-loader": "^2.5.1"
     }
 }

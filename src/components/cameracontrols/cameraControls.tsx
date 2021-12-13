@@ -1,5 +1,4 @@
 import { CameraButton, ScannerButton } from '@components';
-import { useState } from 'react';
 import styles from './styles.less';
 
 interface CameraControlsProps {
@@ -15,11 +14,7 @@ interface CameraControlsProps {
  * @param {callback} - The torch action. If undefined, the torch button is disabled.
  */
 const CameraControls = (props: CameraControlsProps): JSX.Element => {
-  // Temp scanning toggle until APIs are in place.
-  const [isScanning, setIsScanning] = useState(false);
-
   function onScanning() {
-    setIsScanning(!isScanning);
     props.onScanning();
   }
 
@@ -33,7 +28,7 @@ const CameraControls = (props: CameraControlsProps): JSX.Element => {
           supported={Boolean(props.onToggleTorch)}
         />
 
-        <ScannerButton onClick={onScanning} isActive={isScanning} />
+        <ScannerButton onClick={onScanning} />
       </div>
     </section>
   );

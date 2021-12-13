@@ -42,12 +42,9 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
 };
 
 const Dialogue = styled(Dialog)`
-  position: absolute;
-  top: 10%;
   max-width: 90vw;
   min-width: 25vw;
   max-height: 70vh;
-  left: 20%;
   z-index: 2;
 `;
 

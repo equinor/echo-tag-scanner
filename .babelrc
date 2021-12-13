@@ -5,10 +5,11 @@
       {
         "useBuiltIns": "usage",
         "corejs": 3,
-        "targets": "> 0.25%, not dead"
-        // "targets": {
-        //     "esmodules": true
-        // }
+        "targets": {
+          "chrome": "90",
+          "ios": "14.3"
+        }
+        //"targets": "> 0.25%, not dead"
       }
     ],
     ["@babel/preset-react",

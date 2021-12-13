@@ -1,5 +1,4 @@
 import { CoreCamera, CoreCameraProps } from './CoreCamera';
-import { getNotificationDispatcher } from '@utils';
 import { getFunctionalLocations } from '@services';
 import { MadOCRFunctionalLocations } from '@types';
 
@@ -7,27 +6,20 @@ export type CameraProps = CoreCameraProps;
 
 class Camera extends CoreCamera {
   private _torchState = false;
-  private _scanningNotification = getNotificationDispatcher('Scanning...');
 
   constructor(props: CameraProps) {
     super(props);
   }
 
   public toggleTorch = (): void => {
-    try {
-      this._torchState = !this._torchState;
-      this.torch(this._torchState);
-    } catch (error) {
-      console.log(error);
-    }
+    this._torchState = !this._torchState;
+    this.torch(this._torchState);
   };
 
   public alterZoom = (ev: React.FormEvent<HTMLDivElement>, newValue: number | number[]): void => {
     if (typeof newValue === 'number' && ev.target && this.isValidZoom(newValue)) {
       this.zoom(newValue);
     }
-
-    // TODO: Handle zoom errors
   };
 
   private isValidZoom(zoomValue: number) {
@@ -38,7 +30,6 @@ class Camera extends CoreCamera {
 
   public async scan(): Promise<MadOCRFunctionalLocations | undefined> {
     // handle scanning logic
-    this._scanningNotification();
     await this.capturePhoto();
 
     if (this.capture) {

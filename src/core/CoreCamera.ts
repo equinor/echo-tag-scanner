@@ -44,7 +44,8 @@ class CoreCamera {
 
   private async promptCameraUsage(additionalCaptureOptions?: DisplayMediaStreamConstraints) {
     const mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
+      video: { facingMode: 'environment' },
+      audio: false,
       ...additionalCaptureOptions
     });
 
@@ -76,9 +77,6 @@ class CoreCamera {
       this._videoTrack
         ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
         .catch(onZoomRejection);
-    } else {
-      // TODO: refactor to informational
-      console.warn('Device is not zoom capable');
     }
 
     function onZoomRejection(reason: unknown) {

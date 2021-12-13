@@ -34,7 +34,6 @@ const CameraButton = (props: CameraButtonProps): JSX.Element => {
 };
 
 interface ShutterProps {
-  isActive?: boolean;
   isDisabled?: boolean;
   className?: string;
   onClick?: () => void;
@@ -44,11 +43,7 @@ interface ShutterProps {
  * Returns a custom camera shutter/tag scanning button.
  */
 const ScannerButton = (props: ShutterProps): JSX.Element => (
-  <button
-    className={props.isActive ? styles.buttonScanning : styles.buttonResting}
-    disabled={props.isDisabled}
-    onClick={props.onClick}
-  />
+  <button className={styles.buttonResting} disabled={props.isDisabled} onClick={props.onClick} />
 );
 
 export { CameraButton, ScannerButton };

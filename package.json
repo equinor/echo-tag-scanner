@@ -1,6 +1,6 @@
 {
     "name": "@equinor/echo-camera-web",
-    "version": "0.9.7",
+    "version": "0.9.8",
     "private": false,
     "license": "MIT",
     "module": "./build/index.js",
@@ -123,6 +123,5 @@
         ]
     },
     "dependencies": {
-        "@teamsupercell/typings-for-css-modules-loader": "^2.5.1"
     }
 }

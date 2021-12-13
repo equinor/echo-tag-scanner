@@ -1,73 +1,39 @@
 .buttonResting {
-    border-radius: 100%;
-    border-style: solid;
-    border-color: var(--black);
-    border-width: 3px;
-    width: 75px;
-    height: 75px;
-    background-color: white;
+  border-radius: 100%;
+  border-style: solid;
+  border-color: var(--black);
+  border-width: 3px;
+  width: 75px;
+  height: 75px;
+  background-color: white;
 
-    &:active {
-        background-color: var(--equiGreen2);
-    }
-}
-
-.buttonScanning {
-    border-radius: 100%;
-    border-style: solid;
-    border-color: black;
-    border-width: 3px;
-    width: 75px;
-    height: 75px;
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
-    transform: scale(1);
-    animation: pulse 2s infinite;
-    background-color: var(--equiBlue1);
-
-    &:active {
-        background-color: var(--equiGreen2);
-    }
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(0.7);
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
-    }
-
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 20px rgba(0, 0, 0, 0);
-    }
-
-    100% {
-        transform: scale(0.7);
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-    }
+  &:active {
+    background-color: var(--equiGreen1);
+    box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
+    -webkit-box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
+    -moz-box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
+  }
 }
 
 .iconButton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--equiGreen1);
-    border-radius: 100%;
-    width: 55px;
-    height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--equiGreen1);
+  border-radius: 100%;
+  width: 55px;
+  height: 55px;
 
-    &:active {
-        background-color: var(--equiBlue1);
-    }
+  &:active {
+    background-color: var(--equiBlue1);
+  }
 
-    &:disabled {
-        background-color: var(--disabledColor);
-    }
+  &:disabled {
+    background-color: var(--disabledColor);
+  }
 
-    
-
-    .icon {
-        width: 60%;
-        height: 60%;
-    }
+  .icon {
+    width: 60%;
+    height: 60%;
+  }
 }
-

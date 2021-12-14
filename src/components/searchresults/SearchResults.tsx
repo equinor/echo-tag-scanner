@@ -20,8 +20,8 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
       <Dialog.Title>Search results</Dialog.Title>
       <Dialog.CustomContent>
         <CardList>
-          {props.functionalLocations.map((fLocation) => (
-            <List.Item key={fLocation.tagNumber}>
+          {props.functionalLocations.map((fLocation, index) => (
+            <List.Item key={fLocation.tagNumber + '-' + String(index)}>
               <FunctionalLocationCard variant="info" onClick={() => onClick(fLocation.tagNumber)}>
                 <FunctionalLocationCard.HeaderTitle>
                   <Typography variant="h5">{fLocation.tagNumber}</Typography>

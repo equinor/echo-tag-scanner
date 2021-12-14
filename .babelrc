@@ -7,7 +7,8 @@
         "corejs": 3,
         "targets": {
           "chrome": "90",
-          "ios": "14.3"
+          "ios": "14.3",
+          "safari": "14.3"
         }
         //"targets": "> 0.25%, not dead"
       }

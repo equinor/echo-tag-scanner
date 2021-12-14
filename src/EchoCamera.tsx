@@ -97,9 +97,12 @@ const EchoCamera: FC = () => {
       });
 
       // Start the scan race.
-      Promise.race([scanAction, scanTookTooLong])
-        .then((locations) => handleDetectedLocations(locations))
-        .catch((reason) => console.error('Quietly failing: ', reason));
+      // Promise.race([scanAction, scanTookTooLong])
+      //   .then((locations) => handleDetectedLocations(locations))
+      //   .catch((reason) => console.error('Quietly failing: ', reason));
+
+      console.log('starting scan');
+      cameraRef.current.scan().then(handleDetectedLocations);
 
       /**
        * Handles the parsing and filtering of functional locations that was returned from the API.

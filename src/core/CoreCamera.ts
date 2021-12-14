@@ -115,9 +115,10 @@ class CoreCamera {
         this._capture = await capture(videoTracks[0]);
       } else {
         // use legacy frame capture
-        legacyCapture
+        await legacyCapture
           .call(this)
           .then((stillFrame) => {
+            console.info('captured frame', stillFrame);
             this._capture = stillFrame;
           })
           .catch((error: string) => console.log(error));
@@ -134,33 +135,48 @@ class CoreCamera {
      * @this CoreCamera
      */
     async function legacyCapture(): Promise<Blob | undefined> {
-      return new Promise((resolve, reject) => {
-        if (this._canvas?.current != null) {
-          const settings = this._videoTrack?.getSettings();
-          if (settings) {
-            if (typeof settings.height === 'number' && typeof settings.width === 'number') {
-              this._canvas.current.width = settings.width;
-              this._canvas.current.height = settings.height;
-              const canvasContext = this._canvas.current.getContext('2d');
+      // Captures a frame from the viewfinder and stores it in a hidden canvas.
+      const writeViewfinderToCanvas = () => {
+        return new Promise((resolve, reject) => {
+          if (this._canvas?.current != null) {
+            const settings = this._videoTrack?.getSettings();
+            if (settings) {
+              if (typeof settings.height === 'number' && typeof settings.width === 'number') {
+                this._canvas.current.width = settings.width;
+                this._canvas.current.height = settings.height;
+                const canvasContext = this._canvas.current.getContext('2d');
 
-              if (canvasContext && this._viewfinder?.current != null) {
-                canvasContext.drawImage(
-                  this._viewfinder?.current,
-                  0,
-                  0,
-                  settings.width,
-                  settings.height
-                );
-                this._canvas.current.toBlob((blob: Blob) => {
-                  resolve(blob);
-                });
+                if (canvasContext && this._viewfinder?.current != null) {
+                  canvasContext.drawImage(
+                    this._viewfinder?.current,
+                    0,
+                    0,
+                    settings.width,
+                    settings.height
+                  );
+                  resolve(undefined);
+                }
               }
             }
+          } else {
+            reject('Could not find a canvas to capture a frame to.');
           }
-        } else {
-          reject('Could not find a canvas to capture a frame to.');
-        }
-      });
+        });
+      };
+
+      // Retrieve the current contents of the hidden canvas as a Blob.
+      const getBlob = (): Promise<Blob | undefined> => {
+        return new Promise((resolve) => {
+          if (this._canvas.current != null) {
+            this._canvas.current.toBlob((blob: Blob) => {
+              resolve(blob);
+            });
+          }
+        });
+      };
+
+      await writeViewfinderToCanvas();
+      return await getBlob();
     }
   }
 }

@@ -33,7 +33,6 @@ class Camera extends CoreCamera {
   public async scan(): Promise<MadOCRFunctionalLocations | undefined> {
     // handle scanning logic
     await this.capturePhoto();
-
     if (this.capture) {
       return await getFunctionalLocations(this.capture);
     } else {

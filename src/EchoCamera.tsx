@@ -85,19 +85,19 @@ const EchoCamera: FC = () => {
 
       // We won't make the user wait more than 10 seconds for the scanning results.
       const scanTookTooLong: Promise<MadOCRFunctionalLocations> = new Promise((resolve) => {
+        console.log('starting timer');
         setTimeout(() => {
           resolve({ results: [] });
         }, 10000);
       });
 
-      const scanOpponent: Promise<MadOCRFunctionalLocations | undefined> = new Promise(
-        (resolve) => {
-          resolve(cameraRef?.current?.scan());
-        }
-      );
+      const scanAction: Promise<MadOCRFunctionalLocations | undefined> = new Promise((resolve) => {
+        console.log('attempting to resolve tag number(s)');
+        resolve(cameraRef?.current?.scan());
+      });
 
       // Start the scan race.
-      Promise.race([scanOpponent, scanTookTooLong])
+      Promise.race([scanAction, scanTookTooLong])
         .then((locations) => handleDetectedLocations(locations))
         .catch((reason) => console.error('Quietly failing: ', reason));
 
@@ -105,6 +105,7 @@ const EchoCamera: FC = () => {
        * Handles the parsing and filtering of functional locations that was returned from the API.
        */
       function handleDetectedLocations(madOcrFunctionalLocations?: MadOCRFunctionalLocations) {
+        console.log('Got a result:', madOcrFunctionalLocations);
         setIsScanning(false);
         if (
           madOcrFunctionalLocations &&

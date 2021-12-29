@@ -1,7 +1,6 @@
-import React from 'react';
-import { FC, useEffect, useState } from 'react';
-import { Toast } from '../../components';
-import styles from './styles.less';
+import React, { FC, useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { Toast } from '@components';
 /**
  * A top level element that displays an EDS Snackbar if it detects the custom event "notification"
  */
@@ -33,8 +32,7 @@ const NotificationHandler: FC = () => {
 
   if (message) {
     return (
-      <Toast
-        className={styles.notification}
+      <Notification
         open
         message={message}
         onClose={() => setMessage(undefined)}
@@ -44,5 +42,11 @@ const NotificationHandler: FC = () => {
     return <div id="unfired_notification" />;
   }
 };
+
+const Notification = styled(Toast)`
+    position: absolute !important;
+    bottom: 25% !important;
+    left: 50% !important;
+`
 
 export { NotificationHandler };

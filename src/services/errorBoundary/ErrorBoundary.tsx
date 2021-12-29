@@ -5,8 +5,8 @@ import { eventHub } from '@equinor/echo-core';
 import { Button, Typography, Dialog, Scrim, Banner, Icon } from '@equinor/eds-core-react';
 import { warning_filled } from '@equinor/eds-icons';
 
-import { ErrorKey } from '../../enums';
-import { EchoCameraError } from '../../types';
+import { ErrorKey } from '@enums';
+import { EchoCameraError } from '@types';
 
 interface ErrorBoundaryProps {
   stackTraceEnabled: boolean;

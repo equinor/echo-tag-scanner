@@ -1,5 +1,6 @@
-import { CircularProgress, Dialog } from '@equinor/eds-core-react';
+import React from "react";
 import styled from 'styled-components';
+import { CircularProgress, Dialog } from '@equinor/eds-core-react';
 
 const ScanningIndicator = (): JSX.Element => {
   return (

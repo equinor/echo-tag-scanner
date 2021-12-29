@@ -108,10 +108,7 @@ class CoreCamera {
     const videoTracks = this._mediaStream?.getVideoTracks();
 
     if (Array.isArray(videoTracks) && videoTracks.length === 1) {
-      // Browser supports ImageCapture
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      if (globalThis.ImageCapture) {
+      if (ImageCapture) {
         this._capture = await capture(videoTracks[0]);
       } else {
         // use legacy frame capture

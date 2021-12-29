@@ -57,6 +57,7 @@ async function performFetchAsync<TError>(url: string, init: RequestInit): Promis
       throw error;
     }
 
+    //@ts-ignore
     throw new BaseApiClientError(error);
   }
 }

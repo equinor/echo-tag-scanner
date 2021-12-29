@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './styles.less';
+import styled from "styled-components"
 import { VideoHTMLAttributes, CanvasHTMLAttributes, RefObject } from 'react';
 
 interface ViewfinderProps {
@@ -12,16 +12,28 @@ interface ViewfinderProps {
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   return (
     <>
-      <video
+      <ViewFinder
         playsInline // needed for the viewfinder to work in Safari
         ref={props.videoRef}
-        className={styles.viewfinder}
         autoPlay
         {...props.videoOptions}
       />
-      <canvas className={styles.canvas} ref={props.canvasRef} {...props.canvasOptions} />
+      <Canvas ref={props.canvasRef} {...props.canvasOptions} />
+      
     </>
   );
 };
+
+const ViewFinder = styled.video`
+    background-color: var(--black);
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+`
+
+const Canvas = styled.canvas`
+  height: 0;
+`
 
 export { Viewfinder };

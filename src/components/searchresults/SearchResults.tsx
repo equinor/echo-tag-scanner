@@ -1,3 +1,4 @@
+import React from "react";
 import styled from 'styled-components';
 import { Dialog, Card, List, Typography, Button } from '@equinor/eds-core-react';
 import { ExtractedFunctionalLocation } from '@types';

@@ -1,5 +1,4 @@
-import { FC, useRef, useState, useEffect } from 'react';
-import styles from './styles.less';
+import React, { FC, useRef, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Camera, CameraProps } from './core/Camera';
 import {
@@ -14,7 +13,7 @@ import {
   getNotificationDispatcher as dispatchNotification,
   extractFunctionalLocation
 } from '@utils';
-import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from './types';
+import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from '@types';
 import { useSetActiveTagNo } from '@hooks';
 
 const EchoCamera: FC = () => {
@@ -74,6 +73,32 @@ const EchoCamera: FC = () => {
   const onScanning = () => {
     setIsScanning(true);
     setFunctionalLocations(undefined);
+
+
+      /**
+       * Handles the parsing and filtering of functional locations that was returned from the API.
+       */
+       function handleDetectedLocations(madOcrFunctionalLocations?: MadOCRFunctionalLocations) {
+        console.info('Got a location result:', madOcrFunctionalLocations);
+        setIsScanning(false);
+        if (
+          madOcrFunctionalLocations &&
+          Array.isArray(madOcrFunctionalLocations?.results) &&
+          madOcrFunctionalLocations.results.length > 0
+        ) {
+          const locations = filterFalsePositives(madOcrFunctionalLocations);
+          if (locations.length > 1) {
+            setFunctionalLocations(locations);
+          } else {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //@ts-ignore This var has already been checked and filtered above.
+            tagSearch(locations[0].tagNumber);
+          }
+        } else {
+          dispatchNotification('We did not recognize any tag numbers.')();
+        }
+      }
+
     if (cameraRef?.current != null) {
       (function notifyUserLongScan() {
         setTimeout(() => {
@@ -101,29 +126,6 @@ const EchoCamera: FC = () => {
         .then((locations) => handleDetectedLocations(locations))
         .catch((reason) => console.error('Quietly failing: ', reason));
 
-      /**
-       * Handles the parsing and filtering of functional locations that was returned from the API.
-       */
-      function handleDetectedLocations(madOcrFunctionalLocations?: MadOCRFunctionalLocations) {
-        console.info('Got a location result:', madOcrFunctionalLocations);
-        setIsScanning(false);
-        if (
-          madOcrFunctionalLocations &&
-          Array.isArray(madOcrFunctionalLocations?.results) &&
-          madOcrFunctionalLocations.results.length > 0
-        ) {
-          const locations = filterFalsePositives(madOcrFunctionalLocations);
-          if (locations.length > 1) {
-            setFunctionalLocations(locations);
-          } else {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            //@ts-ignore This var has already been checked and filtered above.
-            tagSearch(locations[0].tagNumber);
-          }
-        } else {
-          dispatchNotification('We did not recognize any tag numbers.')();
-        }
-      }
     }
 
     function filterFalsePositives(locations: MadOCRFunctionalLocations) {
@@ -155,7 +157,7 @@ const EchoCamera: FC = () => {
 
   if (cameraRef?.current) {
     return (
-      <main className={styles.cameraWrapper}>
+      <Main>
         <Viewfinder canvasRef={canvasRef} videoRef={videoRef} />
 
         <ZoomSlider
@@ -176,12 +178,19 @@ const EchoCamera: FC = () => {
           )}
           {isScanning && <ScanningIndicator />}
         </DialogueWrapper>
-      </main>
+      </Main>
     );
   } else {
     return null;
   }
 };
+
+const Main = styled.main`
+  .cameraWrapper {
+    height: 100%;
+    // background-color: #00000010;
+  }
+`
 
 const DialogueWrapper = styled.section`
   display: flex;

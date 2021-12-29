@@ -1,18 +1,5 @@
 const path = require('path');
-console.log(path.resolve(__dirname + '/src/components/'));
 module.exports = {
-  module: {
-    rules: [
-      {
-        test: /\.(less)$/,
-        use: [
-          'style-loader',
-          { loader: 'css-loader', options: { modules: true } },
-          'less-loader'
-        ]
-      }
-    ]
-  },
   resolve: {
     alias: {
       '@components': path.resolve(__dirname + '/src/components/'),

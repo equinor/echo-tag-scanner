@@ -22,8 +22,6 @@ local.log
 .env.development.local
 .env.test.local
 .env.production.local
-*.less.d.ts
-*.d.ts
 /webpack/remote.babel.js
 /src/staleCode/*
 

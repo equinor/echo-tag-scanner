@@ -17,14 +17,6 @@ const config = {
   resolve: defineResolves('prod', rootPath),
   plugins: definePlugins('prod', rootPath),
   output: defineOutput('prod', rootPath),
-  // optimization: defineOptimizations('prod'),
-
-  // FIXME: do we need source-maps in prod?
-  // devtool: 'source-map',
-  // FIXME: Something with optimization breaks exports and echopedia won't find XLD app.
-  // optimization: defineOptimizations('prod'),
-  // FIXME: Do we need target? it is set in babelrc
-  // target: defineTarget('prod'),
 
   externals: [
     '@equinor/echo-utils',

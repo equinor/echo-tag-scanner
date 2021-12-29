@@ -1,4 +1,4 @@
-import type { HttpResponse, ResponseParser } from '../../../types';
+import type { HttpResponse, ResponseParser } from '@types';
 import { Client } from './client';
 
 /**

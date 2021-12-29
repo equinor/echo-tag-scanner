@@ -1,11 +1,12 @@
 import React from 'react';
 import styles from './styles.less';
+import { VideoHTMLAttributes, CanvasHTMLAttributes, RefObject } from 'react';
 
 interface ViewfinderProps {
-  canvasRef: React.RefObject<HTMLCanvasElement>;
-  videoRef: React.RefObject<HTMLVideoElement>;
-  canvasOptions?: unknown[];
-  videoOptions?: unknown[];
+  canvasRef: RefObject<HTMLCanvasElement>;
+  videoRef: RefObject<HTMLVideoElement>;
+  canvasOptions?: CanvasHTMLAttributes<HTMLCanvasElement>;
+  videoOptions?: VideoHTMLAttributes<HTMLVideoElement>;
 }
 
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {

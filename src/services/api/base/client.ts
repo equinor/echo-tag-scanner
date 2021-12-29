@@ -1,4 +1,4 @@
-import type { HttpResponse, ResponseParser, RequestMethod } from '../../../types';
+import type { HttpResponse, ResponseParser, RequestMethod } from '@types';
 import { BaseApiClientError, BaseApiClientRequestFailedError, BaseApiParseError } from './error';
 import EchoCore from '@equinor/echo-core';
 
@@ -41,7 +41,6 @@ async function performReusableRequest<T>(
 }
 
 async function performFetchAsync<TError>(url: string, init: RequestInit): Promise<Response> {
-  // TODO: handle header parsing into plain object?
   const [method, options, body, abortSignal] = await transformRequestAsync(init);
 
   try {
@@ -54,9 +53,6 @@ async function performFetchAsync<TError>(url: string, init: RequestInit): Promis
 
     return response;
   } catch (error) {
-    // TODO: maybe do some notification if offline / handle other things.
-    // This could potentially do some more handling of the error.
-    // depending on what actually went wrong.
     if (error instanceof BaseApiClientRequestFailedError) {
       throw error;
     }

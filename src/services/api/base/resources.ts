@@ -1,3 +1,4 @@
+// maybe declare env type for globalThis as that works in workers and everywhere else too.
 function env() {
   if (window._env_) {
     return window._env_;
@@ -16,6 +17,6 @@ function apiUrl() {
   return apiUrl;
 }
 
-const baseApiUrl = apiUrl();
-
-export { baseApiUrl };
+export default {
+  baseApiUrl: apiUrl()
+};

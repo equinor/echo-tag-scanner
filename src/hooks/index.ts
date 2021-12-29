@@ -1,1 +1,1 @@
-export { useDeviceType } from './useDeviceType';
+export * from './useSetActiveTagNo';

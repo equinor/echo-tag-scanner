@@ -1,87 +1,192 @@
-import React, { Component } from 'react';
-import { Typography, Button } from '@equinor/eds-core-react';
-import styles from './styles.less';
+import React from 'react';
+import styled from 'styled-components';
 
-interface ErrorBoundaryState {
-  errorType?: unknown;
-  message?: string;
+import { eventHub } from '@equinor/echo-core';
+import { Button, Typography, Dialog, Scrim, Banner, Icon } from '@equinor/eds-core-react';
+import { warning_filled } from '@equinor/eds-icons';
+
+import { ErrorKey } from '../../enums';
+import { EchoCameraError } from '../../types';
+
+interface ErrorBoundaryProps {
+  stackTraceEnabled: boolean;
 }
 
-class ErrorBoundary extends Component {
-  public state: ErrorBoundaryState = {
-    errorType: undefined,
-    message: undefined
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
+  state = {
+    hasError: false,
+    // User friendly message
+    userMessage: undefined,
+
+    // Nerd stats
+    devMessage: undefined,
+
+    // "high" | "low"
+    severity: undefined
   };
 
-  private promiseRejectionHandler = (event: PromiseRejectionEvent) => {
-    this.setState({
-      errorType: event.type,
-      message: event.reason.message
-    });
-  };
+  private listenerCleanup?: () => void;
 
-  componentDidMount(): void {
-    window.addEventListener('unhandledrejection', this.promiseRejectionHandler);
-  }
-
-  componentWillUnmount(): void {
-    window.removeEventListener('unhandledrejection', this.promiseRejectionHandler);
-  }
-
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { errorType: error.name, message: error.message };
-  }
-
-  componentDidCatch(error: unknown, errorInfo: unknown): void {
-    if (error instanceof DOMException) {
-      switch (error.name) {
-        case 'AbortError':
-        case 'NotAllowedError':
-        case 'NotFoundError':
-        case 'NotReadableError':
-        case 'OverconstrainedError':
-        case 'SecurityError':
-        case 'TypeError':
-          // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#exceptions
-          this.setState({ errorType: error.name, message: error.message });
-          break;
-        default:
-          this.setState({ errorType: 'Unknown error type', message: error.message });
-      }
-    } else if (error instanceof Error) {
-      this.setState({ errorType: error.name, message: error.message });
+  componentDidCatch(error: unknown, info: unknown): void {
+    if (error instanceof Error) {
+      this.setState({ hasError: true, devMessage: error, userMessage: info });
     } else {
-      this.setState({ errorType: 'Unknown error type', message: 'No error message was found' });
+      this.setState({ hasError: true, userMessage: 'An unknown error has occured' });
     }
   }
 
-  render(): React.ReactNode {
-    if (this.state.errorType) {
+  componentDidMount(): void {
+    this.listenerCleanup = eventHub.subscribe(
+      ErrorKey.EchoCameraApiError,
+      (error: EchoCameraError) => this.errorListener(error)
+    );
+  }
+
+  componentWillUnmount(): void {
+    if (this.listenerCleanup) {
+      this.listenerCleanup();
+    }
+  }
+
+  private parseError(error: unknown): JSX.Element | undefined {
+    if (error instanceof Error) {
       return (
-        <main className={styles.main}>
-          <article className={styles.errorWrapper}>
-            <section>
-              <Typography variant="h1">An error has occured</Typography>
-              <Typography variant="ingress">Check the messages below.</Typography>
-            </section>
-            <aside className={styles.errorAdditionalInfo}>
-              <Typography variant="body_short_bold">{this.state.message}</Typography>
-              <Typography variant="body_short_bold">
-                The type of error was: {this.state.errorType}
-              </Typography>
-            </aside>
-          </article>
-          <form className={styles.form}>
-            <Button onClick={() => this.setState({ errorType: undefined, message: undefined })}>
-              Clear error
-            </Button>
-          </form>
-        </main>
+        <article>
+          <section>
+            <dl>
+              <div>
+                <dt>Type of error</dt>
+                <dd>
+                  <em>{error.name ?? 'Unknown type of error.'}</em>
+                </dd>
+              </div>
+
+              <div>
+                <dt>Message</dt>
+                <dd>
+                  <em>{error.message ?? 'No message provided.'}</em>
+                </dd>
+              </div>
+
+              {this.props.stackTraceEnabled && (
+                <div>
+                  <details>
+                    <summary>Stacktrace</summary>
+                    <article>{error.stack}</article>
+                  </details>
+                </div>
+              )}
+            </dl>
+          </section>
+        </article>
       );
+    }
+  }
+
+  private errorListener(error: EchoCameraError): void {
+    this.setState({
+      hasError: true,
+      userMessage: error.userMessage,
+      devMessage: error.devMessage,
+      severity: error.severity
+    });
+  }
+
+  private resetState(): void {
+    this.setState({
+      hasError: false,
+      userMessage: undefined,
+      devMessage: undefined,
+      severity: undefined
+    });
+  }
+
+  render(): React.ReactNode {
+    if (this.state.hasError) {
+      console.group('ErrorBoundary');
+      console.info(this.state);
+      console.groupEnd();
+      if (this.state.severity === 'high') {
+        return (
+          <>
+            <Scrim>
+              <ErrorDialogue>
+                <Dialog.Title>
+                  <h3>An error has occured</h3>
+                </Dialog.Title>
+                <Dialog.CustomContent>
+                  <ErrorBoundaryContent>
+                    <Typography variant="body_long">
+                      Smart Portal ran into an issue. Check the marked message below for more
+                      details.
+                      <br />
+                      <br />
+                      <mark>{this.state.userMessage || 'An unknown error has occured.'}</mark>
+                    </Typography>
+                    <Developer>
+                      <Details>
+                        <summary>Developer information</summary>
+                        {this.state.devMessage
+                          ? this.parseError(this.state.devMessage)
+                          : 'No developer information available'}
+                      </Details>
+                    </Developer>
+                    <Button onClick={() => this.resetState()}>Close</Button>
+                  </ErrorBoundaryContent>
+                </Dialog.CustomContent>
+              </ErrorDialogue>
+            </Scrim>
+            {this.props.children}
+          </>
+        );
+      } else {
+        return (
+          <>
+            <Banner>
+              <Banner.Icon variant="warning">
+                <Icon data={warning_filled} />
+              </Banner.Icon>
+              <Banner.Message>
+                {this.state.userMessage ?? 'An unknown error has occured.'}
+              </Banner.Message>
+              <Banner.Actions>
+                <Button variant="outlined" onClick={() => this.setState({ severity: 'high' })}>
+                  Show details
+                </Button>
+                <Button onClick={() => this.resetState()}>Dismiss</Button>
+              </Banner.Actions>
+            </Banner>
+            {this.props.children}
+          </>
+        );
+      }
     } else {
       return this.props.children;
     }
   }
 }
+
+const ErrorBoundaryContent = styled.section`
+  display: flex;
+  flex-direction: column;
+`;
+
+const ErrorDialogue = styled(Dialog)`
+  max-width: 60vw;
+  max-height: 60vh;
+  width: unset;
+  overflow-y: auto;
+`;
+
+const Details = styled.details`
+  cursor: pointer;
+`;
+
+const Developer = styled.section`
+  margin-top: 2rem;
+  max-width: 60vw;
+  padding: 1rem;
+  padding-top: 0;
+`;
 
 export { ErrorBoundary };

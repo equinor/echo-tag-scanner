@@ -1,5 +1,5 @@
-import React, { useState, useEffect, FC } from 'react';
-import { Route, BrowserRouter } from 'react-router-dom';
+import { useState, useEffect, FC } from 'react';
+import { Route, Switch, BrowserRouter } from 'react-router-dom';
 import EchoCore from '@equinor/echo-core';
 import { EchoCamera } from './EchoCamera';
 import { ErrorBoundary } from './services';
@@ -23,11 +23,13 @@ const App: FC = () => {
 
   return (
     <BrowserRouter>
-      <Route>
-        <ErrorBoundary>
-          <EchoCamera />
-        </ErrorBoundary>
-      </Route>
+      <Switch>
+        <Route>
+          <ErrorBoundary stackTraceEnabled>
+            <EchoCamera />
+          </ErrorBoundary>
+        </Route>
+      </Switch>
     </BrowserRouter>
   );
 };

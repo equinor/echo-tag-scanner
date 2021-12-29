@@ -17,9 +17,7 @@ async function start() {
 
 start()
   .then(() => {
-    console.info('Echo Camera Web started successfully.');
     if (!window.location.href.includes('camera')) {
-      console.info('Redirecting to basepath');
       window.location.href = '/camera';
     }
     // If you want to start measuring performance in your app, pass a function

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, FC } from 'react';
 import EchoCore from '@equinor/echo-core';
+// import { BrowserRouter } from 'react-router-dom';
 import { EchoCamera } from './EchoCamera';
 import { ErrorBoundary } from '@services';
 
@@ -21,9 +22,12 @@ const App: FC = () => {
   }, [isAuthenticated]);
 
   return (
-          <ErrorBoundary stackTraceEnabled>
-            <EchoCamera />
-          </ErrorBoundary>
+    // <BrowserRouter>
+      <ErrorBoundary stackTraceEnabled>
+        <EchoCamera />
+      </ErrorBoundary>
+    // </BrowserRouter>
+
   );
 };
 

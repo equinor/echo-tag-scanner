@@ -1,4 +1,13 @@
 const path = require('path');
+
+/**
+ * Refer to the documentation below in order to do your webpack overrides.
+ * Override rules:
+ * -> Objects are (deeply) merged.
+ * -> Strings are overridden.
+ * -> Arrays are concatenated.
+ * https://webpack.js.org/configuration/
+ */
 module.exports = {
   resolve: {
     alias: {
@@ -14,4 +23,21 @@ module.exports = {
       '@enums': path.resolve(__dirname + '/src/enums/')
     }
   }
+    // entry: {},
+  // mode: {},
+  // output: {},
+  // module: {},
+  // optimization: {},
+  // plugins: {},
+  // devServer: {},
+  // cache: {},
+  // devtool: {},
+  // target: {},
+  // watch: {},
+  // externals: {},
+  // performance: {},
+  // node: {},
+  // stats: {},
+  // experiments: {}
+  
 };

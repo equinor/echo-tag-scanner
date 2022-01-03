@@ -1,5 +1,6 @@
+import React from 'react';
+import styled from "styled-components";
 import { Icon } from '@equinor/eds-core-react';
-import styles from './styles.less';
 
 interface CameraButtonProps {
   name: string;
@@ -22,14 +23,13 @@ const CameraButton = (props: CameraButtonProps): JSX.Element => {
     }
   }
   return (
-    <button
-      className={styles.iconButton}
+    <CameraTrigger
       onClick={props.onClick}
       style={{ border: '1px solid' }}
       disabled={!props.supported}
     >
       {createLabel()}
-    </button>
+    </CameraTrigger>
   );
 };
 
@@ -43,7 +43,47 @@ interface ShutterProps {
  * Returns a custom camera shutter/tag scanning button.
  */
 const ScannerButton = (props: ShutterProps): JSX.Element => (
-  <button className={styles.buttonResting} disabled={props.isDisabled} onClick={props.onClick} />
+  <ScannerTrigger disabled={props.isDisabled} onClick={props.onClick} />
 );
+
+const ScannerTrigger = styled.button`
+  border-radius: 100%;
+  border-style: solid;
+  border-color: var(--black);
+  border-width: 3px;
+  width: 75px;
+  height: 75px;
+  background-color: white;
+
+  &:active {
+    background-color: var(--equiGreen1);
+    box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
+    -webkit-box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
+    -moz-box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
+  }
+`
+
+const CameraTrigger = styled.button`
+display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--equiGreen1);
+  border-radius: 100%;
+  width: 55px;
+  height: 55px;
+
+  &:active {
+    background-color: var(--equiBlue1);
+  }
+
+  &:disabled {
+    background-color: var(--disabledColor);
+  }
+
+  .icon {
+    width: 60%;
+    height: 60%;
+  }
+`
 
 export { CameraButton, ScannerButton };

@@ -1,3 +1,4 @@
+import React from 'react';
 import { Snackbar, SnackbarProps } from '@equinor/eds-core-react';
 
 interface ToastProps extends SnackbarProps {

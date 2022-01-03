@@ -1,90 +1,60 @@
 {
-  "compilerOptions": {
-    // basic options
-    "module": "esnext",
-    "rootDir": "./",
-    "target": "esnext",
-    
-    // for shiny exporting
-    "isolatedModules": true,
-    "importsNotUsedAsValues": "remove",
-    "sourceMap": true,
-    "importHelpers": true,
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "jsx": "react-jsx",
-    "allowJs": true,
-    "checkJs": false,
-
-    // must be set to true because we rely on babel to transpile.
-    "noEmit": true,
-
-    // type checking
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "noImplicitThis": false,
-    "noUnusedParameters": false,
-    "alwaysStrict": false,
-    "noFallthroughCasesInSwitch": true,
-
-    // module resolutions
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "composite": true,
-    "allowSyntheticDefaultImports": true,
-
-    // error handling
-    "pretty": true,
-    // others
-
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "allowUnusedLabels": true,
-
-    // module resolution based on webpack resolve alias
-    "baseUrl": ".",
-    "paths": {
-      "@components": [
-        "src/components/"
-      ],
-      "@pages": [
-        "src/pages/"
-      ],
-      "@enums": [
-        "src/enums"
-      ],
-      "@hooks": [
-        "src/hooks"
-      ],
-      "@contexts": [
-        "src/contexts/"
-      ],
-      "@providers": [
-        "src/providers/"
-      ],
-      "@services": [
-        "src/services/"
-      ],
-      "@types": [
-        "src/types/"
-      ],
-      "@utils": [
-        "src/utils/"
-      ]
-    }
-  },
   "include": [
     "src"
   ],
-  "exclude": [
-    "node_modules",
-    "build",
-    "dist",
-    "rollup.config.js"
-  ]
+  "compilerOptions": {
+      "target": "es5",
+      "lib": [
+        "esnext",
+        "dom",
+        "dom.iterable"
+      ],
+      "allowJs": true,
+      "sourceMap": true,
+      "noImplicitAny": false,
+      "module": "esnext",
+      "removeComments": true,
+      "allowSyntheticDefaultImports": true,
+      "jsx": "react",
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "moduleResolution": "node",
+      "downlevelIteration": true,
+      "types": [
+        "@equinor/echo-scripts",
+        "@types/webpack-env",
+        "@types/node",
+        "@types/w3c-image-capture"
+      ],
+      "baseUrl": ".",
+      "paths": {
+        "@components": [
+          "src/components/"
+        ],
+        "@pages": [
+          "src/pages/"
+        ],
+        "@enums": [
+          "src/enums"
+        ],
+        "@hooks": [
+          "src/hooks"
+        ],
+        "@contexts": [
+          "src/contexts/"
+        ],
+        "@providers": [
+          "src/providers/"
+        ],
+        "@services": [
+          "src/services/"
+        ],
+        "@types": [
+          "src/types/"
+        ],
+        "@utils": [
+          "src/utils/"
+        ]
+  }
+    }
 }

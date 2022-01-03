@@ -1,3 +1,4 @@
+import React from 'react';
 import { EchoModuleApi } from '@equinor/echo-core';
 import { App } from './App';
 

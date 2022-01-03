@@ -45,6 +45,13 @@ const EchoCamera: FC = () => {
       zoomInputRef.current.step = assignZoomSettings('step');
       zoomInputRef.current.value = '1';
     }
+
+    function cleanup() {
+      if (cameraRef.current) {
+        cameraRef.current.stopCamera();
+      }
+    }
+    return cleanup;
   }, []);
 
   function assignZoomSettings(type: 'min' | 'max' | 'step' | 'value'): string {

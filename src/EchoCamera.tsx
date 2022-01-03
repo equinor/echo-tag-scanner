@@ -81,58 +81,66 @@ const EchoCamera: FC = () => {
     setIsScanning(true);
     setFunctionalLocations(undefined);
 
-
-      /**
-       * Handles the parsing and filtering of functional locations that was returned from the API.
-       */
-       function handleDetectedLocations(madOcrFunctionalLocations?: MadOCRFunctionalLocations) {
-        console.info('Got a location result:', madOcrFunctionalLocations);
-        setIsScanning(false);
-        if (
-          madOcrFunctionalLocations &&
-          Array.isArray(madOcrFunctionalLocations?.results) &&
-          madOcrFunctionalLocations.results.length > 0
-        ) {
-          const locations = filterFalsePositives(madOcrFunctionalLocations);
-          if (locations.length > 1) {
-            setFunctionalLocations(locations);
-          } else {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            //@ts-ignore This var has already been checked and filtered above.
-            tagSearch(locations[0].tagNumber);
-          }
+    /**
+     * Handles the parsing and filtering of functional locations that was returned from the API.
+     */
+    function handleDetectedLocations(
+      madOcrFunctionalLocations?: MadOCRFunctionalLocations
+    ) {
+      console.info('Got a location result:', madOcrFunctionalLocations);
+      setIsScanning(false);
+      if (
+        madOcrFunctionalLocations &&
+        Array.isArray(madOcrFunctionalLocations?.results) &&
+        madOcrFunctionalLocations.results.length > 0
+      ) {
+        const locations = filterFalsePositives(madOcrFunctionalLocations);
+        if (locations.length > 1) {
+          setFunctionalLocations(locations);
         } else {
-          dispatchNotification('We did not recognize any tag numbers.')();
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore This var has already been checked and filtered above.
+          tagSearch(locations[0].tagNumber);
         }
+      } else {
+        dispatchNotification({
+          message: 'We did not recognize any tag numbers.',
+          autohideDuration: 3000
+        })();
       }
+    }
 
     if (cameraRef?.current != null) {
       (function notifyUserLongScan() {
         setTimeout(() => {
           if (isScanning) {
-            dispatchNotification('Hang tight, the scan appears to be taking longer than usual.')();
+            dispatchNotification(
+              'Hang tight, the scan appears to be taking longer than usual.'
+            )();
           }
         }, 3000);
       })();
 
       // We won't make the user wait more than 10 seconds for the scanning results.
-      const scanTookTooLong: Promise<MadOCRFunctionalLocations> = new Promise((resolve) => {
-        console.info('starting scan timeout timer');
-        setTimeout(() => {
-          resolve({ results: [] });
-        }, 10000);
-      });
+      const scanTookTooLong: Promise<MadOCRFunctionalLocations> = new Promise(
+        (resolve) => {
+          console.info('starting scan timeout timer');
+          setTimeout(() => {
+            resolve({ results: [] });
+          }, 10000);
+        }
+      );
 
-      const scanAction: Promise<MadOCRFunctionalLocations | undefined> = new Promise((resolve) => {
-        console.info('attempting to resolve tag number(s)');
-        resolve(cameraRef?.current?.scan());
-      });
+      const scanAction: Promise<MadOCRFunctionalLocations | undefined> =
+        new Promise((resolve) => {
+          console.info('attempting to resolve tag number(s)');
+          resolve(cameraRef?.current?.scan());
+        });
 
       // Start the scan race.
       Promise.race([scanAction, scanTookTooLong])
         .then((locations) => handleDetectedLocations(locations))
         .catch((reason) => console.error('Quietly failing: ', reason));
-
     }
 
     function filterFalsePositives(locations: MadOCRFunctionalLocations) {
@@ -173,7 +181,10 @@ const EchoCamera: FC = () => {
           zoomOptions={cameraRef?.current?.capabilities?.zoom}
         />
 
-        <CameraControls onToggleTorch={provideTorchToggling()} onScanning={onScanning} />
+        <CameraControls
+          onToggleTorch={provideTorchToggling()}
+          onScanning={onScanning}
+        />
         <NotificationHandler />
         <DialogueWrapper>
           {functionalLocations && functionalLocations.length > 1 && (

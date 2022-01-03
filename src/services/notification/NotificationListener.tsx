@@ -1,25 +1,29 @@
 import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Toast } from '@components';
+import { CustomEventDetail } from '@types';
 /**
  * A top level element that displays an EDS Snackbar if it detects the custom event "notification"
  */
 const NotificationHandler: FC = () => {
-  const [message, setMessage] = useState<string | undefined>(undefined);
+  const [currentEvent, setCurrentEvent] = useState<
+    string | CustomEventDetail | undefined
+  >(undefined);
   useEffect(function mountNotificationHandler() {
     // No need to check for duplicate event listeners as long as the
     // listener function is not anonymous.
     // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#multiple_identical_event_listeners
     globalThis.addEventListener('notification', updateToastMessage);
 
-    return () => globalThis.removeEventListener('notification', updateToastMessage);
+    return () =>
+      globalThis.removeEventListener('notification', updateToastMessage);
 
     function updateToastMessage(event: Event) {
       if (isCustomEvent(event)) {
-        if (typeof event.detail === 'string') {
-          setMessage(event.detail);
+        if (event.detail) {
+          setCurrentEvent(event.detail);
         } else {
-          setMessage(undefined);
+          setCurrentEvent(undefined);
         }
       }
     }
@@ -30,12 +34,30 @@ const NotificationHandler: FC = () => {
     return (event as CustomEvent).detail != undefined;
   }
 
-  if (message) {
+  function isCustomDetail(event: unknown): event is CustomEventDetail {
+    if (typeof event === 'object') {
+      return (
+        Reflect.has(event, 'autohideDuration') && Reflect.has(event, 'message')
+      );
+    }
+    return false;
+  }
+
+  if (typeof currentEvent === 'string') {
     return (
       <Notification
         open
-        message={message}
-        onClose={() => setMessage(undefined)}
+        message={currentEvent}
+        onClose={() => setCurrentEvent(undefined)}
+      />
+    );
+  } else if (isCustomDetail(currentEvent)) {
+    return (
+      <Notification
+        open
+        message={currentEvent.message}
+        autoHideDuration={currentEvent.autohideDuration}
+        onClose={() => setCurrentEvent(undefined)}
       />
     );
   } else {

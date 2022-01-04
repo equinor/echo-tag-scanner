@@ -13,7 +13,7 @@ class CoreCamera {
   private _capture?: Blob;
   private _mediaStream?: MediaStream;
   private _canvas?: RefObject<HTMLCanvasElement>;
-  private _viewfinder?: RefObject<HTMLVideoElement>;
+  protected _viewfinder?: RefObject<HTMLVideoElement>;
   private _videoTrack?: MediaStreamTrack;
   public _capabilities?: MediaTrackCapabilities = undefined;
   private _settings?: MediaTrackSettings;
@@ -110,7 +110,6 @@ class CoreCamera {
   }
 
   public async stopCamera() {
-    console.log("cleaning up")
     this._videoTrack.stop();
   }
 
@@ -124,7 +123,7 @@ class CoreCamera {
         // use legacy frame capture
         await legacyCapture
           .call(this)
-          .then((stillFrame) => {
+          .then((stillFrame: Blob) => {
             console.info('captured frame', stillFrame);
             this._capture = stillFrame;
           })

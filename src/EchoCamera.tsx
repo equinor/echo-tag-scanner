@@ -16,6 +16,8 @@ import {
 import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from '@types';
 import { useSetActiveTagNo } from '@hooks';
 
+
+
 const EchoCamera: FC = () => {
   const [functionalLocations, setFunctionalLocations] = useState<
     ExtractedFunctionalLocation[] | undefined
@@ -103,6 +105,7 @@ const EchoCamera: FC = () => {
           tagSearch(locations[0].tagNumber);
         }
       } else {
+        cameraRef.current.resumeViewfinder();
         dispatchNotification({
           message: 'We did not recognize any tag numbers.',
           autohideDuration: 3000
@@ -191,7 +194,10 @@ const EchoCamera: FC = () => {
             <SearchResults
               functionalLocations={functionalLocations}
               onTagSearch={tagSearch}
-              onClose={() => setFunctionalLocations(undefined)}
+              onClose={() => {
+                cameraRef.current.resumeViewfinder();
+                setFunctionalLocations(undefined);
+              }}
             />
           )}
           {isScanning && <ScanningIndicator />}

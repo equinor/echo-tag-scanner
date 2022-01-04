@@ -23,10 +23,15 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
         <CardList>
           {props.functionalLocations.map((fLocation, index) => (
             <List.Item key={fLocation.tagNumber + '-' + String(index)}>
-              <FunctionalLocationCard variant="info" onClick={() => onClick(fLocation.tagNumber)}>
+              <FunctionalLocationCard
+                variant="info"
+                onClick={() => onClick(fLocation.tagNumber)}
+              >
                 <FunctionalLocationCard.HeaderTitle>
                   <Typography variant="h5">{fLocation.tagNumber}</Typography>
-                  <Typography variant="body_short">Tap to open this tag.</Typography>
+                  <Typography variant="body_short">
+                    Tap to open this tag.
+                  </Typography>
                 </FunctionalLocationCard.HeaderTitle>
               </FunctionalLocationCard>
             </List.Item>
@@ -34,8 +39,8 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
         </CardList>
       </Dialog.CustomContent>
       <Actions>
-        <Button variant="outlined" onClick={props.onClose}>
-          Close
+        <Button variant="contained" onClick={props.onClose}>
+          Scan again
         </Button>
       </Actions>
     </Dialogue>
@@ -43,14 +48,15 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
 };
 
 const Dialogue = styled(Dialog)`
-  max-width: 90vw;
-  min-width: 25vw;
-  max-height: 70vh;
+  max-width: 90vw !important;
+  min-width: 25vw !important;
+  max-height: 70vh !important;
+  width: unset !important;
   z-index: 2;
 `;
 
 const Actions = styled(Dialog.Actions)`
-  width: 100%;
+  place-self: unset !important;
   text-align: right;
 `;
 
@@ -58,10 +64,12 @@ const CardList = styled(List)`
   list-style-type: none;
   overflow: auto;
   max-height: 50vh;
+  padding: 0;
 `;
 
 const FunctionalLocationCard = styled(Card)`
   margin-bottom: var(--small);
+  padding: var(--small);
 `;
 
 export { SearchResults };

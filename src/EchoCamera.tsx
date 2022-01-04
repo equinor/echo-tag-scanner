@@ -146,7 +146,7 @@ const EchoCamera: FC = () => {
     function filterFalsePositives(locations: MadOCRFunctionalLocations) {
       return locations.results
         .map((location) => extractFunctionalLocation(location))
-        .filter((location) => location.sapPlantId && location.tagNumber);
+        .filter((location) => location.tagNumber);
     }
   };
 

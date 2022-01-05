@@ -13,7 +13,7 @@ class CoreCamera {
   private _capture?: Blob;
   private _mediaStream?: MediaStream;
   private _canvas?: RefObject<HTMLCanvasElement>;
-  private _viewfinder?: RefObject<HTMLVideoElement>;
+  protected _viewfinder?: RefObject<HTMLVideoElement>;
   private _videoTrack?: MediaStreamTrack;
   public _capabilities?: MediaTrackCapabilities = undefined;
   private _settings?: MediaTrackSettings;
@@ -23,7 +23,10 @@ class CoreCamera {
     this._canvas = props.canvas;
 
     // Request camera usage.
-    this.promptCameraUsage(props.additionalCaptureOptions).then(onApproval.bind(this), onRejection);
+    this.promptCameraUsage(props.additionalCaptureOptions).then(
+      onApproval.bind(this),
+      onRejection
+    );
 
     function onApproval(mediaStream: MediaStream) {
       console.info('Camera usage was approved');
@@ -42,7 +45,9 @@ class CoreCamera {
     }
   }
 
-  private async promptCameraUsage(additionalCaptureOptions?: DisplayMediaStreamConstraints) {
+  private async promptCameraUsage(
+    additionalCaptureOptions?: DisplayMediaStreamConstraints
+  ) {
     const mediaStream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'environment' },
       audio: false,
@@ -104,6 +109,10 @@ class CoreCamera {
     }
   }
 
+  public async stopCamera() {
+    this._videoTrack.stop();
+  }
+
   protected async capturePhoto(): Promise<void> {
     const videoTracks = this._mediaStream?.getVideoTracks();
 
@@ -114,7 +123,7 @@ class CoreCamera {
         // use legacy frame capture
         await legacyCapture
           .call(this)
-          .then((stillFrame) => {
+          .then((stillFrame: Blob) => {
             console.info('captured frame', stillFrame);
             this._capture = stillFrame;
           })
@@ -138,7 +147,10 @@ class CoreCamera {
           if (this._canvas?.current != null) {
             const settings = this._videoTrack?.getSettings();
             if (settings) {
-              if (typeof settings.height === 'number' && typeof settings.width === 'number') {
+              if (
+                typeof settings.height === 'number' &&
+                typeof settings.width === 'number'
+              ) {
                 this._canvas.current.width = settings.width;
                 this._canvas.current.height = settings.height;
                 const canvasContext = this._canvas.current.getContext('2d');

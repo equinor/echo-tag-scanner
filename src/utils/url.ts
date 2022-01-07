@@ -48,3 +48,4 @@ export function combineUrls(base: string, ...parts: string[]): string {
 
   return trimTrailingSlash(url);
 }
+

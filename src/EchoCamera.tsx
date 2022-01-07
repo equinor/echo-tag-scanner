@@ -11,14 +11,13 @@ import {
 import { NotificationHandler } from '@services';
 import {
   getNotificationDispatcher as dispatchNotification,
-  extractFunctionalLocation
+  filterFalsePositives
 } from '@utils';
+
 import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from '@types';
 import { useSetActiveTagNo } from '@hooks';
 
-
-
-const EchoCamera: FC = () => {
+const EchoCamera = () => {
   const [functionalLocations, setFunctionalLocations] = useState<
     ExtractedFunctionalLocation[] | undefined
   >(undefined);
@@ -96,19 +95,35 @@ const EchoCamera: FC = () => {
         Array.isArray(madOcrFunctionalLocations?.results) &&
         madOcrFunctionalLocations.results.length > 0
       ) {
-        const locations = filterFalsePositives(madOcrFunctionalLocations);
-        if (locations.length > 1) {
-          setFunctionalLocations(locations);
-        } else {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          //@ts-ignore This var has already been checked and filtered above.
-          tagSearch(locations[0].tagNumber);
-        }
+        console.log('%c⧭', 'color: #f279ca', madOcrFunctionalLocations);
+        filterFalsePositives(madOcrFunctionalLocations).then(
+          handleValidatedTags
+        );
       } else {
+        // The tag scanner returned 0 results.
+        handleNoTagsFound();
+      }
+
+      function handleValidatedTags(locations: ExtractedFunctionalLocation[]) {
+        console.log('final validation results', locations);
+        if (locations.length > 1) {
+          // We got more than 1 validated tag.
+          setFunctionalLocations(locations);
+        } else if (locations.length === 1) {
+          // We got 1 validated tag.
+          tagSearch(locations[0].tagNumber);
+          cameraRef.current.resumeViewfinder();
+        } else {
+          // We got no validated tags.
+          handleNoTagsFound();
+        }
+      }
+
+      function handleNoTagsFound() {
         cameraRef.current.resumeViewfinder();
         dispatchNotification({
-          message: 'We did not recognize any tag numbers.',
-          autohideDuration: 3000
+          message: 'We did not recognize any tag numbers. Try again?',
+          autohideDuration: 5000
         })();
       }
     }
@@ -144,12 +159,6 @@ const EchoCamera: FC = () => {
       Promise.race([scanAction, scanTookTooLong])
         .then((locations) => handleDetectedLocations(locations))
         .catch((reason) => console.error('Quietly failing: ', reason));
-    }
-
-    function filterFalsePositives(locations: MadOCRFunctionalLocations) {
-      return locations.results
-        .map((location) => extractFunctionalLocation(location))
-        .filter((location) => location.tagNumber);
     }
   };
 

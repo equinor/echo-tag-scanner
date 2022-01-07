@@ -4,3 +4,4 @@ export { getNotificationDispatcher } from './event';
 export * from './error';
 export * from './url';
 export * from './business';
+export * from './tagFiltering';

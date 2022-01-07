@@ -1,5 +1,6 @@
 import { ExtractedFunctionalLocation } from '@types';
 import { SAP_PLANT_NUMBERS } from '@enums';
+import { getSelectedPlant } from '@equinor/echo-core';
 
 /**
  * Splits a functional location into its consecutive parts SAP plant ID and tagnumber.
@@ -40,4 +41,17 @@ function isSapPlantId(input: string): boolean {
     }
   }
   return false;
+}
+
+export function getInstCode(): string | undefined {
+  let { instCode } = getSelectedPlant();
+  if (!instCode) {
+    const urlParams = new URLSearchParams(globalThis.location.search);
+    instCode = urlParams.get('instCode');
+
+    if (!instCode) {
+      instCode = 'TROA';
+    }
+  }
+  return instCode;
 }

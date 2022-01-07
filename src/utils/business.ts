@@ -44,14 +44,12 @@ function isSapPlantId(input: string): boolean {
 }
 
 export function getInstCode(): string | undefined {
-  let { instCode } = getSelectedPlant();
+  let instCode = getSelectedPlant().instCode;
+
+  // Fallback
   if (!instCode) {
     const urlParams = new URLSearchParams(globalThis.location.search);
     instCode = urlParams.get('instCode');
-
-    if (!instCode) {
-      instCode = 'TROA';
-    }
   }
   return instCode;
 }

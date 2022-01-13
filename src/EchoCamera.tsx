@@ -11,16 +11,15 @@ import {
 import { NotificationHandler } from '@services';
 import {
   getNotificationDispatcher as dispatchNotification,
-  filterFalsePositives
+  tagSearch as runTagSearch
 } from '@utils';
 
 import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from '@types';
 import { useSetActiveTagNo } from '@hooks';
+import { TagSummaryDto } from '@equinor/echo-search';
 
 const EchoCamera = () => {
-  const [functionalLocations, setFunctionalLocations] = useState<
-    ExtractedFunctionalLocation[] | undefined
-  >(undefined);
+  const [tags, setTags] = useState<TagSummaryDto[] | undefined>(undefined);
   const [isScanning, setIsScanning] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -80,7 +79,7 @@ const EchoCamera = () => {
 
   const onScanning = () => {
     setIsScanning(true);
-    setFunctionalLocations(undefined);
+    setTags(undefined);
 
     /**
      * Handles the parsing and filtering of functional locations that was returned from the API.
@@ -89,14 +88,15 @@ const EchoCamera = () => {
       madOcrFunctionalLocations?: MadOCRFunctionalLocations
     ) {
       console.info('Got a location result:', madOcrFunctionalLocations);
-      setIsScanning(false);
       if (
         madOcrFunctionalLocations &&
         Array.isArray(madOcrFunctionalLocations?.results) &&
         madOcrFunctionalLocations.results.length > 0
       ) {
-        console.log('%c⧭', 'color: #f279ca', madOcrFunctionalLocations);
-        filterFalsePositives(madOcrFunctionalLocations).then(
+        const afterSearchCallback = () => {
+          setIsScanning(false);
+        };
+        runTagSearch(madOcrFunctionalLocations, afterSearchCallback).then(
           handleValidatedTags
         );
       } else {
@@ -104,15 +104,10 @@ const EchoCamera = () => {
         handleNoTagsFound();
       }
 
-      function handleValidatedTags(locations: ExtractedFunctionalLocation[]) {
-        console.log('final validation results', locations);
-        if (locations.length > 1) {
+      function handleValidatedTags(tags: TagSummaryDto[]) {
+        if (tags.length > 0) {
           // We got more than 1 validated tag.
-          setFunctionalLocations(locations);
-        } else if (locations.length === 1) {
-          // We got 1 validated tag.
-          tagSearch(locations[0].tagNumber);
-          cameraRef.current.resumeViewfinder();
+          setTags(tags);
         } else {
           // We got no validated tags.
           handleNoTagsFound();
@@ -121,6 +116,7 @@ const EchoCamera = () => {
 
       function handleNoTagsFound() {
         cameraRef.current.resumeViewfinder();
+        setIsScanning(false);
         dispatchNotification({
           message: 'We did not recognize any tag numbers. Try again?',
           autohideDuration: 5000
@@ -187,28 +183,32 @@ const EchoCamera = () => {
       <Main>
         <Viewfinder canvasRef={canvasRef} videoRef={videoRef} />
 
-        <ZoomSlider
-          onSlide={cameraRef.current?.alterZoom}
-          zoomInputRef={zoomInputRef}
-          zoomOptions={cameraRef?.current?.capabilities?.zoom}
-        />
+        {cameraRef?.current?.capabilities?.zoom && (
+          <ZoomSlider
+            onSlide={cameraRef.current?.alterZoom}
+            zoomInputRef={zoomInputRef}
+            zoomOptions={cameraRef?.current?.capabilities?.zoom}
+          />
+        )}
 
         <CameraControls
           onToggleTorch={provideTorchToggling()}
           onScanning={onScanning}
+          isScanning={isScanning}
         />
         <NotificationHandler />
         <DialogueWrapper>
-          {functionalLocations && functionalLocations.length > 1 && (
+          {tags && tags.length > 0 && (
             <SearchResults
-              functionalLocations={functionalLocations}
+              tags={tags}
               onTagSearch={tagSearch}
               onClose={() => {
                 cameraRef.current.resumeViewfinder();
-                setFunctionalLocations(undefined);
+                setTags(undefined);
               }}
             />
           )}
+
           {isScanning && <ScanningIndicator />}
         </DialogueWrapper>
       </Main>
@@ -223,7 +223,7 @@ const Main = styled.main`
     height: 100%;
     // background-color: #00000010;
   }
-`
+`;
 
 const DialogueWrapper = styled.section`
   display: flex;

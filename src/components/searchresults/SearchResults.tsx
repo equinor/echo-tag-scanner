@@ -1,10 +1,13 @@
 import React from "react";
 import styled from 'styled-components';
-import { Dialog, Card, List, Typography, Button } from '@equinor/eds-core-react';
-import { ExtractedFunctionalLocation } from '@types';
+
+import { Button } from '@equinor/eds-core-react';
+import { TagContextMenu, TagIcon, getIcon } from '@equinor/echo-components';
+import { getLegendStatusColor } from '@equinor/echo-framework';
+import { TagSummaryDto } from '@equinor/echo-search';
 
 interface SearchResultsProps {
-  functionalLocations: ExtractedFunctionalLocation[];
+  tags: TagSummaryDto[];
   onTagSearch: (tagNumber: string) => void;
   onClose: () => void;
 }
@@ -17,59 +20,41 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
   }
 
   return (
-    <Dialogue>
-      <Dialog.Title>Search results</Dialog.Title>
-      <Dialog.CustomContent>
-        <CardList>
-          {props.functionalLocations.map((fLocation, index) => (
-            <List.Item key={fLocation.tagNumber + '-' + String(index)}>
-              <FunctionalLocationCard
-                variant="info"
-                onClick={() => onClick(fLocation.tagNumber)}
-              >
-                <FunctionalLocationCard.HeaderTitle>
-                  <Typography variant="h5">{fLocation.tagNumber}</Typography>
-                  <Typography variant="body_short">
-                    Tap to open this tag.
-                  </Typography>
-                </FunctionalLocationCard.HeaderTitle>
-              </FunctionalLocationCard>
-            </List.Item>
-          ))}
-        </CardList>
-      </Dialog.CustomContent>
-      <Actions>
-        <Button variant="contained" onClick={props.onClose}>
-          Scan again
-        </Button>
-      </Actions>
-    </Dialogue>
+    <InvisibleWrapper>
+      {props.tags.map((tag, index) => (
+        //@ts-ignore
+        // Ignoring a non-optional (setExpanded) prop as this one should be optional.
+        <SearchResult
+          key={index}
+          expanded
+          description={tag.description}
+          openTagInformation={() => onClick(tag.tagNo)}
+          tagNo={tag.tagNo}
+          selected={false}
+        >
+          <TagIcon
+            icon={getIcon(tag.tagCategoryDescription)}
+            legendColor={getLegendStatusColor(tag.tagStatus)}
+          />
+        </SearchResult>
+      ))}
+      <ScanAgainButton variant="contained" onClick={props.onClose}>
+        Scan again
+      </ScanAgainButton>
+    </InvisibleWrapper>
   );
 };
 
-const Dialogue = styled(Dialog)`
-  max-width: 90vw !important;
-  min-width: 25vw !important;
-  max-height: 70vh !important;
-  width: unset !important;
-  z-index: 2;
+const ScanAgainButton = styled(Button)``;
+
+const InvisibleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: var(--medium);
 `;
 
-const Actions = styled(Dialog.Actions)`
-  place-self: unset !important;
-  text-align: right;
-`;
-
-const CardList = styled(List)`
-  list-style-type: none;
-  overflow: auto;
-  max-height: 50vh;
-  padding: 0;
-`;
-
-const FunctionalLocationCard = styled(Card)`
+const SearchResult = styled(TagContextMenu)`
   margin-bottom: var(--small);
-  padding: var(--small);
 `;
 
 export { SearchResults };

@@ -37,6 +37,7 @@ interface ShutterProps {
   isDisabled?: boolean;
   className?: string;
   onClick?: () => void;
+  isScanning?: boolean;
 }
 
 /**
@@ -53,15 +54,15 @@ const ScannerTrigger = styled.button`
   border-width: 3px;
   width: 75px;
   height: 75px;
-  background-color: white;
+  background-color: var(--white);
 
-  &:active {
+  &:disabled {
     background-color: var(--equiGreen1);
     box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
     -webkit-box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
     -moz-box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
   }
-`
+`;
 
 const CameraTrigger = styled.button`
 display: flex;

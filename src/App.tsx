@@ -22,12 +22,9 @@ const App: FC = () => {
   }, [isAuthenticated]);
 
   return (
-    // <BrowserRouter>
-      <ErrorBoundary stackTraceEnabled>
-        <EchoCamera />
-      </ErrorBoundary>
-    // </BrowserRouter>
-
+    <ErrorBoundary stackTraceEnabled>
+      <EchoCamera />
+    </ErrorBoundary>
   );
 };
 

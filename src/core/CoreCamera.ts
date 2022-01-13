@@ -110,12 +110,18 @@ class CoreCamera {
   }
 
   public async stopCamera() {
-    this._videoTrack.stop();
+    if (this._videoTrack) {
+      this._videoTrack.stop();
+    }
   }
 
   protected async capturePhoto(): Promise<void> {
     const videoTracks = this._mediaStream?.getVideoTracks();
 
+    function handleLegacyCaptureError(error) {
+      console.warn("Something bad happened with legacy canvas frame capture.");
+      console.error(error)
+    }
     if (Array.isArray(videoTracks) && videoTracks.length === 1) {
       if (ImageCapture) {
         this._capture = await capture(videoTracks[0]);
@@ -127,8 +133,9 @@ class CoreCamera {
             console.info('captured frame', stillFrame);
             this._capture = stillFrame;
           })
-          .catch((error: string) => console.log(error));
+          .catch(handleLegacyCaptureError);
       }
+
     }
 
     async function capture(videoTrack: MediaStreamTrack) {

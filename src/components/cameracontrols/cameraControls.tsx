@@ -7,6 +7,8 @@ interface CameraControlsProps {
   onScanning: () => void;
   /* Torch callback. If undefined, the torch is not supported. */
   onToggleTorch?: () => void;
+
+  isScanning?: boolean;
 }
 
 /**
@@ -29,7 +31,7 @@ const CameraControls = (props: CameraControlsProps): JSX.Element => {
           supported={Boolean(props.onToggleTorch)}
         />
 
-        <ScannerButton onClick={onScanning} />
+        <ScannerButton onClick={onScanning} isDisabled={props.isScanning} />
       </CameraController>
     </CameraControlsWrapper>
   );

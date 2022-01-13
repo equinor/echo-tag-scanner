@@ -1,22 +1,23 @@
 import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from '@types';
-import { ResultValue, Search } from '@equinor/echo-search';
+import { ResultValue, Search, TagSummaryDto } from '@equinor/echo-search';
 import { extractFunctionalLocation, getInstCode } from '@utils';
 import { getSelectedPlant } from '@equinor/echo-core';
+import {
+  getNotificationDispatcher as dispatchNotification,
+} from '@utils';
 
 /**
- * Validates a tag number. If the tag is validated, it is resolved. Otherwise, undefined is resolved.
+ * Returns a promise to return a TagSummary, or undefined if no tags were found.
  */
-function createTagValidationAttempt(
+function createTagSearch(
   location: ExtractedFunctionalLocation,
   instCode?: string
-): Promise<ExtractedFunctionalLocation | undefined> {
-  return new Promise((resolve, reject) => {
-    console.log('possible tag number:', location);
-    Search.Tags.isTagAsync(location.tagNumber, instCode)
-      .then(function handleTagValidationResponse(res) {
-        if (res.value === true) {
-          console.log('found tag number', location.tagNumber);
-          resolve(location);
+): Promise<TagSummaryDto | undefined> {
+  return new Promise(function getTag(resolve, reject) {
+    Search.Tags.searchAsync(location.tagNumber, 1, instCode)
+      .then(function handleTagValidationResponse(tagSummary) {
+        if (tagSummary.values.length === 1) {
+          resolve(tagSummary.values[0]);
         } else {
           resolve(undefined);
         }
@@ -32,8 +33,11 @@ function getFunctionalLocations(locations: MadOCRFunctionalLocations) {
   return locations.results.map((l) => extractFunctionalLocation(l));
 }
 
-function filterUnvalidatedLocations(
-  res: Array<ExtractedFunctionalLocation | undefined>
+/**
+ * Filters away falsey tag results for prior tag searches.
+ */
+function filterInvalidTags(
+  res: Array<TagSummaryDto | undefined>
 ) {
   return res.filter((r) => Boolean(r));
 }
@@ -42,18 +46,19 @@ function filterUnvalidatedLocations(
  * The user might have scanned images containing other things than tag-numbers.
  * This function will filter them out.
  */
-export function filterFalsePositives(
-  locations: MadOCRFunctionalLocations
-): Promise<ExtractedFunctionalLocation[]> {
+export function tagSearch(
+  locations: MadOCRFunctionalLocations,
+  afterSearchCallback: () => void
+): Promise<TagSummaryDto[]> {
   return new Promise((resolve) => {
     const functionalLocations = getFunctionalLocations(locations);
-    const validationAttempts = functionalLocations.map((funcLocation) =>
-      createTagValidationAttempt(funcLocation, getInstCode())
+    const tagSearches = functionalLocations.map((funcLocation) =>
+      createTagSearch(funcLocation, getInstCode() ?? "TROA")
     );
 
-    Promise.all([...validationAttempts]).then((results) => {
-      console.log('done, resolving result');
-      resolve(filterUnvalidatedLocations(results));
+    Promise.all([...tagSearches]).then((results) => {
+      afterSearchCallback();
+      resolve(filterInvalidTags(results));
     });
   });
 }

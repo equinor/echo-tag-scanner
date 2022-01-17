@@ -1,9 +1,11 @@
 {
   "name": "@equinor/echo-camera-web",
-  "version": "1.0.0rc3",
+  "version": "1.0.0",
   "private": false,
   "main": "build/index.js",
   "source": "src/index.ts",
+  "repository": "https://github.com/equinor/echo-camera-web",
+  "license": "MIT",
   "scripts": {
     "build": "echo-build -c",
     "start": "echo-build -s -d",
@@ -15,6 +17,7 @@
   },
   "devDependencies": {
     "@equinor/echo-base": "^0.5.1",
+    "@equinor/echo-components": "^0.2.4",
     "@equinor/echo-cli": "^0.1.74",
     "@equinor/echo-core": "^0.5.3",
     "@equinor/echo-framework": "^0.5.3",

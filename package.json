@@ -5,8 +5,7 @@
   "main": "build/index.js",
   "source": "src/index.ts",
   "scripts": {
-    "build": "echo-build",
-    "build-client": "echo-build -c",
+    "build": "echo-build -c",
     "start": "echo-build -s -d",
     "start-admin": "echo-build -s -d -a",
     "ui": "npm i --legacy-peer-deps",

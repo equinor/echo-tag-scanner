@@ -42,10 +42,10 @@ done < .env
 
 echo "}" >> ./env-config.js
 
-#if directory exists, copy to public folder. Needed for dev enironment (npm start)
-if [ -d "public" ]; then
-  rm -rf ./public/env-config.js
-  cp ./env-config.js ./public/env-config.js
+#if directory exists, copy to build folder. Needed for dev enironment (npm start)
+if [ -d "build" ]; then
+  rm -rf ./build/env-config.js
+  cp ./env-config.js ./build/env-config.js
 fi
 
 echo "done creating env-config.js"

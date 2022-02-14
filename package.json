@@ -7,8 +7,8 @@
   "repository": "https://github.com/equinor/echo-camera-web",
   "license": "MIT",
   "scripts": {
-    "build": "echo-build -c",
-    "start": "echo-build -s -d",
+    "build": "bash ./env.sh & echo-build -c",
+    "start": "bash ./env.sh & echo-build -s -d",
     "start-admin": "echo-build -s -d -a",
     "ui": "npm i --legacy-peer-deps",
     "clean-merged": "git branch --merged | egrep -v '(^*|master|dev|main|develop|test|qa)' | xargs git b",

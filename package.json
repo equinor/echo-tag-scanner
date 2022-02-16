@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@equinor/echo-base": "^0.6.2",
-    "@equinor/echo-cli": "^0.1.78",
+    "@equinor/echo-cli": "^0.2.3",
     "@equinor/echo-components": "^0.3.0",
     "@equinor/echo-core": "^0.6.5",
     "@equinor/echo-framework": "^0.6.3",
@@ -53,5 +53,6 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "styled-components": "^5.3.3"
-  }
+  },
+  "browserslist": "Chrome > 80"
 }

@@ -22,8 +22,8 @@ module.exports = {
       '@workers': path.resolve(__dirname + '/src/workers/'),
       '@enums': path.resolve(__dirname + '/src/enums/')
     }
-  }
-    // entry: {},
+  },
+  // entry: {},
   // mode: {},
   // output: {},
   // module: {},
@@ -32,12 +32,11 @@ module.exports = {
   // devServer: {},
   // cache: {},
   // devtool: {},
-  // target: {},
+  // target: 'browserslist'
   // watch: {},
   // externals: {},
   // performance: {},
   // node: {},
   // stats: {},
   // experiments: {}
-  
 };

@@ -109,7 +109,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
       if (this.state.severity === 'high') {
         return (
           <>
-            <Scrim>
+            <Scrim open>
               <ErrorDialogue>
                 <Dialog.Title>
                   <h3>An error has occured</h3>
@@ -117,11 +117,14 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
                 <Dialog.CustomContent>
                   <ErrorBoundaryContent>
                     <Typography variant="body_long">
-                      Smart Portal ran into an issue. Check the marked message below for more
-                      details.
+                      Smart Portal ran into an issue. Check the marked message
+                      below for more details.
                       <br />
                       <br />
-                      <mark>{this.state.userMessage || 'An unknown error has occured.'}</mark>
+                      <mark>
+                        {this.state.userMessage ||
+                          'An unknown error has occured.'}
+                      </mark>
                     </Typography>
                     <Developer>
                       <Details>

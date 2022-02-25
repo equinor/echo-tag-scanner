@@ -20,10 +20,10 @@
   },
   "devDependencies": {
     "@equinor/echo-base": "^0.6.2",
-    "@equinor/echo-cli": "^0.3.0",
+    "@equinor/echo-cli": "^0.3.4",
     "@equinor/echo-components": "^0.3.0",
     "@equinor/echo-core": "^0.6.6",
-    "@equinor/echo-framework": "^0.7.3",
+    "@equinor/echo-framework": "^0.7.4",
     "@equinor/echo-scripts": "^0.1.5",
     "@equinor/echo-search": "^0.11.15",
     "@equinor/eds-core-react": "^0.17.0",
@@ -46,7 +46,7 @@
   "peerDependencies": {
     "@equinor/echo-base": "^0.6.2",
     "@equinor/echo-components": "^0.3.0",
-    "@equinor/echo-framework": "^0.7.3",
+    "@equinor/echo-framework": "^0.7.4",
     "@equinor/echo-search": "^0.11.15",
     "@equinor/eds-core-react": "^0.17.0",
     "@equinor/echo-core": "^0.6.6",

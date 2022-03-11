@@ -9,8 +9,8 @@
     "description": "A web based tag scanner",
     "private": false,
     "env": "production",
-    "fileUri": "https://echocamera.equinor.com",
-    "devFileUri": "https://red-hill-093221b03.1.azurestaticapps.net"
+    "fileUri": "https://echocamera.equinor.com/index.js",
+    "devFileUri": "https://red-hill-093221b03.1.azurestaticapps.net/index.js"
   },
   "server": {
     "contentBase": "/build",

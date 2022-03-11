@@ -9,8 +9,8 @@
     "description": "A web based tag scanner",
     "private": false,
     "env": "production",
-    "fileUri": "https://victorious-pebble-043419e03.1.azurestaticapps.net/index.js",
-    "devFileUri": "https://example.com"
+    "fileUri": "https://echocamera.equinor.com",
+    "devFileUri": "https://red-hill-093221b03.1.azurestaticapps.net"
   },
   "server": {
     "contentBase": "/build",

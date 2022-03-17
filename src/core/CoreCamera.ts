@@ -123,7 +123,8 @@ class CoreCamera {
       console.error(error)
     }
     if (Array.isArray(videoTracks) && videoTracks.length === 1) {
-      if (ImageCapture) {
+      //@ts-ignore
+      if (globalThis.ImageCapture) {
         this._capture = await capture(videoTracks[0]);
       } else {
         // use legacy frame capture

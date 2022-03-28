@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "start": "echo-build -s -d",
-    "build": "echo-build",
+    "build": "echo-build -c",
     "build:module": "echo-build"
   },
   "devDependencies": {

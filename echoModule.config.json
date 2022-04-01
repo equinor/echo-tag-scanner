@@ -5,7 +5,7 @@
     "name": "Echo Camera Web",
     "key": "echo-camera-web",
     "shortName": "ecw",
-    "path": "/camera",
+    "path": "/newcamera",
     "description": "A web based tag scanner",
     "private": false,
     "env": "production",

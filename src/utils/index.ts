@@ -5,3 +5,4 @@ export * from './error';
 export * from './url';
 export * from './business';
 export * from './tagFiltering';
+export * from './logger';

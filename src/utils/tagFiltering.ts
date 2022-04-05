@@ -16,6 +16,9 @@ function createTagSearch(
   return new Promise(function getTag(resolve, reject) {
     Search.Tags.searchAsync(location.tagNumber, 1, instCode)
       .then(function handleTagValidationResponse(tagSummary) {
+        console.group('Looking up tag number: ', location.tagNumber);
+        console.info('Lookup result: ', tagSummary.values);
+        console.groupEnd();
         if (tagSummary.values.length === 1) {
           resolve(tagSummary.values[0]);
         } else {
@@ -23,6 +26,7 @@ function createTagSearch(
         }
       })
       .catch(function handleTagValidationError(reason) {
+        console.log('%c⧭', 'color: #994d75', reason);
         // TODO Possible errorboundary target
         reject(reason);
       });
@@ -36,9 +40,7 @@ function getFunctionalLocations(locations: MadOCRFunctionalLocations) {
 /**
  * Filters away falsey tag results for prior tag searches.
  */
-function filterInvalidTags(
-  res: Array<TagSummaryDto | undefined>
-) {
+function filterInvalidTags(res: Array<TagSummaryDto | undefined>) {
   return res.filter((r) => Boolean(r));
 }
 
@@ -52,8 +54,9 @@ export function tagSearch(
 ): Promise<TagSummaryDto[]> {
   return new Promise((resolve) => {
     const functionalLocations = getFunctionalLocations(locations);
+    console.log('%c⧭', 'color: #00258c', functionalLocations);
     const tagSearches = functionalLocations.map((funcLocation) =>
-      createTagSearch(funcLocation, getInstCode() ?? "TROA")
+      createTagSearch(funcLocation, getInstCode() ?? 'TROA')
     );
 
     Promise.all([...tagSearches]).then((results) => {

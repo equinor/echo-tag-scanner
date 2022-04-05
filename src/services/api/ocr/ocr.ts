@@ -7,7 +7,6 @@ import { MadOCRFunctionalLocations } from '@types';
 export async function getFunctionalLocations(image: Blob): Promise<MadOCRFunctionalLocations> {
   try {
     const { url, body, init } = getFunctionalLocationsResources(image);
-
     return (await baseApiClient.postAsync<MadOCRFunctionalLocations>(url, body, init)).data;
   } catch (error) {
     throw handleError(ErrorRegistry.ocrError, error as Error);

@@ -7,9 +7,18 @@ export type CameraProps = CoreCameraProps;
 class Camera extends CoreCamera {
   private _torchState = false;
   private _url: string | undefined;
+  private _isScanning = false;
 
   constructor(props: CameraProps) {
     super(props);
+  }
+
+  public set isScanning(value: boolean) {
+    this._isScanning = value;
+  }
+
+  public get isScanning() {
+    return this._isScanning;
   }
 
   public get url(): string {
@@ -56,8 +65,11 @@ class Camera extends CoreCamera {
     this.pauseViewfinder();
     await this.capturePhoto();
     if (this.capture) {
-      return await getFunctionalLocations(this.capture);
+      const result = await getFunctionalLocations(this.capture);
+      this.isScanning = false;
+      return result;
     } else {
+      this.isScanning = false;
       return undefined;
     }
   }

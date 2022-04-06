@@ -66,8 +66,6 @@ const EchoCamera = () => {
       }
       if (camera.capabilities?.zoom) {
         if (camera.capabilities.zoom[type]) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
           return String(camera.zoom[type]);
         }
       }
@@ -80,6 +78,7 @@ const EchoCamera = () => {
   const onScanning = () => {
     setIsScanning(true);
     setTags(undefined);
+    cameraRef.current.isScanning = true;
 
     /**
      * Handles the parsing and filtering of functional locations that was returned from the API.
@@ -127,10 +126,12 @@ const EchoCamera = () => {
     if (cameraRef?.current != null) {
       (function notifyUserLongScan() {
         setTimeout(() => {
-          if (isScanning) {
-            dispatchNotification(
-              'Hang tight, the scan appears to be taking longer than usual.'
-            )();
+          if (cameraRef.current.isScanning) {
+            dispatchNotification({
+              message:
+                'Hang tight, the scan appears to be taking longer than usual.',
+              autohideDuration: 5000
+            })();
           }
         }, 3000);
       })();
@@ -138,7 +139,6 @@ const EchoCamera = () => {
       // We won't make the user wait more than 10 seconds for the scanning results.
       const scanTookTooLong: Promise<MadOCRFunctionalLocations> = new Promise(
         (resolve) => {
-          console.info('starting scan timeout timer');
           setTimeout(() => {
             resolve({ results: [] });
           }, 10000);
@@ -147,7 +147,6 @@ const EchoCamera = () => {
 
       const scanAction: Promise<MadOCRFunctionalLocations | undefined> =
         new Promise((resolve) => {
-          console.info('attempting to resolve tag number(s)');
           resolve(cameraRef?.current?.scan());
         });
 

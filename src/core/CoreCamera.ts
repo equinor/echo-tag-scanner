@@ -77,7 +77,7 @@ class CoreCamera {
     return this._settings;
   }
 
-  protected zoom(zoomValue: number): void {
+  public zoom(zoomValue: number): void {
     if (this._capabilities?.zoom) {
       this._videoTrack
         ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
@@ -119,8 +119,8 @@ class CoreCamera {
     const videoTracks = this._mediaStream?.getVideoTracks();
 
     function handleLegacyCaptureError(error) {
-      console.warn("Something bad happened with legacy canvas frame capture.");
-      console.error(error)
+      console.warn('Something bad happened with legacy canvas frame capture.');
+      console.error(error);
     }
     if (Array.isArray(videoTracks) && videoTracks.length === 1) {
       //@ts-ignore
@@ -136,7 +136,6 @@ class CoreCamera {
           })
           .catch(handleLegacyCaptureError);
       }
-
     }
 
     async function capture(videoTrack: MediaStreamTrack) {

@@ -41,25 +41,17 @@ async function performReusableRequest<T>(
 }
 
 async function performFetchAsync<TError>(url: string, init: RequestInit): Promise<Response> {
-  const [method, options, body, abortSignal] = await transformRequestAsync(init);
-
-  try {
-    const response = await EchoCore.EchoClient.fetch(url, options, method, body, abortSignal);
-
-    if (!response.ok) {
-      const errorResponse = await parseResponseJSONAsync<TError>(response);
-      throw new BaseApiClientRequestFailedError(url, response.status, errorResponse);
-    }
-
-    return response;
-  } catch (error) {
-    if (error instanceof BaseApiClientRequestFailedError) {
-      throw error;
-    }
-
-    //@ts-ignore
-    throw new BaseApiClientError(error);
-  }
+  const [method, options, body, abortSignal] = await transformRequestAsync(
+    init
+  );
+  const response = await EchoCore.EchoClient.fetch(
+    url,
+    options,
+    method,
+    body,
+    abortSignal
+  );
+  return response;
 }
 
 function ensureRequestInit(

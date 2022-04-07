@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "start": "echo-build -s -d",
-    "build": "echo-build -c",
+    "build": "echo-build -c && npm run env",
+    "env": "bash ./env.sh",
     "build:module": "echo-build"
   },
   "devDependencies": {

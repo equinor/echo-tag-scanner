@@ -2,11 +2,9 @@ import React from 'react';
 import styled from "styled-components";
 import { Icon } from '@equinor/eds-core-react';
 
-interface CameraButtonProps {
+interface TorchButtonProps {
   name: string;
   onClick?: () => void;
-  supported?: boolean;
-  label?: string;
 }
 
 /**
@@ -14,22 +12,14 @@ interface CameraButtonProps {
  * @param name An identifier from EDS system icons.
  * @param onClick callback.
  */
-const CameraButton = (props: CameraButtonProps): JSX.Element => {
+const TorchButton = (props: TorchButtonProps): JSX.Element => {
   function createLabel() {
-    if (props.supported) {
-      return <Icon name={props.name ?? 'placeholder_icon'} color="white" />;
-    } else {
-      return <Icon name={props.name ?? 'placeholder_icon'} color="white" />;
-    }
+    return <Icon name={'lightbulb'} color="white" />;
   }
   return (
-    <CameraTrigger
-      onClick={props.onClick}
-      style={{ border: '1px solid' }}
-      disabled={!props.supported}
-    >
+    <TorchTrigger onClick={props.onClick} style={{ border: '1px solid' }}>
       {createLabel()}
-    </CameraTrigger>
+    </TorchTrigger>
   );
 };
 
@@ -55,6 +45,7 @@ const ScannerTrigger = styled.button`
   width: 75px;
   height: 75px;
   background-color: var(--white);
+  grid-area: shutter;
 
   &:disabled {
     background-color: var(--equiGreen1);
@@ -64,14 +55,15 @@ const ScannerTrigger = styled.button`
   }
 `;
 
-const CameraTrigger = styled.button`
-display: flex;
+const TorchTrigger = styled.button`
+  display: flex;
   align-items: center;
   justify-content: center;
   background-color: var(--equiGreen1);
   border-radius: 100%;
   width: 55px;
   height: 55px;
+  grid-area: torch;
 
   &:active {
     background-color: var(--equiBlue1);
@@ -85,6 +77,6 @@ display: flex;
     width: 60%;
     height: 60%;
   }
-`
+`;
 
-export { CameraButton, ScannerButton };
+export { TorchButton, ScannerButton };

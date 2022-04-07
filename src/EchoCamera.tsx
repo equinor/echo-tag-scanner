@@ -28,6 +28,7 @@ const EchoCamera = () => {
   const cameraRef = useRef<Camera>();
   const tagSearch = useSetActiveTagNo();
 
+
   // Instansiate the camera core class.
   useEffect(function mountCamera() {
     if (cameraRef.current == null) {
@@ -127,7 +128,7 @@ const EchoCamera = () => {
       (function notifyUserLongScan() {
         setTimeout(() => {
           if (cameraRef.current.isScanning) {
-            dispatchNotification({
+            dispatchNotifnpm run envication({
               message:
                 'Hang tight, the scan appears to be taking longer than usual.',
               autohideDuration: 5000
@@ -169,7 +170,7 @@ const EchoCamera = () => {
     };
 
     if (cameraRef?.current != null) {
-      if (cameraRef?.current.capabilities?.zoom) {
+      if (cameraRef?.current.capabilities?.torch) {
         return onToggleTorch;
       } else {
         return onToggleUnsupportedTorch;
@@ -194,6 +195,7 @@ const EchoCamera = () => {
           onToggleTorch={provideTorchToggling()}
           onScanning={onScanning}
           isScanning={isScanning}
+          supportedFeatures={{ torch: cameraRef?.current?.capabilities?.torch }}
         />
         <NotificationHandler />
         <DialogueWrapper>

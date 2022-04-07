@@ -28,6 +28,7 @@ const EchoCamera = () => {
   const cameraRef = useRef<Camera>();
   const tagSearch = useSetActiveTagNo();
 
+  console.log(cameraRef?.current?.capabilities);
 
   // Instansiate the camera core class.
   useEffect(function mountCamera() {
@@ -38,6 +39,12 @@ const EchoCamera = () => {
       };
       cameraRef.current = new Camera(props);
     }
+
+    videoRef?.current?.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    });
 
     // Setup the zoom slider with the min, max and step values.
     if (zoomInputRef?.current != null) {
@@ -128,7 +135,7 @@ const EchoCamera = () => {
       (function notifyUserLongScan() {
         setTimeout(() => {
           if (cameraRef.current.isScanning) {
-            dispatchNotifnpm run envication({
+            dispatchNotification({
               message:
                 'Hang tight, the scan appears to be taking longer than usual.',
               autohideDuration: 5000

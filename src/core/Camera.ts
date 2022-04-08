@@ -61,10 +61,15 @@ class Camera extends CoreCamera {
   }
 
   public async scan(): Promise<MadOCRFunctionalLocations | undefined> {
-    // handle scanning logic
     this.pauseViewfinder();
+    console.log('camera is paused', this._viewfinder.current.paused);
     await this.capturePhoto();
     if (this.capture) {
+      console.group('The photo that was OCR scanned');
+      console.info('Photo size in kilobytes: ', this.capture.size / 1000);
+      console.info('Media type: ', this.capture.type);
+      console.groupEnd();
+
       const result = await getFunctionalLocations(this.capture);
       this.isScanning = false;
       return result;

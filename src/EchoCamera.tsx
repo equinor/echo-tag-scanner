@@ -1,229 +1,158 @@
-import React, { FC, useRef, useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { Camera, CameraProps } from './core/Camera';
+import React, { useState } from 'react';
 import {
   CameraControls,
-  Viewfinder,
-  ZoomSlider,
+  ScanningIndicator,
   SearchResults,
-  ScanningIndicator
+  Viewfinder,
+  ZoomSlider
 } from '@components';
+import { useMountCamera, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler } from '@services';
+import { MadOCRFunctionalLocations, ExtractedFunctionalLocation } from '@types';
 import {
   getNotificationDispatcher as dispatchNotification,
+  getTorchToggleProvider,
   tagSearch as runTagSearch
 } from '@utils';
-
-import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from '@types';
-import { useSetActiveTagNo } from '@hooks';
-import { TagSummaryDto } from '@equinor/echo-search';
+import styled from 'styled-components';
 
 const EchoCamera = () => {
-  const [tags, setTags] = useState<TagSummaryDto[] | undefined>(undefined);
+  const [scannedFunctionalLocations, setScans] = useState<
+    ExtractedFunctionalLocation[] | undefined
+  >(undefined);
   const [isScanning, setIsScanning] = useState(false);
-
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const zoomInputRef = useRef<HTMLInputElement>(null);
-  const cameraRef = useRef<Camera>();
+  const { camera, canvas, viewfinder, zoomInput } = useMountCamera();
   const tagSearch = useSetActiveTagNo();
 
-  console.log(cameraRef?.current?.capabilities);
-
-  // Instansiate the camera core class.
-  useEffect(function mountCamera() {
-    if (cameraRef.current == null) {
-      const props: CameraProps = {
-        viewfinder: videoRef,
-        canvas: canvasRef
-      };
-      cameraRef.current = new Camera(props);
+  function handleValidatedTags(tags: ExtractedFunctionalLocation[]) {
+    if (Array.isArray(tags) && tags.length > 0) {
+      // We got more than 1 validated tag.
+      // Set them into state and rerender to present search results.
+      setScans(tags);
+    } else {
+      // We got no validated tags.
+      handleNoTagsFound();
     }
-
-    videoRef?.current?.addEventListener('touchstart', (e) => {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    });
-
-    // Setup the zoom slider with the min, max and step values.
-    if (zoomInputRef?.current != null) {
-      zoomInputRef.current.min = assignZoomSettings('min');
-      zoomInputRef.current.max = assignZoomSettings('max');
-      zoomInputRef.current.step = assignZoomSettings('step');
-      zoomInputRef.current.value = '1';
-    }
-
-    function cleanup() {
-      if (cameraRef.current) {
-        cameraRef.current.stopCamera();
-      }
-    }
-    return cleanup;
-  }, []);
-
-  function assignZoomSettings(type: 'min' | 'max' | 'step' | 'value'): string {
-    if (cameraRef?.current != null) {
-      const camera = cameraRef.current;
-      if (type === 'value') {
-        if (camera.settings?.zoom) {
-          return String(camera.settings.zoom);
-        } else {
-          return '1';
-        }
-      }
-      if (camera.capabilities?.zoom) {
-        if (camera.capabilities.zoom[type]) {
-          return String(camera.zoom[type]);
-        }
-      }
-    }
-    // If zoom capabilities does not exist, we need to return a stringified zero
-    // to prevent a stringified undefined to be assigned to the zoom slider.
-    return '0';
   }
 
-  const onScanning = () => {
+  function handleNoTagsFound() {
+    camera.resumeViewfinder();
+    setIsScanning(false);
+    dispatchNotification({
+      message: 'We did not recognize any tag numbers. Try again?',
+      autohideDuration: 5000
+    })();
+  }
+
+  const onScanning = async () => {
     setIsScanning(true);
-    setTags(undefined);
-    cameraRef.current.isScanning = true;
+    setScans(undefined);
+    camera.isScanning = true;
+
+    /** An IIFE that runs after 3 seconds.
+     * If the tag scanning process is still in progress,
+     * this will ensure the impatient user.
+     */
+    (function notifyUserLongScan() {
+      setTimeout(() => {
+        if (camera.isScanning) {
+          dispatchNotification({
+            message:
+              'Hang tight, the scan appears to be taking longer than usual.',
+            autohideDuration: 5000
+          })();
+        }
+      }, 3000);
+    })();
 
     /**
      * Handles the parsing and filtering of functional locations that was returned from the API.
      */
-    function handleDetectedLocations(
-      madOcrFunctionalLocations?: MadOCRFunctionalLocations
+    async function handleDetectedLocations(
+      fLocations?: MadOCRFunctionalLocations
     ) {
-      console.info('Got a location result:', madOcrFunctionalLocations);
-      if (
-        madOcrFunctionalLocations &&
-        Array.isArray(madOcrFunctionalLocations?.results) &&
-        madOcrFunctionalLocations.results.length > 0
-      ) {
+      // The tag scanner returned some results.
+      if (Array.isArray(fLocations?.results) && fLocations.results.length > 0) {
         const afterSearchCallback = () => {
           setIsScanning(false);
         };
-        runTagSearch(madOcrFunctionalLocations, afterSearchCallback).then(
-          handleValidatedTags
+        const beforeScan = new Date();
+        // Send the results over to tag validation.
+        const result = await runTagSearch(fLocations, afterSearchCallback);
+        const afterScan = new Date();
+        console.info(
+          `Tag validation took ${
+            afterScan.getSeconds() - beforeScan.getSeconds()
+          } seconds.`
         );
+
+        return result;
       } else {
         // The tag scanner returned 0 results.
         handleNoTagsFound();
       }
-
-      function handleValidatedTags(tags: TagSummaryDto[]) {
-        if (tags.length > 0) {
-          // We got more than 1 validated tag.
-          setTags(tags);
-        } else {
-          // We got no validated tags.
-          handleNoTagsFound();
-        }
-      }
-
-      function handleNoTagsFound() {
-        cameraRef.current.resumeViewfinder();
-        setIsScanning(false);
-        dispatchNotification({
-          message: 'We did not recognize any tag numbers. Try again?',
-          autohideDuration: 5000
-        })();
-      }
     }
 
-    if (cameraRef?.current != null) {
-      (function notifyUserLongScan() {
+    // We won't make the user wait more than 10 seconds for the scanning results.
+    const scanTookTooLong: Promise<MadOCRFunctionalLocations> = new Promise(
+      (resolve) => {
         setTimeout(() => {
-          if (cameraRef.current.isScanning) {
-            dispatchNotification({
-              message:
-                'Hang tight, the scan appears to be taking longer than usual.',
-              autohideDuration: 5000
-            })();
-          }
-        }, 3000);
-      })();
+          resolve({ results: [] });
+        }, 10000);
+      }
+    );
 
-      // We won't make the user wait more than 10 seconds for the scanning results.
-      const scanTookTooLong: Promise<MadOCRFunctionalLocations> = new Promise(
-        (resolve) => {
-          setTimeout(() => {
-            resolve({ results: [] });
-          }, 10000);
-        }
-      );
+    // This promise puts the scanning in motion.
+    const scanAction: Promise<MadOCRFunctionalLocations | undefined> =
+      new Promise((resolve) => {
+        resolve(camera.scan());
+      });
 
-      const scanAction: Promise<MadOCRFunctionalLocations | undefined> =
-        new Promise((resolve) => {
-          resolve(cameraRef?.current?.scan());
-        });
+    // Start the scan race.
+    Promise.race([scanAction, scanTookTooLong])
+      // Validate the tag results from OCR
+      .then((locations) => handleDetectedLocations(locations))
 
-      // Start the scan race.
-      Promise.race([scanAction, scanTookTooLong])
-        .then((locations) => handleDetectedLocations(locations))
-        .catch((reason) => console.error('Quietly failing: ', reason));
-    }
+      // Receive the validated tags and put them into state.
+      .then((validatedTags) => handleValidatedTags(validatedTags))
+      .catch((reason) => console.error('Quietly failing: ', reason));
   };
 
-  function provideTorchToggling() {
-    const onToggleTorch = () => {
-      if (cameraRef?.current != null) {
-        cameraRef.current.toggleTorch();
-      }
-    };
+  return (
+    <Main>
+      <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
 
-    const onToggleUnsupportedTorch = () => {
-      dispatchNotification('The torch is not supported on this device.')();
-    };
+      {camera.capabilities?.zoom && (
+        <ZoomSlider
+          onSlide={camera.alterZoom}
+          zoomInputRef={zoomInput}
+          zoomOptions={camera.capabilities?.zoom}
+        />
+      )}
 
-    if (cameraRef?.current != null) {
-      if (cameraRef?.current.capabilities?.torch) {
-        return onToggleTorch;
-      } else {
-        return onToggleUnsupportedTorch;
-      }
-    }
-  }
-
-  if (cameraRef?.current) {
-    return (
-      <Main>
-        <Viewfinder canvasRef={canvasRef} videoRef={videoRef} />
-
-        {cameraRef?.current?.capabilities?.zoom && (
-          <ZoomSlider
-            onSlide={cameraRef.current?.alterZoom}
-            zoomInputRef={zoomInputRef}
-            zoomOptions={cameraRef?.current?.capabilities?.zoom}
+      <CameraControls
+        onToggleTorch={getTorchToggleProvider(camera)}
+        onScanning={onScanning}
+        isScanning={isScanning}
+        supportedFeatures={{ torch: camera.capabilities?.torch }}
+      />
+      <NotificationHandler />
+      <DialogueWrapper>
+        {scannedFunctionalLocations && scannedFunctionalLocations.length > 0 && (
+          <SearchResults
+            functionalLocations={scannedFunctionalLocations}
+            onTagSearch={tagSearch}
+            onClose={() => {
+              camera.resumeViewfinder();
+              setScans(undefined);
+            }}
           />
         )}
 
-        <CameraControls
-          onToggleTorch={provideTorchToggling()}
-          onScanning={onScanning}
-          isScanning={isScanning}
-          supportedFeatures={{ torch: cameraRef?.current?.capabilities?.torch }}
-        />
-        <NotificationHandler />
-        <DialogueWrapper>
-          {tags && tags.length > 0 && (
-            <SearchResults
-              tags={tags}
-              onTagSearch={tagSearch}
-              onClose={() => {
-                cameraRef.current.resumeViewfinder();
-                setTags(undefined);
-              }}
-            />
-          )}
-
-          {isScanning && <ScanningIndicator />}
-        </DialogueWrapper>
-      </Main>
-    );
-  } else {
-    return null;
-  }
+        {isScanning && <ScanningIndicator />}
+      </DialogueWrapper>
+    </Main>
+  );
 };
 
 const Main = styled.main`

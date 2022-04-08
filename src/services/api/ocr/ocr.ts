@@ -25,5 +25,6 @@ export const ocrApi = { getFunctionalLocations };
 function reportTimeTakenForRequest(startDate: Date, endDate: Date) {
   const result = endDate.getSeconds() - startDate.getSeconds();
   console.group('Request timer');
-  console.info(`Request took -> ${result} seconds`);
+  console.info(`OCR Scanning took ${result} seconds`);
+  console.groupEnd();
 }

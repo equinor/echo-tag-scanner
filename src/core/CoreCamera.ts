@@ -29,11 +29,9 @@ class CoreCamera {
     );
 
     function onApproval(mediaStream: MediaStream) {
-      console.info('Camera usage was approved');
       this._mediaStream = mediaStream;
       this._videoTrack = this._mediaStream.getVideoTracks()[0];
       this._capabilities = this._videoTrack.getCapabilities();
-      console.log('%c⧭', 'color: #e50000', this._capabilities);
       this._settings = this.videoTrack?.getSettings();
       if (this._viewfinder?.current) {
         this._viewfinder.current.srcObject = mediaStream;

@@ -129,7 +129,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
         return (
           <>
             <Backdrop open>
-              <ErrorDialogue>
+              <ErrorDialogue open>
                 <Dialog.Title>
                   <Typography variant="h3">An error has occured</Typography>
                 </Dialog.Title>

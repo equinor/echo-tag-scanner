@@ -108,7 +108,7 @@ class CoreCamera {
     }
   }
 
-  public async stopCamera() {
+  public stopCamera() {
     if (this._videoTrack) {
       this._videoTrack.stop();
     }

@@ -122,7 +122,7 @@ const EchoCamera = () => {
     <Main>
       <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
 
-      {camera.capabilities?.zoom && (
+      {camera?.capabilities?.zoom && (
         <ZoomSlider
           onSlide={camera.alterZoom}
           zoomInputRef={zoomInput}
@@ -134,7 +134,7 @@ const EchoCamera = () => {
         onToggleTorch={getTorchToggleProvider(camera)}
         onScanning={onScanning}
         isScanning={isScanning}
-        supportedFeatures={{ torch: camera.capabilities?.torch }}
+        supportedFeatures={{ torch: camera?.capabilities?.torch }}
       />
       <NotificationHandler />
       <DialogueWrapper>

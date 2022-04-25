@@ -1,4 +1,4 @@
-import { RefObject, useRef } from 'react';
+import { RefObject, useEffect, useRef } from 'react';
 import { Camera, CameraProps } from '../core/Camera';
 import { assignZoomSettings } from '@utils';
 
@@ -13,11 +13,33 @@ export function useMountCamera(): CameraInfrastructure {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomInputRef = useRef<HTMLInputElement>(null);
-  const props: CameraProps = {
-    viewfinder: videoRef,
-    canvas: canvasRef
-  };
-  const cameraRef = useRef<Camera>(new Camera(props));
+  const cameraRef = useRef<Camera>();
+  
+  // Instansiate the camera core class.
+  useEffect(function mountCamera() {
+    if (cameraRef.current == null) {
+      const props: CameraProps = {
+        viewfinder: videoRef,
+        canvas: canvasRef
+      };
+      cameraRef.current = new Camera(props);
+    }
+
+    // Setup the zoom slider with the min, max and step values.
+    if (zoomInputRef?.current != null) {
+      zoomInputRef.current.min = assignZoomSettings('min', cameraRef.current);
+      zoomInputRef.current.max = assignZoomSettings('max', cameraRef.current);
+      zoomInputRef.current.step = assignZoomSettings('step', cameraRef.current);
+      zoomInputRef.current.value = '1';
+    }
+
+    function cleanup() {
+      if (cameraRef.current) {
+        cameraRef.current.stopCamera();
+      }
+    }
+    return cleanup;
+  }, []);
 
   // Handle multitouch events.
   videoRef?.current?.addEventListener(
@@ -30,21 +52,10 @@ export function useMountCamera(): CameraInfrastructure {
     { passive: false }
   );
 
-  // Setup the zoom slider with the min, max and step values.
-  if (zoomInputRef?.current != null) {
-    zoomInputRef.current.min = assignZoomSettings('min', cameraRef.current);
-    zoomInputRef.current.max = assignZoomSettings('max', cameraRef.current);
-    zoomInputRef.current.step = assignZoomSettings('step', cameraRef.current);
-    zoomInputRef.current.value = '1';
-  }
 
-  // Turn off camera once user is navigating away.
-  globalThis.addEventListener('pagehide', () => {
-    cameraRef.current.stopCamera();
-  });
 
   return {
-    camera: cameraRef.current,
+    camera: cameraRef?.current,
     canvas: canvasRef,
     viewfinder: videoRef,
     zoomInput: zoomInputRef

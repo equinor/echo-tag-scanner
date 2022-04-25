@@ -4,7 +4,7 @@ import { CircularProgress, Dialog } from '@equinor/eds-core-react';
 
 const ScanningIndicator = (): JSX.Element => {
   return (
-    <Dialogue>
+    <Dialogue open>
       <CircularProgress variant="indeterminate"></CircularProgress>
       <span>
         We got your image. <br />

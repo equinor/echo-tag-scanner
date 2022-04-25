@@ -26,7 +26,8 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
       const result = await Search.Tags.getAllAsync(
         props.functionalLocations.map((l) => l.tagNumber)
       );
-      if (result.isSuccess) {
+      console.log(result);
+      if (result.isSuccess && result.values.length > 0) {
         logTagSummaries(result.values);
         setTagSummary(result.values);
       } else {

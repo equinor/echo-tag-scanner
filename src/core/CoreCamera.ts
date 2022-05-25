@@ -31,6 +31,7 @@ class CoreCamera {
     function onApproval(mediaStream: MediaStream) {
       this._mediaStream = mediaStream;
       this._videoTrack = this._mediaStream.getVideoTracks()[0];
+      console.log('%c⧭', 'color: #ff0000', this._mediaStream.getVideoTracks());
       this._capabilities = this._videoTrack.getCapabilities();
       this._settings = this.videoTrack?.getSettings();
       if (this._viewfinder?.current) {

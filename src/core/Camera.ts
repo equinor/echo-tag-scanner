@@ -1,6 +1,6 @@
 import { CoreCamera, CoreCameraProps } from './CoreCamera';
-import { getFunctionalLocations } from '@services';
-import { MadOCRFunctionalLocations } from '@types';
+import { getFunctionalLocations, ocrRead } from '@services';
+import { MadOCRFunctionalLocations, ParsedComputerVisionResponse } from '@types';
 
 export type CameraProps = CoreCameraProps;
 
@@ -60,17 +60,31 @@ class Camera extends CoreCamera {
     }
   }
 
-  public async scan(): Promise<MadOCRFunctionalLocations | undefined> {
-    this.pauseViewfinder();
-    console.log('camera is paused', this._viewfinder.current.paused);
-    await this.capturePhoto();
+  private displayStatistics() {
     if (this.capture) {
       console.group('The photo that was OCR scanned');
       console.info('Photo size in kilobytes: ', this.capture.size / 1000);
       console.info('Media type: ', this.capture.type);
+      const image = new Image();
+      image.src = URL.createObjectURL(this.capture);
+      
+      image.onload = () => {
+        console.info("Dimensions: " + "Width: " + image.width + " " + "Height: " + image.height);
+        URL.revokeObjectURL(image.src);
+      }
       console.groupEnd();
+    }
+  }
 
-      const result = await getFunctionalLocations(this.capture);
+  public async scan(): Promise<MadOCRFunctionalLocations | ParsedComputerVisionResponse | undefined> {
+    this.pauseViewfinder();
+    console.log('camera is paused', this._viewfinder.current.paused);
+    await this.capturePhoto();
+    if (this.capture) {
+      this.displayStatistics();
+      const image = new Image();
+      image.src = URL.createObjectURL(this.capture);
+      const result = await ocrRead(this.capture);
       this.isScanning = false;
       return result;
     } else {

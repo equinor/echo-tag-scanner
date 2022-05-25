@@ -44,14 +44,14 @@ type EndpointInfo = {
 }
 // TODO: Move to env vars.
 const computerVisionOcrEndpointDev: EndpointInfo = {
-  url: "https://echocamera-tag-scanner-dev.cognitiveservices.azure.com/vision/v3.2/read/analyze",
+  url: "https://echocamera-tag-scanner-dev.cognitiveservices.azure.com/vision/v3.2/ocr",
   apiKey: ["47a223e8dae44f93ab479f0b49b7005d", "5442094e81954068bd0b1a6df5a1c0ad"]
 }
 
 type ComputerVisionOcrParams = {
-  language?: string | "unk";
+  language: string | "unk";
   detectOrientation?: boolean;
-  modelVersion?: string | "latest";
+  modelVersion: string | "latest";
 }
 
 export function getComputerVisionOcrResources(image: Blob): [
@@ -63,6 +63,8 @@ export function getComputerVisionOcrResources(image: Blob): [
 
   let url = computerVisionOcrEndpointDev.url;
   const params: ComputerVisionOcrParams = {
+    language: "unk",
+    detectOrientation: false,
     modelVersion: "latest"
   }
   url = addParams(url, params);

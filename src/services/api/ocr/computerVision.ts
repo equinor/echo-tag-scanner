@@ -2,19 +2,32 @@ import { getComputerVisionOcrResources } from '../resources/resources';
 import { baseApiClient } from '../base/base';
 import { ComputerVisionResponse, ParsedComputerVisionResponse } from '@types';
 
-export async function ocrRead(image: Blob): Promise<ParsedComputerVisionResponse> {
+export async function ocrRead(
+  image: Blob
+): Promise<ParsedComputerVisionResponse> {
   const [url, body, init] = getComputerVisionOcrResources(image);
   try {
+ 
+
+    const beforeRequestTimestamp = new Date();
     const response = await baseApiClient.postAsync<ComputerVisionResponse>(
-        url,
-        body,
-        init
-        );
-      const parsedResponse = parseResponse(response.data);
-      console.log(parsedResponse);
-      return parsedResponse;
-  } catch (e) {
-  }
+      url,
+      body,
+      init
+    );
+    const afterRequestTimestamp = new Date();
+    reportTimeTakenForRequest(beforeRequestTimestamp, afterRequestTimestamp);
+
+    const parsedResponse = parseResponse(response.data);
+    return parsedResponse;
+  } catch (e) {}
+}
+
+function reportTimeTakenForRequest(startDate: Date, endDate: Date) {
+  const result = endDate.getMilliseconds() - startDate.getMilliseconds();
+  console.group('Request timer');
+  console.info(`OCR Scanning took ${result} milliseconds`);
+  console.groupEnd();
 }
 
 // TODO: Improve this, possibly do validation here.
@@ -25,13 +38,13 @@ function parseResponse(
   response.regions.forEach((region) =>
     region.lines.forEach((line) =>
       line.words.forEach((word) => {
-        if (word.text && word.text.length > 7) {
-            // TODO: Improve regexp to include filter everything expect "-", alphanumerics, and aA-zZ.
-              possibleTagNumbers.push(word.text.replaceAll(/[\(\)']+/g, ''));
+        if (word.text && word.text.length >= 7) {
+          // TODO: Improve regexp to include filter everything expect "-", alphanumerics, and aA-zZ.
+          possibleTagNumbers.push(word.text.replaceAll(/[\(\)']+/g, ''));
         }
       })
     )
   );
-  console.log("ocr result: ", possibleTagNumbers);
+  console.log('ocr result: ', possibleTagNumbers);
   return { results: possibleTagNumbers };
 }

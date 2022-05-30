@@ -8,11 +8,11 @@ import {
 } from '@components';
 import { useMountCamera, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler } from '@services';
-import { MadOCRFunctionalLocations, ExtractedFunctionalLocation } from '@types';
+import { PossibleFunctionalLocations, ExtractedFunctionalLocation } from '@types';
 import {
   getNotificationDispatcher as dispatchNotification,
   getTorchToggleProvider,
-  tagSearch as runTagSearch
+  runTagValidation
 } from '@utils';
 import styled from 'styled-components';
 
@@ -23,10 +23,11 @@ const EchoCamera = () => {
   const { camera, canvas, viewfinder, zoomInput } = useMountCamera();
   const tagSearch = useSetActiveTagNo();
   
-  console.log('%c⧭', 'color: #917399', scannedFunctionalLocations);
-  function handleValidatedTags(tags: ExtractedFunctionalLocation[]) {
+  console.log('tags that has been detected: ', scannedFunctionalLocations?.length);
+
+  // Accepts a list of validated tags and sets them in memory for presentation.
+  function presentValidatedTags(tags: ExtractedFunctionalLocation[]) {
     if (Array.isArray(tags) && tags.length > 0) {
-      console.log("valid tags", tags);
       // We got more than 1 validated tag. Set them into state and rerender to present search results.
       setScans(tags);
     } else {
@@ -66,7 +67,7 @@ const EchoCamera = () => {
     /**
      * Handles the parsing and filtering of functional locations that was returned from the API.
      */
-    async function validateTags(fLocations?: MadOCRFunctionalLocations) {
+    async function validateTags(fLocations?: PossibleFunctionalLocations) {
       console.log('%c⧭', 'color: #d90000', fLocations);
       // The tag scanner returned some results.
       if (Array.isArray(fLocations?.results) && fLocations.results.length > 0) {
@@ -74,8 +75,7 @@ const EchoCamera = () => {
           camera.isScanning = false;
         };
         const beforeScan = new Date();
-        // Send the results over to tag validation.
-        const result = await runTagSearch(fLocations, afterSearchCallback);
+        const result = await runTagValidation(fLocations, afterSearchCallback);
         const afterScan = new Date();
         console.info(
           `Tag validation took ${
@@ -91,7 +91,7 @@ const EchoCamera = () => {
     }
 
     // We won't make the user wait more than 10 seconds for the scanning results.
-    const scanTookTooLong: Promise<MadOCRFunctionalLocations> = new Promise(
+    const scanTookTooLong: Promise<PossibleFunctionalLocations> = new Promise(
       (resolve) => {
         setTimeout(() => {
           resolve({ results: [] });
@@ -100,7 +100,7 @@ const EchoCamera = () => {
     );
 
     // This promise puts the scanning in motion.
-    const scanAction: Promise<MadOCRFunctionalLocations | undefined> =
+    const scanAction: Promise<PossibleFunctionalLocations | undefined> =
       new Promise((resolve) => {
         resolve(camera.scan());
       });
@@ -111,8 +111,8 @@ const EchoCamera = () => {
       // Validate the tag results from OCR
       .then((funcLocations) => validateTags(funcLocations))
 
-      // Receive the validated tags and put them into state.
-      .then((validatedTags) => handleValidatedTags(validatedTags));
+      // Receive the validated tags and present them.
+      .then((validatedTags) => presentValidatedTags(validatedTags));
   };
 
   if (camera) {

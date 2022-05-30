@@ -33,11 +33,6 @@ export function getFunctionalLocationsResources(image: Blob): {
 
 /* --------------- Computer Vision OCR -------------------------------------- */
 
-function createBinaryBody(image: Blob) {
-  const appendingMeta = `Content-Disposition: form-data; name="files"; filename="ocr_img.JPG"\r\nContent-Type: image/jpeg\r\n\r\n`;
-  return new Blob([appendingMeta, image]);
-} 
-
 type EndpointInfo = {
   url: string;
   apiKey: Array<string>;

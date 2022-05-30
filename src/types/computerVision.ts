@@ -1,4 +1,4 @@
-import {MadOCRFunctionalLocations} from "@types"
+import {PossibleFunctionalLocations} from "@types"
 
 type ComputerVisionResponse = {
     language: string;
@@ -28,6 +28,6 @@ type Word = {
 */
 type BoundingBox = string;
 
-type ParsedComputerVisionResponse = MadOCRFunctionalLocations;
+type ParsedComputerVisionResponse = PossibleFunctionalLocations;
 
 export type { ComputerVisionResponse, ParsedComputerVisionResponse };

@@ -1,6 +1,6 @@
 import { CoreCamera, CoreCameraProps } from './CoreCamera';
 import { getFunctionalLocations, ocrRead } from '@services';
-import { MadOCRFunctionalLocations, ParsedComputerVisionResponse } from '@types';
+import { PossibleFunctionalLocations, ParsedComputerVisionResponse } from '@types';
 
 export type CameraProps = CoreCameraProps;
 
@@ -76,7 +76,7 @@ class Camera extends CoreCamera {
     }
   }
 
-  public async scan(): Promise<MadOCRFunctionalLocations | ParsedComputerVisionResponse | undefined> {
+  public async scan(): Promise<PossibleFunctionalLocations | ParsedComputerVisionResponse | undefined> {
     this.pauseViewfinder();
     console.log('camera is paused', this._viewfinder.current.paused);
     await this.capturePhoto();

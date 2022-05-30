@@ -21,19 +21,20 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
   /**
    * Keeps and updates a list of tag summaries for user presentation.
    */
-  EchoUtils.Hooks.useEffectAsync(async () => {
-    if (props.functionalLocations.length > 0) {
-      const result = await Search.Tags.getAllAsync(
-        props.functionalLocations.map((l) => l.tagNumber)
-      );
-      if (result.isSuccess && result.values.length > 0) {
-        logTagSummaries(result.values);
-        setTagSummary(result.values);
-      } else {
-        setTagSummary(undefined);
-      }
+ EchoUtils.Hooks.useEffectAsync(async () => {
+if (props.functionalLocations.length > 0) {
+ const result = await Search.Tags.getAllAsync(
+  props.functionalLocations.map((l) => l.tagNumber)
+  );
+  console.log("getting tag summary", result);
+  if (result.isSuccess && result.values.length > 0) {
+ logTagSummaries(result.values);
+  setTagSummary(result.values);
+  } else {
+  setTagSummary(undefined);
+  }
     }
-  }, [props.functionalLocations]);
+   }, [props.functionalLocations?.length]);
 
   function onClick(tagNumber: string) {
     props.onTagSearch(tagNumber);

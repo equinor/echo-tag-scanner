@@ -2,13 +2,13 @@ import { getFunctionalLocationsResources } from '../resources/resources';
 import { baseApiClient } from '../base/base';
 import { ErrorRegistry } from '@enums';
 import { handleError } from '@utils';
-import { MadOCRFunctionalLocations } from '@types';
+import { PossibleFunctionalLocations } from '@types';
 
-export async function getFunctionalLocations(image: Blob): Promise<MadOCRFunctionalLocations> {
+export async function getFunctionalLocations(image: Blob): Promise<PossibleFunctionalLocations> {
   try {
     const beforeRequestTimestamp = new Date();
     const { url, body, init } = getFunctionalLocationsResources(image);
-    const result = await baseApiClient.postAsync<MadOCRFunctionalLocations>(
+    const result = await baseApiClient.postAsync<PossibleFunctionalLocations>(
       url,
       body,
       init
@@ -23,7 +23,7 @@ export async function getFunctionalLocations(image: Blob): Promise<MadOCRFunctio
 export const ocrApi = { getFunctionalLocations };
 
 function reportTimeTakenForRequest(startDate: Date, endDate: Date) {
-  const result = endDate.getSeconds() - startDate.getSeconds();
+  const result = endDate.getMilliseconds() - startDate.getMilliseconds();
   console.group('Request timer');
   console.info(`OCR Scanning took ${result} seconds`);
   console.groupEnd();

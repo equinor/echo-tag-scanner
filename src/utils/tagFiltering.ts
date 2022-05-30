@@ -1,32 +1,28 @@
-import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from '@types';
-import { Search, TagSummaryDto } from '@equinor/echo-search';
+import { ExtractedFunctionalLocation, PossibleFunctionalLocations } from '@types';
+import { Search } from '@equinor/echo-search';
 import { extractFunctionalLocation, getInstCode } from '@utils';
 
 /**
- * Returns a promise to return a TagSummary, or undefined if no tags were found.
+ * Returns a promise to validate a string as a tag number.
  */
-function createTagSearch(
+function createTagValidator(
   location: ExtractedFunctionalLocation,
   instCode?: string
 ): Promise<ExtractedFunctionalLocation | undefined> {
   return new Promise((resolve, reject) => {
-    Search.Tags.isTagAsync(location.tagNumber, instCode)
+    Search.Tags.getAsync(location.tagNumber)
       .then(function handleTagValidationResponse(validation) {
-        if (Boolean(validation.value)) {
-          console.info(
-            `${location.tagNumber} is valid: `,
-            Boolean(validation.value)
-          );
-        } else {
-          console.warn(
-            `${location.tagNumber} is valid: `,
-            Boolean(validation.value)
-          );
-        }
+        console.log('%c⧭', 'color: #731d1d', validation);
 
-        if (validation.value) {
-          resolve(location);
-        } else {
+        if (validation.isNotFound){
+          console.warn(
+            `${location.tagNumber} is not valid.`,
+            );
+            resolve(location);
+        } else {          
+          console.info(
+            `${location.tagNumber} is valid.`,
+          );
           resolve(undefined);
         }
       })
@@ -37,29 +33,26 @@ function createTagSearch(
   });
 }
 
-function getFunctionalLocations(locations: MadOCRFunctionalLocations) {
-  return locations.results.map((l) => extractFunctionalLocation(l));
-}
-
 /**
  * The user might have scanned images containing other things than tag-numbers.
- * This function will filter them out.
+ * This function handles the filtering of these false positives.
  */
-export function tagSearch(
-  locations: MadOCRFunctionalLocations,
+export async function runTagValidation(
+  locations: PossibleFunctionalLocations,
   afterSearchCallback: () => void
 ): Promise<ExtractedFunctionalLocation[]> {
-  return new Promise((resolve) => {
-    const functionalLocations = getFunctionalLocations(locations);
-    const tagSearches = functionalLocations.map((funcLocation) =>
-      createTagSearch(funcLocation, getInstCode() ?? 'TROA')
+
+  // Split the possible tag number into functional locations.
+  const functionalLocations = locations.results.map((l) => extractFunctionalLocation(l));
+    const tagValidationTasks = functionalLocations.map((funcLocation) =>
+      createTagValidator(funcLocation, getInstCode())
     );
-
-    Promise.all([...tagSearches]).then((results) => {
-      afterSearchCallback();
-
-      // Resolve a list of validated tags and filter away undefines.
-      resolve(results.filter((r) => Boolean(r)));
-    });
-  });
+  const tagValidationResults = await Promise.allSettled([...tagValidationTasks]);
+  afterSearchCallback();
+  
+  return tagValidationResults.map((result) => {
+    if (result.status === "fulfilled") return result.value;
+  }).filter(result => Boolean(result));
 }
+
+

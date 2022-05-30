@@ -25,6 +25,7 @@ export async function ocrRead(
     const parsedResponse = parseResponse(response.data);
     return parsedResponse;
   } catch (error) {
+    console.error("API Error -> ", error);
     dispatchNotification("There was a error while uploading the media.")()
     throw handleError(ErrorRegistry.ocrError, error as Error);
   }

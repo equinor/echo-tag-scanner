@@ -1,14 +1,18 @@
 import { getComputerVisionOcrResources } from '../resources/resources';
 import { baseApiClient } from '../base/base';
 import { ComputerVisionResponse, ParsedComputerVisionResponse } from '@types';
+import {
+  getNotificationDispatcher as dispatchNotification,
+} from '@utils';
+import { handleError } from '@utils';
+import { ErrorRegistry } from '../../../enums';
+
 
 export async function ocrRead(
   image: Blob
 ): Promise<ParsedComputerVisionResponse> {
   const [url, body, init] = getComputerVisionOcrResources(image);
   try {
- 
-
     const beforeRequestTimestamp = new Date();
     const response = await baseApiClient.postAsync<ComputerVisionResponse>(
       url,
@@ -20,7 +24,10 @@ export async function ocrRead(
 
     const parsedResponse = parseResponse(response.data);
     return parsedResponse;
-  } catch (e) {}
+  } catch (error) {
+    dispatchNotification("There was a error while uploading the media.")()
+    throw handleError(ErrorRegistry.ocrError, error as Error);
+  }
 }
 
 function reportTimeTakenForRequest(startDate: Date, endDate: Date) {

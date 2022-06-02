@@ -7,62 +7,40 @@ import {
   ZoomSlider
 } from '@components';
 import { useMountCamera, useSetActiveTagNo } from '@hooks';
-import { NotificationHandler } from '@services';
-import { PossibleFunctionalLocations, ExtractedFunctionalLocation } from '@types';
-import {
-  getNotificationDispatcher as dispatchNotification,
-  getTorchToggleProvider,
-  runTagValidation
-} from '@utils';
+import { NotificationHandler, useTagScanStatus } from '@services';
+import { PossibleFunctionalLocations } from '@types';
+import { getTorchToggleProvider, runTagValidation } from '@utils';
 import styled from 'styled-components';
+import { TagSummaryDto } from '@equinor/echo-search';
 
 const EchoCamera = () => {
-  const [scannedFunctionalLocations, setScans] = useState<
-  ExtractedFunctionalLocation[] | undefined
+  const [validatedTags, setValidatedTags] = useState<
+    TagSummaryDto[] | undefined
   >(undefined);
   const { camera, canvas, viewfinder, zoomInput } = useMountCamera();
   const tagSearch = useSetActiveTagNo();
-  
-  console.log('tags that has been detected: ', scannedFunctionalLocations?.length);
+  const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
   // Accepts a list of validated tags and sets them in memory for presentation.
-  function presentValidatedTags(tags: ExtractedFunctionalLocation[]) {
+  function presentValidatedTags(tags: TagSummaryDto[]) {
     if (Array.isArray(tags) && tags.length > 0) {
       // We got more than 1 validated tag. Set them into state and rerender to present search results.
-      setScans(tags);
+      setValidatedTags(tags);
     } else {
       // We got no validated tags.
       handleNoTagsFound();
+      changeTagScanStatus('noTagsFound', true);
     }
   }
 
   function handleNoTagsFound() {
     camera.resumeViewfinder();
-    dispatchNotification({
-      message: 'We did not recognize any tag numbers. Try again?',
-      autohideDuration: 5000
-    })();
+    setValidatedTags([]);
   }
 
   const onScanning = async () => {
-    setScans(undefined);
+    setValidatedTags(undefined);
     camera.isScanning = true;
-
-    /** An IIFE that runs after 3 seconds.
-     * If the tag scanning process is still in progress,
-     * this will ensure the impatient user.
-     */
-    (function notifyUserLongScan() {
-      setTimeout(() => {
-        if (camera.isScanning) {
-          dispatchNotification({
-            message:
-              'Hang tight, the scan appears to be taking longer than usual.',
-            autohideDuration: 5000
-          })();
-        }
-      }, 3000);
-    })();
 
     /**
      * Handles the parsing and filtering of functional locations that was returned from the API.
@@ -74,13 +52,14 @@ const EchoCamera = () => {
         const afterSearchCallback = () => {
           camera.isScanning = false;
         };
-        const beforeScan = new Date();
+        const beforeValidation = new Date();
         const result = await runTagValidation(fLocations, afterSearchCallback);
-        const afterScan = new Date();
+        const afterValidation = new Date();
         console.info(
           `Tag validation took ${
-            afterScan.getSeconds() - beforeScan.getSeconds()
-          } seconds.`
+            afterValidation.getMilliseconds() -
+            beforeValidation.getMilliseconds()
+          } milliseconds.`
         );
 
         return result;
@@ -91,25 +70,32 @@ const EchoCamera = () => {
     }
 
     // We won't make the user wait more than 10 seconds for the scanning results.
+    // TODO: Retire the scanning race.
     const scanTookTooLong: Promise<PossibleFunctionalLocations> = new Promise(
       (resolve) => {
         setTimeout(() => {
           resolve({ results: [] });
-        }, 10000);
+        }, 1000000);
       }
     );
 
     // This promise puts the scanning in motion.
     const scanAction: Promise<PossibleFunctionalLocations | undefined> =
       new Promise((resolve) => {
-        resolve(camera.scan());
+        resolve(camera.scan(changeTagScanStatus));
       });
 
     // Start the scan race.
     Promise.race([scanAction, scanTookTooLong])
 
       // Validate the tag results from OCR
-      .then((funcLocations) => validateTags(funcLocations))
+      .then((funcLocations) => {
+        changeTagScanStatus('uploading', false);
+        changeTagScanStatus('validating', true);
+        const validatedTags = validateTags(funcLocations);
+        changeTagScanStatus('validating', false);
+        return validatedTags;
+      })
 
       // Receive the validated tags and present them.
       .then((validatedTags) => presentValidatedTags(validatedTags));
@@ -136,18 +122,26 @@ const EchoCamera = () => {
         />
         <NotificationHandler />
         <DialogueWrapper>
-          {scannedFunctionalLocations && scannedFunctionalLocations.length > 0 && (
+          {validatedTags && (
             <SearchResults
-              functionalLocations={scannedFunctionalLocations}
+              tagSummary={validatedTags}
               onTagSearch={tagSearch}
               onClose={() => {
                 camera.resumeViewfinder();
-                setScans(undefined);
+                setValidatedTags(undefined);
               }}
             />
           )}
 
-          {camera.isScanning && <ScanningIndicator />}
+          {tagScanStatus.uploading &&
+            ScanningIndicator(
+              <span>
+                Uploading media. <br />
+                <br /> This could take a while depending on your internet
+                connection.
+              </span>
+            )}
+          {tagScanStatus.validating && ScanningIndicator('Validating...')}
         </DialogueWrapper>
       </Main>
     );
@@ -159,7 +153,6 @@ const EchoCamera = () => {
 const Main = styled.main`
   .cameraWrapper {
     height: 100%;
-    // background-color: #00000010;
   }
 `;
 

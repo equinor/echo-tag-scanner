@@ -1,6 +1,9 @@
 import { CoreCamera, CoreCameraProps } from './CoreCamera';
-import { getFunctionalLocations, ocrRead } from '@services';
-import { PossibleFunctionalLocations, ParsedComputerVisionResponse } from '@types';
+import { getFunctionalLocations, ocrRead, TagScanningStages } from '@services';
+import {
+  PossibleFunctionalLocations,
+  ParsedComputerVisionResponse
+} from '@types';
 
 export type CameraProps = CoreCameraProps;
 
@@ -67,25 +70,37 @@ class Camera extends CoreCamera {
       console.info('Media type: ', this.capture.type);
       const image = new Image();
       image.src = URL.createObjectURL(this.capture);
-      
+
       image.onload = () => {
-        console.info("Dimensions: " + "Width: " + image.width + " " + "Height: " + image.height);
+        console.info(
+          'Dimensions: ' +
+            'Width: ' +
+            image.width +
+            ' ' +
+            'Height: ' +
+            image.height
+        );
         URL.revokeObjectURL(image.src);
-      }
+      };
       console.groupEnd();
     }
   }
 
-  public async scan(): Promise<PossibleFunctionalLocations | ParsedComputerVisionResponse | undefined> {
+  public async scan(
+    callback: (property: TagScanningStages, value: boolean) => void
+  ): Promise<
+    PossibleFunctionalLocations | ParsedComputerVisionResponse | undefined
+  > {
     this.pauseViewfinder();
-    console.log('camera is paused', this._viewfinder.current.paused);
     await this.capturePhoto();
     if (this.capture) {
       this.displayStatistics();
       const image = new Image();
       image.src = URL.createObjectURL(this.capture);
+      callback('uploading', true);
       const result = await ocrRead(this.capture);
       this.isScanning = false;
+      callback('uploading', false);
       return result;
     } else {
       this.isScanning = false;

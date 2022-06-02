@@ -52,7 +52,7 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
       <InvisibleWrapper>
         {props.tagSummary.map(createSearchResult)}
         <ScanAgainButton variant="contained" onClick={props.onClose}>
-          Scan again
+          <ButtonLabel>Scan again</ButtonLabel>
         </ScanAgainButton>
       </InvisibleWrapper>
     );
@@ -61,12 +61,16 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
       <NoSearchResultsWrapper open>
         <NoSearchResultsMessage>No tags detected.</NoSearchResultsMessage>
         <ScanAgainButton variant="contained" onClick={props.onClose}>
-          Scan again
+          <ButtonLabel>Scan again</ButtonLabel>
         </ScanAgainButton>
       </NoSearchResultsWrapper>
     );
   }
 };
+
+const ButtonLabel = styled.span`
+  white-space: nowrap;
+`;
 
 const NoSearchResultsMessage = styled.p`
   background-color: var(--white);
@@ -83,9 +87,10 @@ const InvisibleWrapper = styled.div`
 const NoSearchResultsWrapper = styled(Dialog)`
   justify-content: center;
   z-index: 2;
-  width: auto;
+  width: 100%;
   height: auto;
   padding: var(--medium);
+  max-width: unset !important;
 `;
 
 const SearchResult = styled(TagContextMenu)`

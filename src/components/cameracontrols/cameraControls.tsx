@@ -36,8 +36,6 @@ const CameraControls = (props: CameraControlsProps): JSX.Element => {
 };
 
 const CameraControlsWrapper = styled.section`
-  position: fixed;
-  bottom: 5%;
   width: 100%;
 `;
 
@@ -47,7 +45,6 @@ const CameraController = styled.div`
   justify-items: center;
   align-items: center;
   width: 100%;
-
   label {
     margin-right: 1.5em;
   }

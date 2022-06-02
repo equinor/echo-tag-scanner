@@ -29,22 +29,20 @@ const ZoomSlider = (props: ZoomSliderProps): JSX.Element => {
 };
 
 const SliderWrapper = styled.div`
-    display: flex;
-    justify-content: center;
-    position: absolute;
-    bottom: 20%;
-    width: 30%;
-    width: 100%;
-    text-align: center;
-  
-    > div {
-      width: 40%;
+  display: flex;
+  justify-content: center;
+  width: 30%;
+  width: 100%;
+  text-align: center;
 
-      > output {
-        // Hide the zoom output value.
-        display: none;
-      }
+  > div {
+    width: 40%;
+
+    > output {
+      // Hide the zoom output value.
+      display: none;
     }
-`
+  }
+`;
 
 export { ZoomSlider };

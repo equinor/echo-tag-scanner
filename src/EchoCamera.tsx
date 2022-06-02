@@ -106,20 +106,22 @@ const EchoCamera = () => {
       <Main>
         <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
 
-        {camera?.capabilities?.zoom && (
-          <ZoomSlider
-            onSlide={camera.alterZoom}
-            zoomInputRef={zoomInput}
-            zoomOptions={camera.capabilities?.zoom}
-          />
-        )}
+        <Section>
+          {camera?.capabilities?.zoom && (
+            <ZoomSlider
+              onSlide={camera.alterZoom}
+              zoomInputRef={zoomInput}
+              zoomOptions={camera.capabilities?.zoom}
+            />
+          )}
 
-        <CameraControls
-          onToggleTorch={getTorchToggleProvider(camera)}
-          onScanning={onScanning}
-          isScanning={camera.isScanning}
-          supportedFeatures={{ torch: camera?.capabilities?.torch }}
-        />
+          <CameraControls
+            onToggleTorch={getTorchToggleProvider(camera)}
+            onScanning={onScanning}
+            isScanning={camera.isScanning}
+            supportedFeatures={{ torch: camera?.capabilities?.torch }}
+          />
+        </Section>
         <NotificationHandler />
         <DialogueWrapper>
           {validatedTags && (
@@ -150,6 +152,15 @@ const EchoCamera = () => {
   }
 };
 
+const Section = styled.section`
+  position: fixed;
+  bottom: 10px;
+  display: grid;
+  height: 20%;
+  width: 100%;
+  align-items: center;
+`;
+
 const Main = styled.main`
   .cameraWrapper {
     height: 100%;
@@ -164,7 +175,7 @@ const DialogueWrapper = styled.section`
   top: 0;
   // The height of this wrapper is based on the bottom offset
   // of the zoom slider and camera controls (20% and 5% respectively).
-  height: calc(100% - 20% - 5%);
+  height: calc(100% - 20%);
   width: 100%;
 `;
 

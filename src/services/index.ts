@@ -3,3 +3,7 @@ export { NotificationHandler } from './notification/NotificationListener';
 export { getFunctionalLocations } from './api/ocr/ocr';
 export { isBaseApiError, BaseApiClientError } from './api/base/error';
 export { ocrRead } from "./api/ocr/computerVision";
+export {
+  useTagScanStatus,
+  TagScanningStages
+} from './notification/TagScanStatus';

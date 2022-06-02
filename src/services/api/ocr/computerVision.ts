@@ -1,12 +1,8 @@
 import { getComputerVisionOcrResources } from '../resources/resources';
 import { baseApiClient } from '../base/base';
 import { ComputerVisionResponse, ParsedComputerVisionResponse } from '@types';
-import {
-  getNotificationDispatcher as dispatchNotification,
-} from '@utils';
 import { handleError } from '@utils';
 import { ErrorRegistry } from '../../../enums';
-
 
 export async function ocrRead(
   image: Blob
@@ -25,8 +21,7 @@ export async function ocrRead(
     const parsedResponse = parseResponse(response.data);
     return parsedResponse;
   } catch (error) {
-    console.error("API Error -> ", error);
-    dispatchNotification("There was a error while uploading the media.")()
+    console.error('API Error -> ', error);
     throw handleError(ErrorRegistry.ocrError, error as Error);
   }
 }

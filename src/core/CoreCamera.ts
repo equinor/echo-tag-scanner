@@ -36,6 +36,17 @@ class CoreCamera {
       if (this._viewfinder?.current) {
         this._viewfinder.current.srcObject = mediaStream;
       }
+
+      console.group('Camera capabilities');
+      console.info(
+        'Camera is capable of zooming: ',
+        Boolean(this._capabilities.zoom)
+      );
+      console.info(
+        'Camera is capable of using the torch: ',
+        Boolean(this._capabilities.torch)
+      );
+      console.groupEnd();
     }
 
     function onRejection(reason: unknown) {
@@ -47,13 +58,33 @@ class CoreCamera {
   private async promptCameraUsage(
     additionalCaptureOptions?: DisplayMediaStreamConstraints
   ) {
-    const mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment'  },
-      audio: false,
-      ...additionalCaptureOptions
-    });
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: {
+            min: 1280,
+            ideal: 1920,
+            max: 2560
+          },
+          height: {
+            min: 720,
+            ideal: 1080,
+            max: 1440
+          },
+          frameRate: {
+            ideal: 30,
+            min: 15
+          },
+          facingMode: 'environment'
+        },
+        audio: false,
+        ...additionalCaptureOptions
+      });
+      return mediaStream;
+    } catch (error) {
+      throw new Error(error);
+    }
 
-    return mediaStream;
   }
 
   public get cameraEnabled(): boolean {

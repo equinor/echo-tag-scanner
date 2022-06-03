@@ -25,6 +25,7 @@ const Dialogue = styled(Dialog)`
   width: auto;
   height: auto;
   padding: 0 1rem;
+  max-width: unset !important;
 
   > span {
     margin: 0 auto;

@@ -122,6 +122,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
       severity: undefined
     });
   }
+  // if (this.state.severity === 'high') {
 
   render(): React.ReactNode {
     if (this.state.hasError) {
@@ -130,9 +131,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
           <>
             <Backdrop open>
               <ErrorDialogue open>
-                <Dialog.Title>
-                  <Typography variant="h3">An error has occured</Typography>
-                </Dialog.Title>
+                <DialogueTitleSection>
+                  <DialogueTitle variant="h4">
+                    An error has occured
+                  </DialogueTitle>
+                </DialogueTitleSection>
                 <Dialog.CustomContent>
                   <ErrorBoundaryContent>
                     <Typography variant="body_long">
@@ -211,8 +214,8 @@ const Backdrop = styled(Scrim)`
 `;
 
 const ErrorDialogue = styled(Dialog)`
-  width: 60vw;
-  max-width: 60vw;
+  max-width: unset !important;
+  width: 80vw;
   max-height: 60vh;
   width: unset;
   overflow-y: auto;
@@ -220,6 +223,16 @@ const ErrorDialogue = styled(Dialog)`
 
 const Details = styled.details`
   cursor: pointer;
+`;
+
+const DialogueTitleSection = styled(Dialog.Title)`
+  width: 100%;
+  border-bottom: 1px solid var(--equiGray4);
+`;
+
+const DialogueTitle = styled(Typography)`
+  padding: var(--small) 0;
+  padding-left: var(--medium);
 `;
 
 const Developer = styled.section`

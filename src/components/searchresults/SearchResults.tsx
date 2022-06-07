@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { Button, Dialog } from '@equinor/eds-core-react';
+import { Button, Dialog, Scrim } from '@equinor/eds-core-react';
 import { TagContextMenu, TagIcon, getIcon } from '@equinor/echo-components';
 import { getLegendStatusColor } from '@equinor/echo-framework';
 import { TagSummaryDto } from '@equinor/echo-search';
@@ -32,6 +32,7 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
       //@ts-ignore
       // Ignoring a non-optional (setExpanded) prop as there is
       // no need to handle expanded states.
+
       <SearchResult
         key={index}
         expanded
@@ -49,12 +50,14 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
 
   if (props.tagSummary.length > 0) {
     return (
-      <InvisibleWrapper>
-        {props.tagSummary.map(createSearchResult)}
-        <ScanAgainButton variant="contained" onClick={props.onClose}>
-          <ButtonLabel>Scan again</ButtonLabel>
-        </ScanAgainButton>
-      </InvisibleWrapper>
+      <Scrim open>
+        <InvisibleWrapper>
+          {props.tagSummary.map(createSearchResult)}
+          <ScanAgainButton variant="contained" onClick={props.onClose}>
+            <ButtonLabel>Scan again</ButtonLabel>
+          </ScanAgainButton>
+        </InvisibleWrapper>
+      </Scrim>
     );
   } else {
     return (

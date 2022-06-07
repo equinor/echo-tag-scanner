@@ -35,7 +35,7 @@ const EchoCamera = () => {
     }
   }
   eventHub.subscribe('isSyncing', (syncStatus: boolean) => {
-    console.log('checking if syncing: ', syncStatus);
+    console.log('echo is syncing : ', syncStatus);
     if (syncStatus) setTagSyncIsDone(true);
     else setTagSyncIsDone(false);
   });
@@ -125,7 +125,7 @@ const EchoCamera = () => {
           <CameraControls
             onToggleTorch={getTorchToggleProvider(camera)}
             onScanning={onScanning}
-            isDisabled={camera.isScanning && tagSyncIsDone}
+            isDisabled={camera.isScanning && !tagSyncIsDone}
             supportedFeatures={{ torch: camera?.capabilities?.torch }}
           />
         </Section>

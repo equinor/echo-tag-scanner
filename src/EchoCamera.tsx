@@ -11,7 +11,8 @@ import { NotificationHandler, useTagScanStatus } from '@services';
 import { PossibleFunctionalLocations } from '@types';
 import { getTorchToggleProvider, runTagValidation } from '@utils';
 import styled from 'styled-components';
-import { TagSummaryDto } from '@equinor/echo-search';
+import { OfflineSystem, Syncer, TagSummaryDto } from '@equinor/echo-search';
+import { eventHub } from '@equinor/echo-base';
 
 const EchoCamera = () => {
   const [validatedTags, setValidatedTags] = useState<
@@ -20,6 +21,7 @@ const EchoCamera = () => {
   const { camera, canvas, viewfinder, zoomInput } = useMountCamera();
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
+  const [tagSyncIsDone, setTagSyncIsDone] = useState(false);
 
   // Accepts a list of validated tags and sets them in memory for presentation.
   function presentValidatedTags(tags: TagSummaryDto[]) {
@@ -32,6 +34,11 @@ const EchoCamera = () => {
       changeTagScanStatus('noTagsFound', true);
     }
   }
+  eventHub.subscribe('isSyncing', (syncStatus: boolean) => {
+    console.log('checking if syncing: ', syncStatus);
+    if (syncStatus) setTagSyncIsDone(true);
+    else setTagSyncIsDone(false);
+  });
 
   function handleNoTagsFound() {
     camera.resumeViewfinder();
@@ -118,7 +125,7 @@ const EchoCamera = () => {
           <CameraControls
             onToggleTorch={getTorchToggleProvider(camera)}
             onScanning={onScanning}
-            isScanning={camera.isScanning}
+            isDisabled={camera.isScanning && tagSyncIsDone}
             supportedFeatures={{ torch: camera?.capabilities?.torch }}
           />
         </Section>

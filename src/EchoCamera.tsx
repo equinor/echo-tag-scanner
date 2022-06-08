@@ -9,10 +9,15 @@ import {
 import { useMountCamera, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import { PossibleFunctionalLocations } from '@types';
-import { getTorchToggleProvider, runTagValidation } from '@utils';
+import {
+  getTorchToggleProvider,
+  runTagValidation,
+  getNotificationDispatcher as dispatchNotification
+} from '@utils';
 import styled from 'styled-components';
-import { OfflineSystem, Syncer, TagSummaryDto } from '@equinor/echo-search';
+import { TagSummaryDto } from '@equinor/echo-search';
 import { eventHub } from '@equinor/echo-base';
+import { EchoEnv } from '@equinor/echo-core';
 
 const EchoCamera = () => {
   const [validatedTags, setValidatedTags] = useState<
@@ -21,7 +26,26 @@ const EchoCamera = () => {
   const { camera, canvas, viewfinder, zoomInput } = useMountCamera();
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
-  const [tagSyncIsDone, setTagSyncIsDone] = useState(false);
+
+  // Controls the availability of scanning.
+  // We currently have no good way of setting the initial mounted value.
+  // There will be a small lag until EventHub is able to set the proper initial value.
+  const [tagSyncIsDone, setTagSyncIsDone] = useState(true);
+
+  // When Echo is done syncing, we can rerender and open for scanning.
+  eventHub.subscribe('isSyncing', (syncStatus: boolean) => {
+    console.log('Echo is syncing: ', syncStatus);
+    if (syncStatus) setTagSyncIsDone(true);
+    else setTagSyncIsDone(false);
+  });
+
+  // Since we do not have tag syncing in development, this will mimick an interval where Echopedia is syncing.
+  if (EchoEnv.isDevelopment) {
+    const syncDelayMs = 2000;
+    setTimeout(() => {
+      setTagSyncIsDone(true);
+    }, syncDelayMs);
+  }
 
   // Accepts a list of validated tags and sets them in memory for presentation.
   function presentValidatedTags(tags: TagSummaryDto[]) {
@@ -34,11 +58,6 @@ const EchoCamera = () => {
       changeTagScanStatus('noTagsFound', true);
     }
   }
-  eventHub.subscribe('isSyncing', (syncStatus: boolean) => {
-    console.log('echo is syncing : ', syncStatus);
-    if (syncStatus) setTagSyncIsDone(true);
-    else setTagSyncIsDone(false);
-  });
 
   function handleNoTagsFound() {
     camera.resumeViewfinder();
@@ -46,6 +65,13 @@ const EchoCamera = () => {
   }
 
   const onScanning = async () => {
+    if (!tagSyncIsDone || camera.isScanning) {
+      dispatchNotification({
+        message: 'Scanning is available as soon as the syncing is done.',
+        autohideDuration: 2000
+      })();
+      return;
+    }
     setValidatedTags(undefined);
     camera.isScanning = true;
 
@@ -53,7 +79,6 @@ const EchoCamera = () => {
      * Handles the parsing and filtering of functional locations that was returned from the API.
      */
     async function validateTags(fLocations?: PossibleFunctionalLocations) {
-      console.log('%c⧭', 'color: #d90000', fLocations);
       // The tag scanner returned some results.
       if (Array.isArray(fLocations?.results) && fLocations.results.length > 0) {
         const afterSearchCallback = () => {
@@ -125,7 +150,7 @@ const EchoCamera = () => {
           <CameraControls
             onToggleTorch={getTorchToggleProvider(camera)}
             onScanning={onScanning}
-            isDisabled={camera.isScanning && !tagSyncIsDone}
+            isDisabled={camera.isScanning || !tagSyncIsDone}
             supportedFeatures={{ torch: camera?.capabilities?.torch }}
           />
         </Section>

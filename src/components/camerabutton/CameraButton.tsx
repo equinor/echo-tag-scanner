@@ -33,10 +33,11 @@ interface ShutterProps {
 /**
  * Returns a custom camera shutter/tag scanning button.
  */
-const ScannerButton = (props: ShutterProps): JSX.Element => (
-  <ScannerTrigger disabled={props.isDisabled} onClick={props.onClick} />
-);
-
+const ScannerButton = (props: ShutterProps): JSX.Element => {
+  if (props.isDisabled)
+    return <ScannerTriggerInProgress onClick={props.onClick} />;
+  else return <ScannerTrigger onClick={props.onClick} />;
+};
 const ScannerTrigger = styled.button`
   border-radius: 100%;
   border-style: solid;
@@ -46,13 +47,13 @@ const ScannerTrigger = styled.button`
   height: 75px;
   background-color: var(--white);
   grid-area: shutter;
+`;
 
-  &:disabled {
-    background-color: var(--equiGreen1);
-    box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
-    -webkit-box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
-    -moz-box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
-  }
+const ScannerTriggerInProgress = styled(ScannerTrigger)`
+  background-color: var(--equiGreen1);
+  box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
+  -webkit-box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
+  -moz-box-shadow: -5px 4px 40px -6px rgba(0, 0, 0, 0.65) inset;
 `;
 
 const TorchTrigger = styled.button`

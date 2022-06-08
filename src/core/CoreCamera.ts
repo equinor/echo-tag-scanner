@@ -133,7 +133,7 @@ class CoreCamera {
 
     function onTorchRejection(reason: unknown) {
       throw handleError(
-        ErrorRegistry.zoomError,
+        ErrorRegistry.torchError,
         new Error('The torch could not be toggled, more info: ' + reason)
       );
     }

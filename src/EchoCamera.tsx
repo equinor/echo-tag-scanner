@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   CameraControls,
+  CaptureArea,
   ScanningIndicator,
   SearchResults,
   Viewfinder,
@@ -23,7 +24,7 @@ const EchoCamera = () => {
   const [validatedTags, setValidatedTags] = useState<
     TagSummaryDto[] | undefined
   >(undefined);
-  const { camera, canvas, viewfinder, zoomInput } = useMountCamera();
+  const { camera, canvas, viewfinder, zoomInput, scanArea } = useMountCamera();
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
@@ -114,7 +115,12 @@ const EchoCamera = () => {
     // This promise puts the scanning in motion.
     const scanAction: Promise<PossibleFunctionalLocations | undefined> =
       new Promise((resolve) => {
-        resolve(camera.scan(changeTagScanStatus));
+        resolve(
+          camera.scan(
+            scanArea.current.getBoundingClientRect(),
+            changeTagScanStatus
+          )
+        );
       });
 
     // Start the scan race.
@@ -133,55 +139,53 @@ const EchoCamera = () => {
       .then((validatedTags) => presentValidatedTags(validatedTags));
   };
 
-  if (camera) {
-    return (
-      <Main>
-        <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
+  return (
+    <Main>
+      <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
+      <CaptureArea captureAreaRef={scanArea} />
+      <Section>
+        {camera && camera?.capabilities?.zoom && (
+          <ZoomSlider
+            onSlide={camera.alterZoom}
+            zoomInputRef={zoomInput}
+            zoomOptions={camera.capabilities?.zoom}
+          />
+        )}
 
-        <Section>
-          {camera?.capabilities?.zoom && (
-            <ZoomSlider
-              onSlide={camera.alterZoom}
-              zoomInputRef={zoomInput}
-              zoomOptions={camera.capabilities?.zoom}
-            />
-          )}
-
+        {camera && (
           <CameraControls
             onToggleTorch={getTorchToggleProvider(camera)}
             onScanning={onScanning}
             isDisabled={camera.isScanning || !tagSyncIsDone}
             supportedFeatures={{ torch: camera?.capabilities?.torch }}
           />
-        </Section>
-        <NotificationHandler />
-        <DialogueWrapper>
-          {validatedTags && (
-            <SearchResults
-              tagSummary={validatedTags}
-              onTagSearch={tagSearch}
-              onClose={() => {
-                camera.resumeViewfinder();
-                setValidatedTags(undefined);
-              }}
-            />
-          )}
+        )}
+      </Section>
+      <NotificationHandler />
+      <DialogueWrapper>
+        {validatedTags && (
+          <SearchResults
+            tagSummary={validatedTags}
+            onTagSearch={tagSearch}
+            onClose={() => {
+              camera.resumeViewfinder();
+              setValidatedTags(undefined);
+            }}
+          />
+        )}
 
-          {tagScanStatus.uploading &&
-            ScanningIndicator(
-              <span>
-                Uploading media. <br />
-                <br /> This could take a while depending on your internet
-                connection.
-              </span>
-            )}
-          {tagScanStatus.validating && ScanningIndicator('Validating...')}
-        </DialogueWrapper>
-      </Main>
-    );
-  } else {
-    return null;
-  }
+        {tagScanStatus.uploading &&
+          ScanningIndicator(
+            <span>
+              Uploading media. <br />
+              <br /> This could take a while depending on your internet
+              connection.
+            </span>
+          )}
+        {tagScanStatus.validating && ScanningIndicator('Validating...')}
+      </DialogueWrapper>
+    </Main>
+  );
 };
 
 const Section = styled.section`

@@ -114,10 +114,10 @@ class Camera extends Postprocessor {
   > {
     this.pauseViewfinder();
     await this.capturePhoto(area);
-    this.logImageStats(this.capture, 'The cropped photo.');
-    if (this.capture.size > 50000) await this.blackAndWhite();
-    if (this.capture.size > 50000) await this.scale(area);
     if (this.capture) {
+      this.logImageStats(this.capture, 'The cropped photo.');
+      if (this.capture.size > 50000) await this.blackAndWhite();
+      if (this.capture.size > 50000) await this.scale(area);
       callback('uploading', true);
       const result = await ocrRead(this.capture);
       this.isScanning = false;

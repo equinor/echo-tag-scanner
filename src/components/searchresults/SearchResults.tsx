@@ -16,8 +16,8 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
   // TODO: Make this only run in non-prod envs.
   useEffect(() => {
     function logTagSummaries() {
-      console.group('This tag data is used for presentation');
       if (props.tagSummary.length > 0) {
+        console.group('This tag data is used for presentation');
         props.tagSummary.forEach((tag) => console.table(tag));
       }
 

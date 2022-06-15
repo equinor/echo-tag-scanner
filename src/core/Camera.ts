@@ -1,13 +1,13 @@
-import { CoreCamera, CoreCameraProps } from './CoreCamera';
-import { getFunctionalLocations, ocrRead, TagScanningStages } from '@services';
+import { CameraProps } from './CoreCamera';
+import { Postprocessor } from './Postprocessor';
+import { ocrRead, TagScanningStages } from '@services';
 import {
   PossibleFunctionalLocations,
   ParsedComputerVisionResponse
 } from '@types';
+import { DrawImageParameters } from './CanvasHandler';
 
-export type CameraProps = CoreCameraProps;
-
-class Camera extends CoreCamera {
+class Camera extends Postprocessor {
   private _torchState = false;
   private _url: string | undefined;
   private _isScanning = false;
@@ -63,40 +63,61 @@ class Camera extends CoreCamera {
     }
   }
 
-  private displayStatistics() {
-    if (this.capture) {
-      console.group('The photo that was OCR scanned');
-      console.info('Photo size in kilobytes: ', this.capture.size / 1000);
-      console.info('Media type: ', this.capture.type);
-      const image = new Image();
-      image.src = URL.createObjectURL(this.capture);
-
-      image.onload = () => {
-        console.info(
-          'Dimensions: ' +
-            'Width: ' +
-            image.width +
-            ' ' +
-            'Height: ' +
-            image.height
+  /**
+   * Captures a photo, stores it in memory and as a drawing on the canvas.
+   * @this CoreCamera
+   */
+  protected async capturePhoto(captureArea: DOMRect): Promise<void> {
+    this.canvasHandler.clearCanvas();
+    const settings = this._videoTrack?.getSettings();
+    console.group('Video dimensions');
+    console.info(
+      'intrinsic -> ',
+      this._viewfinder.current.videoWidth,
+      this._viewfinder.current.videoHeight
+    );
+    console.info(
+      'regular -> ',
+      this._viewfinder.current.width,
+      this._viewfinder.current.height
+    );
+    console.groupEnd();
+    if (settings) {
+      if (
+        typeof settings.height === 'number' &&
+        typeof settings.width === 'number'
+      ) {
+        const params: DrawImageParameters = {
+          sx: captureArea.x,
+          sy: captureArea.y,
+          sHeight: captureArea.height,
+          sWidth: captureArea.width,
+          dx: 0,
+          dy: 0,
+          dHeight: captureArea.height,
+          dWidth: captureArea.width
+        };
+        const captureBlob = await this._canvasHandler.draw(
+          this._viewfinder.current,
+          params
         );
-        URL.revokeObjectURL(image.src);
-      };
-      console.groupEnd();
+        this._capture = captureBlob;
+      }
     }
   }
 
   public async scan(
+    area: DOMRect,
     callback: (property: TagScanningStages, value: boolean) => void
   ): Promise<
     PossibleFunctionalLocations | ParsedComputerVisionResponse | undefined
   > {
     this.pauseViewfinder();
-    await this.capturePhoto();
+    await this.capturePhoto(area);
+    this.logImageStats(this.capture, 'The cropped photo.');
+    if (this.capture.size > 50000) await this.blackAndWhite();
+    if (this.capture.size > 50000) await this.scale(area);
     if (this.capture) {
-      this.displayStatistics();
-      const image = new Image();
-      image.src = URL.createObjectURL(this.capture);
       callback('uploading', true);
       const result = await ocrRead(this.capture);
       this.isScanning = false;

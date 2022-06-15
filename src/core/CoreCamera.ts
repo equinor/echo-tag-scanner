@@ -2,25 +2,22 @@ import { RefObject } from 'react';
 import { handleError } from '@utils';
 import { ErrorRegistry } from '@enums';
 
-export interface CoreCameraProps {
+export interface CameraProps {
   viewfinder: RefObject<HTMLVideoElement>;
-  canvas: RefObject<HTMLCanvasElement>;
+  canvas?: RefObject<HTMLCanvasElement>;
   additionalCaptureOptions?: DisplayMediaStreamConstraints;
 }
 
 class CoreCamera {
-  private _cameraEnabled = true;
-  private _capture?: Blob;
-  private _mediaStream?: MediaStream;
-  private _canvas?: RefObject<HTMLCanvasElement>;
+  protected _cameraEnabled = true;
+  protected _mediaStream?: MediaStream;
   protected _viewfinder?: RefObject<HTMLVideoElement>;
-  private _videoTrack?: MediaStreamTrack;
+  protected _videoTrack?: MediaStreamTrack;
   public _capabilities?: MediaTrackCapabilities = undefined;
-  private _settings?: MediaTrackSettings;
+  protected _settings?: MediaTrackSettings;
 
-  constructor(props: CoreCameraProps) {
+  constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
-    this._canvas = props.canvas;
 
     // Request camera usage.
     this.promptCameraUsage(props.additionalCaptureOptions).then(
@@ -62,14 +59,14 @@ class CoreCamera {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
           width: {
-            min: 1280,
-            ideal: 1920,
-            max: 2560
+            min: globalThis.innerWidth,
+            ideal: globalThis.innerWidth,
+            max: globalThis.innerWidth
           },
           height: {
-            min: 720,
-            ideal: 1080,
-            max: 1440
+            min: globalThis.innerHeight,
+            ideal: globalThis.innerHeight,
+            max: globalThis.innerHeight
           },
           frameRate: {
             ideal: 30,
@@ -84,15 +81,10 @@ class CoreCamera {
     } catch (error) {
       throw new Error(error);
     }
-
   }
 
   public get cameraEnabled(): boolean {
     return this._cameraEnabled;
-  }
-
-  public get capture(): Blob | undefined {
-    return this._capture;
   }
 
   public get videoTrack(): MediaStreamTrack | undefined {
@@ -142,87 +134,6 @@ class CoreCamera {
   public stopCamera() {
     if (this._videoTrack) {
       this._videoTrack.stop();
-    }
-  }
-
-  protected async capturePhoto(): Promise<void> {
-    const videoTracks = this._mediaStream?.getVideoTracks();
-
-    function handleLegacyCaptureError(error) {
-      console.warn('Something bad happened with legacy canvas frame capture.');
-      console.error(error);
-    }
-    if (Array.isArray(videoTracks) && videoTracks.length === 1) {
-      //@ts-ignore
-      if (globalThis.ImageCapture) {
-        this._capture = await capture(videoTracks[0]);
-      } else {
-        // use legacy frame capture
-        await legacyCapture
-          .call(this)
-          .then((stillFrame: Blob) => {
-            console.info('captured frame', stillFrame);
-            this._capture = stillFrame;
-          })
-          .catch(handleLegacyCaptureError);
-      }
-    }
-
-    async function capture(videoTrack: MediaStreamTrack) {
-      const capture = new ImageCapture(videoTrack);
-      return await capture.takePhoto();
-    }
-
-    /**
-     * Captures a photo for browsers that does not support ImageCapture.
-     * @this CoreCamera
-     */
-    async function legacyCapture(): Promise<Blob | undefined> {
-      // Captures a frame from the viewfinder and stores it in a hidden canvas.
-      const writeViewfinderToCanvas = () => {
-        return new Promise((resolve, reject) => {
-          if (this._canvas?.current != null) {
-            const settings = this._videoTrack?.getSettings();
-            if (settings) {
-              if (
-                typeof settings.height === 'number' &&
-                typeof settings.width === 'number'
-              ) {
-                this._canvas.current.width = settings.width;
-                this._canvas.current.height = settings.height;
-                const canvasContext = this._canvas.current.getContext('2d');
-
-                if (canvasContext && this._viewfinder?.current != null) {
-                  canvasContext.drawImage(
-                    this._viewfinder?.current,
-                    0,
-                    0,
-                    settings.width,
-                    settings.height
-                  );
-                  resolve(undefined);
-                }
-              }
-            }
-          } else {
-            reject('Could not find a canvas to capture a frame to.');
-          }
-        });
-      };
-
-      // Retrieve the current contents of the hidden canvas as a Blob.
-      const getBlob = (): Promise<Blob | undefined> => {
-        return new Promise((resolve) => {
-          if (this._canvas.current != null) {
-            this._canvas.current.toBlob((blob: Blob) => {
-              resolve(blob);
-            });
-          }
-        });
-      };
-
-      await writeViewfinderToCanvas();
-      return await getBlob();
     }
   }
 }

@@ -18,24 +18,31 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         autoPlay
         disablePictureInPicture
         controls={false}
+        width={globalThis.innerWidth}
+        height={globalThis.innerHeight}
         {...props.videoOptions}
       />
-      <Canvas ref={props.canvasRef} {...props.canvasOptions} />
-      
+      <Canvas
+        ref={props.canvasRef}
+        width={'500'}
+        height="300"
+        {...props.canvasOptions}
+      />
     </>
   );
 };
 
 const ViewFinder = styled.video`
-    background-color: var(--black);
-    transition: all 0.3s ease;
-    width: 100%;
-    height: 100vh;
-    object-fit: cover;
-`
+  background-color: var(--black);
+  transition: all 0.3s ease;
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
+`;
 
 const Canvas = styled.canvas`
-  height: 0;
-`
+  width: 500px;
+  height: 300px;
+`;
 
 export { Viewfinder };

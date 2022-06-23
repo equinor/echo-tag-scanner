@@ -5,13 +5,13 @@
     "name": "Echo Camera Web",
     "key": "echo-camera-web",
     "shortName": "ecw",
-    "path": "/newcamera",
+    "path": "/camera",
     "description": "A web based tag scanner",
     "private": false,
-    "env": "production",
     "fileUri": "https://echocamera-dev.equinor.com/index.js",
     "devFileUri": "https://echocamera-dev.equinor.com/index.js",
-    "qaFileUri": "https://echocamera-dev.equinor.com/index.js"
+    "qaFileUri": "https://echocamera-dev.equinor.com/index.js",
+    "testFileUri": "https://red-hill-093221b03.1.azurestaticapps.net/index.js"
   },
   "server": {
     "contentBase": "/build",

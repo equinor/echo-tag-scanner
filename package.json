@@ -19,14 +19,14 @@
         "clean-your-remotes": "git branch | egrep -v '(^*|master|dev|main|develop|test|qa)' | xargs git branch -D"
     },
     "devDependencies": {
-        "@equinor/echo-base": "^0.6.4",
-        "@equinor/echo-cli": "^0.4.4",
-        "@equinor/echo-components": "^0.3.2",
-        "@equinor/echo-core": "^0.6.9",
-        "@equinor/echo-framework": "^0.7.8",
+        "@equinor/echo-base": "^0.6.8",
+        "@equinor/echo-cli": "^0.5.3",
+        "@equinor/echo-components": "^0.4.0",
+        "@equinor/echo-core": "^0.6.12",
+        "@equinor/echo-framework": "^0.9.1",
         "@equinor/echo-scripts": "^0.1.5",
-        "@equinor/echo-search": "^0.11.15",
-        "@equinor/eds-core-react": "^0.17.0",
+        "@equinor/echo-search": "^0.12.4",
+        "@equinor/eds-core-react": "^0.19.0",
         "@testing-library/jest-dom": "^5.15.1",
         "@testing-library/react": "^12.1.2",
         "@testing-library/user-event": "^13.5.0",
@@ -44,12 +44,12 @@
         "webpack-merge": "^5.8.0"
     },
     "peerDependencies": {
-        "@equinor/echo-base": "^0.6.4",
-        "@equinor/echo-components": "^0.3.2",
-        "@equinor/echo-framework": "^0.7.8",
-        "@equinor/echo-search": "^0.11.15",
-        "@equinor/eds-core-react": "^0.17.0",
-        "@equinor/echo-core": "^0.6.9",
+        "@equinor/echo-base": "^0.6.8",
+        "@equinor/echo-components": "^0.4.0",
+        "@equinor/echo-framework": "^0.9.1",
+        "@equinor/echo-search": "^0.12.4",
+        "@equinor/eds-core-react": "^0.19.0",
+        "@equinor/echo-core": "^0.6.12",
         "react": "^17.0.2",
         "react-dom": "^17.0.2"
     }

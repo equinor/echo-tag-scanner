@@ -1,215 +1,181 @@
-import React, { FC, useRef, useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { Camera, CameraProps } from './core/Camera';
+import React, { useState } from 'react';
 import {
   CameraControls,
-  Viewfinder,
-  ZoomSlider,
+  ScanningIndicator,
   SearchResults,
-  ScanningIndicator
+  Viewfinder,
+  ZoomSlider
 } from '@components';
-import { NotificationHandler } from '@services';
+import { useMountCamera, useSetActiveTagNo } from '@hooks';
+import { NotificationHandler, useTagScanStatus } from '@services';
+import { PossibleFunctionalLocations } from '@types';
 import {
-  getNotificationDispatcher as dispatchNotification,
-  tagSearch as runTagSearch
+  getTorchToggleProvider,
+  runTagValidation,
+  getNotificationDispatcher as dispatchNotification
 } from '@utils';
-
-import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from '@types';
-import { useSetActiveTagNo } from '@hooks';
+import styled from 'styled-components';
 import { TagSummaryDto } from '@equinor/echo-search';
+import { eventHub } from '@equinor/echo-base';
+import { EchoEnv } from '@equinor/echo-core';
 
 const EchoCamera = () => {
-  const [tags, setTags] = useState<TagSummaryDto[] | undefined>(undefined);
-  const [isScanning, setIsScanning] = useState(false);
-
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const zoomInputRef = useRef<HTMLInputElement>(null);
-  const cameraRef = useRef<Camera>();
+  const [validatedTags, setValidatedTags] = useState<
+    TagSummaryDto[] | undefined
+  >(undefined);
+  const { camera, canvas, viewfinder, zoomInput } = useMountCamera();
   const tagSearch = useSetActiveTagNo();
+  const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
-  // Instansiate the camera core class.
-  useEffect(function mountCamera() {
-    if (cameraRef.current == null) {
-      const props: CameraProps = {
-        viewfinder: videoRef,
-        canvas: canvasRef
-      };
-      cameraRef.current = new Camera(props);
-    }
+  // Controls the availability of scanning.
+  // We currently have no good way of setting the initial mounted value.
+  // There will be a small lag until EventHub is able to set the proper initial value.
+  const [tagSyncIsDone, setTagSyncIsDone] = useState(true);
 
-    // Setup the zoom slider with the min, max and step values.
-    if (zoomInputRef?.current != null) {
-      zoomInputRef.current.min = assignZoomSettings('min');
-      zoomInputRef.current.max = assignZoomSettings('max');
-      zoomInputRef.current.step = assignZoomSettings('step');
-      zoomInputRef.current.value = '1';
-    }
+  // When Echo is done syncing, we can rerender and open for scanning.
+  eventHub.subscribe('isSyncing', (syncStatus: boolean) => {
+    console.log('Echo is syncing: ', syncStatus);
+    if (syncStatus) setTagSyncIsDone(true);
+    else setTagSyncIsDone(false);
+  });
 
-    function cleanup() {
-      if (cameraRef.current) {
-        cameraRef.current.stopCamera();
-      }
-    }
-    return cleanup;
-  }, []);
-
-  function assignZoomSettings(type: 'min' | 'max' | 'step' | 'value'): string {
-    if (cameraRef?.current != null) {
-      const camera = cameraRef.current;
-      if (type === 'value') {
-        if (camera.settings?.zoom) {
-          return String(camera.settings.zoom);
-        } else {
-          return '1';
-        }
-      }
-      if (camera.capabilities?.zoom) {
-        if (camera.capabilities.zoom[type]) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          return String(camera.zoom[type]);
-        }
-      }
-    }
-    // If zoom capabilities does not exist, we need to return a stringified zero
-    // to prevent a stringified undefined to be assigned to the zoom slider.
-    return '0';
+  // Since we do not have tag syncing in development, this will mimick an interval where Echopedia is syncing.
+  if (EchoEnv.isDevelopment) {
+    const syncDelayMs = 2000;
+    setTimeout(() => {
+      setTagSyncIsDone(true);
+    }, syncDelayMs);
   }
 
-  const onScanning = () => {
-    setIsScanning(true);
-    setTags(undefined);
+  // Accepts a list of validated tags and sets them in memory for presentation.
+  function presentValidatedTags(tags: TagSummaryDto[]) {
+    if (Array.isArray(tags) && tags.length > 0) {
+      // We got more than 1 validated tag. Set them into state and rerender to present search results.
+      setValidatedTags(tags);
+    } else {
+      // We got no validated tags.
+      handleNoTagsFound();
+      changeTagScanStatus('noTagsFound', true);
+    }
+  }
+
+  function handleNoTagsFound() {
+    camera.resumeViewfinder();
+    setValidatedTags([]);
+  }
+
+  const onScanning = async () => {
+    if (!tagSyncIsDone || camera.isScanning) {
+      dispatchNotification({
+        message: 'Scanning is available as soon as the syncing is done.',
+        autohideDuration: 2000
+      })();
+      return;
+    }
+    setValidatedTags(undefined);
+    camera.isScanning = true;
 
     /**
      * Handles the parsing and filtering of functional locations that was returned from the API.
      */
-    function handleDetectedLocations(
-      madOcrFunctionalLocations?: MadOCRFunctionalLocations
-    ) {
-      console.info('Got a location result:', madOcrFunctionalLocations);
-      if (
-        madOcrFunctionalLocations &&
-        Array.isArray(madOcrFunctionalLocations?.results) &&
-        madOcrFunctionalLocations.results.length > 0
-      ) {
+    async function validateTags(fLocations?: PossibleFunctionalLocations) {
+      // The tag scanner returned some results.
+      if (Array.isArray(fLocations?.results) && fLocations.results.length > 0) {
         const afterSearchCallback = () => {
-          setIsScanning(false);
+          camera.isScanning = false;
         };
-        runTagSearch(madOcrFunctionalLocations, afterSearchCallback).then(
-          handleValidatedTags
+        const beforeValidation = new Date();
+        const result = await runTagValidation(fLocations, afterSearchCallback);
+        const afterValidation = new Date();
+        console.info(
+          `Tag validation took ${
+            afterValidation.getMilliseconds() -
+            beforeValidation.getMilliseconds()
+          } milliseconds.`
         );
+
+        return result;
       } else {
         // The tag scanner returned 0 results.
         handleNoTagsFound();
       }
-
-      function handleValidatedTags(tags: TagSummaryDto[]) {
-        if (tags.length > 0) {
-          // We got more than 1 validated tag.
-          setTags(tags);
-        } else {
-          // We got no validated tags.
-          handleNoTagsFound();
-        }
-      }
-
-      function handleNoTagsFound() {
-        cameraRef.current.resumeViewfinder();
-        setIsScanning(false);
-        dispatchNotification({
-          message: 'We did not recognize any tag numbers. Try again?',
-          autohideDuration: 5000
-        })();
-      }
     }
 
-    if (cameraRef?.current != null) {
-      (function notifyUserLongScan() {
+    // We won't make the user wait more than 10 seconds for the scanning results.
+    // TODO: Retire the scanning race.
+    const scanTookTooLong: Promise<PossibleFunctionalLocations> = new Promise(
+      (resolve) => {
         setTimeout(() => {
-          if (isScanning) {
-            dispatchNotification(
-              'Hang tight, the scan appears to be taking longer than usual.'
-            )();
-          }
-        }, 3000);
-      })();
+          resolve({ results: [] });
+        }, 1000000);
+      }
+    );
 
-      // We won't make the user wait more than 10 seconds for the scanning results.
-      const scanTookTooLong: Promise<MadOCRFunctionalLocations> = new Promise(
-        (resolve) => {
-          console.info('starting scan timeout timer');
-          setTimeout(() => {
-            resolve({ results: [] });
-          }, 10000);
-        }
-      );
+    // This promise puts the scanning in motion.
+    const scanAction: Promise<PossibleFunctionalLocations | undefined> =
+      new Promise((resolve) => {
+        resolve(camera.scan(changeTagScanStatus));
+      });
 
-      const scanAction: Promise<MadOCRFunctionalLocations | undefined> =
-        new Promise((resolve) => {
-          console.info('attempting to resolve tag number(s)');
-          resolve(cameraRef?.current?.scan());
-        });
+    // Start the scan race.
+    Promise.race([scanAction, scanTookTooLong])
 
-      // Start the scan race.
-      Promise.race([scanAction, scanTookTooLong])
-        .then((locations) => handleDetectedLocations(locations))
-        .catch((reason) => console.error('Quietly failing: ', reason));
-    }
+      // Validate the tag results from OCR
+      .then((funcLocations) => {
+        changeTagScanStatus('uploading', false);
+        changeTagScanStatus('validating', true);
+        const validatedTags = validateTags(funcLocations);
+        changeTagScanStatus('validating', false);
+        return validatedTags;
+      })
+
+      // Receive the validated tags and present them.
+      .then((validatedTags) => presentValidatedTags(validatedTags));
   };
 
-  function provideTorchToggling() {
-    const onToggleTorch = () => {
-      if (cameraRef?.current != null) {
-        cameraRef.current.toggleTorch();
-      }
-    };
-
-    const onToggleUnsupportedTorch = () => {
-      dispatchNotification('The torch is not supported on this device.')();
-    };
-
-    if (cameraRef?.current != null) {
-      if (cameraRef?.current.capabilities?.zoom) {
-        return onToggleTorch;
-      } else {
-        return onToggleUnsupportedTorch;
-      }
-    }
-  }
-
-  if (cameraRef?.current) {
+  if (camera) {
     return (
       <Main>
-        <Viewfinder canvasRef={canvasRef} videoRef={videoRef} />
+        <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
 
-        {cameraRef?.current?.capabilities?.zoom && (
-          <ZoomSlider
-            onSlide={cameraRef.current?.alterZoom}
-            zoomInputRef={zoomInputRef}
-            zoomOptions={cameraRef?.current?.capabilities?.zoom}
+        <Section>
+          {camera?.capabilities?.zoom && (
+            <ZoomSlider
+              onSlide={camera.alterZoom}
+              zoomInputRef={zoomInput}
+              zoomOptions={camera.capabilities?.zoom}
+            />
+          )}
+
+          <CameraControls
+            onToggleTorch={getTorchToggleProvider(camera)}
+            onScanning={onScanning}
+            isDisabled={camera.isScanning || !tagSyncIsDone}
+            supportedFeatures={{ torch: camera?.capabilities?.torch }}
           />
-        )}
-
-        <CameraControls
-          onToggleTorch={provideTorchToggling()}
-          onScanning={onScanning}
-          isScanning={isScanning}
-        />
+        </Section>
         <NotificationHandler />
         <DialogueWrapper>
-          {tags && tags.length > 0 && (
+          {validatedTags && (
             <SearchResults
-              tags={tags}
+              tagSummary={validatedTags}
               onTagSearch={tagSearch}
               onClose={() => {
-                cameraRef.current.resumeViewfinder();
-                setTags(undefined);
+                camera.resumeViewfinder();
+                setValidatedTags(undefined);
               }}
             />
           )}
 
-          {isScanning && <ScanningIndicator />}
+          {tagScanStatus.uploading &&
+            ScanningIndicator(
+              <span>
+                Uploading media. <br />
+                <br /> This could take a while depending on your internet
+                connection.
+              </span>
+            )}
+          {tagScanStatus.validating && ScanningIndicator('Validating...')}
         </DialogueWrapper>
       </Main>
     );
@@ -218,10 +184,18 @@ const EchoCamera = () => {
   }
 };
 
+const Section = styled.section`
+  position: fixed;
+  bottom: 10px;
+  display: grid;
+  height: 20%;
+  width: 100%;
+  align-items: center;
+`;
+
 const Main = styled.main`
   .cameraWrapper {
     height: 100%;
-    // background-color: #00000010;
   }
 `;
 
@@ -233,7 +207,7 @@ const DialogueWrapper = styled.section`
   top: 0;
   // The height of this wrapper is based on the bottom offset
   // of the zoom slider and camera controls (20% and 5% respectively).
-  height: calc(100% - 20% - 5%);
+  height: calc(100% - 20%);
   width: 100%;
 `;
 

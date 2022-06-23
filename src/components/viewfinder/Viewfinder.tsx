@@ -16,6 +16,8 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         playsInline // needed for the viewfinder to work in Safari
         ref={props.videoRef}
         autoPlay
+        disablePictureInPicture
+        controls={false}
         {...props.videoOptions}
       />
       <Canvas ref={props.canvasRef} {...props.canvasOptions} />

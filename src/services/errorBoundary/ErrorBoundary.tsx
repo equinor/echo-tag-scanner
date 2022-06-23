@@ -2,7 +2,15 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { eventHub } from '@equinor/echo-core';
-import { Button, Typography, Dialog, Scrim, Banner, Icon } from '@equinor/eds-core-react';
+import { BaseError } from '@equinor/echo-base';
+import {
+  Button,
+  Typography,
+  Dialog,
+  Scrim,
+  Banner,
+  Icon
+} from '@equinor/eds-core-react';
 import { warning_filled } from '@equinor/eds-icons';
 
 import { ErrorKey } from '@enums';
@@ -31,7 +39,10 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
     if (error instanceof Error) {
       this.setState({ hasError: true, devMessage: error, userMessage: info });
     } else {
-      this.setState({ hasError: true, userMessage: 'An unknown error has occured' });
+      this.setState({
+        hasError: true,
+        userMessage: 'An unknown error has occured'
+      });
     }
   }
 
@@ -48,39 +59,50 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
     }
   }
 
-  private parseError(error: unknown): JSX.Element | undefined {
-    if (error instanceof Error) {
-      return (
-        <article>
-          <section>
-            <dl>
-              <div>
-                <dt>Type of error</dt>
-                <dd>
-                  <em>{error.name ?? 'Unknown type of error.'}</em>
-                </dd>
-              </div>
-
-              <div>
-                <dt>Message</dt>
-                <dd>
-                  <em>{error.message ?? 'No message provided.'}</em>
-                </dd>
-              </div>
-
-              {this.props.stackTraceEnabled && (
-                <div>
-                  <details>
-                    <summary>Stacktrace</summary>
-                    <article>{error.stack}</article>
-                  </details>
-                </div>
-              )}
-            </dl>
-          </section>
-        </article>
-      );
+  private getInnerError(error: BaseError) {
+    const details = error.getInnerErrorProperties().details;
+    if (typeof details === 'string') {
+      return details;
+    } else {
+      return JSON.stringify(details);
     }
+  }
+
+  private parseError(error: unknown): JSX.Element | undefined {
+    let [errorMessage, errorType] = (() => {
+      if (error instanceof BaseError) {
+        return [this.getInnerError(error), error.name];
+      } else if (error instanceof Error) {
+        return [error.message, error.name];
+      } else {
+        return [
+          (error as unknown as Record<string, string>).toString(),
+          undefined
+        ];
+      }
+    })();
+
+    return (
+      <article>
+        <section>
+          <dl>
+            <div>
+              <dt>Type of error</dt>
+              <dd>
+                <em>{errorType ?? 'Unknown type of error.'}</em>
+              </dd>
+            </div>
+
+            <div>
+              <dt>Message</dt>
+              <dd>
+                <em>{errorMessage ?? 'No message provided.'}</em>
+              </dd>
+            </div>
+          </dl>
+        </section>
+      </article>
+    );
   }
 
   private errorListener(error: EchoCameraError): void {
@@ -100,31 +122,35 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
       severity: undefined
     });
   }
+  // if (this.state.severity === 'high') {
 
   render(): React.ReactNode {
     if (this.state.hasError) {
-      console.group('ErrorBoundary');
-      console.info(this.state);
-      console.groupEnd();
       if (this.state.severity === 'high') {
         return (
           <>
-            <Scrim open>
-              <ErrorDialogue>
-                <Dialog.Title>
-                  <h3>An error has occured</h3>
-                </Dialog.Title>
+            <Backdrop open>
+              <ErrorDialogue open>
+                <DialogueTitleSection>
+                  <DialogueTitle variant="h4">
+                    An error has occured
+                  </DialogueTitle>
+                </DialogueTitleSection>
                 <Dialog.CustomContent>
                   <ErrorBoundaryContent>
                     <Typography variant="body_long">
                       Smart Portal ran into an issue. Check the marked message
                       below for more details.
-                      <br />
-                      <br />
-                      <mark>
-                        {this.state.userMessage ||
-                          'An unknown error has occured.'}
-                      </mark>
+                      <p>
+                        <mark>
+                          {this.state.userMessage ||
+                            'An unknown error has occured.'}
+                        </mark>
+                      </p>
+                      <p>
+                        If you want to report this, be sure to expand
+                        &quot;Developer information&quot; below
+                      </p>
                     </Typography>
                     <Developer>
                       <Details>
@@ -138,13 +164,13 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
                   </ErrorBoundaryContent>
                 </Dialog.CustomContent>
               </ErrorDialogue>
-            </Scrim>
+            </Backdrop>
             {this.props.children}
           </>
         );
       } else {
         return (
-          <>
+          <BannerContainer>
             <Banner>
               <Banner.Icon variant="warning">
                 <Icon data={warning_filled} />
@@ -153,14 +179,17 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
                 {this.state.userMessage ?? 'An unknown error has occured.'}
               </Banner.Message>
               <Banner.Actions>
-                <Button variant="outlined" onClick={() => this.setState({ severity: 'high' })}>
+                <Button
+                  variant="outlined"
+                  onClick={() => this.setState({ severity: 'high' })}
+                >
                   Show details
                 </Button>
                 <Button onClick={() => this.resetState()}>Dismiss</Button>
               </Banner.Actions>
             </Banner>
             {this.props.children}
-          </>
+          </BannerContainer>
         );
       }
     } else {
@@ -174,8 +203,19 @@ const ErrorBoundaryContent = styled.section`
   flex-direction: column;
 `;
 
+const BannerContainer = styled(Banner)`
+  // ErrorBoundary popup will have the highest z-index.
+  z-index: 501;
+`;
+
+const Backdrop = styled(Scrim)`
+  // ErrorBoundary popup will have the highest z-index.
+  z-index: 501;
+`;
+
 const ErrorDialogue = styled(Dialog)`
-  max-width: 60vw;
+  max-width: unset !important;
+  width: 80vw;
   max-height: 60vh;
   width: unset;
   overflow-y: auto;
@@ -183,6 +223,16 @@ const ErrorDialogue = styled(Dialog)`
 
 const Details = styled.details`
   cursor: pointer;
+`;
+
+const DialogueTitleSection = styled(Dialog.Title)`
+  width: 100%;
+  border-bottom: 1px solid var(--equiGray4);
+`;
+
+const DialogueTitle = styled(Typography)`
+  padding: var(--small) 0;
+  padding-left: var(--medium);
 `;
 
 const Developer = styled.section`

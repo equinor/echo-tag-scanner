@@ -1,29 +1,46 @@
+import { Camera } from '../core/Camera';
+import { getNotificationDispatcher as dispatchNotification } from '@utils';
+
+function assignZoomSettings(
+  type: 'min' | 'max' | 'step' | 'value',
+  camera: Camera
+): string {
+  if (type === 'value') {
+    if (camera.settings?.zoom) {
+      return String(camera.settings.zoom);
+    } else {
+      return '1';
+    }
+  }
+  if (camera.capabilities?.zoom) {
+    if (camera.capabilities.zoom[type]) {
+      return String(camera.zoom[type]);
+    }
+  }
+  // If zoom capabilities does not exist, we need to return a stringified zero
+  // to prevent a stringified undefined to be assigned to the zoom slider.
+  return '0';
+}
+
 /**
- * Logs device and browser capabilities.
+ * Returns a closure that handles the toggling of the torch functionality.
  */
-async function getCapabilities(): Promise<boolean> {
-  const mediaCapabilities = await navigator.mediaDevices.getUserMedia({
-    video: true
-  });
-  const browserContraints = navigator.mediaDevices.getSupportedConstraints();
-  console.group('browser and device capabilities');
-  console.info('Device video', mediaCapabilities);
-  console.info('Browser capabilities', browserContraints);
-  console.groupEnd();
-  return true;
+function getTorchToggleProvider(camera: Camera) {
+  return function provideTorchToggling() {
+    const onToggleTorch = () => {
+      camera.toggleTorch();
+    };
+
+    const onToggleUnsupportedTorch = () => {
+      dispatchNotification('The torch is not supported on this device.')();
+    };
+
+    if (camera.capabilities?.torch) {
+      return onToggleTorch;
+    } else {
+      return onToggleUnsupportedTorch;
+    }
+  };
 }
 
-function getCapabilitiesRaw(): boolean {
-  navigator.mediaDevices.getUserMedia({ video: true }).then((mediaCapabilities) => {
-    const browserContraints = navigator.mediaDevices.getSupportedConstraints();
-    console.group('browser and device capabilities');
-    console.info('Device video', mediaCapabilities);
-    console.info('Browser capabilities', browserContraints);
-    console.groupEnd();
-    return false;
-  });
-
-  return false;
-}
-
-export { getCapabilities, getCapabilitiesRaw };
+export { assignZoomSettings, getTorchToggleProvider };

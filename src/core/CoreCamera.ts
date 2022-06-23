@@ -29,7 +29,6 @@ class CoreCamera {
     );
 
     function onApproval(mediaStream: MediaStream) {
-      console.info('Camera usage was approved');
       this._mediaStream = mediaStream;
       this._videoTrack = this._mediaStream.getVideoTracks()[0];
       this._capabilities = this._videoTrack.getCapabilities();
@@ -37,6 +36,17 @@ class CoreCamera {
       if (this._viewfinder?.current) {
         this._viewfinder.current.srcObject = mediaStream;
       }
+
+      console.group('Camera capabilities');
+      console.info(
+        'Camera is capable of zooming: ',
+        Boolean(this._capabilities.zoom)
+      );
+      console.info(
+        'Camera is capable of using the torch: ',
+        Boolean(this._capabilities.torch)
+      );
+      console.groupEnd();
     }
 
     function onRejection(reason: unknown) {
@@ -48,13 +58,33 @@ class CoreCamera {
   private async promptCameraUsage(
     additionalCaptureOptions?: DisplayMediaStreamConstraints
   ) {
-    const mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment' },
-      audio: false,
-      ...additionalCaptureOptions
-    });
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: {
+            min: 1280,
+            ideal: 1920,
+            max: 2560
+          },
+          height: {
+            min: 720,
+            ideal: 1080,
+            max: 1440
+          },
+          frameRate: {
+            ideal: 30,
+            min: 15
+          },
+          facingMode: 'environment'
+        },
+        audio: false,
+        ...additionalCaptureOptions
+      });
+      return mediaStream;
+    } catch (error) {
+      throw new Error(error);
+    }
 
-    return mediaStream;
   }
 
   public get cameraEnabled(): boolean {
@@ -77,7 +107,7 @@ class CoreCamera {
     return this._settings;
   }
 
-  protected zoom(zoomValue: number): void {
+  public zoom(zoomValue: number): void {
     if (this._capabilities?.zoom) {
       this._videoTrack
         ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
@@ -103,13 +133,13 @@ class CoreCamera {
 
     function onTorchRejection(reason: unknown) {
       throw handleError(
-        ErrorRegistry.zoomError,
+        ErrorRegistry.torchError,
         new Error('The torch could not be toggled, more info: ' + reason)
       );
     }
   }
 
-  public async stopCamera() {
+  public stopCamera() {
     if (this._videoTrack) {
       this._videoTrack.stop();
     }
@@ -119,11 +149,12 @@ class CoreCamera {
     const videoTracks = this._mediaStream?.getVideoTracks();
 
     function handleLegacyCaptureError(error) {
-      console.warn("Something bad happened with legacy canvas frame capture.");
-      console.error(error)
+      console.warn('Something bad happened with legacy canvas frame capture.');
+      console.error(error);
     }
     if (Array.isArray(videoTracks) && videoTracks.length === 1) {
-      if (ImageCapture) {
+      //@ts-ignore
+      if (globalThis.ImageCapture) {
         this._capture = await capture(videoTracks[0]);
       } else {
         // use legacy frame capture
@@ -135,7 +166,6 @@ class CoreCamera {
           })
           .catch(handleLegacyCaptureError);
       }
-
     }
 
     async function capture(videoTrack: MediaStreamTrack) {

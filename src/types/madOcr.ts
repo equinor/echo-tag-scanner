@@ -4,7 +4,7 @@ interface MadOCRStatus {
   dependencies: Array<MadOCRDependencies>;
 }
 
-interface MadOCRFunctionalLocations {
+interface PossibleFunctionalLocations {
   results: string[];
 }
 
@@ -15,4 +15,4 @@ interface MadOCRDependencies {
   errorText: string;
 }
 
-export type { MadOCRStatus, MadOCRFunctionalLocations };
+export type { MadOCRStatus, PossibleFunctionalLocations };

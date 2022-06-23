@@ -1,64 +1,87 @@
-import { ExtractedFunctionalLocation, MadOCRFunctionalLocations } from '@types';
-import { ResultValue, Search, TagSummaryDto } from '@equinor/echo-search';
-import { extractFunctionalLocation, getInstCode } from '@utils';
-import { getSelectedPlant } from '@equinor/echo-core';
 import {
-  getNotificationDispatcher as dispatchNotification,
-} from '@utils';
+  ExtractedFunctionalLocation,
+  PossibleFunctionalLocations
+} from '@types';
+import { Search, TagSummaryDto, ResultValue } from '@equinor/echo-search';
+import { extractFunctionalLocation, getInstCode } from '@utils';
+
+function hasContent(data: unknown) {
+  if (typeof data === 'string' || typeof data === 'number') {
+    return data != null;
+  } else if (Array.isArray(data)) {
+    return data.length > 0;
+  } else if (typeof data === 'object') {
+    return Reflect.ownKeys(data).length > 0;
+  }
+}
 
 /**
- * Returns a promise to return a TagSummary, or undefined if no tags were found.
+ * Accepts a possible tag number as string value and runs it through Echo Search for validation.
  */
-function createTagSearch(
+async function findClosestTag(possibleTagNumber: string) {
+  const result = await Search.Tags.closestTagAsync(possibleTagNumber);
+  if (result.isSuccess) {
+    console.group('Running validation for ', possibleTagNumber);
+    console.info(possibleTagNumber + ' corrected to ' + result.value);
+    console.groupEnd();
+    return result.value;
+  }
+}
+
+/**
+ * Accepts a validated tag and fetches its tag summary locally.
+ */
+async function getTagSummary(validationResult: string) {
+  const result = await Search.Tags.getAsync(validationResult);
+  if (result.isSuccess && hasContent(result.value)) return result.value;
+}
+
+function tagSummary(tagSummary: TagSummaryDto): TagSummaryDto {
+  // TODO: Validate tag summary
+  return tagSummary;
+}
+
+/**
+ * Returns a promise to validate a string as a tag number.
+ */
+function createTagValidator(
   location: ExtractedFunctionalLocation,
   instCode?: string
-): Promise<TagSummaryDto | undefined> {
-  return new Promise(function getTag(resolve, reject) {
-    Search.Tags.searchAsync(location.tagNumber, 1, instCode)
-      .then(function handleTagValidationResponse(tagSummary) {
-        if (tagSummary.values.length === 1) {
-          resolve(tagSummary.values[0]);
-        } else {
-          resolve(undefined);
-        }
-      })
+): Promise<TagSummaryDto> {
+  return new Promise((resolve, reject) => {
+    findClosestTag(location.tagNumber)
+      .then(getTagSummary)
+      .then((summary) => resolve(tagSummary(summary)))
       .catch(function handleTagValidationError(reason) {
-        // TODO Possible errorboundary target
         reject(reason);
       });
   });
 }
 
-function getFunctionalLocations(locations: MadOCRFunctionalLocations) {
-  return locations.results.map((l) => extractFunctionalLocation(l));
-}
-
-/**
- * Filters away falsey tag results for prior tag searches.
- */
-function filterInvalidTags(
-  res: Array<TagSummaryDto | undefined>
-) {
-  return res.filter((r) => Boolean(r));
-}
-
 /**
  * The user might have scanned images containing other things than tag-numbers.
- * This function will filter them out.
+ * This function handles the filtering of these false positives.
  */
-export function tagSearch(
-  locations: MadOCRFunctionalLocations,
+export async function runTagValidation(
+  locations: PossibleFunctionalLocations,
   afterSearchCallback: () => void
 ): Promise<TagSummaryDto[]> {
-  return new Promise((resolve) => {
-    const functionalLocations = getFunctionalLocations(locations);
-    const tagSearches = functionalLocations.map((funcLocation) =>
-      createTagSearch(funcLocation, getInstCode() ?? "TROA")
-    );
+  // Split the possible tag number into functional locations.
+  const functionalLocations = locations.results.map((l) =>
+    extractFunctionalLocation(l)
+  );
+  const tagValidationTasks = functionalLocations.map((funcLocation) =>
+    createTagValidator(funcLocation, getInstCode())
+  );
+  const tagValidationResults = await Promise.allSettled([
+    ...tagValidationTasks
+  ]);
+  console.log('%c⧭', 'color: #807160', tagValidationResults);
+  afterSearchCallback();
 
-    Promise.all([...tagSearches]).then((results) => {
-      afterSearchCallback();
-      resolve(filterInvalidTags(results));
-    });
-  });
+  return tagValidationResults
+    .map((result) => {
+      if (result.status === 'fulfilled') return result.value;
+    })
+    .filter((result) => Boolean(result));
 }

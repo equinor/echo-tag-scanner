@@ -1,15 +1,27 @@
 import { CoreCamera, CoreCameraProps } from './CoreCamera';
-import { getFunctionalLocations } from '@services';
-import { MadOCRFunctionalLocations } from '@types';
+import { getFunctionalLocations, ocrRead, TagScanningStages } from '@services';
+import {
+  PossibleFunctionalLocations,
+  ParsedComputerVisionResponse
+} from '@types';
 
 export type CameraProps = CoreCameraProps;
 
 class Camera extends CoreCamera {
   private _torchState = false;
   private _url: string | undefined;
+  private _isScanning = false;
 
   constructor(props: CameraProps) {
     super(props);
+  }
+
+  public set isScanning(value: boolean) {
+    this._isScanning = value;
+  }
+
+  public get isScanning() {
+    return this._isScanning;
   }
 
   public get url(): string {
@@ -51,13 +63,47 @@ class Camera extends CoreCamera {
     }
   }
 
-  public async scan(): Promise<MadOCRFunctionalLocations | undefined> {
-    // handle scanning logic
+  private displayStatistics() {
+    if (this.capture) {
+      console.group('The photo that was OCR scanned');
+      console.info('Photo size in kilobytes: ', this.capture.size / 1000);
+      console.info('Media type: ', this.capture.type);
+      const image = new Image();
+      image.src = URL.createObjectURL(this.capture);
+
+      image.onload = () => {
+        console.info(
+          'Dimensions: ' +
+            'Width: ' +
+            image.width +
+            ' ' +
+            'Height: ' +
+            image.height
+        );
+        URL.revokeObjectURL(image.src);
+      };
+      console.groupEnd();
+    }
+  }
+
+  public async scan(
+    callback: (property: TagScanningStages, value: boolean) => void
+  ): Promise<
+    PossibleFunctionalLocations | ParsedComputerVisionResponse | undefined
+  > {
     this.pauseViewfinder();
     await this.capturePhoto();
     if (this.capture) {
-      return await getFunctionalLocations(this.capture);
+      this.displayStatistics();
+      const image = new Image();
+      image.src = URL.createObjectURL(this.capture);
+      callback('uploading', true);
+      const result = await ocrRead(this.capture);
+      this.isScanning = false;
+      callback('uploading', false);
+      return result;
     } else {
+      this.isScanning = false;
       return undefined;
     }
   }

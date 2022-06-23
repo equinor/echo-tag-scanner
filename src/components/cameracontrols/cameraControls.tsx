@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import { CameraButton, ScannerButton } from '@components';
+import { TorchButton, ScannerButton } from '@components';
+import { SupportedCameraFeatures } from '@types';
 
 interface CameraControlsProps {
   /* Scanning callback */
@@ -8,7 +9,8 @@ interface CameraControlsProps {
   /* Torch callback. If undefined, the torch is not supported. */
   onToggleTorch?: () => void;
 
-  isScanning?: boolean;
+  isDisabled?: boolean;
+  supportedFeatures: SupportedCameraFeatures;
 }
 
 /**
@@ -24,40 +26,28 @@ const CameraControls = (props: CameraControlsProps): JSX.Element => {
   return (
     <CameraControlsWrapper>
       <CameraController role="toolbar">
-        <CameraButton
-          name="lightbulb"
-          onClick={props.onToggleTorch}
-          label="torch"
-          supported={Boolean(props.onToggleTorch)}
-        />
-
-        <ScannerButton onClick={onScanning} isDisabled={props.isScanning} />
+        {props.supportedFeatures.torch && (
+          <TorchButton name="lightbulb" onClick={props.onToggleTorch} />
+        )}
+        <ScannerButton onClick={onScanning} isDisabled={props.isDisabled} />
       </CameraController>
     </CameraControlsWrapper>
   );
 };
 
 const CameraControlsWrapper = styled.section`
-    position: fixed;
-    bottom: 5%;
-    width: 100%;
-`
+  width: 100%;
+`;
 
 const CameraController = styled.div`
   display: grid;
-    grid-template-columns: [availablecell]1fr [shutter]1fr [carousel]1fr;
-    justify-items: center;
-    align-items: center;
-    width: 100%;
-
-    label {
-        margin-right: 1.5em;
-    }
-
-    select {
-        text-overflow: ellipsis;
-        max-width: 100%;
-    }
-`
+  grid-template-columns: [torch]1fr [shutter]1fr [empty-cell]1fr;
+  justify-items: center;
+  align-items: center;
+  width: 100%;
+  label {
+    margin-right: 1.5em;
+  }
+`;
 
 export { CameraControls };

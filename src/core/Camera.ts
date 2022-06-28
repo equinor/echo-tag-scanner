@@ -1,27 +1,18 @@
 import { CameraProps } from './CoreCamera';
 import { Postprocessor } from './Postprocessor';
-import { ocrRead, TagScanningStages } from '@services';
-import {
-  PossibleFunctionalLocations,
-  ParsedComputerVisionResponse
-} from '@types';
 import { DrawImageParameters } from './CanvasHandler';
 
+/**
+ * This object acts as a proxy towards CoreCamera.
+ * From a user perspective, it is the viewfinder and camera controls.
+ */
 class Camera extends Postprocessor {
   private _torchState = false;
   private _url: string | undefined;
-  private _isScanning = false;
+  protected _isScanning = false;
 
   constructor(props: CameraProps) {
     super(props);
-  }
-
-  public set isScanning(value: boolean) {
-    this._isScanning = value;
-  }
-
-  public get isScanning() {
-    return this._isScanning;
   }
 
   public get url(): string {
@@ -64,24 +55,15 @@ class Camera extends Postprocessor {
   }
 
   /**
-   * Captures a photo, stores it in memory and as a drawing on the canvas.
-   * @this CoreCamera
+   * Captures a photo, and stores it as a drawing on the postprocessing canvas.
    */
-  protected async capturePhoto(captureArea: DOMRect): Promise<void> {
+  protected async capturePhoto(
+    captureArea: DOMRect
+  ): Promise<Blob | undefined> {
+    let capture: Blob | undefined = undefined;
     this.canvasHandler.clearCanvas();
     const settings = this._videoTrack?.getSettings();
-    console.group('Video dimensions');
-    console.info(
-      'intrinsic -> ',
-      this._viewfinder.current.videoWidth,
-      this._viewfinder.current.videoHeight
-    );
-    console.info(
-      'regular -> ',
-      this._viewfinder.current.width,
-      this._viewfinder.current.height
-    );
-    console.groupEnd();
+
     if (settings) {
       if (
         typeof settings.height === 'number' &&
@@ -101,32 +83,15 @@ class Camera extends Postprocessor {
           this._viewfinder.current,
           params
         );
-        this._capture = captureBlob;
+        capture = captureBlob;
       }
-    }
-  }
-
-  public async scan(
-    area: DOMRect,
-    callback: (property: TagScanningStages, value: boolean) => void
-  ): Promise<
-    PossibleFunctionalLocations | ParsedComputerVisionResponse | undefined
-  > {
-    this.pauseViewfinder();
-    await this.capturePhoto(area);
-    if (this.capture) {
-      this.logImageStats(this.capture, 'The cropped photo.');
-      if (this.capture.size > 50000) await this.blackAndWhite();
-      if (this.capture.size > 50000) await this.scale(area);
-      callback('uploading', true);
-      const result = await ocrRead(this.capture);
-      this.isScanning = false;
-      callback('uploading', false);
-      return result;
     } else {
-      this.isScanning = false;
-      return undefined;
+      throw new Error(
+        'The camera was not able to do an initial capture because of missing settings.'
+      );
     }
+
+    return capture;
   }
 }
 

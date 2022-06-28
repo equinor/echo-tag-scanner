@@ -13,6 +13,9 @@ type CropInstructions = {
   height: number;
 };
 
+/**
+ * This object is concerned with the altering of captures done with the camera.
+ */
 class Postprocessor extends CoreCamera {
   protected _capture?: Blob;
   protected _canvas?: RefObject<HTMLCanvasElement>;
@@ -65,8 +68,8 @@ class Postprocessor extends CoreCamera {
   /**
    * Downscales the image by a factor of 0.5 and returns the new size.
    */
-  protected async scale(scaleInstructions: DOMRect) {
-    const bitmap = await createImageBitmap(this._capture);
+  protected async scale(scaleInstructions: DOMRect): Promise<Blob> {
+    const bitmap = await createImageBitmap(await this._canvasHandler.getBlob());
     const params: DrawImageParameters = {
       sx: 0,
       sy: 0,
@@ -79,16 +82,18 @@ class Postprocessor extends CoreCamera {
     };
     this._canvas.current.width = scaleInstructions.width * 0.5;
     this._canvas.current.height = scaleInstructions.height * 0.5;
-    const downscaledBlob = await this._canvasHandler.draw(bitmap, params);
-    this.logImageStats(downscaledBlob, 'Photo capture after downscaling.');
-    this._capture = downscaledBlob;
-    return downscaledBlob.size;
+    const downscaledImgBlob = await this._canvasHandler.draw(bitmap, params);
+    this.logImageStats(downscaledImgBlob, 'Photo capture after downscaling.');
+    this._capture = downscaledImgBlob;
+    return downscaledImgBlob;
   }
 
   /**
-   * Recolours the image to black and white and returns the size of the new image.
+   * Recolours the image to black and white.
+   * This method is considered the best in terms of compression,
+   * but in some cases it can recolour text to be the same as the background.
    */
-  protected async blackAndWhite(): Promise<Number> {
+  protected async blackAndWhite(): Promise<Blob> {
     const imgData = await this._canvasHandler.getCanvasContents();
 
     for (let i = 0; i < imgData.data.length; i += 4) {
@@ -108,7 +113,37 @@ class Postprocessor extends CoreCamera {
       'Photo capture after black and white recolour.'
     );
     this._capture = bwImgBlob;
-    return bwImgBlob.size;
+    return bwImgBlob;
+  }
+
+  /**
+   * Recolours the image to be grayscale.
+   * This is less effective for compression than B&W, but is safer.
+   */
+  protected async grayscale(): Promise<Blob> {
+    const imgData = await this._canvasHandler.getCanvasContents();
+
+    for (let i = 0; i < imgData.data.length; i += 4) {
+      let count = imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2];
+
+      let colour = 0;
+      if (count > 510) colour = 255;
+      else if (count > 255) colour = 127.5;
+
+      imgData.data[i] = colour;
+      imgData.data[i + 1] = colour;
+      imgData.data[i + 2] = colour;
+      imgData.data[i + 3] = 255;
+    }
+    const grayscaleImgBlob = await this._canvasHandler.draw(imgData, {
+      dx: 0,
+      dy: 0
+    });
+    this.logImageStats(
+      grayscaleImgBlob,
+      'Photo capture after grayscale recolour.'
+    );
+    return grayscaleImgBlob;
   }
 
   /**

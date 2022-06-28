@@ -22,6 +22,9 @@ interface CanvasHandlerProps {
   canvasRef: RefObject<HTMLCanvasElement>;
 }
 
+/**
+ * This object implements different operations on the postprocessing canvas.
+ */
 class CanvasHandler {
   private _canvas: HTMLCanvasElement;
   private _canvasContext: CanvasRenderingContext2D;

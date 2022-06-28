@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import {
   CameraControls,
-  CaptureArea,
+  ScanningArea,
   ScanningIndicator,
   SearchResults,
   Viewfinder,
   ZoomSlider
 } from '@components';
-import { useMountCamera, useSetActiveTagNo } from '@hooks';
+import { useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import { PossibleFunctionalLocations } from '@types';
 import {
@@ -24,7 +24,8 @@ const EchoCamera = () => {
   const [validatedTags, setValidatedTags] = useState<
     TagSummaryDto[] | undefined
   >(undefined);
-  const { camera, canvas, viewfinder, zoomInput, scanArea } = useMountCamera();
+  const { tagScanner, canvas, viewfinder, zoomInput, scanArea } =
+    useMountScanner();
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
@@ -39,6 +40,8 @@ const EchoCamera = () => {
     if (syncStatus) setTagSyncIsDone(true);
     else setTagSyncIsDone(false);
   });
+
+  tagScanner?.reportCameraFeatures();
 
   // Since we do not have tag syncing in development, this will mimick an interval where Echopedia is syncing.
   if (EchoEnv.isDevelopment) {
@@ -61,12 +64,12 @@ const EchoCamera = () => {
   }
 
   function handleNoTagsFound() {
-    camera.resumeViewfinder();
+    tagScanner.resumeViewfinder();
     setValidatedTags([]);
   }
 
   const onScanning = async () => {
-    if (!tagSyncIsDone || camera.isScanning) {
+    if (!tagSyncIsDone || tagScanner.isScanning) {
       dispatchNotification({
         message: 'Scanning is available as soon as the syncing is done.',
         autohideDuration: 2000
@@ -74,7 +77,7 @@ const EchoCamera = () => {
       return;
     }
     setValidatedTags(undefined);
-    camera.isScanning = true;
+    tagScanner.isScanning = true;
 
     /**
      * Handles the parsing and filtering of functional locations that was returned from the API.
@@ -83,7 +86,7 @@ const EchoCamera = () => {
       // The tag scanner returned some results.
       if (Array.isArray(fLocations?.results) && fLocations.results.length > 0) {
         const afterSearchCallback = () => {
-          camera.isScanning = false;
+          tagScanner.isScanning = false;
         };
         const beforeValidation = new Date();
         const result = await runTagValidation(fLocations, afterSearchCallback);
@@ -116,7 +119,7 @@ const EchoCamera = () => {
     const scanAction: Promise<PossibleFunctionalLocations | undefined> =
       new Promise((resolve) => {
         resolve(
-          camera.scan(
+          tagScanner.scan(
             scanArea.current.getBoundingClientRect(),
             changeTagScanStatus
           )
@@ -142,25 +145,25 @@ const EchoCamera = () => {
   return (
     <Main>
       <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
-      <CaptureArea captureAreaRef={scanArea} />
-      <Section>
-        {camera && camera?.capabilities?.zoom && (
+      <ScanningArea captureAreaRef={scanArea} />
+      <ControlPad id="controlarea">
+        {tagScanner && tagScanner?.capabilities?.zoom && (
           <ZoomSlider
-            onSlide={camera.alterZoom}
+            onSlide={tagScanner.alterZoom}
             zoomInputRef={zoomInput}
-            zoomOptions={camera.capabilities?.zoom}
+            zoomOptions={tagScanner.capabilities?.zoom}
           />
         )}
 
-        {camera && (
+        {tagScanner && (
           <CameraControls
-            onToggleTorch={getTorchToggleProvider(camera)}
+            onToggleTorch={getTorchToggleProvider(tagScanner)}
             onScanning={onScanning}
-            isDisabled={camera.isScanning || !tagSyncIsDone}
-            supportedFeatures={{ torch: camera?.capabilities?.torch }}
+            isDisabled={tagScanner.isScanning || !tagSyncIsDone}
+            supportedFeatures={{ torch: tagScanner?.capabilities?.torch }}
           />
         )}
-      </Section>
+      </ControlPad>
       <NotificationHandler />
       <DialogueWrapper>
         {validatedTags && (
@@ -168,8 +171,9 @@ const EchoCamera = () => {
             tagSummary={validatedTags}
             onTagSearch={tagSearch}
             onClose={() => {
-              camera.resumeViewfinder();
-              setValidatedTags(undefined);
+              tagScanner
+                .prepareNewScan()
+                .then(() => setValidatedTags(undefined));
             }}
           />
         )}
@@ -188,13 +192,23 @@ const EchoCamera = () => {
   );
 };
 
-const Section = styled.section`
+const ControlPad = styled.section`
+  display: grid;
+  align-items: center;
   position: fixed;
   bottom: 10px;
-  display: grid;
   height: 20%;
   width: 100%;
-  align-items: center;
+
+  // Move the control pad to the right;
+  @media screen and (orientation: landscape) {
+    display: flex;
+    right: 20px;
+    top: 0;
+    bottom: unset;
+    height: 100%;
+    width: 20%;
+  }
 `;
 
 const Main = styled.main`

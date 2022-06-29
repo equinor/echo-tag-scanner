@@ -1,5 +1,3 @@
-import {PossibleFunctionalLocations} from "@types"
-
 type ComputerVisionResponse = {
     language: string;
     textAngle: number;
@@ -28,6 +26,6 @@ type Word = {
 */
 type BoundingBox = string;
 
-type ParsedComputerVisionResponse = PossibleFunctionalLocations;
+type ParsedComputerVisionResponse = string[];;
 
 export type { ComputerVisionResponse, ParsedComputerVisionResponse };

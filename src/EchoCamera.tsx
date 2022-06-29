@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  CameraControls,
+  CaptureAndTorch,
   ScanningArea,
   ScanningIndicator,
   SearchResults,
@@ -146,7 +146,7 @@ const EchoCamera = () => {
     <Main>
       <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
       <ScanningArea captureAreaRef={scanArea} />
-      <ControlPad id="controlarea">
+      <ControlPad>
         {tagScanner && tagScanner?.capabilities?.zoom && (
           <ZoomSlider
             onSlide={tagScanner.alterZoom}
@@ -156,7 +156,7 @@ const EchoCamera = () => {
         )}
 
         {tagScanner && (
-          <CameraControls
+          <CaptureAndTorch
             onToggleTorch={getTorchToggleProvider(tagScanner)}
             onScanning={onScanning}
             isDisabled={tagScanner.isScanning || !tagSyncIsDone}

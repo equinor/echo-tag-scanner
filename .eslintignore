@@ -2,6 +2,7 @@
 env.sh
 .d.ts
 scripts/*.js
-/build/*
+/build/**
 /webpack/*
+/public/**
 /node_modules/*

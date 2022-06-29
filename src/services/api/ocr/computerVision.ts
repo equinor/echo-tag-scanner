@@ -48,6 +48,5 @@ function parseResponse(
       })
     )
   );
-  console.log('ocr result: ', possibleTagNumbers);
   return { results: possibleTagNumbers };
 }

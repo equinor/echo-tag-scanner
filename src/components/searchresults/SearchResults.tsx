@@ -16,8 +16,8 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
   // TODO: Make this only run in non-prod envs.
   useEffect(() => {
     function logTagSummaries() {
-      console.group('This tag data is used for presentation');
       if (props.tagSummary.length > 0) {
+        console.group('This tag data is used for presentation');
         props.tagSummary.forEach((tag) => console.table(tag));
       }
 
@@ -29,10 +29,9 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
 
   function createSearchResult(tag: TagSummaryDto, index: number) {
     return (
-      //@ts-ignore
       // Ignoring a non-optional (setExpanded) prop as there is
       // no need to handle expanded states.
-
+      //@ts-ignore
       <SearchResult
         key={index}
         expanded
@@ -61,12 +60,14 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
     );
   } else {
     return (
-      <NoSearchResultsWrapper open>
-        <NoSearchResultsMessage>No tags detected.</NoSearchResultsMessage>
-        <ScanAgainButton variant="contained" onClick={props.onClose}>
-          <ButtonLabel>Scan again</ButtonLabel>
-        </ScanAgainButton>
-      </NoSearchResultsWrapper>
+      <Scrim open>
+        <NoSearchResultsWrapper>
+          <NoSearchResultsMessage>No tags detected.</NoSearchResultsMessage>
+          <ScanAgainButton variant="contained" onClick={props.onClose}>
+            <ButtonLabel>Scan again</ButtonLabel>
+          </ScanAgainButton>
+        </NoSearchResultsWrapper>
+      </Scrim>
     );
   }
 };
@@ -75,9 +76,7 @@ const ButtonLabel = styled.span`
   white-space: nowrap;
 `;
 
-const NoSearchResultsMessage = styled.p`
-  background-color: var(--white);
-`;
+const NoSearchResultsMessage = styled.p``;
 
 const ScanAgainButton = styled(Button)``;
 
@@ -87,13 +86,14 @@ const InvisibleWrapper = styled.div`
   gap: var(--medium);
 `;
 
-const NoSearchResultsWrapper = styled(Dialog)`
+const NoSearchResultsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: var(--white);
   justify-content: center;
   z-index: 2;
-  width: 100%;
   height: auto;
   padding: var(--medium);
-  max-width: unset !important;
 `;
 
 const SearchResult = styled(TagContextMenu)`

@@ -31,7 +31,6 @@ const ZoomSlider = (props: ZoomSliderProps): JSX.Element => {
 const SliderWrapper = styled.div`
   display: flex;
   justify-content: center;
-  width: 30%;
   width: 100%;
   text-align: center;
 
@@ -41,6 +40,15 @@ const SliderWrapper = styled.div`
     > output {
       // Hide the zoom output value.
       display: none;
+    }
+  }
+
+  @media screen and (orientation: landscape) {
+    transform: rotate(-90deg);
+    width: 100%;
+
+    > div {
+      width: 100%;
     }
   }
 `;

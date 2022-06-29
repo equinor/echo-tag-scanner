@@ -35,8 +35,12 @@ const CameraControls = (props: CameraControlsProps): JSX.Element => {
   );
 };
 
-const CameraControlsWrapper = styled.section`
+const CameraControlsWrapper = styled.div`
   width: 100%;
+
+  @media screen and (orientation: landscape) {
+    height: 100%;
+  }
 `;
 
 const CameraController = styled.div`
@@ -47,6 +51,13 @@ const CameraController = styled.div`
   width: 100%;
   label {
     margin-right: 1.5em;
+  }
+
+  @media screen and (orientation: landscape) {
+    width: auto;
+    height: 100%;
+    grid-template-columns: 1fr;
+    grid-template-rows: [empty-cell]1fr [shutter]1fr [torch]1fr;
   }
 `;
 

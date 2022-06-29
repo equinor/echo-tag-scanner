@@ -76,7 +76,6 @@ export async function runTagValidation(
   const tagValidationResults = await Promise.allSettled([
     ...tagValidationTasks
   ]);
-  console.log('%c⧭', 'color: #807160', tagValidationResults);
   afterSearchCallback();
 
   return tagValidationResults

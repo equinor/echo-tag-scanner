@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import {
   CameraControls,
+  ScanningArea,
   ScanningIndicator,
   SearchResults,
   Viewfinder,
   ZoomSlider
 } from '@components';
-import { useMountCamera, useSetActiveTagNo } from '@hooks';
+import { useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import { PossibleFunctionalLocations } from '@types';
 import {
@@ -23,7 +24,8 @@ const EchoCamera = () => {
   const [validatedTags, setValidatedTags] = useState<
     TagSummaryDto[] | undefined
   >(undefined);
-  const { camera, canvas, viewfinder, zoomInput } = useMountCamera();
+  const { tagScanner, canvas, viewfinder, zoomInput, scanArea } =
+    useMountScanner();
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
@@ -38,6 +40,8 @@ const EchoCamera = () => {
     if (syncStatus) setTagSyncIsDone(true);
     else setTagSyncIsDone(false);
   });
+
+  tagScanner?.reportCameraFeatures();
 
   // Since we do not have tag syncing in development, this will mimick an interval where Echopedia is syncing.
   if (EchoEnv.isDevelopment) {
@@ -60,12 +64,12 @@ const EchoCamera = () => {
   }
 
   function handleNoTagsFound() {
-    camera.resumeViewfinder();
+    tagScanner.resumeViewfinder();
     setValidatedTags([]);
   }
 
   const onScanning = async () => {
-    if (!tagSyncIsDone || camera.isScanning) {
+    if (!tagSyncIsDone || tagScanner.isScanning) {
       dispatchNotification({
         message: 'Scanning is available as soon as the syncing is done.',
         autohideDuration: 2000
@@ -73,7 +77,7 @@ const EchoCamera = () => {
       return;
     }
     setValidatedTags(undefined);
-    camera.isScanning = true;
+    tagScanner.isScanning = true;
 
     /**
      * Handles the parsing and filtering of functional locations that was returned from the API.
@@ -82,7 +86,7 @@ const EchoCamera = () => {
       // The tag scanner returned some results.
       if (Array.isArray(fLocations?.results) && fLocations.results.length > 0) {
         const afterSearchCallback = () => {
-          camera.isScanning = false;
+          tagScanner.isScanning = false;
         };
         const beforeValidation = new Date();
         const result = await runTagValidation(fLocations, afterSearchCallback);
@@ -114,7 +118,12 @@ const EchoCamera = () => {
     // This promise puts the scanning in motion.
     const scanAction: Promise<PossibleFunctionalLocations | undefined> =
       new Promise((resolve) => {
-        resolve(camera.scan(changeTagScanStatus));
+        resolve(
+          tagScanner.scan(
+            scanArea.current.getBoundingClientRect(),
+            changeTagScanStatus
+          )
+        );
       });
 
     // Start the scan race.
@@ -133,64 +142,73 @@ const EchoCamera = () => {
       .then((validatedTags) => presentValidatedTags(validatedTags));
   };
 
-  if (camera) {
-    return (
-      <Main>
-        <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
-
-        <Section>
-          {camera?.capabilities?.zoom && (
-            <ZoomSlider
-              onSlide={camera.alterZoom}
-              zoomInputRef={zoomInput}
-              zoomOptions={camera.capabilities?.zoom}
-            />
-          )}
-
-          <CameraControls
-            onToggleTorch={getTorchToggleProvider(camera)}
-            onScanning={onScanning}
-            isDisabled={camera.isScanning || !tagSyncIsDone}
-            supportedFeatures={{ torch: camera?.capabilities?.torch }}
+  return (
+    <Main>
+      <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
+      <ScanningArea captureAreaRef={scanArea} />
+      <ControlPad id="controlarea">
+        {tagScanner && tagScanner?.capabilities?.zoom && (
+          <ZoomSlider
+            onSlide={tagScanner.alterZoom}
+            zoomInputRef={zoomInput}
+            zoomOptions={tagScanner.capabilities?.zoom}
           />
-        </Section>
-        <NotificationHandler />
-        <DialogueWrapper>
-          {validatedTags && (
-            <SearchResults
-              tagSummary={validatedTags}
-              onTagSearch={tagSearch}
-              onClose={() => {
-                camera.resumeViewfinder();
-                setValidatedTags(undefined);
-              }}
-            />
-          )}
+        )}
 
-          {tagScanStatus.uploading &&
-            ScanningIndicator(
-              <span>
-                Uploading media. <br />
-                <br /> This could take a while depending on your internet
-                connection.
-              </span>
-            )}
-          {tagScanStatus.validating && ScanningIndicator('Validating...')}
-        </DialogueWrapper>
-      </Main>
-    );
-  } else {
-    return null;
-  }
+        {tagScanner && (
+          <CameraControls
+            onToggleTorch={getTorchToggleProvider(tagScanner)}
+            onScanning={onScanning}
+            isDisabled={tagScanner.isScanning || !tagSyncIsDone}
+            supportedFeatures={{ torch: tagScanner?.capabilities?.torch }}
+          />
+        )}
+      </ControlPad>
+      <NotificationHandler />
+      <DialogueWrapper>
+        {validatedTags && (
+          <SearchResults
+            tagSummary={validatedTags}
+            onTagSearch={tagSearch}
+            onClose={() => {
+              tagScanner
+                .prepareNewScan()
+                .then(() => setValidatedTags(undefined));
+            }}
+          />
+        )}
+
+        {tagScanStatus.uploading &&
+          ScanningIndicator(
+            <span>
+              Uploading media. <br />
+              <br /> This could take a while depending on your internet
+              connection.
+            </span>
+          )}
+        {tagScanStatus.validating && ScanningIndicator('Validating...')}
+      </DialogueWrapper>
+    </Main>
+  );
 };
 
-const Section = styled.section`
+const ControlPad = styled.section`
+  display: grid;
+  align-items: center;
   position: fixed;
   bottom: 10px;
-  display: grid;
   height: 20%;
   width: 100%;
-  align-items: center;
+
+  // Move the control pad to the right;
+  @media screen and (orientation: landscape) {
+    display: flex;
+    right: 20px;
+    top: 0;
+    bottom: unset;
+    height: 100%;
+    width: 20%;
+  }
 `;
 
 const Main = styled.main`

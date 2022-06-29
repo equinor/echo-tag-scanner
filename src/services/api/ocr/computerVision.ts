@@ -48,5 +48,5 @@ function parseResponse(
       })
     )
   );
-  return { results: possibleTagNumbers };
+  return possibleTagNumbers;
 }

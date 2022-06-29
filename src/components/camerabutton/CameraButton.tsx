@@ -7,33 +7,28 @@ interface TorchButtonProps {
   onClick?: () => void;
 }
 
+
 /**
- * Returns an EDS ghost_icon button as a formatted camera button.
- * @param name An identifier from EDS system icons.
- * @param onClick callback.
+ * Returns a button for toggling the torch feature.
  */
 const TorchButton = (props: TorchButtonProps): JSX.Element => {
-  function createLabel() {
-    return <Icon name={'lightbulb'} color="white" />;
-  }
   return (
-    <TorchTrigger onClick={props.onClick} style={{ border: '1px solid' }}>
-      {createLabel()}
+    <TorchTrigger onClick={props.onClick}>
+      <Icon name={'lightbulb'} color="white" />;
     </TorchTrigger>
   );
 };
 
-interface ShutterProps {
+interface CaptureButtonProps {
   isDisabled?: boolean;
   className?: string;
   onClick?: () => void;
-  isScanning?: boolean;
 }
 
 /**
- * Returns a custom camera shutter/tag scanning button.
+ * Returns a custom camera tag scanning button.
  */
-const ScannerButton = (props: ShutterProps): JSX.Element => {
+const ScannerButton = (props: CaptureButtonProps): JSX.Element => {
   if (props.isDisabled)
     return <ScannerTriggerInProgress onClick={props.onClick} />;
   else return <ScannerTrigger onClick={props.onClick} />;
@@ -65,6 +60,7 @@ const TorchTrigger = styled.button`
   width: 55px;
   height: 55px;
   grid-area: torch;
+  border: 1px solid;
 
   &:active {
     background-color: var(--equiBlue1);

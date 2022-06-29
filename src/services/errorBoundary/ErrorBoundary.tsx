@@ -139,7 +139,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
                 <Dialog.CustomContent>
                   <ErrorBoundaryContent>
                     <section>
-                      Smart Portal ran into an issue. Check the marked message
+                      The Camera ran into an issue. Check the marked message
                       below for more details.
                       <p>
                         <mark>

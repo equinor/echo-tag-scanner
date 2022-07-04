@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { RefObject, useRef, useState } from 'react';
 import {
   CameraControls,
   ScanningArea,
@@ -21,11 +21,39 @@ import { eventHub } from '@equinor/echo-base';
 import { EchoEnv } from '@equinor/echo-core';
 
 const EchoCamera = () => {
+  // Represets the camera viewfinder.
+  const viewfinder = useRef<HTMLVideoElement>(null);
+  // Used for postprocessing of captures.
+  const canvas = useRef<HTMLCanvasElement>(null);
+  // All tags within this bounding box will be scanned.
+  const scanArea = useRef<HTMLElement>(null);
+
+  return (
+    <Main>
+      <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
+      <ScanningArea captureAreaRef={scanArea} />
+
+      {viewfinder.current && canvas.current && scanArea.current && (
+        <Scanner viewfinder={viewfinder} canvas={canvas} scanArea={scanArea} />
+      )}
+    </Main>
+  );
+};
+
+interface ScannerProps {
+  viewfinder: RefObject<HTMLVideoElement>;
+  canvas: RefObject<HTMLCanvasElement>;
+  scanArea: RefObject<HTMLElement>;
+}
+function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
   const [validatedTags, setValidatedTags] = useState<
     TagSummaryDto[] | undefined
   >(undefined);
-  const { tagScanner, canvas, viewfinder, zoomInput, scanArea } =
-    useMountScanner();
+  const { tagScanner, zoomInput } = useMountScanner(
+    viewfinder,
+    canvas,
+    scanArea
+  );
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
@@ -143,25 +171,25 @@ const EchoCamera = () => {
   };
 
   return (
-    <Main>
-      <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
-      <ScanningArea captureAreaRef={scanArea} />
+    <>
       <ControlPad id="controlarea">
-        {tagScanner && tagScanner?.capabilities?.zoom && (
-          <ZoomSlider
-            onSlide={tagScanner.alterZoom}
-            zoomInputRef={zoomInput}
-            zoomOptions={tagScanner.capabilities?.zoom}
-          />
-        )}
-
         {tagScanner && (
-          <CameraControls
-            onToggleTorch={getTorchToggleProvider(tagScanner)}
-            onScanning={onScanning}
-            isDisabled={tagScanner.isScanning || !tagSyncIsDone}
-            supportedFeatures={{ torch: tagScanner?.capabilities?.torch }}
-          />
+          <>
+            {tagScanner.capabilities?.zoom && (
+              <ZoomSlider
+                onSlide={tagScanner.alterZoom}
+                zoomInputRef={zoomInput}
+                zoomOptions={tagScanner.capabilities?.zoom}
+              />
+            )}
+
+            <CameraControls
+              onToggleTorch={getTorchToggleProvider(tagScanner)}
+              onScanning={onScanning}
+              isDisabled={tagScanner.isScanning || !tagSyncIsDone}
+              supportedFeatures={{ torch: tagScanner.capabilities?.torch }}
+            />
+          </>
         )}
       </ControlPad>
       <NotificationHandler />
@@ -188,9 +216,9 @@ const EchoCamera = () => {
           )}
         {tagScanStatus.validating && ScanningIndicator('Validating...')}
       </DialogueWrapper>
-    </Main>
+    </>
   );
-};
+}
 
 const ControlPad = styled.section`
   display: grid;

@@ -1,6 +1,6 @@
 import React, { RefObject, useRef, useState } from 'react';
 import {
-  CameraControls,
+  CaptureAndTorch,
   ScanningArea,
   ScanningIndicator,
   SearchResults,
@@ -8,8 +8,12 @@ import {
   ZoomSlider
 } from '@components';
 import { useMountScanner, useSetActiveTagNo } from '@hooks';
-import { NotificationHandler, useTagScanStatus } from '@services';
-import { PossibleFunctionalLocations } from '@types';
+import {
+  NotificationHandler,
+  TagScanningStages,
+  useTagScanStatus
+} from '@services';
+import { ParsedComputerVisionResponse } from '@types';
 import {
   getTorchToggleProvider,
   runTagValidation,
@@ -97,6 +101,7 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
   }
 
   const onScanning = async () => {
+    // Prevent scanning if Echo is syncing, otherwise the validation will not work.
     if (!tagSyncIsDone || tagScanner.isScanning) {
       dispatchNotification({
         message: 'Scanning is available as soon as the syncing is done.',
@@ -104,20 +109,21 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
       })();
       return;
     }
+
     setValidatedTags(undefined);
     tagScanner.isScanning = true;
 
     /**
      * Handles the parsing and filtering of functional locations that was returned from the API.
      */
-    async function validateTags(fLocations?: PossibleFunctionalLocations) {
-      // The tag scanner returned some results.
-      if (Array.isArray(fLocations?.results) && fLocations.results.length > 0) {
-        const afterSearchCallback = () => {
-          tagScanner.isScanning = false;
-        };
+    async function validateTags(
+      possibleTagNumbers: ParsedComputerVisionResponse,
+      callback: (property: TagScanningStages, value: boolean) => void
+    ) {
+      if (Array.isArray(possibleTagNumbers) && possibleTagNumbers.length > 0) {
+        callback('validating', true);
         const beforeValidation = new Date();
-        const result = await runTagValidation(fLocations, afterSearchCallback);
+        const result = await runTagValidation(possibleTagNumbers);
         const afterValidation = new Date();
         console.info(
           `Tag validation took ${
@@ -125,49 +131,28 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
             beforeValidation.getMilliseconds()
           } milliseconds.`
         );
+        callback('validating', false);
 
         return result;
       } else {
         // The tag scanner returned 0 results.
+        callback('validating', false);
         handleNoTagsFound();
       }
     }
 
-    // We won't make the user wait more than 10 seconds for the scanning results.
-    // TODO: Retire the scanning race.
-    const scanTookTooLong: Promise<PossibleFunctionalLocations> = new Promise(
-      (resolve) => {
-        setTimeout(() => {
-          resolve({ results: [] });
-        }, 1000000);
-      }
+    // Get a list of possible tag matches.
+    const possibleTags = await tagScanner.scan(
+      scanArea.current.getBoundingClientRect(),
+      changeTagScanStatus
     );
 
-    // This promise puts the scanning in motion.
-    const scanAction: Promise<PossibleFunctionalLocations | undefined> =
-      new Promise((resolve) => {
-        resolve(
-          tagScanner.scan(
-            scanArea.current.getBoundingClientRect(),
-            changeTagScanStatus
-          )
-        );
-      });
+    // Validate the possible tags with Echo-Search.
+    const validatedTags = await validateTags(possibleTags, changeTagScanStatus);
+    tagScanner.isScanning = false;
 
-    // Start the scan race.
-    Promise.race([scanAction, scanTookTooLong])
-
-      // Validate the tag results from OCR
-      .then((funcLocations) => {
-        changeTagScanStatus('uploading', false);
-        changeTagScanStatus('validating', true);
-        const validatedTags = validateTags(funcLocations);
-        changeTagScanStatus('validating', false);
-        return validatedTags;
-      })
-
-      // Receive the validated tags and present them.
-      .then((validatedTags) => presentValidatedTags(validatedTags));
+    // Put the validated tags in state.
+    presentValidatedTags(validatedTags);
   };
 
   return (
@@ -183,11 +168,11 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
               />
             )}
 
-            <CameraControls
+            <CaptureAndTorch
               onToggleTorch={getTorchToggleProvider(tagScanner)}
               onScanning={onScanning}
               isDisabled={tagScanner.isScanning || !tagSyncIsDone}
-              supportedFeatures={{ torch: tagScanner.capabilities?.torch }}
+              supportedFeatures={{ torch: tagScanner?.capabilities?.torch }}
             />
           </>
         )}

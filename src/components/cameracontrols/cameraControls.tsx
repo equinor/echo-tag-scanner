@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 import { TorchButton, ScannerButton } from '@components';
-import { SupportedCameraFeatures } from '@types';
 
 interface CameraControlsProps {
   /* Scanning callback */
@@ -10,7 +9,7 @@ interface CameraControlsProps {
   onToggleTorch?: () => void;
 
   isDisabled?: boolean;
-  supportedFeatures: SupportedCameraFeatures;
+  supportedFeatures: Pick<MediaTrackCapabilities, "torch">;
 }
 
 /**
@@ -18,24 +17,20 @@ interface CameraControlsProps {
  * @param {callback} - The scanning action
  * @param {callback} - The torch action. If undefined, the torch button is disabled.
  */
-const CameraControls = (props: CameraControlsProps): JSX.Element => {
-  function onScanning() {
-    props.onScanning();
-  }
-
+const CaptureAndTorch = (props: CameraControlsProps): JSX.Element => {
   return (
-    <CameraControlsWrapper>
-      <CameraController role="toolbar">
+    <CaptureAndTorchWrapper>
+      <CaptureAndTorchGrid role="toolbar">
         {props.supportedFeatures.torch && (
           <TorchButton name="lightbulb" onClick={props.onToggleTorch} />
         )}
-        <ScannerButton onClick={onScanning} isDisabled={props.isDisabled} />
-      </CameraController>
-    </CameraControlsWrapper>
+        <ScannerButton onClick={props.onScanning} isDisabled={props.isDisabled} />
+      </CaptureAndTorchGrid>
+    </CaptureAndTorchWrapper>
   );
 };
 
-const CameraControlsWrapper = styled.div`
+const CaptureAndTorchWrapper = styled.div`
   width: 100%;
 
   @media screen and (orientation: landscape) {
@@ -43,7 +38,7 @@ const CameraControlsWrapper = styled.div`
   }
 `;
 
-const CameraController = styled.div`
+const CaptureAndTorchGrid = styled.div`
   display: grid;
   grid-template-columns: [torch]1fr [shutter]1fr [empty-cell]1fr;
   justify-items: center;
@@ -61,4 +56,4 @@ const CameraController = styled.div`
   }
 `;
 
-export { CameraControls };
+export { CaptureAndTorch };

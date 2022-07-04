@@ -4,5 +4,5 @@ export * from './event';
 export * from './error';
 export * from './url';
 export * from './business';
-export * from './tagFiltering';
+export * from './tag';
 export * from './logger';

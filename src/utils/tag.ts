@@ -1,9 +1,7 @@
 import {
-  ExtractedFunctionalLocation,
-  PossibleFunctionalLocations
+  ParsedComputerVisionResponse
 } from '@types';
-import { Search, TagSummaryDto, ResultValue } from '@equinor/echo-search';
-import { extractFunctionalLocation, getInstCode } from '@utils';
+import { Search, TagSummaryDto } from '@equinor/echo-search';
 
 function hasContent(data: unknown) {
   if (typeof data === 'string' || typeof data === 'number') {
@@ -36,26 +34,14 @@ async function getTagSummary(validationResult: string) {
   if (result.isSuccess && hasContent(result.value)) return result.value;
 }
 
-function tagSummary(tagSummary: TagSummaryDto): TagSummaryDto {
-  // TODO: Validate tag summary
-  return tagSummary;
-}
-
 /**
  * Returns a promise to validate a string as a tag number.
  */
-function createTagValidator(
-  location: ExtractedFunctionalLocation,
-  instCode?: string
+async function createTagValidator(
+  possibleTagNumber: string
 ): Promise<TagSummaryDto> {
-  return new Promise((resolve, reject) => {
-    findClosestTag(location.tagNumber)
-      .then(getTagSummary)
-      .then((summary) => resolve(tagSummary(summary)))
-      .catch(function handleTagValidationError(reason) {
-        reject(reason);
-      });
-  });
+  const closestTagMatch = await findClosestTag(possibleTagNumber);
+  return await getTagSummary(closestTagMatch);
 }
 
 /**
@@ -63,21 +49,17 @@ function createTagValidator(
  * This function handles the filtering of these false positives.
  */
 export async function runTagValidation(
-  locations: PossibleFunctionalLocations,
-  afterSearchCallback: () => void
+  locations: ParsedComputerVisionResponse,
 ): Promise<TagSummaryDto[]> {
-  // Split the possible tag number into functional locations.
-  const functionalLocations = locations.results.map((l) =>
-    extractFunctionalLocation(l)
-  );
-  const tagValidationTasks = functionalLocations.map((funcLocation) =>
-    createTagValidator(funcLocation, getInstCode())
+
+  const tagValidationTasks = locations.map((funcLocation) =>
+    createTagValidator(funcLocation)
   );
   const tagValidationResults = await Promise.allSettled([
     ...tagValidationTasks
   ]);
-  afterSearchCallback();
 
+  // Filter away rejected promises and return the validated tags.
   return tagValidationResults
     .map((result) => {
       if (result.status === 'fulfilled') return result.value;

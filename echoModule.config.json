@@ -1,6 +1,6 @@
 {
   "bundler": "webpack",
-  "webpackConfigPath": "./webpack.config.js",
+  "webpackConfigPath": "./webpack/webpack.config.js",
   "manifest": {
     "name": "Echo Camera Web",
     "key": "echo-camera-web",

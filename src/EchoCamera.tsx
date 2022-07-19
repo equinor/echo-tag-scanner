@@ -32,6 +32,7 @@ const EchoCamera = () => {
   // All tags within this bounding box will be scanned.
   const scanArea = useRef<HTMLElement>(null);
 
+
   return (
     <Main>
       <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
@@ -62,16 +63,17 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
   // Controls the availability of scanning.
+  const [tagSyncIsDone, setTagSyncIsDone] = useState(false);
+  
+  // When Echo is done syncing, we can rerender and open for scanning.
   // We currently have no good way of setting the initial mounted value.
   // There will be a small lag until EventHub is able to set the proper initial value.
-  const [tagSyncIsDone, setTagSyncIsDone] = useState(true);
-
-  // When Echo is done syncing, we can rerender and open for scanning.
   eventHub.subscribe('isSyncing', (syncStatus: boolean) => {
     console.log('Echo is syncing: ', syncStatus);
     if (syncStatus) setTagSyncIsDone(true);
     else setTagSyncIsDone(false);
   });
+  console.log('Echo is syncing', tagSyncIsDone);
 
   tagScanner?.reportCameraFeatures();
 
@@ -111,45 +113,22 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
     }
 
     setValidatedTags(undefined);
+
+    changeTagScanStatus('uploading', true);
     tagScanner.isScanning = true;
 
-    /**
-     * Handles the parsing and filtering of functional locations that was returned from the API.
-     */
-    async function validateTags(
-      possibleTagNumbers: ParsedComputerVisionResponse,
-      callback: (property: TagScanningStages, value: boolean) => void
-    ) {
-      if (Array.isArray(possibleTagNumbers) && possibleTagNumbers.length > 0) {
-        callback('validating', true);
-        const beforeValidation = new Date();
-        const result = await runTagValidation(possibleTagNumbers);
-        const afterValidation = new Date();
-        console.info(
-          `Tag validation took ${
-            afterValidation.getMilliseconds() -
-            beforeValidation.getMilliseconds()
-          } milliseconds.`
-        );
-        callback('validating', false);
-
-        return result;
-      } else {
-        // The tag scanner returned 0 results.
-        callback('validating', false);
-        handleNoTagsFound();
-      }
-    }
-
-    // Get a list of possible tag matches.
-    const possibleTags = await tagScanner.scan(
+    // Capture image.
+    await tagScanner.scan(
       scanArea.current.getBoundingClientRect(),
-      changeTagScanStatus
+      
     );
 
-    // Validate the possible tags with Echo-Search.
-    const validatedTags = await validateTags(possibleTags, changeTagScanStatus);
+    // Run OCR to get possible tag numbers.
+    const possibleTagNumbers = await tagScanner.ocr(changeTagScanStatus);
     tagScanner.isScanning = false;
+
+    // Validate the possible tags with Echo-Search.
+    const validatedTags = await tagScanner.validateTags(possibleTagNumbers, handleNoTagsFound);
 
     // Put the validated tags in state.
     presentValidatedTags(validatedTags);
@@ -157,7 +136,7 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
 
   return (
     <>
-      <ControlPad id="controlarea">
+      <ControlPad>
         {tagScanner && (
           <>
             {tagScanner.capabilities?.zoom && (

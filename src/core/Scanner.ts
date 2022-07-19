@@ -1,5 +1,7 @@
+import { TagSummaryDto } from '@equinor/echo-search';
 import { ocrRead, TagScanningStages } from '@services';
 import { ParsedComputerVisionResponse } from '@types';
+import { runTagValidation } from '../utils';
 import { Camera } from './Camera';
 import { CameraProps } from './CoreCamera';
 
@@ -46,10 +48,13 @@ export class TagScanner extends Camera {
     this.resumeViewfinder();
   }
 
+  /**
+   * Captures a frame and runs postprocessing.
+   * @returns {Blob} The postprocessed frame.
+   */
   public async scan(
     area: DOMRect,
-    callback: (property: TagScanningStages, value: boolean) => void
-  ): Promise<ParsedComputerVisionResponse | undefined> {
+  ): Promise<Blob | undefined> {
     this.pauseViewfinder();
     let capture = await this.capturePhoto(area);
     if (capture) {
@@ -59,15 +64,46 @@ export class TagScanner extends Camera {
       if (capture.size > 50000) capture = await this.scale(area);
       this.capture = capture;
 
-      callback('uploading', true);
-      const result = await ocrRead(this.capture);
-
-      this.isScanning = false;
-      callback('uploading', false);
-      return result;
+      return capture;
     } else {
       this.isScanning = false;
       return undefined;
     }
   }
+  
+  /**
+   * Uses whatever capture is in memory and runs OCR on it.
+   */
+  public async ocr(callback: (property: TagScanningStages, value: boolean) => void) {
+    if (this.capture) {
+      callback('runningOcr', true);
+      const result = await ocrRead(this.capture);
+      callback("runningOcr", false);
+      return result;
+    }
+  }
+
+  public async validateTags(possibleTagNumbers: ParsedComputerVisionResponse,
+    callback: (property: TagScanningStages, value: boolean) => void): Promise<TagSummaryDto[]> {
+      this.isScanning = true;
+      if (Array.isArray(possibleTagNumbers) && possibleTagNumbers.length > 0) {
+        callback('validating', true);
+        const beforeValidation = new Date();
+        const result = await runTagValidation(possibleTagNumbers);
+        const afterValidation = new Date();
+        console.info(
+          `Tag validation took ${
+            afterValidation.getMilliseconds() -
+            beforeValidation.getMilliseconds()
+          } milliseconds.`
+        );
+        this.isScanning = false;
+        callback('validating', false);
+        return result;
+      } else {
+        this.isScanning = false;
+        callback('validating', false);
+        return [];
+      }
+    }
 }

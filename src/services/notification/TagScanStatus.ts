@@ -11,7 +11,8 @@ export type TagScanningStages =
   | 'finished'
   | 'uploading'
   | 'validating'
-  | 'noTagsFound';
+  | 'noTagsFound'
+  | 'runningOcr';
 
 export interface TagScan {
   tagScanStatus: TagScanStatus;

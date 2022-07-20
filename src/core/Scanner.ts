@@ -11,6 +11,8 @@ export class TagScanner extends Camera {
 
   constructor(props: CameraProps) {
     super(props);
+
+    this.reportCameraFeatures();
   }
 
   public set isScanning(value: boolean) {

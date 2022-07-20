@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { Button, Dialog, Scrim } from '@equinor/eds-core-react';
+
+import { Button, Scrim } from '@equinor/eds-core-react';
 import { TagContextMenu, TagIcon, getIcon } from '@equinor/echo-components';
 import { getLegendStatusColor } from '@equinor/echo-framework';
 import { TagSummaryDto } from '@equinor/echo-search';
@@ -80,15 +81,18 @@ const NoSearchResultsMessage = styled.p``;
 
 const ScanAgainButton = styled(Button)``;
 
-const InvisibleWrapper = styled.div`
+const DialogContentWrapper = styled.div`
+  pointer-events: all;
+
   display: flex;
   flex-direction: column;
+`;
+
+const InvisibleWrapper = styled(DialogContentWrapper)`
   gap: var(--medium);
 `;
 
-const NoSearchResultsWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
+const NoSearchResultsWrapper = styled(DialogContentWrapper)`
   background-color: var(--white);
   justify-content: center;
   z-index: 2;

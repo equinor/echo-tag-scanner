@@ -1,4 +1,8 @@
 import React, { RefObject, useRef, useState } from 'react';
+import styled from 'styled-components';
+
+import { TagSummaryDto } from '@equinor/echo-search';
+
 import {
   CaptureAndTorch,
   ScanningArea,
@@ -7,7 +11,7 @@ import {
   Viewfinder,
   ZoomSlider
 } from '@components';
-import { useMountScanner, useSetActiveTagNo } from '@hooks';
+import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
 import {
   NotificationHandler,
   TagScanningStages,
@@ -19,10 +23,6 @@ import {
   runTagValidation,
   getNotificationDispatcher as dispatchNotification
 } from '@utils';
-import styled from 'styled-components';
-import { TagSummaryDto } from '@equinor/echo-search';
-import { eventHub } from '@equinor/echo-base';
-import { EchoEnv } from '@equinor/echo-core';
 
 const EchoCamera = () => {
   // Represets the camera viewfinder.
@@ -64,24 +64,7 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
   // Controls the availability of scanning.
   // We currently have no good way of setting the initial mounted value.
   // There will be a small lag until EventHub is able to set the proper initial value.
-  const [tagSyncIsDone, setTagSyncIsDone] = useState(true);
-
-  // When Echo is done syncing, we can rerender and open for scanning.
-  eventHub.subscribe('isSyncing', (syncStatus: boolean) => {
-    console.log('Echo is syncing: ', syncStatus);
-    if (syncStatus) setTagSyncIsDone(true);
-    else setTagSyncIsDone(false);
-  });
-
-  tagScanner?.reportCameraFeatures();
-
-  // Since we do not have tag syncing in development, this will mimick an interval where Echopedia is syncing.
-  if (EchoEnv.isDevelopment) {
-    const syncDelayMs = 2000;
-    setTimeout(() => {
-      setTagSyncIsDone(true);
-    }, syncDelayMs);
-  }
+  const tagSyncIsDone = useEchoIsSyncing();
 
   // Accepts a list of validated tags and sets them in memory for presentation.
   function presentValidatedTags(tags: TagSummaryDto[]) {
@@ -231,6 +214,7 @@ const Main = styled.main`
 `;
 
 const DialogueWrapper = styled.section`
+  pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -238,7 +222,7 @@ const DialogueWrapper = styled.section`
   top: 0;
   // The height of this wrapper is based on the bottom offset
   // of the zoom slider and camera controls (20% and 5% respectively).
-  height: calc(100% - 20%);
+  height: 100%;
   width: 100%;
 `;
 

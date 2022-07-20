@@ -9,26 +9,8 @@ import { CameraProps } from './CoreCamera';
 export class TagScanner extends Camera {
   protected _isScanning = false;
 
-  private constructor(props: CameraProps) {
+  constructor(props: CameraProps) {
     super(props);
-  }
-
-  /**
-   * Asynchronously constructs the tag scanner.
-   */
-  static construct(props: CameraProps): Promise<TagScanner> {
-    return new Promise((resolve) => {
-      // Call the constructor above.
-      const scannerConstruct = new TagScanner(props);
-
-      // User is asked for permission to use the camera. (the async part)
-      scannerConstruct.promptCameraUsage().then((mediastream) => {
-        // If approved, setup the camera, ie super.setup()
-        scannerConstruct.setup.call(scannerConstruct, mediastream);
-        // Resolve "this" so that it can be React ref'd
-        resolve(scannerConstruct);
-      });
-    });
   }
 
   public set isScanning(value: boolean) {

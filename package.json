@@ -8,15 +8,10 @@
   "license": "MIT",
   "scripts": {
     "start": "echo-build -s -d",
-    "build": "echo-build -c && npm run runEnv && npm run copy:webconfig",
-    "build:module": "echo-build",
-    "start-admin": "echo-build -s -d -a",
-    "ui": "npm i --legacy-peer-deps",
-    "copy:webconfig": "copyfiles web.config ./build",
+    "build": "echo-build -c && npm run runEnv",
     "runEnv": "bash ./env.sh",
-    "clean-merged": "git branch --merged | egrep -v '(^*|master|dev|main|develop|test|qa)' | xargs git b",
-    "clean-locals": "git branch | egrep -v '(^*|master|dev|main|develop|test|qa)' | xargs git branch -D",
-    "clean-your-remotes": "git branch | egrep -v '(^*|master|dev|main|develop|test|qa)' | xargs git branch -D"
+    "build:module": "echo-build",
+    "start-admin": "echo-build -s -d -a"
   },
   "devDependencies": {
     "@equinor/echo-base": "^0.6.8",

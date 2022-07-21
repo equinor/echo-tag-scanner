@@ -11,7 +11,6 @@ import { CameraProps } from './CoreCamera';
 export class TagScanner extends Camera {
   private readonly _scanRetries = 5;
   private readonly _scanDuration = 2; //seconds 
-  private _scans: Blob[] = []
 
   private constructor(props: CameraProps) {
     super(props);
@@ -56,7 +55,8 @@ export class TagScanner extends Camera {
       const intervalId = setInterval(async() => {
         var capture = await this.capturePhoto(area);
         if (capture.size > 50000) capture = await this.scale(area);
-        if (capture.size > 50000) capture = await this.grayscale();
+        // if (capture.size > 50000) capture = await this.grayscale();
+        console.log('%c⧭', 'color: #ffa280', capture);
         scans.push(capture)
         
         // Log some image stats and a blob preview in network tab.
@@ -69,22 +69,18 @@ export class TagScanner extends Camera {
       })
     }
     
-  
-  
-  /**
+    /**
    * Runs OCR on a list of blobs until a result is obtained or it reaches the end of the list.
    */
-  public async ocr(scans: Blob[]): Promise<ParsedComputerVisionResponse> {
-      let result = [];
-      scans.find(async(scan: Blob) => {
-        var ocrResult = await ocrRead(scan);
-        if (ocrResult.length >= 1) {
-          result = ocrResult;
-          return true;
+     public async ocr(scans: Blob[]): Promise<ParsedComputerVisionResponse> {
+      for (let i = 0; i < scans.length; i++) {
+          var ocrResult = await ocrRead(scans[i]);
+          if (ocrResult.length > 1) return ocrResult;
+          else console.log("OCR returned no results");
         }
-      })
-      return result;
-  }
+        
+      return []
+    }
 
   public async validateTags(possibleTagNumbers: ParsedComputerVisionResponse,
     ): Promise<TagSummaryDto[]> {

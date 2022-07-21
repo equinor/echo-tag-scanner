@@ -5,6 +5,9 @@ type TagScanStatus = {
   validating: boolean;
   finished: boolean;
   noTagsFound: boolean;
+
+  // This might replace most of the statuses above.
+  scanning: boolean;
 };
 
 export type TagScanningStages =
@@ -12,7 +15,8 @@ export type TagScanningStages =
   | 'uploading'
   | 'validating'
   | 'noTagsFound'
-  | 'runningOcr';
+  | 'runningOcr'
+  | 'scanning';
 
 export interface TagScan {
   tagScanStatus: TagScanStatus;
@@ -25,7 +29,8 @@ export function useTagScanStatus(): TagScan {
     finished: false,
     uploading: false,
     validating: false,
-    noTagsFound: false
+    noTagsFound: false,
+    scanning: false
   });
 
   const changeTagScanStatus = (property: TagScanningStages, value: boolean) => {

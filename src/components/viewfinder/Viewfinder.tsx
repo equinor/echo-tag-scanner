@@ -24,6 +24,7 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
       />
       <Canvas
         ref={props.canvasRef}
+        // TODO: set dynamic dimensions
         width={'500'}
         height="300"
         {...props.canvasOptions}

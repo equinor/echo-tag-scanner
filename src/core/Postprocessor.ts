@@ -79,8 +79,6 @@ class Postprocessor extends CoreCamera {
       dHeight: scaleInstructions.height * 0.5,
       dWidth: scaleInstructions.width * 0.5
     };
-    this._canvas.current.width = scaleInstructions.width * 0.5;
-    this._canvas.current.height = scaleInstructions.height * 0.5;
     const downscaledImgBlob = await this._canvasHandler.draw(bitmap, params);
     return downscaledImgBlob;
   }

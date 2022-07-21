@@ -10,19 +10,15 @@ import {
 import { useMountScanner, useSetActiveTagNo } from '@hooks';
 import {
   NotificationHandler,
-  TagScanningStages,
   useTagScanStatus
 } from '@services';
-import { ParsedComputerVisionResponse } from '@types';
 import {
   getTorchToggleProvider,
-  runTagValidation,
   getNotificationDispatcher as dispatchNotification
 } from '@utils';
 import styled from 'styled-components';
 import { TagSummaryDto } from '@equinor/echo-search';
-import { eventHub } from '@equinor/echo-base';
-import { EchoEnv } from '@equinor/echo-core';
+import { EchoEnv, eventHub } from '@equinor/echo-core';
 
 const EchoCamera = () => {
   // Represets the camera viewfinder.
@@ -63,19 +59,14 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
   // Controls the availability of scanning.
-  const [tagSyncIsDone, setTagSyncIsDone] = useState(false);
-  
+  const [tagSyncIsDone, setTagSyncIsDone] = useState(true);
   // When Echo is done syncing, we can rerender and open for scanning.
   // We currently have no good way of setting the initial mounted value.
   // There will be a small lag until EventHub is able to set the proper initial value.
   eventHub.subscribe('isSyncing', (syncStatus: boolean) => {
-    console.log('Echo is syncing: ', syncStatus);
     if (syncStatus) setTagSyncIsDone(true);
     else setTagSyncIsDone(false);
   });
-  console.log('Echo is syncing', tagSyncIsDone);
-
-  tagScanner?.reportCameraFeatures();
 
   // Since we do not have tag syncing in development, this will mimick an interval where Echopedia is syncing.
   if (EchoEnv.isDevelopment) {
@@ -104,7 +95,7 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
 
   const onScanning = async () => {
     // Prevent scanning if Echo is syncing, otherwise the validation will not work.
-    if (!tagSyncIsDone || tagScanner.isScanning) {
+    if (!tagSyncIsDone) {
       dispatchNotification({
         message: 'Scanning is available as soon as the syncing is done.',
         autohideDuration: 2000
@@ -112,23 +103,22 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
       return;
     }
 
+    // Initial preperations
     setValidatedTags(undefined);
-
-    changeTagScanStatus('uploading', true);
-    tagScanner.isScanning = true;
-
-    // Capture image.
-    await tagScanner.scan(
-      scanArea.current.getBoundingClientRect(),
+    changeTagScanStatus("scanning", true);
       
-    );
+  // Capture image.
+    let scans = await tagScanner.scan(
+      scanArea.current.getBoundingClientRect());
+      
 
     // Run OCR to get possible tag numbers.
-    const possibleTagNumbers = await tagScanner.ocr(changeTagScanStatus);
-    tagScanner.isScanning = false;
+    const possibleTagNumbers = await tagScanner.ocr(scans);
 
+    
     // Validate the possible tags with Echo-Search.
-    const validatedTags = await tagScanner.validateTags(possibleTagNumbers, handleNoTagsFound);
+    let validatedTags = await tagScanner.validateTags(possibleTagNumbers);
+    changeTagScanStatus("scanning", false);
 
     // Put the validated tags in state.
     presentValidatedTags(validatedTags);
@@ -150,7 +140,8 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
             <CaptureAndTorch
               onToggleTorch={getTorchToggleProvider(tagScanner)}
               onScanning={onScanning}
-              isDisabled={tagScanner.isScanning || !tagSyncIsDone}
+              isDisabled={!tagSyncIsDone}
+              isScanning={tagScanStatus.scanning}
               supportedFeatures={{ torch: tagScanner?.capabilities?.torch }}
             />
           </>
@@ -169,16 +160,6 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
             }}
           />
         )}
-
-        {tagScanStatus.uploading &&
-          ScanningIndicator(
-            <span>
-              Uploading media. <br />
-              <br /> This could take a while depending on your internet
-              connection.
-            </span>
-          )}
-        {tagScanStatus.validating && ScanningIndicator('Validating...')}
       </DialogueWrapper>
     </>
   );

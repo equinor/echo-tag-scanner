@@ -55,8 +55,6 @@ export class TagScanner extends Camera {
       const intervalId = setInterval(async() => {
         var capture = await this.capturePhoto(area);
         if (capture.size > 50000) capture = await this.scale(area);
-        // if (capture.size > 50000) capture = await this.grayscale();
-        console.log('%c⧭', 'color: #ffa280', capture);
         scans.push(capture)
         
         // Log some image stats and a blob preview in network tab.
@@ -76,7 +74,7 @@ export class TagScanner extends Camera {
       for (let i = 0; i < scans.length; i++) {
           var ocrResult = await ocrRead(scans[i]);
           if (ocrResult.length > 1) return ocrResult;
-          else console.log("OCR returned no results");
+          else console.info("OCR returned no results");
         }
         
       return []

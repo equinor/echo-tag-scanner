@@ -68,18 +68,25 @@ export class TagScanner extends Camera {
     }
     
     /**
-   * Runs OCR on a list of blobs until a result is obtained or it reaches the end of the list.
+   * Runs OCR and tag validation on a list of blobs until a result is obtained or it reaches the end of the list.
    */
-     public async ocr(scans: Blob[]): Promise<ParsedComputerVisionResponse> {
+     public async ocr(scans: Blob[]): Promise<TagSummaryDto[]> {
       for (let i = 0; i < scans.length; i++) {
           var ocrResult = await ocrRead(scans[i]);
-          if (ocrResult.length > 1) return ocrResult;
+          if (ocrResult.length >= 1) {
+            var validation = await this.validateTags(ocrResult);
+            if (validation.length >= 1) return validation;
+          }
           else console.info("OCR returned no results");
         }
         
       return []
     }
 
+    /**
+     * Accepts a list of possible tag numbers and returns a filtered list containing tags which are
+     * available in IndexedDB.
+     */
   public async validateTags(possibleTagNumbers: ParsedComputerVisionResponse,
     ): Promise<TagSummaryDto[]> {
       if (Array.isArray(possibleTagNumbers) && possibleTagNumbers.length > 0) {

@@ -111,16 +111,11 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
     let scans = await tagScanner.scan(
       scanArea.current.getBoundingClientRect());
       
-
-    // Run OCR to get possible tag numbers.
-    const possibleTagNumbers = await tagScanner.ocr(scans);
-
-    
-    // Validate the possible tags with Echo-Search.
-    let validatedTags = await tagScanner.validateTags(possibleTagNumbers);
-    changeTagScanStatus("scanning", false);
-
+    // Run OCR and validation to get possible tag numbers.
+    const validatedTags = await tagScanner.ocr(scans);
+        
     // Put the validated tags in state.
+    changeTagScanStatus("scanning", false);
     presentValidatedTags(validatedTags);
   };
 

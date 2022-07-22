@@ -59,7 +59,7 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
 
   const onScanning = async () => {
     // Prevent scanning if Echo is syncing, otherwise the validation will not work.
-    if (!tagSyncIsDone || tagScanner.isScanning) {
+    if (!tagSyncIsDone) {
       dispatchNotification({
         message: 'Scanning is available as soon as the syncing is done.',
         autohideDuration: 2000
@@ -67,54 +67,24 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
       return;
     }
 
+    // Initial preperations
     setValidatedTags(undefined);
-    tagScanner.isScanning = true;
+    changeTagScanStatus('scanning', true);
 
-    /**
-     * Handles the parsing and filtering of functional locations that was returned from the API.
-     */
-    async function validateTags(
-      possibleTagNumbers: ParsedComputerVisionResponse,
-      callback: (property: TagScanningStages, value: boolean) => void
-    ) {
-      if (Array.isArray(possibleTagNumbers) && possibleTagNumbers.length > 0) {
-        callback('validating', true);
-        const beforeValidation = new Date();
-        const result = await runTagValidation(possibleTagNumbers);
-        const afterValidation = new Date();
-        console.info(
-          `Tag validation took ${
-            afterValidation.getMilliseconds() -
-            beforeValidation.getMilliseconds()
-          } milliseconds.`
-        );
-        callback('validating', false);
+    // Capture image.
+    let scans = await tagScanner.scan(scanArea.current.getBoundingClientRect());
 
-        return result;
-      } else {
-        // The tag scanner returned 0 results.
-        callback('validating', false);
-        handleNoTagsFound();
-      }
-    }
-
-    // Get a list of possible tag matches.
-    const possibleTags = await tagScanner.scan(
-      scanArea.current.getBoundingClientRect(),
-      changeTagScanStatus
-    );
-
-    // Validate the possible tags with Echo-Search.
-    const validatedTags = await validateTags(possibleTags, changeTagScanStatus);
-    tagScanner.isScanning = false;
+    // Run OCR and validation to get possible tag numbers.
+    const validatedTags = await tagScanner.ocr(scans);
 
     // Put the validated tags in state.
+    changeTagScanStatus('scanning', false);
     presentValidatedTags(validatedTags);
   };
 
   return (
     <>
-      <ControlPad id="controlarea">
+      <ControlPad>
         {tagScanner && (
           <>
             {tagScanner.capabilities?.zoom && (
@@ -128,7 +98,8 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
             <CaptureAndTorch
               onToggleTorch={getTorchToggleProvider(tagScanner)}
               onScanning={onScanning}
-              isDisabled={tagScanner.isScanning || !tagSyncIsDone}
+              isDisabled={!tagSyncIsDone}
+              isScanning={tagScanStatus.scanning}
               supportedFeatures={{ torch: tagScanner?.capabilities?.torch }}
             />
           </>
@@ -147,16 +118,6 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
             }}
           />
         )}
-
-        {tagScanStatus.uploading &&
-          ScanningIndicator(
-            <span>
-              Uploading media. <br />
-              <br /> This could take a while depending on your internet
-              connection.
-            </span>
-          )}
-        {tagScanStatus.validating && ScanningIndicator('Validating...')}
       </DialogueWrapper>
     </>
   );

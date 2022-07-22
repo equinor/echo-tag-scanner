@@ -1,5 +1,7 @@
+import { TagSummaryDto } from '@equinor/echo-search';
 import { ocrRead, TagScanningStages } from '@services';
 import { ParsedComputerVisionResponse } from '@types';
+import { runTagValidation } from '../utils';
 import { Camera } from './Camera';
 import { CameraProps } from './CoreCamera';
 
@@ -7,20 +9,13 @@ import { CameraProps } from './CoreCamera';
  * This object implements tag scanning logic.
  */
 export class TagScanner extends Camera {
-  protected _isScanning = false;
+  private readonly _scanRetries = 5;
+  private readonly _scanDuration = 2; //seconds
 
   constructor(props: CameraProps) {
     super(props);
 
     this.reportCameraFeatures();
-  }
-
-  public set isScanning(value: boolean) {
-    this._isScanning = value;
-  }
-
-  public get isScanning() {
-    return this._isScanning;
   }
 
   // Prepare for a new scan by resetting the camera.
@@ -30,28 +25,64 @@ export class TagScanner extends Camera {
     this.resumeViewfinder();
   }
 
-  public async scan(
-    area: DOMRect,
-    callback: (property: TagScanningStages, value: boolean) => void
-  ): Promise<ParsedComputerVisionResponse | undefined> {
-    this.pauseViewfinder();
-    let capture = await this.capturePhoto(area);
-    if (capture) {
-      this.logImageStats(this.capture, 'The cropped photo.');
+  /**
+   * Runs a series of captures in a set interval and appends them to a list.
+   * @param area A bounding box for which the capture is cropped from.
+   * @returns {Blob[]} A list of blobs.
+   */
+  public async scan(area: DOMRect): Promise<Blob[]> {
+    return new Promise((resolve) => {
+      const scans: Blob[] = [];
+      const interval = (this._scanRetries / this._scanDuration) * 100;
+      const intervalId = setInterval(async () => {
+        var capture = await this.capturePhoto(area);
+        if (capture.size > 50000) capture = await this.scale(area);
+        scans.push(capture);
 
-      if (capture.size > 50000) capture = await this.grayscale();
-      if (capture.size > 50000) capture = await this.scale(area);
-      this.capture = capture;
+        // Log some image stats and a blob preview in network tab.
+        this.logImageStats(capture, 'The postprocessed photo.');
+        if (scans.length === this._scanRetries) {
+          clearInterval(intervalId);
+          resolve(scans);
+        }
+      }, interval);
+    });
+  }
 
-      callback('uploading', true);
-      const result = await ocrRead(this.capture);
+  /**
+   * Runs OCR and tag validation on a list of blobs until a result is obtained or it reaches the end of the list.
+   */
+  public async ocr(scans: Blob[]): Promise<TagSummaryDto[]> {
+    for (let i = 0; i < scans.length; i++) {
+      var ocrResult = await ocrRead(scans[i]);
+      if (ocrResult.length >= 1) {
+        var validation = await this.validateTags(ocrResult);
+        if (validation.length >= 1) return validation;
+      } else console.info('OCR returned no results');
+    }
 
-      this.isScanning = false;
-      callback('uploading', false);
+    return [];
+  }
+
+  /**
+   * Accepts a list of possible tag numbers and returns a filtered list containing tags which are
+   * available in IndexedDB.
+   */
+  public async validateTags(
+    possibleTagNumbers: ParsedComputerVisionResponse
+  ): Promise<TagSummaryDto[]> {
+    if (Array.isArray(possibleTagNumbers) && possibleTagNumbers.length > 0) {
+      const beforeValidation = new Date();
+      const result = await runTagValidation(possibleTagNumbers);
+      const afterValidation = new Date();
+      console.info(
+        `Tag validation took ${
+          afterValidation.getMilliseconds() - beforeValidation.getMilliseconds()
+        } milliseconds.`
+      );
       return result;
     } else {
-      this.isScanning = false;
-      return undefined;
+      return [];
     }
   }
 }

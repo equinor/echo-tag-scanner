@@ -1,6 +1,7 @@
 export * from './array';
 export * from './capabilities';
 export * from './event';
+export * from './func';
 export * from './error';
 export * from './url';
 export * from './business';

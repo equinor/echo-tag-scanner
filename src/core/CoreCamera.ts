@@ -4,8 +4,8 @@ import { ErrorRegistry } from '@enums';
 
 export interface CameraProps {
   mediaStream: MediaStream;
-  viewfinder: RefObject<HTMLVideoElement>;
-  canvas?: RefObject<HTMLCanvasElement>;
+  viewfinder: HTMLVideoElement;
+  canvas: HTMLCanvasElement;
   additionalCaptureOptions?: DisplayMediaStreamConstraints;
 }
 
@@ -15,21 +15,18 @@ export interface CameraProps {
 class CoreCamera {
   protected _cameraEnabled = true;
   protected _mediaStream: MediaStream;
-  protected _viewfinder: RefObject<HTMLVideoElement>;
+  protected _viewfinder: HTMLVideoElement;
   protected _videoTrack?: MediaStreamTrack;
-  public _capabilities?: MediaTrackCapabilities = undefined;
   protected _settings?: MediaTrackSettings;
+  public _capabilities?: MediaTrackCapabilities = undefined;
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
-
     this._mediaStream = props.mediaStream;
     this._videoTrack = props.mediaStream.getVideoTracks()[0];
     this._capabilities = this._videoTrack.getCapabilities();
-    this._settings = this.videoTrack.getSettings();
-    if (this._viewfinder.current) {
-      this._viewfinder.current.srcObject = props.mediaStream;
-    }
+    this._settings = this._videoTrack.getSettings();
+    this._viewfinder.srcObject = props.mediaStream;
   }
 
   /**
@@ -74,7 +71,6 @@ class CoreCamera {
       throw new Error(error);
     }
   }
-
 
   public get videoTrack(): MediaStreamTrack | undefined {
     return this._videoTrack;
@@ -130,13 +126,13 @@ class CoreCamera {
     console.group('Starting camera');
     console.info(
       'Camera resolution -> ',
-      this._viewfinder.current.videoWidth,
-      this._viewfinder.current.videoHeight
+      this._viewfinder.videoWidth,
+      this._viewfinder.videoHeight
     );
     console.info(
       'Viewfinder dimensions -> ',
-      this._viewfinder.current.width,
-      this._viewfinder.current.height
+      this._viewfinder.width,
+      this._viewfinder.height
     );
     console.info(
       'Camera is capable of zooming: ',

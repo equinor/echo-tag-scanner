@@ -1,10 +1,4 @@
-import {
-  Dispatch,
-  RefObject,
-  SetStateAction,
-  useEffect,
-  useState
-} from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
 
 import { TagScanner } from '../core/Scanner';
@@ -18,8 +12,8 @@ type CameraInfrastructure = {
 
 const { useEffectAsync } = EchoUtils.Hooks;
 export function useMountScanner(
-  viewfinder: RefObject<HTMLVideoElement>,
-  canvas: RefObject<HTMLCanvasElement>
+  viewfinder: HTMLVideoElement,
+  canvas: HTMLCanvasElement
 ): CameraInfrastructure {
   // Zoom controls. Currently only Android.
   const [zoomRef, setZoomInputRef] = useState<HTMLInputElement>(null);
@@ -65,7 +59,7 @@ export function useMountScanner(
   }, [tagScanner, zoomRef]);
 
   // Handle multitouch events.
-  viewfinder.current?.addEventListener(
+  viewfinder.addEventListener(
     'touchstart',
     (e) => {
       if (e.touches.length > 1) {

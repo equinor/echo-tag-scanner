@@ -46,9 +46,6 @@ const ViewFinder = styled.video`
   object-fit: cover;
 `;
 
-const Canvas = styled.canvas`
-  width: 500px;
-  height: 300px;
-`;
+const Canvas = styled.canvas``;
 
 export { Viewfinder };

@@ -60,7 +60,6 @@ class Camera extends Postprocessor {
   protected async capturePhoto(
     captureArea: DOMRect
   ): Promise<Blob | undefined> {
-    let capture: Blob | undefined = undefined;
     this.canvasHandler.clearCanvas();
     const settings = this._videoTrack?.getSettings();
 
@@ -79,11 +78,10 @@ class Camera extends Postprocessor {
           dHeight: captureArea.height,
           dWidth: captureArea.width
         };
-        const captureBlob = await this._canvasHandler.draw(
+        var captureBlob = await this._canvasHandler.draw(
           this._viewfinder.current,
           params
         );
-        capture = captureBlob;
       }
     } else {
       throw new Error(
@@ -91,7 +89,7 @@ class Camera extends Postprocessor {
       );
     }
 
-    return capture;
+    return captureBlob;
   }
 }
 

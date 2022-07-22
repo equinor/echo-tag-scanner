@@ -80,9 +80,6 @@ class CoreCamera {
     }
   }
 
-  public get cameraEnabled(): boolean {
-    return this._cameraEnabled;
-  }
 
   public get videoTrack(): MediaStreamTrack | undefined {
     return this._videoTrack;

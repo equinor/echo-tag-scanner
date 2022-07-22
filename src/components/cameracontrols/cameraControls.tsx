@@ -9,6 +9,7 @@ interface CameraControlsProps {
   onToggleTorch?: () => void;
 
   isDisabled?: boolean;
+  isScanning?: boolean;
   supportedFeatures: Pick<MediaTrackCapabilities, "torch">;
 }
 
@@ -24,7 +25,7 @@ const CaptureAndTorch = (props: CameraControlsProps): JSX.Element => {
         {props.supportedFeatures.torch && (
           <TorchButton name="lightbulb" onClick={props.onToggleTorch} />
         )}
-        <ScannerButton onClick={props.onScanning} isDisabled={props.isDisabled} />
+        <ScannerButton onClick={props.onScanning} isDisabled={props.isDisabled} isScanning={props.isScanning} />
       </CaptureAndTorchGrid>
     </CaptureAndTorchWrapper>
   );

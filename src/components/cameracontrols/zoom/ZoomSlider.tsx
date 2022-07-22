@@ -1,11 +1,13 @@
-import React, {Ref} from 'react';
+import React, { Dispatch, Ref, SetStateAction } from 'react';
 import styled from 'styled-components';
-import { Slider as EDSSlider} from '@equinor/eds-core-react';
-
+import { Slider as EDSSlider } from '@equinor/eds-core-react';
 
 interface ZoomSliderProps {
-  onSlide: (event: React.FormEvent<HTMLDivElement>, newValue: number | number[]) => void;
-  zoomInputRef: Ref<HTMLInputElement>;
+  onSlide: (
+    event: React.FormEvent<HTMLDivElement>,
+    newValue: number | number[]
+  ) => void;
+  zoomInputRef: (input: HTMLInputElement) => void;
   zoomOptions?: MediaSettingsRange;
 }
 

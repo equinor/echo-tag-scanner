@@ -1,4 +1,10 @@
-import { RefObject, useEffect, useRef, useState } from 'react';
+import {
+  Dispatch,
+  RefObject,
+  SetStateAction,
+  useEffect,
+  useState
+} from 'react';
 import EchoUtils from '@equinor/echo-utils';
 
 import { TagScanner } from '../core/Scanner';
@@ -7,34 +13,28 @@ import { assignZoomSettings } from '@utils';
 
 type CameraInfrastructure = {
   tagScanner: TagScanner;
-  zoomInput: RefObject<HTMLInputElement>;
+  setZoomInputRef: Dispatch<SetStateAction<HTMLInputElement>>;
 };
 
 const { useEffectAsync } = EchoUtils.Hooks;
 export function useMountScanner(
   viewfinder: RefObject<HTMLVideoElement>,
-  canvas: RefObject<HTMLCanvasElement>,
-  scanArea: RefObject<HTMLElement>
+  canvas: RefObject<HTMLCanvasElement>
 ): CameraInfrastructure {
   // Zoom controls. Currently only Android.
-  const zoomInputRef = useRef<HTMLInputElement>(null);
-  const [camera, setCamera] = useState<TagScanner | undefined>(undefined);
+  const [zoomRef, setZoomInputRef] = useState<HTMLInputElement>(null);
+  const [tagScanner, setCamera] = useState<TagScanner | undefined>(undefined);
 
   useEffectAsync(async (signal) => {
-    const props: CameraProps = {
-      viewfinder,
-      canvas
-    };
-
     try {
-      const camera = await TagScanner.construct(props);
-      // Setup the zoom slider with the min, max and step values.
-      if (zoomInputRef?.current != null) {
-        zoomInputRef.current.min = assignZoomSettings('min', camera);
-        zoomInputRef.current.max = assignZoomSettings('max', camera);
-        zoomInputRef.current.step = assignZoomSettings('step', camera);
-        zoomInputRef.current.value = '1';
-      }
+      const mediaStream = await TagScanner.promptCameraUsage();
+
+      const props: CameraProps = {
+        mediaStream,
+        viewfinder,
+        canvas
+      };
+      const camera = new TagScanner(props);
 
       if (!signal.aborted) {
         setCamera(camera);
@@ -52,6 +52,18 @@ export function useMountScanner(
     }
   }, []);
 
+  // Handling zoom assignments
+  useEffect(() => {
+    if (!tagScanner) return;
+    if (zoomRef === null) return;
+
+    // Setup the zoom slider with the min, max and step values.
+    zoomRef.min = assignZoomSettings('min', tagScanner);
+    zoomRef.max = assignZoomSettings('max', tagScanner);
+    zoomRef.step = assignZoomSettings('step', tagScanner);
+    zoomRef.value = '1';
+  }, [tagScanner, zoomRef]);
+
   // Handle multitouch events.
   viewfinder.current?.addEventListener(
     'touchstart',
@@ -64,7 +76,7 @@ export function useMountScanner(
   );
 
   return {
-    tagScanner: camera,
-    zoomInput: zoomInputRef
+    tagScanner,
+    setZoomInputRef
   };
 }

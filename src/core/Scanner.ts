@@ -10,29 +10,12 @@ import { CameraProps } from './CoreCamera';
  */
 export class TagScanner extends Camera {
   private readonly _scanRetries = 5;
-  private readonly _scanDuration = 2; //seconds 
+  private readonly _scanDuration = 2; //seconds
 
-  private constructor(props: CameraProps) {
+  constructor(props: CameraProps) {
     super(props);
-  }
 
-
-  /**
-   * Asynchronously constructs the tag scanner.
-   */
-  static construct(props: CameraProps): Promise<TagScanner> {
-    return new Promise((resolve) => {
-      // Call the constructor above.
-      const scannerConstruct = new TagScanner(props);
-      // User is asked for permission to use the camera. (the async part)
-      scannerConstruct.promptCameraUsage().then(function(mediastream) {
-        console.log(this)
-        // If approved, setup the camera, ie super.setup()
-        scannerConstruct.setup(mediastream);
-        // Resolve "this" so that it can be React ref'd
-        resolve(scannerConstruct);
-      });
-    });
+    this.reportCameraFeatures();
   }
 
   // Prepare for a new scan by resetting the camera.
@@ -41,7 +24,6 @@ export class TagScanner extends Camera {
     this.capture = undefined;
     this.resumeViewfinder();
   }
-
 
   /**
    * Runs a series of captures in a set interval and appends them to a list.
@@ -52,56 +34,55 @@ export class TagScanner extends Camera {
     return new Promise((resolve) => {
       const scans: Blob[] = [];
       const interval = (this._scanRetries / this._scanDuration) * 100;
-      const intervalId = setInterval(async() => {
+      const intervalId = setInterval(async () => {
         var capture = await this.capturePhoto(area);
         if (capture.size > 50000) capture = await this.scale(area);
-        scans.push(capture)
-        
+        scans.push(capture);
+
         // Log some image stats and a blob preview in network tab.
         this.logImageStats(capture, 'The postprocessed photo.');
         if (scans.length === this._scanRetries) {
-            clearInterval(intervalId);
-            resolve(scans);
-          }
-        }, interval)
-      })
-    }
-    
-    /**
+          clearInterval(intervalId);
+          resolve(scans);
+        }
+      }, interval);
+    });
+  }
+
+  /**
    * Runs OCR and tag validation on a list of blobs until a result is obtained or it reaches the end of the list.
    */
-     public async ocr(scans: Blob[]): Promise<TagSummaryDto[]> {
-      for (let i = 0; i < scans.length; i++) {
-          var ocrResult = await ocrRead(scans[i]);
-          if (ocrResult.length >= 1) {
-            var validation = await this.validateTags(ocrResult);
-            if (validation.length >= 1) return validation;
-          }
-          else console.info("OCR returned no results");
-        }
-        
-      return []
+  public async ocr(scans: Blob[]): Promise<TagSummaryDto[]> {
+    for (let i = 0; i < scans.length; i++) {
+      var ocrResult = await ocrRead(scans[i]);
+      if (ocrResult.length >= 1) {
+        var validation = await this.validateTags(ocrResult);
+        if (validation.length >= 1) return validation;
+      } else console.info('OCR returned no results');
     }
 
-    /**
-     * Accepts a list of possible tag numbers and returns a filtered list containing tags which are
-     * available in IndexedDB.
-     */
-  public async validateTags(possibleTagNumbers: ParsedComputerVisionResponse,
-    ): Promise<TagSummaryDto[]> {
-      if (Array.isArray(possibleTagNumbers) && possibleTagNumbers.length > 0) {
-        const beforeValidation = new Date();
-        const result = await runTagValidation(possibleTagNumbers);
-        const afterValidation = new Date();
-        console.info(
-          `Tag validation took ${
-            afterValidation.getMilliseconds() -
-            beforeValidation.getMilliseconds()
-          } milliseconds.`
-        );
-        return result;
-      } else {
-        return [];
-      }
+    return [];
+  }
+
+  /**
+   * Accepts a list of possible tag numbers and returns a filtered list containing tags which are
+   * available in IndexedDB.
+   */
+  public async validateTags(
+    possibleTagNumbers: ParsedComputerVisionResponse
+  ): Promise<TagSummaryDto[]> {
+    if (Array.isArray(possibleTagNumbers) && possibleTagNumbers.length > 0) {
+      const beforeValidation = new Date();
+      const result = await runTagValidation(possibleTagNumbers);
+      const afterValidation = new Date();
+      console.info(
+        `Tag validation took ${
+          afterValidation.getMilliseconds() - beforeValidation.getMilliseconds()
+        } milliseconds.`
+      );
+      return result;
+    } else {
+      return [];
     }
+  }
 }

@@ -3,6 +3,7 @@ import { handleError } from '@utils';
 import { ErrorRegistry } from '@enums';
 
 export interface CameraProps {
+  mediaStream: MediaStream;
   viewfinder: RefObject<HTMLVideoElement>;
   canvas?: RefObject<HTMLCanvasElement>;
   additionalCaptureOptions?: DisplayMediaStreamConstraints;
@@ -13,34 +14,28 @@ export interface CameraProps {
  */
 class CoreCamera {
   protected _cameraEnabled = true;
-  protected _mediaStream?: MediaStream;
-  protected _viewfinder?: RefObject<HTMLVideoElement>;
+  protected _mediaStream: MediaStream;
+  protected _viewfinder: RefObject<HTMLVideoElement>;
   protected _videoTrack?: MediaStreamTrack;
   public _capabilities?: MediaTrackCapabilities = undefined;
   protected _settings?: MediaTrackSettings;
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
-  }
 
-  /**
-   * Instansiates the rest of the camera's wheels and cogs.
-   * Note: This runs after the construction is done.
-   */
-  protected setup(mediaStream: MediaStream) {
-    this._mediaStream = mediaStream;
-    this._videoTrack = mediaStream.getVideoTracks()[0];
+    this._mediaStream = props.mediaStream;
+    this._videoTrack = props.mediaStream.getVideoTracks()[0];
     this._capabilities = this._videoTrack.getCapabilities();
-    this._settings = this.videoTrack?.getSettings();
-    if (this._viewfinder?.current) {
-      this._viewfinder.current.srcObject = mediaStream;
+    this._settings = this.videoTrack.getSettings();
+    if (this._viewfinder.current) {
+      this._viewfinder.current.srcObject = props.mediaStream;
     }
   }
 
   /**
    * Asks the user for permission to use the device camera and resolves a MediaStream object.
    */
-  protected async promptCameraUsage(
+  static async promptCameraUsage(
     additionalCaptureOptions?: DisplayMediaStreamConstraints
   ): Promise<MediaStream> {
     try {
@@ -145,11 +140,11 @@ class CoreCamera {
     );
     console.info(
       'Camera is capable of zooming: ',
-      Boolean(this._capabilities.zoom)
+      Boolean(this._capabilities?.zoom)
     );
     console.info(
       'Camera is capable of using the torch: ',
-      Boolean(this._capabilities.torch)
+      Boolean(this._capabilities?.torch)
     );
     console.groupEnd();
   }

@@ -1,12 +1,11 @@
 import React from 'react';
-import styled from "styled-components";
+import styled from 'styled-components';
 import { Icon } from '@equinor/eds-core-react';
 
 interface TorchButtonProps {
   name: string;
   onClick?: () => void;
 }
-
 
 /**
  * Returns a button for toggling the torch feature.
@@ -33,10 +32,9 @@ const ScannerButton = (props: CaptureButtonProps): JSX.Element => {
   if (props.isDisabled) {
     return <DisabledScannerButton />;
   } else if (props.isScanning) {
-    return <ScannerButtonIsScanning />
-  }
-  else {
-    return <StyledScannerButton onClick={props.onClick} />
+    return <ScannerButtonIsScanning />;
+  } else {
+    return <StyledScannerButton onClick={props.onClick} />;
   }
 };
 const StyledScannerButton = styled.button`
@@ -58,28 +56,28 @@ const DisabledScannerButton = styled(StyledScannerButton)`
 `;
 
 const ScannerButtonIsScanning = styled(StyledScannerButton)`
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
-    transform: scale(1);
-    animation: pulse 2s infinite;
-    background-color: var(--equiGreen1);
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
+  transform: scale(1);
+  animation: pulse 2s infinite;
+  background-color: var(--equiGreen1);
 
-    @keyframes pulse {
+  @keyframes pulse {
     0% {
-        transform: scale(0.7);
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+      transform: scale(0.7);
+      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
     }
 
     70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 20px rgba(0, 0, 0, 0);
+      transform: scale(1);
+      box-shadow: 0 0 0 20px rgba(0, 0, 0, 0);
     }
 
     100% {
-        transform: scale(0.7);
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+      transform: scale(0.7);
+      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
     }
-}
-`
+  }
+`;
 
 const StyledTorchButton = styled.button`
   display: flex;

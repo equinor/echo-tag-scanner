@@ -1,12 +1,6 @@
 import { RefObject } from 'react';
 import { CanvasHandler, DrawImageParameters } from './CanvasHandler';
-import { CoreCamera } from './CoreCamera';
-
-interface PostprocessorProps {
-  canvas?: RefObject<HTMLCanvasElement>;
-  viewfinder: RefObject<HTMLVideoElement>;
-  additionalCaptureOptions?: DisplayMediaStreamConstraints;
-}
+import { CameraProps, CoreCamera } from './CoreCamera';
 
 type CropInstructions = {
   width: number;
@@ -22,7 +16,7 @@ class Postprocessor extends CoreCamera {
   protected _cropDimensions: CropInstructions;
   protected _canvasHandler: CanvasHandler;
 
-  constructor(props: PostprocessorProps) {
+  constructor(props: CameraProps) {
     super(props);
     this._canvas = props.canvas;
     this._canvasHandler = new CanvasHandler({ canvasRef: props.canvas });

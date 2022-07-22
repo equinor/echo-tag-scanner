@@ -1,5 +1,5 @@
-import React from "react";
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 import { TorchButton, ScannerButton } from '@components';
 
 interface CameraControlsProps {
@@ -10,7 +10,7 @@ interface CameraControlsProps {
 
   isDisabled?: boolean;
   isScanning?: boolean;
-  supportedFeatures: Pick<MediaTrackCapabilities, "torch">;
+  supportedFeatures: Pick<MediaTrackCapabilities, 'torch'>;
 }
 
 /**
@@ -25,7 +25,11 @@ const CaptureAndTorch = (props: CameraControlsProps): JSX.Element => {
         {props.supportedFeatures.torch && (
           <TorchButton name="lightbulb" onClick={props.onToggleTorch} />
         )}
-        <ScannerButton onClick={props.onScanning} isDisabled={props.isDisabled} isScanning={props.isScanning} />
+        <ScannerButton
+          onClick={props.onScanning}
+          isDisabled={props.isDisabled}
+          isScanning={props.isScanning}
+        />
       </CaptureAndTorchGrid>
     </CaptureAndTorchWrapper>
   );

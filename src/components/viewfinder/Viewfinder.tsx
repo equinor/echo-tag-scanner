@@ -1,7 +1,11 @@
-import React from 'react';
-import styled from "styled-components"
-import { VideoHTMLAttributes, CanvasHTMLAttributes, RefObject } from 'react';
+import React, {
+  VideoHTMLAttributes,
+  CanvasHTMLAttributes,
+  RefObject
+} from 'react';
+import styled from 'styled-components';
 
+import { useScanningAreaDimensions } from './viewFinderUtils';
 interface ViewfinderProps {
   canvasRef: RefObject<HTMLCanvasElement>;
   videoRef: RefObject<HTMLVideoElement>;
@@ -10,6 +14,8 @@ interface ViewfinderProps {
 }
 
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
+  const dimensions = useScanningAreaDimensions();
+
   return (
     <>
       <ViewFinder
@@ -24,9 +30,8 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
       />
       <Canvas
         ref={props.canvasRef}
-        // TODO: set dynamic dimensions
-        width={'500'}
-        height="300"
+        width={dimensions.width}
+        height={dimensions.height}
         {...props.canvasOptions}
       />
     </>
@@ -41,9 +46,6 @@ const ViewFinder = styled.video`
   object-fit: cover;
 `;
 
-const Canvas = styled.canvas`
-  width: 500px;
-  height: 300px;
-`;
+const Canvas = styled.canvas``;
 
 export { Viewfinder };

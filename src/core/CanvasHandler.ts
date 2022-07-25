@@ -1,5 +1,3 @@
-import { RefObject } from 'react';
-
 export type DrawImageParameters = {
   sx?: number;
   sy?: number;
@@ -19,7 +17,7 @@ type CanvasDimensions = {
 type AllowedMimeTypes = 'image/bmp' | 'image/png' | 'image/jpeg' | 'image/tiff';
 
 interface CanvasHandlerProps {
-  canvasRef: RefObject<HTMLCanvasElement>;
+  canvas: HTMLCanvasElement;
 }
 
 /**
@@ -31,15 +29,15 @@ class CanvasHandler {
   private readonly _standardCanvasDimensions: CanvasDimensions;
 
   constructor(props: CanvasHandlerProps) {
-    if (props.canvasRef == null)
+    if (!props.canvas)
       throw new Error(
         'Could not construct CanvasHandler. The canvas element reference is missing.'
       );
-    this._canvas = props.canvasRef.current;
-    this._canvasContext = props.canvasRef.current.getContext('2d');
+    this._canvas = props.canvas;
+    this._canvasContext = this._canvas.getContext('2d');
     this._standardCanvasDimensions = {
-      width: props.canvasRef.current.width,
-      height: props.canvasRef.current.height
+      width: this._canvas.width,
+      height: this._canvas.height
     };
   }
 

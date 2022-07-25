@@ -23,9 +23,9 @@ import {
 } from '@utils';
 
 interface ScannerProps {
-  viewfinder: RefObject<HTMLVideoElement>;
-  canvas: RefObject<HTMLCanvasElement>;
-  scanArea: RefObject<HTMLElement>;
+  viewfinder: HTMLVideoElement;
+  canvas: HTMLCanvasElement;
+  scanArea: HTMLElement;
 }
 function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
   const [validatedTags, setValidatedTags] = useState<
@@ -72,7 +72,7 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
     changeTagScanStatus('scanning', true);
 
     // Capture image.
-    let scans = await tagScanner.scan(scanArea.current.getBoundingClientRect());
+    let scans = await tagScanner.scan(scanArea.getBoundingClientRect());
 
     // Run OCR and validation to get possible tag numbers.
     const validatedTags = await tagScanner.ocr(scans);

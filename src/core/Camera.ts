@@ -25,13 +25,13 @@ class Camera extends Postprocessor {
   };
 
   public pauseViewfinder(): boolean {
-    this._viewfinder.current.pause();
-    return this._viewfinder.current.paused;
+    this._viewfinder.pause();
+    return this._viewfinder.paused;
   }
 
   public resumeViewfinder(): boolean {
-    this._viewfinder.current.play();
-    return this._viewfinder.current.paused;
+    this._viewfinder.play();
+    return this._viewfinder.paused;
   }
 
   public alterZoom = (
@@ -79,7 +79,7 @@ class Camera extends Postprocessor {
           dWidth: captureArea.width
         };
         var captureBlob = await this._canvasHandler.draw(
-          this._viewfinder.current,
+          this._viewfinder,
           params
         );
       }

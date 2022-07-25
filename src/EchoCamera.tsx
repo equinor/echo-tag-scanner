@@ -19,7 +19,11 @@ const EchoCamera = () => {
       <ScanningArea captureAreaRef={scanArea} />
 
       {viewfinder.current && canvas.current && scanArea.current && (
-        <Scanner viewfinder={viewfinder} canvas={canvas} scanArea={scanArea} />
+        <Scanner
+          viewfinder={viewfinder.current}
+          canvas={canvas.current}
+          scanArea={scanArea.current}
+        />
       )}
     </Main>
   );

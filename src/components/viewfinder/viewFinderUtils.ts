@@ -40,7 +40,7 @@ function getDimensions(): Dimensions {
     };
   } else {
     return {
-      width: globalThis.innerWidth * 0.6,
+      width: globalThis.innerWidth * 0.7,
       height: globalThis.innerHeight * (1 / 3)
     };
   }

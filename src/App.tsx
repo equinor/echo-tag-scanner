@@ -4,9 +4,11 @@ import { ErrorBoundary } from '@services';
 
 const App: FC = () => {
   return (
-    <ErrorBoundary stackTraceEnabled>
-      <EchoCamera />
-    </ErrorBoundary>
+    <main>
+      <ErrorBoundary stackTraceEnabled>
+        <EchoCamera />
+      </ErrorBoundary>
+    </main>
   );
 };
 

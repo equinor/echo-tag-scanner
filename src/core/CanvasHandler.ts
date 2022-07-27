@@ -68,7 +68,6 @@ class CanvasHandler {
     image: CanvasImageSource | ImageData,
     params: DrawImageParameters
   ): Promise<Blob> {
-    console.log('%c⧭', 'color: #607339', params);
     //--------------
     function drawImage() {
       // Before drawing, set the canvas dimensions to be equal to whatever is being drawn.

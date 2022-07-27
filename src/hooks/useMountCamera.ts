@@ -34,7 +34,6 @@ export function useMountScanner(
     }
 
     return () => {
-      console.info('stopping camera');
       camera.stopCamera();
     };
   }, []);

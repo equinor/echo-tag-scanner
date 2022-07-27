@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { debounce, getViewMode } from '@utils';
+import { debounce, getOrientation } from '@utils';
 import EchoUtils from '@equinor/echo-utils';
 
 export type Dimensions = {
@@ -29,7 +29,7 @@ export function useScanningAreaDimensions() {
 }
 
 function getDimensions(): Dimensions {
-  const viewMode = getViewMode();
+  const viewMode = getOrientation();
 
   if (viewMode === 'portrait') {
     return {

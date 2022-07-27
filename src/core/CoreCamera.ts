@@ -1,4 +1,4 @@
-import { handleError, getViewMode } from '@utils';
+import { handleError, getOrientation } from '@utils';
 import { ErrorRegistry } from '@enums';
 import { CameraProps } from '@types';
 
@@ -32,7 +32,7 @@ class CoreCamera {
      * Get the minimum camera resolution depending on the device orientation.
      */
     const minimums = (function getMinimumVideoConstraints() {
-      const viewmode = getViewMode();
+      const viewmode = getOrientation();
       if (viewmode === 'portrait') return { width: 720, height: 1280 };
       else return { width: 1280, height: 720 };
     })();

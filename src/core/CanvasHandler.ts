@@ -1,4 +1,4 @@
-import { getViewMode } from '@utils';
+import { getOrientation } from '@utils';
 import {
   AllowedMimeTypes,
   CanvasDimensions,
@@ -33,9 +33,9 @@ class CanvasHandler {
      *  An alternative approach now in use is to set the canvas dimensions to whatever is being
      * drawn on it (see this.draw). Code below can maybe be removed.
      */
-    this._currentOrientation = getViewMode();
+    this._currentOrientation = getOrientation();
     const orientationResizer = new ResizeObserver((entry) => {
-      const newOrientation = getViewMode();
+      const newOrientation = getOrientation();
 
       if (entry[0] && newOrientation !== this._currentOrientation) {
         this._currentOrientation = newOrientation;

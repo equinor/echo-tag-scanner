@@ -14,7 +14,10 @@ async function getAsync<T, TError = never>(
   responseParser?: ResponseParser<T>
 ): Promise<HttpResponse<T>> {
   return Client.performReusableRequest<T>(url, async () => {
-    init = Client.ensureRequestInit(init, (init) => ({ ...init, method: 'GET' }));
+    init = Client.ensureRequestInit(init, (init) => ({
+      ...init,
+      method: 'GET'
+    }));
     const response = await Client.performFetchAsync<TError>(url, init);
     const data = await Client.parseResponseAsync<T>(response, responseParser);
     return data;
@@ -29,7 +32,11 @@ async function postAsync<T, TError = never>(
   init?: RequestInit,
   responseParser?: ResponseParser<T>
 ): Promise<HttpResponse<T>> {
-  init = Client.ensureRequestInit(init, (init) => ({ ...init, method: 'POST', body }));
+  init = Client.ensureRequestInit(init, (init) => ({
+    ...init,
+    method: 'POST',
+    body
+  }));
   const response = await Client.performFetchAsync<TError>(url, init);
   return Client.parseResponseAsync<T>(response, responseParser);
 }
@@ -69,9 +76,18 @@ async function deleteAsync<T, TError = never>(
   init?: RequestInit,
   responseParser?: ResponseParser<T>
 ): Promise<HttpResponse<T>> {
-  init = Client.ensureRequestInit(init, (init) => ({ ...init, method: 'DELETE' }));
+  init = Client.ensureRequestInit(init, (init) => ({
+    ...init,
+    method: 'DELETE'
+  }));
   const response = await Client.performFetchAsync<TError>(url, init);
   return Client.parseResponseAsync<T>(response, responseParser);
 }
 
-export const baseApiClient = { getAsync, postAsync, putAsync, patchAsync, deleteAsync };
+export const baseApiClient = {
+  getAsync,
+  postAsync,
+  putAsync,
+  patchAsync,
+  deleteAsync
+};

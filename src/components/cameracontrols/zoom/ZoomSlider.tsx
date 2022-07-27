@@ -1,4 +1,4 @@
-import React, { Dispatch, Ref, SetStateAction } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { Slider as EDSSlider } from '@equinor/eds-core-react';
 

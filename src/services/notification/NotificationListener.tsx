@@ -66,9 +66,9 @@ const NotificationHandler: FC = () => {
 };
 
 const Notification = styled(Toast)`
-    position: absolute !important;
-    bottom: 25% !important;
-    left: 50% !important;
-`
+  position: absolute !important;
+  bottom: 25% !important;
+  left: 50% !important;
+`;
 
 export { NotificationHandler };

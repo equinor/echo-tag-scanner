@@ -1,8 +1,6 @@
 import { useState } from 'react';
-
+import { debounce, getOrientation } from '@utils';
 import EchoUtils from '@equinor/echo-utils';
-
-import { debounce } from '@utils';
 
 export type Dimensions = {
   width: number;
@@ -31,7 +29,7 @@ export function useScanningAreaDimensions() {
 }
 
 function getDimensions(): Dimensions {
-  const viewMode = getViewMode();
+  const viewMode = getOrientation();
 
   if (viewMode === 'portrait') {
     return {
@@ -40,14 +38,8 @@ function getDimensions(): Dimensions {
     };
   } else {
     return {
-      width: globalThis.innerWidth * 0.6,
+      width: globalThis.innerWidth * 0.7,
       height: globalThis.innerHeight * (1 / 3)
     };
-  }
-
-  function getViewMode(): 'portrait' | 'landscape' {
-    // We default to portrait if the height and width are equal.
-    if (globalThis.innerHeight >= globalThis.innerWidth) return 'portrait';
-    else return 'landscape';
   }
 }

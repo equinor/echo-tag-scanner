@@ -1,26 +1,24 @@
+import { CameraProps, ParsedComputerVisionResponse } from '@types';
+import { ocrRead } from '@services';
+import { runTagValidation } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
-import { ocrRead, TagScanningStages } from '@services';
-import { ParsedComputerVisionResponse } from '@types';
-import { runTagValidation } from '../utils';
 import { Camera } from './Camera';
-import { CameraProps } from './CoreCamera';
 
 /**
  * This object implements tag scanning logic.
  */
 export class TagScanner extends Camera {
-  private readonly _scanRetries = 5;
+  private readonly _scanRetries = 2;
   private readonly _scanDuration = 2; //seconds
 
   constructor(props: CameraProps) {
     super(props);
-
     this.reportCameraFeatures();
   }
 
   // Prepare for a new scan by resetting the camera.
   public async prepareNewScan() {
-    await this.canvasHandler.clearCanvas();
+    this.canvasHandler.clearCanvas();
     this.capture = undefined;
     this.resumeViewfinder();
   }
@@ -31,12 +29,16 @@ export class TagScanner extends Camera {
    * @returns {Blob[]} A list of blobs.
    */
   public async scan(area: DOMRect): Promise<Blob[]> {
+    console.clear();
     return new Promise((resolve) => {
       const scans: Blob[] = [];
       const interval = (this._scanRetries / this._scanDuration) * 100;
       const intervalId = setInterval(async () => {
+        console.group('STARTING NEW SCAN');
+        console.info('crop area ->', area.width, area.height);
+        console.groupEnd();
         var capture = await this.capturePhoto(area);
-        if (capture.size > 50000) capture = await this.scale(area);
+        if (capture.size > 50000) capture = await this.scale(0.5);
         scans.push(capture);
 
         // Log some image stats and a blob preview in network tab.

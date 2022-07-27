@@ -1,24 +1,11 @@
-import React, { RefObject, useState } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-
 import { TagSummaryDto } from '@equinor/echo-search';
-
-import {
-  CaptureAndTorch,
-  ScanningIndicator,
-  SearchResults,
-  ZoomSlider
-} from '@components';
+import { CaptureAndTorch, SearchResults, ZoomSlider } from '@components';
 import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
-import {
-  NotificationHandler,
-  TagScanningStages,
-  useTagScanStatus
-} from '@services';
-import { ParsedComputerVisionResponse } from '@types';
+import { NotificationHandler, useTagScanStatus } from '@services';
 import {
   getTorchToggleProvider,
-  runTagValidation,
   getNotificationDispatcher as dispatchNotification
 } from '@utils';
 

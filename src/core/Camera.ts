@@ -1,6 +1,5 @@
-import { CameraProps } from './CoreCamera';
+import { CameraProps, DrawImageParameters } from '@types';
 import { Postprocessor } from './Postprocessor';
-import { DrawImageParameters } from './CanvasHandler';
 
 /**
  * This object acts as a proxy towards CoreCamera.

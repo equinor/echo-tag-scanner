@@ -1,6 +1,6 @@
-import { RefObject } from 'react';
-import { CanvasHandler, DrawImageParameters } from './CanvasHandler';
-import { CameraProps, CoreCamera } from './CoreCamera';
+import { CameraProps, DrawImageParameters } from '../types';
+import { CanvasHandler } from './CanvasHandler';
+import { CoreCamera } from './CoreCamera';
 
 type CropInstructions = {
   width: number;
@@ -35,43 +35,19 @@ class Postprocessor extends CoreCamera {
   }
 
   /**
-   * Crops the image to the predetermined scanning area
-   * and returns the new size in bytes.
-   *
-   * Currently not in use as we are directly cropping after capture, but it may
-   * be necessary to split the operations later.
+   * Scales the image by a given factor and returns the new scaled image as blob.
    */
-  protected async crop(cropInstructions: DOMRect): Promise<Number> {
-    const bitmap = await createImageBitmap(this._capture);
-    const params: DrawImageParameters = {
-      sx: cropInstructions.x,
-      sy: cropInstructions.y,
-      sHeight: cropInstructions.height,
-      sWidth: cropInstructions.width,
-      dx: cropInstructions.x,
-      dy: cropInstructions.y,
-      dHeight: cropInstructions.height,
-      dWidth: cropInstructions.width
-    };
-    const croppedBlob = await this._canvasHandler.draw(bitmap, params);
-    this.logImageStats(croppedBlob, 'Photo capture after downscaling.');
-    return croppedBlob.size;
-  }
-
-  /**
-   * Downscales the image by a factor of 0.5 and returns the new size.
-   */
-  protected async scale(scaleInstructions: DOMRect): Promise<Blob> {
+  protected async scale(byFactor: number): Promise<Blob> {
     const bitmap = await createImageBitmap(await this._canvasHandler.getBlob());
     const params: DrawImageParameters = {
       sx: 0,
       sy: 0,
-      sHeight: scaleInstructions.height,
-      sWidth: scaleInstructions.width,
+      sHeight: this._canvas.height,
+      sWidth: this._canvas.width,
       dx: 0,
       dy: 0,
-      dHeight: scaleInstructions.height * 0.5,
-      dWidth: scaleInstructions.width * 0.5
+      dHeight: this._canvas.height * byFactor,
+      dWidth: this._canvas.width * byFactor
     };
     const downscaledImgBlob = await this._canvasHandler.draw(bitmap, params);
     return downscaledImgBlob;
@@ -83,7 +59,7 @@ class Postprocessor extends CoreCamera {
    * but in some cases it can recolour text to be the same as the background.
    */
   protected async blackAndWhite(): Promise<Blob> {
-    const imgData = await this._canvasHandler.getCanvasContents();
+    const imgData = this._canvasHandler.getCanvasContents();
 
     for (let i = 0; i < imgData.data.length; i += 4) {
       let count = imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2];
@@ -105,7 +81,7 @@ class Postprocessor extends CoreCamera {
    * This is less effective for compression than B&W, but is safer.
    */
   protected async grayscale(): Promise<Blob> {
-    const imgData = await this._canvasHandler.getCanvasContents();
+    const imgData = this._canvasHandler.getCanvasContents();
 
     for (let i = 0; i < imgData.data.length; i += 4) {
       let count = imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2];
@@ -123,10 +99,7 @@ class Postprocessor extends CoreCamera {
       dx: 0,
       dy: 0
     });
-    this.logImageStats(
-      grayscaleImgBlob,
-      'Photo capture after grayscale recolour.'
-    );
+
     return grayscaleImgBlob;
   }
 
@@ -138,18 +111,18 @@ class Postprocessor extends CoreCamera {
       const image = new Image();
       image.src = URL.createObjectURL(target);
       image.onload = () => {
-        console.group(logDescription);
-        console.info('Photo size in bytes: ', target.size);
-        console.info('Media type: ', target.type);
-        console.info(
-          'Dimensions: ' +
-            'Width: ' +
-            image.width +
-            ' ' +
-            'Height: ' +
-            image.height
-        );
-        console.groupEnd();
+        // console.group(logDescription);
+        // console.info('Photo size in bytes: ', target.size);
+        // console.info('Media type: ', target.type);
+        // console.info(
+        //   'Dimensions: ' +
+        //     'Width: ' +
+        //     image.width +
+        //     ' ' +
+        //     'Height: ' +
+        //     image.height
+        // );
+        // console.groupEnd();
         URL.revokeObjectURL(image.src);
       };
     }

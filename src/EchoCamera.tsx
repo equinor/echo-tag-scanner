@@ -1,8 +1,6 @@
 import React, { useRef } from 'react';
 import styled from 'styled-components';
-
 import { ScanningArea, Viewfinder } from '@components';
-
 import { Scanner } from './Scanner';
 
 const EchoCamera = () => {

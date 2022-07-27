@@ -1,6 +1,4 @@
-import {
-  ParsedComputerVisionResponse
-} from '@types';
+import { ParsedComputerVisionResponse } from '@types';
 import { Search, TagSummaryDto } from '@equinor/echo-search';
 
 function hasContent(data: unknown) {
@@ -49,9 +47,8 @@ async function createTagValidator(
  * This function handles the filtering of these false positives.
  */
 export async function runTagValidation(
-  locations: ParsedComputerVisionResponse,
+  locations: ParsedComputerVisionResponse
 ): Promise<TagSummaryDto[]> {
-
   const tagValidationTasks = locations.map((funcLocation) =>
     createTagValidator(funcLocation)
   );

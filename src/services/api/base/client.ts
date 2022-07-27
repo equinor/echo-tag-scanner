@@ -1,5 +1,5 @@
 import type { HttpResponse, ResponseParser, RequestMethod } from '@types';
-import { BaseApiClientError, BaseApiClientRequestFailedError, BaseApiParseError } from './error';
+import { BaseApiParseError } from './error';
 import EchoCore from '@equinor/echo-core';
 
 /**
@@ -40,7 +40,10 @@ async function performReusableRequest<T>(
   return request;
 }
 
-async function performFetchAsync<TError>(url: string, init: RequestInit): Promise<Response> {
+async function performFetchAsync<TError>(
+  url: string,
+  init: RequestInit
+): Promise<Response> {
   const [method, options, body, abortSignal] = await transformRequestAsync(
     init
   );

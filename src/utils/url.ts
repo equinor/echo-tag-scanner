@@ -1,13 +1,12 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const separator = '/';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Params = { [key: string]: any };
 export function addParams(url: string, params: Params): string {
   const queryString = Object.keys(params)
     .filter((key) => params[key])
     .reduce(
-      (query, key) => query + `${query ? '&' : ''}${key}=${encodeURIComponent(params[key])}`,
+      (query, key) =>
+        query + `${query ? '&' : ''}${key}=${encodeURIComponent(params[key])}`,
       ''
     );
 
@@ -44,8 +43,10 @@ export function parseParams<T extends Record<string, string>>(url: string): T {
 export function combineUrls(base: string, ...parts: string[]): string {
   const url = (parts || [])
     .filter((part) => part)
-    .reduce((url, part) => url + separator + encodeURIComponent(part), base || '');
+    .reduce(
+      (url, part) => url + separator + encodeURIComponent(part),
+      base || ''
+    );
 
   return trimTrailingSlash(url);
 }
-

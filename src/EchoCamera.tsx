@@ -36,3 +36,4 @@ const Main = styled.main`
 `;
 
 export { EchoCamera };
+export default EchoCamera;

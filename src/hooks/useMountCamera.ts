@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
 
 import { TagScanner } from '../core/Scanner';
-import { CameraProps } from '../core/CoreCamera';
+import { CameraProps } from '@types';
 import { assignZoomSettings } from '@utils';
 
 type CameraInfrastructure = {
@@ -20,30 +20,23 @@ export function useMountScanner(
   const [tagScanner, setCamera] = useState<TagScanner | undefined>(undefined);
 
   useEffectAsync(async (signal) => {
-    try {
-      const mediaStream = await TagScanner.promptCameraUsage();
+    const mediaStream = await TagScanner.promptCameraUsage();
 
-      const props: CameraProps = {
-        mediaStream,
-        viewfinder,
-        canvas
-      };
-      const camera = new TagScanner(props);
+    const props: CameraProps = {
+      mediaStream,
+      viewfinder,
+      canvas
+    };
+    const camera = new TagScanner(props);
 
-      if (!signal.aborted) {
-        setCamera(camera);
-      }
-
-      return () => {
-        console.info('stopping camera');
-        camera.stopCamera();
-      };
-    } catch (reason) {
-      console.error(
-        'Something went wrong when constructing the camera.',
-        reason
-      );
+    if (!signal.aborted) {
+      setCamera(camera);
     }
+
+    return () => {
+      console.info('stopping camera');
+      camera.stopCamera();
+    };
   }, []);
 
   // Handling zoom assignments

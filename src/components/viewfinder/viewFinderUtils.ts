@@ -1,8 +1,6 @@
 import { useState } from 'react';
-
+import { debounce, getViewMode } from '@utils';
 import EchoUtils from '@equinor/echo-utils';
-
-import { debounce } from '@utils';
 
 export type Dimensions = {
   width: number;
@@ -43,11 +41,5 @@ function getDimensions(): Dimensions {
       width: globalThis.innerWidth * 0.7,
       height: globalThis.innerHeight * (1 / 3)
     };
-  }
-
-  function getViewMode(): 'portrait' | 'landscape' {
-    // We default to portrait if the height and width are equal.
-    if (globalThis.innerHeight >= globalThis.innerWidth) return 'portrait';
-    else return 'landscape';
   }
 }

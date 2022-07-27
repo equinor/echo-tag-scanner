@@ -142,7 +142,6 @@ class CoreCamera {
   }
 
   public stopCamera() {
-    console.log('stopping');
     if (this._videoTrack) {
       this._videoTrack.stop();
     }

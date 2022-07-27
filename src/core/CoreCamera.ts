@@ -1,4 +1,4 @@
-import { handleError, getOrientation, getMediaConstraints } from '@utils';
+import { handleError, getOrientation } from '@utils';
 import { ErrorRegistry } from '@enums';
 import { CameraProps } from '@types';
 

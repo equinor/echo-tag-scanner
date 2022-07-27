@@ -21,11 +21,13 @@ const FallbackLoading = (): JSX.Element => {
 
 const App: React.FC = () => {
   return (
-    <ErrorBoundary stackTraceEnabled>
-      <Suspense fallback={<FallbackLoading />}>
-        <LazyCamera />
-      </Suspense>
-    </ErrorBoundary>
+    <main>
+      <ErrorBoundary stackTraceEnabled>
+        <Suspense fallback={<FallbackLoading />}>
+          <LazyCamera />
+        </Suspense>
+      </ErrorBoundary>
+    </main>
   );
 };
 

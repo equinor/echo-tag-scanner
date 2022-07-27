@@ -17,13 +17,17 @@ export class BaseApiClientError extends BaseApiError {
   }
 }
 
-export class BaseApiClientRequestFailedError<TError> extends BaseApiClientError {
+export class BaseApiClientRequestFailedError<
+  TError
+> extends BaseApiClientError {
   url: string;
   statusCode: number;
   response: TError;
 
   constructor(url: string, statusCode: number, response: TError) {
-    super(`[${url}] returned status code [${statusCode}] and response [${response}]`);
+    super(
+      `[${url}] returned status code [${statusCode}] and response [${response}]`
+    );
     this.url = url;
     this.statusCode = statusCode;
     this.response = response;

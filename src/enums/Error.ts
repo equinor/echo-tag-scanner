@@ -3,14 +3,13 @@ export type ErrorRecord = {
   severity: 'low' | 'high';
   userMessage: string;
 };
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IErrorRegistry {
   ocrError: ErrorRecord;
   ocrMimeError: ErrorRecord;
   viewfinderError: ErrorRecord;
   zoomError: ErrorRecord;
   torchError: ErrorRecord;
+  overconstrainedError: ErrorRecord;
 }
 
 export enum ErrorKey {
@@ -26,7 +25,9 @@ const ErrorMessages = {
   },
   viewfinder: 'Could not find the viewfinder.',
   zoom: 'Something went wrong when we tried to zoom the camera.',
-  torch: 'Something went wrong when we tried to turn on the lights'
+  torch: 'Something went wrong when we tried to turn on the lights',
+  OverconstrainedError:
+    'The camera failed to start due to device dimensions. The viewport dimension must be 720x1280 or 1280x720'
 };
 
 export const ErrorRegistry: IErrorRegistry = {
@@ -54,5 +55,10 @@ export const ErrorRegistry: IErrorRegistry = {
     key: ErrorKey.EchoCameraRuntimeErrors,
     severity: 'low',
     userMessage: ErrorMessages.torch
+  },
+  overconstrainedError: {
+    key: ErrorKey.EchoCameraRuntimeErrors,
+    severity: 'high',
+    userMessage: ErrorMessages.OverconstrainedError
   }
 } as const;

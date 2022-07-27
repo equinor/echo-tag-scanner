@@ -1,8 +1,5 @@
 import React, { useRef } from 'react';
-import styled from 'styled-components';
-
 import { ScanningArea, Viewfinder } from '@components';
-
 import { Scanner } from './Scanner';
 
 const EchoCamera = () => {
@@ -14,7 +11,7 @@ const EchoCamera = () => {
   const scanArea = useRef<HTMLElement>(null);
 
   return (
-    <Main>
+    <>
       <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
       <ScanningArea captureAreaRef={scanArea} />
 
@@ -25,15 +22,9 @@ const EchoCamera = () => {
           scanArea={scanArea.current}
         />
       )}
-    </Main>
+    </>
   );
 };
-
-const Main = styled.main`
-  .cameraWrapper {
-    height: 100%;
-  }
-`;
 
 export { EchoCamera };
 export default EchoCamera;

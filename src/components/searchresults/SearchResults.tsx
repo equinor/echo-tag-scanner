@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-
+import { getNotificationDispatcher as dispatchNotification } from '@utils';
 import { Button, Scrim } from '@equinor/eds-core-react';
 import { TagContextMenu, TagIcon, getIcon } from '@equinor/echo-components';
 import { getLegendStatusColor } from '@equinor/echo-framework';
@@ -60,16 +60,11 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
       </Scrim>
     );
   } else {
-    return (
-      <Scrim open>
-        <NoSearchResultsWrapper>
-          <NoSearchResultsMessage>No tags detected.</NoSearchResultsMessage>
-          <ScanAgainButton variant="contained" onClick={props.onClose}>
-            <ButtonLabel>Scan again</ButtonLabel>
-          </ScanAgainButton>
-        </NoSearchResultsWrapper>
-      </Scrim>
-    );
+    dispatchNotification({
+      message: 'No tags detected.',
+      autohideDuration: 2000
+    })();
+    return null;
   }
 };
 

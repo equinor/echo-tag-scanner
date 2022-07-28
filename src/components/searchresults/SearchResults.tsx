@@ -58,10 +58,6 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
       </InvisibleWrapper>
     );
   } else {
-    dispatchNotification({
-      message: 'No tags detected.',
-      autohideDuration: 2000
-    })();
     return null;
   }
 };

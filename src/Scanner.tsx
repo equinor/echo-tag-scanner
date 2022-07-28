@@ -63,10 +63,17 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
 
     // Run OCR and validation to get possible tag numbers.
     const validatedTags = await tagScanner.ocr(scans);
-
-    // Put the validated tags in state.
     changeTagScanStatus('scanning', false);
-    presentValidatedTags(validatedTags);
+
+    if (validatedTags.length === 0) {
+      dispatchNotification({
+        message: 'No tags detected.',
+        autohideDuration: 2000
+      })();
+    } else {
+      // Put the validated tags in state.
+      presentValidatedTags(validatedTags);
+    }
   };
 
   return (

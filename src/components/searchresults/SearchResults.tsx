@@ -25,7 +25,7 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
       console.groupEnd();
     }
 
-    logTagSummaries();
+    EchoEnv.isDevelopment && logTagSummaries();
   }, [props.tagSummary]);
 
   function createSearchResult(tag: TagSummaryDto, index: number) {

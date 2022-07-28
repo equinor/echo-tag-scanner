@@ -68,6 +68,7 @@ class CoreCamera {
         ...additionalCaptureOptions
       })
       .catch((error) => {
+        console.error('media stream capture failed', error);
         if (error instanceof OverconstrainedError) {
           console.error(
             'Could not set camera constraints. The viewport dimensions should not be below the dimensions of your camera device.'
@@ -84,6 +85,7 @@ class CoreCamera {
     const newOrientation = getOrientation();
 
     if (newOrientation !== this._currentOrientation) {
+      console.info('Switching orientation to: ', newOrientation);
       // Device orientation has changed. Refresh the video stream.
       this._currentOrientation = newOrientation;
       this.refreshStream();
@@ -95,10 +97,16 @@ class CoreCamera {
   }
 
   public async refreshStream() {
-    const newMediastream = await CoreCamera.promptCameraUsage();
-    const newTrack = newMediastream.getVideoTracks()[0];
-    const newConstraints = newTrack.getConstraints();
-    await this._videoTrack.applyConstraints(newConstraints);
+    try {
+      const newMediastream = await CoreCamera.promptCameraUsage();
+      const newTrack = newMediastream.getVideoTracks()[0];
+      const newConstraints = newTrack.getConstraints();
+      await this._videoTrack.applyConstraints(newConstraints);
+    } catch (error) {
+      console.error('An error occured while refreshing stream: ', error);
+      if (typeof error === 'object') console.error(error.toString());
+      throw new Error(error);
+    }
   }
 
   public get capabilities(): MediaTrackCapabilities | undefined {

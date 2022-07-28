@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { getNotificationDispatcher as dispatchNotification } from '@utils';
-import { Button, Scrim } from '@equinor/eds-core-react';
+import { Button } from '@equinor/eds-core-react';
 import { TagContextMenu, TagIcon, getIcon } from '@equinor/echo-components';
 import { getLegendStatusColor } from '@equinor/echo-framework';
 import { TagSummaryDto } from '@equinor/echo-search';
+import { EchoEnv } from '@equinor/echo-core';
 
 interface SearchResultsProps {
   tagSummary: TagSummaryDto[];
@@ -14,7 +15,6 @@ interface SearchResultsProps {
 
 const SearchResults = (props: SearchResultsProps): JSX.Element => {
   // Log new tag summaries as they arrive.
-  // TODO: Make this only run in non-prod envs.
   useEffect(() => {
     function logTagSummaries() {
       if (props.tagSummary.length > 0) {
@@ -50,14 +50,12 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
 
   if (props.tagSummary.length > 0) {
     return (
-      <Scrim open>
-        <InvisibleWrapper>
-          {props.tagSummary.map(createSearchResult)}
-          <ScanAgainButton variant="contained" onClick={props.onClose}>
-            <ButtonLabel>Scan again</ButtonLabel>
-          </ScanAgainButton>
-        </InvisibleWrapper>
-      </Scrim>
+      <InvisibleWrapper>
+        {props.tagSummary.map(createSearchResult)}
+        <Button variant="contained" onClick={props.onClose}>
+          <ButtonLabel>Scan again</ButtonLabel>
+        </Button>
+      </InvisibleWrapper>
     );
   } else {
     dispatchNotification({
@@ -72,27 +70,11 @@ const ButtonLabel = styled.span`
   white-space: nowrap;
 `;
 
-const NoSearchResultsMessage = styled.p``;
-
-const ScanAgainButton = styled(Button)``;
-
-const DialogContentWrapper = styled.div`
-  pointer-events: all;
-
+const InvisibleWrapper = styled.div`
   display: flex;
   flex-direction: column;
-`;
-
-const InvisibleWrapper = styled(DialogContentWrapper)`
+  pointer-events: all;
   gap: var(--medium);
-`;
-
-const NoSearchResultsWrapper = styled(DialogContentWrapper)`
-  background-color: var(--white);
-  justify-content: center;
-  z-index: 2;
-  height: auto;
-  padding: var(--medium);
 `;
 
 const SearchResult = styled(TagContextMenu)`

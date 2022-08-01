@@ -1,21 +1,20 @@
-import { AnalyticsEvent, AnalyticsModule } from '@equinor/echo-core';
+import { analytics, AnalyticsEvent, AnalyticsModule } from '@equinor/echo-core';
+
+import echomodule from '../../echoModule.config.json';
 
 export enum ObjectName {
   Module = 'Module',
-  Dashboard = 'Dashboard',
-  Comment = 'Comment'
+  Scanner = 'Scanner'
 }
 
 type ActionNames = {
   [ObjectName.Module]: ModuleActions;
-  [ObjectName.Dashboard]: DashboardActions;
-  [ObjectName.Comment]: CommentActions;
+  [ObjectName.Scanner]: ScannerActions;
 };
 
 type ActionProperties = {
   [ObjectName.Module]: ModuleActionProperties;
-  [ObjectName.Dashboard]: DashboardActionProperties;
-  [ObjectName.Comment]: CommentActionProperties;
+  [ObjectName.Scanner]: ScannerActionsProperties;
 };
 
 type ModuleActions = 'Started';
@@ -23,40 +22,87 @@ type ModuleActionProperties = {
   message?: string;
 };
 
-type DashboardActions = 'SelectDrawing';
-type DashboardActionProperties = {
-  cardId: number;
+type ScannerActions = 'DoneScanning';
+type ScannerActionsProperties = {
+  seconds: number;
+  found: number;
 };
 
-type CommentActions = 'Opened' | 'Closed';
-type CommentActionProperties = {
-  commentId: number;
+enum LogLevel {
+  Track = 1,
+  Error,
+  Warning,
+  Info,
+  Verbose
+}
+
+type LogLevelKeys = keyof typeof LogLevel;
+
+type LoggerProps = {
+  analytics: AnalyticsModule;
+  logLevelOverride?: LogLevel;
 };
+class BaseLogger {
+  protected logLevelOverride?: LogLevel;
+  protected analytics: AnalyticsModule;
 
-class Logger {
-  private active: boolean;
-  private logLevel: number;
-  private analytics?: AnalyticsModule;
-
-  constructor() {
-    this.active = true;
-    // loglevel handling?
-    this.logLevel = 0;
-
-    // The analytics could be configured -- not sure how to do that yet.
-  }
-
-  public setAnalytics(analytics: AnalyticsModule): void {
-    // Do we have analytics?
+  constructor({ analytics, logLevelOverride }: LoggerProps) {
     this.analytics = analytics;
+    this.logLevelOverride = logLevelOverride;
   }
 
+  public track(event: AnalyticsEvent): void {
+    if (this.logLevel() <= LogLevel.Track) return;
+    this.analytics.trackEvent(event);
+  }
+
+  public trackError(error: Error): void {
+    if (this.logLevel() <= LogLevel.Track) return;
+    this.analytics.logError(error);
+  }
+
+  public log(level: LogLevelKeys, callback: Function): void {
+    if (this.logLevel() < LogLevel[level]) return;
+    callback();
+  }
+
+  /**
+   *
+   * @returns LogLevel for current hosting environment.
+   */
+  protected logLevel(): LogLevel {
+    const location = globalThis.location;
+    const modulePath = echomodule.manifest.path;
+
+    // We only log things when module path matches our module
+    if (!location.pathname.includes(modulePath)) return;
+
+    if (
+      location.host === 'echo.equinor.com' ||
+      location.host === 'dt-echopedia-web-dev.azurewebsites.net' ||
+      location.host === 'dt-echopedia-web-qa.azurewebsites.net' ||
+      location.host === 'dt-echopedia-web-test.azurewebsites.net'
+    ) {
+      // FIXME: We could in theory also console.log errors here. Not sure.
+      // return LogLevel.Error
+      return LogLevel.Track;
+    }
+
+    if (location.host === 'localhost:3000') {
+      return LogLevel.Verbose;
+    }
+
+    return LogLevel.Error;
+  }
+}
+
+class EchoTagScannnerLogger extends BaseLogger {
   public trackEvent<
     Name extends ObjectName = ObjectName,
     Action extends ActionNames[Name] = ActionNames[Name],
     Properties extends ActionProperties[Name] = ActionProperties[Name]
   >(objectName: Name, actionName: Action, properties: Properties): void {
-    const event = this.analytics?.createEventLog(
+    const event = this.analytics.createEventLog(
       objectName,
       actionName,
       properties
@@ -65,46 +111,13 @@ class Logger {
       this.track(event);
     }
   }
-
-  public track(event: AnalyticsEvent): void {
-    this.analytics?.trackEvent(event);
-  }
-
-  public trackError(error: Error): void {
-    this.analytics?.logError(error);
-  }
-
-  public info(...params: any[]): void {
-    this.log('info', ...params);
-  }
-
-  public warn(...params: any[]): void {
-    this.log('warn', ...params);
-  }
-
-  public error(...params: any[]): void {
-    this.log('error', ...params);
-  }
-
-  private log(logType: 'info' | 'warn' | 'error', ...params: any[]) {
-    if (this.active) {
-      switch (logType) {
-        case 'info':
-          console.info(...params);
-          break;
-        case 'warn':
-          console.warn(...params);
-          break;
-        case 'error':
-          console.error(...params);
-          break;
-        default:
-          throw new Error("No matching 'logType' found in Logger.log.");
-      }
-    }
-  }
 }
 
-const logger = new Logger();
+const moduleShortName = echomodule.manifest.shortName;
+const overrideLogLevel = localStorage.getItem(`${moduleShortName}.logOverride`);
+const logger = new EchoTagScannnerLogger({
+  analytics: analytics.createAnalyticsModule(moduleShortName),
+  logLevelOverride: overrideLogLevel ? Number(overrideLogLevel) : undefined
+});
 
 export { logger };

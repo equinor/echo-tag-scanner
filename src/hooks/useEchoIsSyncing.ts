@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { EchoEnv, eventHub } from '@equinor/echo-core';
 import EchoUtils from '@equinor/echo-utils';
+import { logger } from '@utils';
 
 function useEchoIsSyncing() {
   const [tagSyncIsDone, setTagSyncIsDone] = useState(false);
@@ -10,11 +11,11 @@ function useEchoIsSyncing() {
     const unsubscribe = eventHub.subscribe(
       'isSyncing',
       (isSyncing: boolean) => {
-        console.log('Echo is syncing: ', isSyncing);
+        logger.log('Info', () => console.log('Echo is syncing: ', isSyncing));
         if (signal.aborted) return;
 
         if (!isSyncing) {
-          console.log('Echo is syncing: ', isSyncing);
+          logger.log('Info', () => console.log('Echo is syncing: ', isSyncing));
           setTagSyncIsDone(true);
         }
       }

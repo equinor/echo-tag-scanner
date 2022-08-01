@@ -5,6 +5,7 @@ import { Button, Scrim } from '@equinor/eds-core-react';
 import { TagContextMenu, TagIcon, getIcon } from '@equinor/echo-components';
 import { getLegendStatusColor } from '@equinor/echo-framework';
 import { TagSummaryDto } from '@equinor/echo-search';
+import { logger } from '@utils';
 
 interface SearchResultsProps {
   tagSummary: TagSummaryDto[];
@@ -18,11 +19,14 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
   useEffect(() => {
     function logTagSummaries() {
       if (props.tagSummary.length > 0) {
-        console.group('This tag data is used for presentation');
-        props.tagSummary.forEach((tag) => console.table(tag));
+        logger.log('Info', () => {
+          console.group(
+            'This information will only be logged when LogLevel is Info'
+          );
+          props.tagSummary.forEach((tag) => console.table(tag));
+          console.groupEnd();
+        });
       }
-
-      console.groupEnd();
     }
 
     logTagSummaries();

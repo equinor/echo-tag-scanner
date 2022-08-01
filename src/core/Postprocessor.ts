@@ -1,4 +1,6 @@
-import { CameraProps, DrawImageParameters } from '../types';
+import { logger } from '@utils';
+import { CameraProps, DrawImageParameters } from '@types';
+
 import { CanvasHandler } from './CanvasHandler';
 import { CoreCamera } from './CoreCamera';
 
@@ -111,18 +113,20 @@ class Postprocessor extends CoreCamera {
       const image = new Image();
       image.src = URL.createObjectURL(target);
       image.onload = () => {
-        // console.group(logDescription);
-        // console.info('Photo size in bytes: ', target.size);
-        // console.info('Media type: ', target.type);
-        // console.info(
-        //   'Dimensions: ' +
-        //     'Width: ' +
-        //     image.width +
-        //     ' ' +
-        //     'Height: ' +
-        //     image.height
-        // );
-        // console.groupEnd();
+        logger.log('Verbose', () => {
+          console.group(logDescription);
+          console.info('Photo size in bytes: ', target.size);
+          console.info('Media type: ', target.type);
+          console.info(
+            'Dimensions: ' +
+              'Width: ' +
+              image.width +
+              ' ' +
+              'Height: ' +
+              image.height
+          );
+          console.groupEnd();
+        });
         URL.revokeObjectURL(image.src);
       };
     }

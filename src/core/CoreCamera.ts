@@ -1,4 +1,4 @@
-import { handleError, getOrientation } from '@utils';
+import { handleError, getOrientation, logger } from '@utils';
 import { ErrorRegistry } from '@enums';
 import { CameraProps } from '@types';
 
@@ -71,9 +71,11 @@ class CoreCamera {
       })
       .catch((error) => {
         if (error instanceof OverconstrainedError) {
-          console.error(
-            'Could not set camera constraints. The device/viewport dimensions should be minimum 1280x720 or 720x1280; or the camera is not capable of framerates over 15.'
-          );
+          logger.log('Error', () => {
+            console.error(
+              'Could not set camera constraints. The device/viewport dimensions should be minimum 1280x720 or 720x1280; or the camera is not capable of framerates over 15.'
+            );
+          });
           throw handleError(ErrorRegistry.overconstrainedError, error as Error);
         }
         throw new Error(error);
@@ -115,7 +117,9 @@ class CoreCamera {
         ?.applyConstraints({ advanced: [{ torch: toggled }] })
         .catch(onTorchRejection);
     } else {
-      console.warn('Device does not support the torch');
+      logger.log('Warning', () =>
+        console.warn('Device does not support the torch')
+      );
     }
 
     function onTorchRejection(reason: unknown) {
@@ -133,26 +137,28 @@ class CoreCamera {
   }
 
   public reportCameraFeatures() {
-    console.group('Starting camera');
-    console.info(
-      'Camera resolution -> ',
-      this._viewfinder.videoWidth,
-      this._viewfinder.videoHeight
-    );
-    console.info(
-      'Viewfinder dimensions -> ',
-      this._viewfinder.width,
-      this._viewfinder.height
-    );
-    console.info(
-      'Camera is capable of zooming: ',
-      Boolean(this._capabilities?.zoom)
-    );
-    console.info(
-      'Camera is capable of using the torch: ',
-      Boolean(this._capabilities?.torch)
-    );
-    console.groupEnd();
+    logger.log('Info', () => {
+      console.group('Starting camera');
+      console.info(
+        'Camera resolution -> ',
+        this._viewfinder.videoWidth,
+        this._viewfinder.videoHeight
+      );
+      console.info(
+        'Viewfinder dimensions -> ',
+        this._viewfinder.width,
+        this._viewfinder.height
+      );
+      console.info(
+        'Camera is capable of zooming: ',
+        Boolean(this._capabilities?.zoom)
+      );
+      console.info(
+        'Camera is capable of using the torch: ',
+        Boolean(this._capabilities?.torch)
+      );
+      console.groupEnd();
+    });
   }
 }
 

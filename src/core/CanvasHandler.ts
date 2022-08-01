@@ -1,4 +1,4 @@
-import { getOrientation } from '@utils';
+import { getOrientation, logger } from '@utils';
 import {
   AllowedMimeTypes,
   CanvasDimensions,
@@ -43,10 +43,12 @@ class CanvasHandler {
           width: entry[0].contentRect.width,
           height: entry[0].contentRect.height
         };
-        console.log(
-          'device orientation changed -> ',
-          this._standardCanvasDimensions
-        );
+        logger.log('Info', () => {
+          console.info(
+            'device orientation changed -> ',
+            this._standardCanvasDimensions
+          );
+        });
         this.logCanvasStats();
       }
     });
@@ -150,9 +152,11 @@ class CanvasHandler {
   }
 
   public logCanvasStats() {
-    console.group('Canvas info');
-    console.info('Dimensions w/h', this._canvas.width, this._canvas.height);
-    console.groupEnd();
+    logger.log('Info', () => {
+      console.group('Canvas info');
+      console.info('Dimensions w/h', this._canvas.width, this._canvas.height);
+      console.groupEnd();
+    });
   }
 }
 

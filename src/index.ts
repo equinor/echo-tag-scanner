@@ -1,5 +1,5 @@
-import { EchoModuleApi, analytics } from '@equinor/echo-core';
-import { logger } from '@utils';
+import { EchoModuleApi } from '@equinor/echo-core';
+
 import { App } from './App';
 
 export function setup(api: EchoModuleApi): void {

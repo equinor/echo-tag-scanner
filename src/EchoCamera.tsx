@@ -1,8 +1,15 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+
 import { ScanningArea, Viewfinder } from '@components';
+import { logger, ObjectName } from '@utils';
+
 import { Scanner } from './Scanner';
 
 const EchoCamera = () => {
+  useEffect(() => {
+    logger.ModuleStarted();
+  }, []);
+
   // Represets the camera viewfinder.
   const viewfinder = useRef<HTMLVideoElement>(null);
   // Used for postprocessing of captures.

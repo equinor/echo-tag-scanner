@@ -38,15 +38,15 @@ enum LogLevel {
 
 type LogLevelKeys = keyof typeof LogLevel;
 
-type LoggerProps = {
+interface BaseLoggerProps {
   analytics: AnalyticsModule;
   logLevelOverride?: LogLevel;
-};
+}
 class BaseLogger {
   protected logLevelOverride?: LogLevel;
   protected analytics: AnalyticsModule;
 
-  constructor({ analytics, logLevelOverride }: LoggerProps) {
+  constructor({ analytics, logLevelOverride }: BaseLoggerProps) {
     this.analytics = analytics;
     this.logLevelOverride = logLevelOverride;
   }
@@ -96,7 +96,24 @@ class BaseLogger {
   }
 }
 
+interface EchoTagScannnerLoggerProps extends BaseLoggerProps {
+  moduleName: string;
+  moduleShortName: string;
+}
 class EchoTagScannnerLogger extends BaseLogger {
+  private moduleName: string;
+  private moduleShortName: string;
+
+  constructor({
+    moduleName,
+    moduleShortName,
+    ...baseProps
+  }: EchoTagScannnerLoggerProps) {
+    super(baseProps);
+    this.moduleName = moduleName;
+    this.moduleShortName = moduleShortName;
+  }
+
   public trackEvent<
     Name extends ObjectName = ObjectName,
     Action extends ActionNames[Name] = ActionNames[Name],
@@ -111,11 +128,25 @@ class EchoTagScannnerLogger extends BaseLogger {
       this.track(event);
     }
   }
+
+  public ModuleStarted() {
+    this.trackEvent(ObjectName.Module, 'Started', {
+      message: this.moduleName + ' has started.'
+    });
+  }
+
+  public DoneScanning() {
+    // TODO: implement
+  }
 }
 
 const moduleShortName = echomodule.manifest.shortName;
+const moduleName = echomodule.manifest.name;
+
 const overrideLogLevel = localStorage.getItem(`${moduleShortName}.logOverride`);
 const logger = new EchoTagScannnerLogger({
+  moduleName,
+  moduleShortName,
   analytics: analytics.createAnalyticsModule(moduleShortName),
   logLevelOverride: overrideLogLevel ? Number(overrideLogLevel) : undefined
 });

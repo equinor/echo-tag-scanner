@@ -27,7 +27,7 @@ The scanner is available for all Echo users on all installations. A sizeable gro
 
 
 ## Overview
-![image](image.png)
+![image](https://user-images.githubusercontent.com/10920843/182129206-78893e1d-083d-44f0-b1a0-ecbb18baeb14.png)
 
 
 ### Scanner setup
@@ -49,8 +49,7 @@ When we have obtained permission from the users, we can then construct a MediaSt
 With the mediastream object, we can assign it as a source to a standard HTML video element. We are then streaming from the device camera to a video element, emulating a viewfinder.
 
 Finally, we also define a "capture area", which the users can identify as a marked area in their viewfinder. When a capture happens, only whatever is inside the capture area is captured.
-
-(TODO: create class diagram)
+![image](https://user-images.githubusercontent.com/10920843/182128953-55f21653-bc05-47eb-915a-8254e0f7d5de.png)
 
 ### Camera capture
 In this stage, we are capturing a frame from the video stream before putting it in memory. In order for this to work, the scanner features a hidden canvas element which is used for temporary storage between postprocessing operations.

@@ -3,7 +3,7 @@
 An Echo module for recognising tag numbers with a camera.
 
 Full documentation:
-https://equinor.github.io/echo-camera-web/
+https://github.com/equinor/echo-camera-web/blob/dev/docs/index.md
 
 ## First time development setup
 

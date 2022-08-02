@@ -40,6 +40,10 @@ type LogLevelKeys = keyof typeof LogLevel;
 
 interface BaseLoggerProps {
   analytics: AnalyticsModule;
+  /**
+   * LogLevelOverride can be set in localstorage as "[moduleShortName].logOverride"
+   * and should be a number between 1 and 5 where highest is verbose.
+   */
   logLevelOverride?: LogLevel;
 }
 class BaseLogger {
@@ -67,7 +71,6 @@ class BaseLogger {
   }
 
   /**
-   *
    * @returns LogLevel for current hosting environment.
    */
   protected logLevel(): LogLevel {
@@ -76,6 +79,10 @@ class BaseLogger {
 
     // We only log things when module path matches our module
     if (!location.pathname.includes(modulePath)) return;
+
+    if (this.logLevelOverride) {
+      return this.logLevelOverride;
+    }
 
     if (
       location.host === 'echo.equinor.com' ||

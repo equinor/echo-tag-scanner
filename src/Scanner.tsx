@@ -6,7 +6,8 @@ import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import {
   getTorchToggleProvider,
-  getNotificationDispatcher as dispatchNotification
+  getNotificationDispatcher as dispatchNotification,
+  logger
 } from '@utils';
 
 interface ScannerProps {
@@ -58,11 +59,16 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
     setValidatedTags(undefined);
     changeTagScanStatus('scanning', true);
 
+    const start = new Date();
     // Capture image.
     let scans = await tagScanner.scan(scanArea.getBoundingClientRect());
-
     // Run OCR and validation to get possible tag numbers.
     const validatedTags = await tagScanner.ocr(scans);
+    const end = new Date();
+
+    const seconds = (start.getTime() - end.getTime()) / 1000;
+    const found = validatedTags.length;
+    logger.DoneScanning({ seconds, found });
 
     // Put the validated tags in state.
     changeTagScanStatus('scanning', false);

@@ -135,7 +135,7 @@ class EchoTagScannnerLogger extends BaseLogger {
     });
   }
 
-  public DoneScanning() {
+  public DoneScanning(props: ScannerActionsProperties) {
     // TODO: implement
   }
 }

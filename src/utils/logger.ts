@@ -136,7 +136,7 @@ class EchoTagScannnerLogger extends BaseLogger {
   }
 
   public DoneScanning(props: ScannerActionsProperties) {
-    // TODO: implement
+    this.trackEvent(ObjectName.Scanner, 'DoneScanning', props);
   }
 }
 

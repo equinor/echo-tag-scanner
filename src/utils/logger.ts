@@ -108,8 +108,8 @@ interface EchoTagScannnerLoggerProps extends BaseLoggerProps {
   moduleShortName: string;
 }
 class EchoTagScannnerLogger extends BaseLogger {
-  private moduleName: string;
-  private moduleShortName: string;
+  private _moduleName: string;
+  private _moduleShortName: string;
 
   constructor({
     moduleName,
@@ -117,8 +117,8 @@ class EchoTagScannnerLogger extends BaseLogger {
     ...baseProps
   }: EchoTagScannnerLoggerProps) {
     super(baseProps);
-    this.moduleName = moduleName;
-    this.moduleShortName = moduleShortName;
+    this._moduleName = moduleName;
+    this._moduleShortName = moduleShortName;
   }
 
   public trackEvent<
@@ -136,13 +136,13 @@ class EchoTagScannnerLogger extends BaseLogger {
     }
   }
 
-  public ModuleStarted() {
+  public moduleStarted() {
     this.trackEvent(ObjectName.Module, 'Started', {
-      message: this.moduleName + ' has started.'
+      message: this._moduleName + ' has started.'
     });
   }
 
-  public DoneScanning(props: ScannerActionsProperties) {
+  public doneScanning(props: ScannerActionsProperties) {
     this.trackEvent(ObjectName.Scanner, 'DoneScanning', props);
   }
 }

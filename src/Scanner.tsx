@@ -68,7 +68,7 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
 
     const seconds = (start.getTime() - end.getTime()) / 1000;
     const found = validatedTags.length;
-    logger.DoneScanning({ seconds, found });
+    logger.doneScanning({ seconds, found });
 
     // Put the validated tags in state.
     changeTagScanStatus('scanning', false);

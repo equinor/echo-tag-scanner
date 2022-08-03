@@ -7,7 +7,7 @@ import { Scanner } from './Scanner';
 
 const EchoCamera = () => {
   useEffect(() => {
-    logger.ModuleStarted();
+    logger.moduleStarted();
   }, []);
 
   // Represets the camera viewfinder.

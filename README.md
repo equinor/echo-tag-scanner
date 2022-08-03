@@ -1,7 +1,9 @@
 # Echo Camera Web
 
 An Echo module for recognising tag numbers with a camera.
-The camera communicates with MadOCR API.
+
+Full documentation:
+https://github.com/equinor/echo-camera-web/blob/dev/docs/index.md
 
 ## First time development setup
 

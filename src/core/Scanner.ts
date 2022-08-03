@@ -8,7 +8,7 @@ import { Camera } from './Camera';
  * This object implements tag scanning logic.
  */
 export class TagScanner extends Camera {
-  private readonly _scanRetries = 2;
+  private readonly _scanRetries = 5;
   private readonly _scanDuration = 2; //seconds
 
   constructor(props: CameraProps) {

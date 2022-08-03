@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { CaptureAndTorch, SearchResults, ZoomSlider } from '@components';
@@ -72,7 +72,16 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
 
     // Put the validated tags in state.
     changeTagScanStatus('scanning', false);
-    presentValidatedTags(validatedTags);
+
+    if (validatedTags.length === 0) {
+      dispatchNotification({
+        message: 'No tags detected.',
+        autohideDuration: 2000
+      })();
+    } else {
+      // Put the validated tags in state.
+      presentValidatedTags(validatedTags);
+    }
   };
 
   return (

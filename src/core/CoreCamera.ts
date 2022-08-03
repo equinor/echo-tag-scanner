@@ -11,7 +11,9 @@ class CoreCamera {
   protected _viewfinder: HTMLVideoElement;
   protected _videoTrack?: MediaStreamTrack;
   protected _settings?: MediaTrackSettings;
+  protected _orientationObserver: ResizeObserver;
   public _capabilities?: MediaTrackCapabilities = undefined;
+  public _currentOrientation: 'portrait' | 'landscape';
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
@@ -20,6 +22,11 @@ class CoreCamera {
     this._capabilities = this._videoTrack.getCapabilities();
     this._settings = this._videoTrack.getSettings();
     this._viewfinder.srcObject = props.mediaStream;
+    this._currentOrientation = getOrientation();
+    this._orientationObserver = new ResizeObserver(
+      this.handleOrientationChange.bind(this)
+    );
+    this._orientationObserver.observe(this._viewfinder);
   }
 
   /**
@@ -28,15 +35,6 @@ class CoreCamera {
   static async promptCameraUsage(
     additionalCaptureOptions?: DisplayMediaStreamConstraints
   ): Promise<MediaStream> {
-    /*
-     * Get the minimum camera resolution depending on the device orientation.
-     */
-    const minimums = (function getMinimumVideoConstraints() {
-      const viewmode = getOrientation();
-      if (viewmode === 'portrait') return { width: 720, height: 1280 };
-      else return { width: 1280, height: 720 };
-    })();
-
     const mediaStream = await navigator.mediaDevices
       .getUserMedia({
         video: {
@@ -48,12 +46,12 @@ class CoreCamera {
            * The canvas operations relies on the <video> element's intrinsic dimensions.
            */
           width: {
-            min: minimums.width,
+            min: globalThis.innerWidth,
             ideal: globalThis.innerWidth,
             max: globalThis.innerWidth
           },
           height: {
-            min: minimums.height,
+            min: globalThis.innerHeight,
             max: globalThis.innerHeight,
             ideal: globalThis.innerHeight
           },
@@ -70,6 +68,7 @@ class CoreCamera {
         ...additionalCaptureOptions
       })
       .catch((error) => {
+        console.error('media stream capture failed', error);
         if (error instanceof OverconstrainedError) {
           logger.log('Error', () => {
             console.error(
@@ -84,8 +83,32 @@ class CoreCamera {
     return mediaStream;
   }
 
+  private handleOrientationChange() {
+    const newOrientation = getOrientation();
+
+    if (newOrientation !== this._currentOrientation) {
+      console.info('Switching orientation to: ', newOrientation);
+      // Device orientation has changed. Refresh the video stream.
+      this._currentOrientation = newOrientation;
+      this.refreshStream();
+    }
+  }
+
   public get videoTrack(): MediaStreamTrack | undefined {
     return this._videoTrack;
+  }
+
+  public async refreshStream() {
+    try {
+      const newMediastream = await CoreCamera.promptCameraUsage();
+      const newTrack = newMediastream.getVideoTracks()[0];
+      const newConstraints = newTrack.getConstraints();
+      await this._videoTrack.applyConstraints(newConstraints);
+    } catch (error) {
+      console.error('An error occured while refreshing stream: ', error);
+      if (typeof error === 'object') console.error(error.toString());
+      throw new Error(error);
+    }
   }
 
   public get capabilities(): MediaTrackCapabilities | undefined {
@@ -134,6 +157,7 @@ class CoreCamera {
     if (this._videoTrack) {
       this._videoTrack.stop();
     }
+    this._orientationObserver.disconnect();
   }
 
   public reportCameraFeatures() {

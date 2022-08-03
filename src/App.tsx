@@ -1,12 +1,31 @@
-import React, { FC } from 'react';
-import { EchoCamera } from './EchoCamera';
+import React, { Suspense } from 'react';
+
+import { DialogGenerator } from '@equinor/echo-components';
+import { Dialog, Progress } from '@equinor/eds-core-react';
+
 import { ErrorBoundary } from '@services';
 
-const App: FC = () => {
+const LazyCamera = React.lazy(() => import('./EchoCamera'));
+
+const FallbackLoading = (): JSX.Element => {
+  return (
+    <DialogGenerator title="Loading..." actionButtons={[]} open>
+      <Dialog.CustomContent>
+        <Progress.Circular
+          style={{ margin: 'auto', display: 'block !important' }}
+        />
+      </Dialog.CustomContent>
+    </DialogGenerator>
+  );
+};
+
+const App: React.FC = () => {
   return (
     <main>
       <ErrorBoundary stackTraceEnabled>
-        <EchoCamera />
+        <Suspense fallback={<FallbackLoading />}>
+          <LazyCamera />
+        </Suspense>
       </ErrorBoundary>
     </main>
   );

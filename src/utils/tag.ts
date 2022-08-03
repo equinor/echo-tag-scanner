@@ -1,5 +1,6 @@
 import { ParsedComputerVisionResponse } from '@types';
 import { Search, TagSummaryDto } from '@equinor/echo-search';
+import { logger } from './logger';
 
 function hasContent(data: unknown) {
   if (typeof data === 'string' || typeof data === 'number') {
@@ -17,9 +18,11 @@ function hasContent(data: unknown) {
 async function findClosestTag(possibleTagNumber: string) {
   const result = await Search.Tags.closestTagAsync(possibleTagNumber);
   if (result.isSuccess) {
-    console.group('Running validation for ', possibleTagNumber);
-    console.info(possibleTagNumber + ' corrected to ' + result.value);
-    console.groupEnd();
+    logger.log('Verbose', () => {
+      console.group('Running validation for ', possibleTagNumber);
+      console.info(possibleTagNumber + ' corrected to ' + result.value);
+      console.groupEnd();
+    });
     return result.value;
   }
 }

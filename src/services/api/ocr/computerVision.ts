@@ -1,7 +1,7 @@
 import { getComputerVisionOcrResources } from '../resources/resources';
 import { baseApiClient } from '../base/base';
 import { ComputerVisionResponse, ParsedComputerVisionResponse } from '@types';
-import { handleError } from '@utils';
+import { handleError, logger } from '@utils';
 import { ErrorRegistry } from '../../../enums';
 
 export async function ocrRead(
@@ -21,16 +21,18 @@ export async function ocrRead(
     const parsedResponse = parseResponse(response.data);
     return parsedResponse;
   } catch (error) {
-    console.error('API Error -> ', error);
+    logger.log('Error', () => console.error('API Error -> ', error));
     throw handleError(ErrorRegistry.ocrError, error as Error);
   }
 }
 
 function reportTimeTakenForRequest(startDate: Date, endDate: Date) {
   const result = endDate.getMilliseconds() - startDate.getMilliseconds();
-  console.group('Request timer');
-  console.info(`OCR Scanning took ${result} milliseconds`);
-  console.groupEnd();
+  logger.log('Info', () => {
+    console.group('Request timer');
+    console.info(`OCR Scanning took ${result} milliseconds`);
+    console.groupEnd();
+  });
 }
 
 // TODO: Improve this, possibly do validation here.

@@ -47,22 +47,22 @@ interface BaseLoggerProps {
   logLevelOverride?: LogLevel;
 }
 class BaseLogger {
-  protected logLevelOverride?: LogLevel;
-  protected analytics: AnalyticsModule;
+  protected _logLevelOverride?: LogLevel;
+  protected _analytics: AnalyticsModule;
 
   constructor({ analytics, logLevelOverride }: BaseLoggerProps) {
-    this.analytics = analytics;
-    this.logLevelOverride = logLevelOverride;
+    this._analytics = analytics;
+    this._logLevelOverride = logLevelOverride;
   }
 
   public track(event: AnalyticsEvent): void {
     if (this.logLevel() <= LogLevel.Track) return;
-    this.analytics.trackEvent(event);
+    this._analytics.trackEvent(event);
   }
 
   public trackError(error: Error): void {
     if (this.logLevel() <= LogLevel.Track) return;
-    this.analytics.logError(error);
+    this._analytics.logError(error);
   }
 
   public log(level: LogLevelKeys, callback: Function): void {
@@ -80,8 +80,8 @@ class BaseLogger {
     // We only log things when module path matches our module
     if (!location.pathname.includes(modulePath)) return;
 
-    if (this.logLevelOverride) {
-      return this.logLevelOverride;
+    if (this._logLevelOverride) {
+      return this._logLevelOverride;
     }
 
     if (
@@ -126,7 +126,7 @@ class EchoTagScannnerLogger extends BaseLogger {
     Action extends ActionNames[Name] = ActionNames[Name],
     Properties extends ActionProperties[Name] = ActionProperties[Name]
   >(objectName: Name, actionName: Action, properties: Properties): void {
-    const event = this.analytics.createEventLog(
+    const event = this._analytics.createEventLog(
       objectName,
       actionName,
       properties

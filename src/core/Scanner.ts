@@ -20,19 +20,21 @@ export class TagScanner extends Camera {
       globalThis.setScanDuraction = (t: number) => (this._scanDuration = t);
       globalThis.pause = () => this.pauseViewfinder();
       globalThis.resume = () => this.resumeViewfinder();
-      globalThis.debugCamera = () => this.debugAll();
+      globalThis.debugCamera = (preview) => this.debugAll(preview);
       globalThis.refresh = () => this.refreshStream();
     }
   }
 
-  public async debugAll() {
-    const scanArea = document.getElementById('scan-area');
-    var capture = await this.capturePhoto(scanArea.getBoundingClientRect());
-    const obUrl = URL.createObjectURL(capture);
-    const link = document.createElement('a');
-    link.href = obUrl;
-    link.target = '_blank';
-    link.click();
+  public async debugAll(previewCapture = false) {
+    if (previewCapture) {
+      const scanArea = document.getElementById('scan-area');
+      var capture = await this.capturePhoto(scanArea.getBoundingClientRect());
+      const obUrl = URL.createObjectURL(capture);
+      const link = document.createElement('a');
+      link.href = obUrl;
+      link.target = '_blank';
+      link.click();
+    }
 
     logger.log('Verbose', () => {
       console.clear();

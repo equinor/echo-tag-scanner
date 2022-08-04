@@ -62,6 +62,7 @@ class CoreCamera {
   static async promptCameraUsage(
     additionalCaptureOptions?: DisplayMediaStreamConstraints
   ): Promise<MediaStream> {
+    console.log(globalThis.innerWidth, globalThis.innerHeight);
     const mediaStream = await navigator.mediaDevices
       .getUserMedia({
         video: {
@@ -81,9 +82,7 @@ class CoreCamera {
 
           // Higher FPS is good for a scanning operation.
           frameRate: {
-            ideal: 60,
-            min: 15,
-            max: 60
+            ideal: 60
           },
           facingMode: 'environment'
         },

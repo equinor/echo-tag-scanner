@@ -37,7 +37,6 @@ export class TagScanner extends Camera {
     }
 
     logger.log('Verbose', () => {
-      console.clear();
       console.info('Mediastream -> ', this.mediaStream);
       console.info('The viewfinder -> ', this.viewfinder);
       console.info('The video track -> ', this.videoTrack);

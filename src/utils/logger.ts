@@ -66,7 +66,7 @@ class BaseLogger {
   }
 
   public log(level: LogLevelKeys, callback: Function): void {
-    if (this.logLevel() < LogLevel[level]) return;
+    // if (this.logLevel() < LogLevel[level]) return;
     callback();
   }
 

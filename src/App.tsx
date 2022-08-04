@@ -2,10 +2,10 @@ import React, { Suspense } from 'react';
 
 import { DialogGenerator } from '@equinor/echo-components';
 import { Dialog, Progress } from '@equinor/eds-core-react';
-
+import { EchoCamera } from './EchoCamera';
 import { ErrorBoundary } from '@services';
 
-const LazyCamera = React.lazy(() => import('./EchoCamera'));
+// const LazyCamera = React.lazy(() => import('./EchoCamera'));
 
 const FallbackLoading = (): JSX.Element => {
   return (
@@ -23,9 +23,10 @@ const App: React.FC = () => {
   return (
     <main>
       <ErrorBoundary stackTraceEnabled>
-        <Suspense fallback={<FallbackLoading />}>
+        {/*        <Suspense fallback={<FallbackLoading />}>
           <LazyCamera />
-        </Suspense>
+        </Suspense> */}
+        <EchoCamera />
       </ErrorBoundary>
     </main>
   );

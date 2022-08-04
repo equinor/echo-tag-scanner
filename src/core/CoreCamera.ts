@@ -73,14 +73,10 @@ class CoreCamera {
            * The canvas operations relies on the <video> element's intrinsic dimensions.
            */
           width: {
-            min: globalThis.innerWidth,
-            ideal: globalThis.innerWidth,
-            max: globalThis.innerWidth
+            exact: globalThis.innerWidth
           },
           height: {
-            min: globalThis.innerHeight,
-            max: globalThis.innerHeight,
-            ideal: globalThis.innerHeight
+            exact: globalThis.innerHeight
           },
 
           // Higher FPS is good for a scanning operation.
@@ -99,7 +95,7 @@ class CoreCamera {
         if (error instanceof OverconstrainedError) {
           logger.log('Error', () => {
             console.error(
-              'Could not set camera constraints. The device/viewport dimensions should be minimum 1280x720 or 720x1280; or the camera is not capable of framerates over 15.'
+              'Could not set camera constraints. The device/viewport dimensions should not be bigger than the resolution of the camera; or the camera is not capable of framerates over 15.'
             );
           });
           throw handleError(ErrorRegistry.overconstrainedError, error as Error);

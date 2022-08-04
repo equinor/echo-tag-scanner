@@ -1,4 +1,5 @@
 import { CameraProps, DrawImageParameters } from '@types';
+import { logger } from '@utils';
 import { Postprocessor } from './Postprocessor';
 
 /**
@@ -7,15 +8,9 @@ import { Postprocessor } from './Postprocessor';
  */
 class Camera extends Postprocessor {
   private _torchState = false;
-  private _url: string | undefined;
-  protected _isScanning = false;
 
   constructor(props: CameraProps) {
     super(props);
-  }
-
-  public get url(): string {
-    return this._url;
   }
 
   public toggleTorch = (): void => {
@@ -24,13 +19,20 @@ class Camera extends Postprocessor {
   };
 
   public pauseViewfinder(): boolean {
-    this._viewfinder.pause();
-    return this._viewfinder.paused;
+    this.viewfinder.pause();
+    return this.viewfinder.paused;
   }
 
   public resumeViewfinder(): boolean {
-    this._viewfinder.play();
-    return this._viewfinder.paused;
+    this.viewfinder.play();
+    return this.viewfinder.paused;
+  }
+
+  public stopCamera() {
+    if (this.videoTrack) {
+      this.videoTrack.stop();
+    }
+    this.orientationObserver.disconnect();
   }
 
   public alterZoom = (
@@ -60,7 +62,7 @@ class Camera extends Postprocessor {
     captureArea: DOMRect
   ): Promise<Blob | undefined> {
     this.canvasHandler.clearCanvas();
-    const settings = this._videoTrack?.getSettings();
+    const settings = this.videoTrack?.getSettings();
 
     if (settings) {
       if (
@@ -78,7 +80,7 @@ class Camera extends Postprocessor {
           dWidth: captureArea.width
         };
         var captureBlob = await this._canvasHandler.draw(
-          this._viewfinder,
+          this.viewfinder,
           params
         );
       }
@@ -89,6 +91,31 @@ class Camera extends Postprocessor {
     }
 
     return captureBlob;
+  }
+
+  public reportCameraFeatures() {
+    logger.log('Info', () => {
+      console.group('Starting camera');
+      console.info(
+        'Camera resolution -> ',
+        this.viewfinder.videoWidth,
+        this.viewfinder.videoHeight
+      );
+      console.info(
+        'Viewfinder dimensions -> ',
+        this.viewfinder.width,
+        this.viewfinder.height
+      );
+      console.info(
+        'Camera is capable of zooming: ',
+        Boolean(this.capabilities?.zoom)
+      );
+      console.info(
+        'Camera is capable of using the torch: ',
+        Boolean(this.capabilities?.torch)
+      );
+      console.groupEnd();
+    });
   }
 }
 

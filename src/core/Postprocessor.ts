@@ -15,7 +15,7 @@ type CropInstructions = {
 class Postprocessor extends CoreCamera {
   protected _capture?: Blob;
   protected _canvas: HTMLCanvasElement;
-  protected _cropDimensions: CropInstructions;
+  private _cropDimensions: CropInstructions;
   protected _canvasHandler: CanvasHandler;
 
   constructor(props: CameraProps) {
@@ -34,6 +34,10 @@ class Postprocessor extends CoreCamera {
 
   protected get canvasHandler() {
     return this._canvasHandler;
+  }
+
+  public get cropDimensions() {
+    return this._cropDimensions;
   }
 
   /**

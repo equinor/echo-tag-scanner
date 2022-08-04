@@ -6,27 +6,54 @@ import { CameraProps } from '@types';
  * This object is concerned with the core features of a camera.
  */
 class CoreCamera {
-  protected _cameraEnabled = true;
-  protected _mediaStream: MediaStream;
-  protected _viewfinder: HTMLVideoElement;
-  protected _videoTrack?: MediaStreamTrack;
-  protected _settings?: MediaTrackSettings;
-  protected _orientationObserver: ResizeObserver;
-  public _capabilities?: MediaTrackCapabilities = undefined;
-  public _currentOrientation: 'portrait' | 'landscape';
+  private _mediaStream: MediaStream;
+  private _viewfinder: HTMLVideoElement;
+  private _videoTrack?: MediaStreamTrack;
+  private _videoTrackSettings?: MediaTrackSettings;
+  private _orientationObserver: ResizeObserver;
+  private _capabilities?: MediaTrackCapabilities = undefined;
+  private _currentOrientation: 'portrait' | 'landscape';
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
     this._mediaStream = props.mediaStream;
     this._videoTrack = props.mediaStream.getVideoTracks()[0];
     this._capabilities = this._videoTrack.getCapabilities();
-    this._settings = this._videoTrack.getSettings();
-    this._viewfinder.srcObject = props.mediaStream;
+    this._videoTrackSettings = this._videoTrack.getSettings();
     this._currentOrientation = getOrientation();
     this._orientationObserver = new ResizeObserver(
       this.handleOrientationChange.bind(this)
     );
     this._orientationObserver.observe(this._viewfinder);
+    this._viewfinder.srcObject = props.mediaStream;
+  }
+
+  public get videoTrack(): MediaStreamTrack | undefined {
+    return this._videoTrack;
+  }
+
+  public get capabilities(): MediaTrackCapabilities | undefined {
+    return this._capabilities;
+  }
+
+  public get videoTrackSettings(): MediaTrackSettings | undefined {
+    return this._videoTrackSettings;
+  }
+
+  public get viewfinder() {
+    return this._viewfinder;
+  }
+
+  public get orientationObserver() {
+    return this._orientationObserver;
+  }
+
+  public get mediaStream() {
+    return this._mediaStream;
+  }
+
+  public get currentOrientation() {
+    return this._currentOrientation;
   }
 
   /**
@@ -94,10 +121,6 @@ class CoreCamera {
     }
   }
 
-  public get videoTrack(): MediaStreamTrack | undefined {
-    return this._videoTrack;
-  }
-
   public async refreshStream() {
     try {
       const newMediastream = await CoreCamera.promptCameraUsage();
@@ -109,14 +132,6 @@ class CoreCamera {
       if (typeof error === 'object') console.error(error.toString());
       throw new Error(error);
     }
-  }
-
-  public get capabilities(): MediaTrackCapabilities | undefined {
-    return this._capabilities;
-  }
-
-  public get settings(): MediaTrackSettings | undefined {
-    return this._settings;
   }
 
   public zoom(zoomValue: number): void {
@@ -151,38 +166,6 @@ class CoreCamera {
         new Error('The torch could not be toggled, more info: ' + reason)
       );
     }
-  }
-
-  public stopCamera() {
-    if (this._videoTrack) {
-      this._videoTrack.stop();
-    }
-    this._orientationObserver.disconnect();
-  }
-
-  public reportCameraFeatures() {
-    logger.log('Info', () => {
-      console.group('Starting camera');
-      console.info(
-        'Camera resolution -> ',
-        this._viewfinder.videoWidth,
-        this._viewfinder.videoHeight
-      );
-      console.info(
-        'Viewfinder dimensions -> ',
-        this._viewfinder.width,
-        this._viewfinder.height
-      );
-      console.info(
-        'Camera is capable of zooming: ',
-        Boolean(this._capabilities?.zoom)
-      );
-      console.info(
-        'Camera is capable of using the torch: ',
-        Boolean(this._capabilities?.torch)
-      );
-      console.groupEnd();
-    });
   }
 }
 

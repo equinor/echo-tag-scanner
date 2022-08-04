@@ -6,8 +6,8 @@ function assignZoomSettings(
   camera: Camera
 ): string {
   if (type === 'value') {
-    if (camera.settings?.zoom) {
-      return String(camera.settings.zoom);
+    if (camera.videoTrackSettings?.zoom) {
+      return String(camera.videoTrackSettings.zoom);
     } else {
       return '1';
     }

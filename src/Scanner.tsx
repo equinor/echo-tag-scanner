@@ -103,6 +103,7 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
               isDisabled={!tagSyncIsDone}
               isScanning={tagScanStatus.scanning}
               supportedFeatures={{ torch: tagScanner?.capabilities?.torch }}
+              onDebug={tagScanner.debugAll.bind(tagScanner)}
             />
           </>
         )}

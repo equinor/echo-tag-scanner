@@ -3,17 +3,70 @@ import { ocrRead } from '@services';
 import { logger, runTagValidation } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { Camera } from './Camera';
+import { EchoEnv } from '@equinor/echo-core';
 
 /**
  * This object implements tag scanning logic.
  */
 export class TagScanner extends Camera {
-  private readonly _scanRetries = 5;
-  private readonly _scanDuration = 2; //seconds
+  private _scanRetries = 5;
+  private _scanDuration = 2; //seconds
 
   constructor(props: CameraProps) {
     super(props);
-    this.reportCameraFeatures();
+
+    if (EchoEnv.isDevelopment()) {
+      globalThis.setScanRetires = (r: number) => (this._scanRetries = r);
+      globalThis.setScanDuraction = (t: number) => (this._scanDuration = t);
+      globalThis.pause = () => this.pauseViewfinder();
+      globalThis.resume = () => this.resumeViewfinder();
+      globalThis.debugCamera = () => this.debugAll();
+      globalThis.refresh = () => this.refreshStream();
+    }
+  }
+
+  public async debugAll() {
+    const scanArea = document.getElementById('scan-area');
+    var capture = await this.capturePhoto(scanArea.getBoundingClientRect());
+    const obUrl = URL.createObjectURL(capture);
+    const link = document.createElement('a');
+    link.href = obUrl;
+    link.target = '_blank';
+    link.click();
+
+    logger.log('Verbose', () => {
+      console.clear();
+      console.info('Mediastream -> ', this.mediaStream);
+      console.info('The viewfinder -> ', this.viewfinder);
+      console.info('The video track -> ', this.videoTrack);
+      console.info('Camera settings -> ', this.videoTrackSettings);
+      console.info('Current orientation -> ', this.currentOrientation);
+      console.info(
+        'Camera is torch capable -> ',
+        Boolean(this.capabilities.torch)
+      );
+      console.info(
+        'Camera is zoom capable -> ',
+        Boolean(this.capabilities.zoom)
+      );
+      console.info(
+        'Camera resolution -> ',
+        this.viewfinder.videoWidth +
+          'x' +
+          this.viewfinder.videoHeight +
+          '@' +
+          this.videoTrack.getSettings().frameRate +
+          'fps'
+      );
+      console.info(
+        'Viewport (CSS pixel) resolution -> ',
+        this.viewfinder.width + 'x' + this.viewfinder.height
+      );
+      console.info('Current capture -> ', this.capture);
+      console.info('Crop instructions -> ', this.cropDimensions);
+      console.info('Number of captures -> ', this._scanRetries);
+      console.info('Scanning duration ->', this._scanDuration);
+    });
   }
 
   // Prepare for a new scan by resetting the camera.

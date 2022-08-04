@@ -1,12 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
 import { TorchButton, ScannerButton } from '@components';
+import { Button } from '@equinor/eds-core-react';
 
 interface CameraControlsProps {
   /* Scanning callback */
   onScanning: () => void;
   /* Torch callback. If undefined, the torch is not supported. */
   onToggleTorch?: () => void;
+  onDebug?: () => void;
 
   isDisabled?: boolean;
   isScanning?: boolean;
@@ -30,6 +32,16 @@ const CaptureAndTorch = (props: CameraControlsProps): JSX.Element => {
           isDisabled={props.isDisabled}
           isScanning={props.isScanning}
         />
+        <Button
+          variant="ghost"
+          style={{ gridArea: 'empty-cell', background: 'hotpink' }}
+          onClick={props.onDebug}
+        >
+          <span>
+            Developer <br />
+            test
+          </span>
+        </Button>
       </CaptureAndTorchGrid>
     </CaptureAndTorchWrapper>
   );

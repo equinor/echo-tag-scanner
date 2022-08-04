@@ -10,7 +10,13 @@ interface ScanningAreaProps {
 const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
   const dimensions = useScanningAreaDimensions();
 
-  return <SvgContainer ref={props.captureAreaRef} dimensions={dimensions} />;
+  return (
+    <SvgContainer
+      id="scan-area"
+      ref={props.captureAreaRef}
+      dimensions={dimensions}
+    />
+  );
 };
 
 const SvgContainer = styled.section<{ dimensions: Dimensions }>`

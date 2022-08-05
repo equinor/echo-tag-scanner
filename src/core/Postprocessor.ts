@@ -117,7 +117,7 @@ class Postprocessor extends CoreCamera {
       const image = new Image();
       image.src = URL.createObjectURL(target);
       image.onload = () => {
-        logger.log('Verbose', () => {
+        logger.log('Info', () => {
           console.group(logDescription);
           console.info('Photo size in bytes: ', target.size);
           console.info('Media type: ', target.type);

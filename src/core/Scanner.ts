@@ -36,38 +36,33 @@ export class TagScanner extends Camera {
       link.click();
     }
 
-    logger.log('Info', () => {
-      console.log('Mediastream -> ', this.mediaStream);
-      console.log('The viewfinder -> ', this.viewfinder);
-      console.log('The video track -> ', this.videoTrack);
-      console.log('Camera settings -> ', this.videoTrackSettings);
-      console.log('Current orientation -> ', this.currentOrientation);
-      console.log(
-        'Camera is torch capable -> ',
-        Boolean(this.capabilities.torch)
-      );
-      console.log(
-        'Camera is zoom capable -> ',
-        Boolean(this.capabilities.zoom)
-      );
-      console.log(
-        'Camera resolution -> ',
-        this.viewfinder.videoWidth +
-          'x' +
-          this.viewfinder.videoHeight +
-          '@' +
-          this.videoTrack.getSettings().frameRate +
-          'fps'
-      );
-      console.log(
-        'Viewport (CSS pixel) resolution -> ',
-        this.viewfinder.width + 'x' + this.viewfinder.height
-      );
-      console.log('Current capture -> ', this.capture);
-      console.log('Crop instructions -> ', this.cropDimensions);
-      console.log('Number of captures -> ', this._scanRetries);
-      console.log('Scanning duration ->', this._scanDuration);
-    });
+    console.log('Mediastream -> ', this.mediaStream);
+    console.log('The viewfinder -> ', this.viewfinder);
+    console.log('The video track -> ', this.videoTrack);
+    console.log('Camera settings -> ', this.videoTrackSettings);
+    console.log('Current orientation -> ', this.currentOrientation);
+    console.log(
+      'Camera is torch capable -> ',
+      Boolean(this.capabilities.torch)
+    );
+    console.log('Camera is zoom capable -> ', Boolean(this.capabilities.zoom));
+    console.log(
+      'Camera resolution -> ',
+      this.viewfinder.videoWidth +
+        'x' +
+        this.viewfinder.videoHeight +
+        '@' +
+        this.videoTrack.getSettings().frameRate +
+        'fps'
+    );
+    console.log(
+      'Viewport (CSS pixel) resolution -> ',
+      this.viewfinder.width + 'x' + this.viewfinder.height
+    );
+    console.log('Current capture -> ', this.capture);
+    console.log('Crop instructions -> ', this.cropDimensions);
+    console.log('Number of captures -> ', this._scanRetries);
+    console.log('Scanning duration ->', this._scanDuration);
   }
 
   // Prepare for a new scan by resetting the camera.

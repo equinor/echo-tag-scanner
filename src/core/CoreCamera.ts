@@ -62,13 +62,18 @@ class CoreCamera {
   static async promptCameraUsage(
     additionalCaptureOptions?: DisplayMediaStreamConstraints
   ): Promise<MediaStream> {
-    console.log(globalThis.innerWidth, globalThis.innerHeight);
+    console.info('Getting fresh mediastream');
+    console.log(
+      'Attempting to set this camera resolution -> ',
+      globalThis.innerWidth + 'x' + globalThis.innerHeight
+    );
+    console.log('Current orientation -> ', getOrientation());
     const mediaStream = await navigator.mediaDevices
       .getUserMedia({
         video: {
           /**
-           * Set the intrinsic dimensions of the <video> element (the <video>.src attribute element is later set to the resolved MediaStream)
-           * to whatever is the viewport width and height. This can be abstracted to the "camera capture resolution".
+           * Set the intrinsic dimensions of the <video> element (videoHeight and videoWidth)
+           * to whatever is the viewport width and height.
            *
            * This is needed in order to correctly crop the captures.
            * The canvas operations relies on the <video> element's intrinsic dimensions.

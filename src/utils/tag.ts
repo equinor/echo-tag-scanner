@@ -18,7 +18,7 @@ function hasContent(data: unknown) {
 async function findClosestTag(possibleTagNumber: string) {
   const result = await Search.Tags.closestTagAsync(possibleTagNumber);
   if (result.isSuccess) {
-    logger.log('Verbose', () => {
+    logger.log('Info', () => {
       console.group('Running validation for ', possibleTagNumber);
       console.info(possibleTagNumber + ' corrected to ' + result.value);
       console.groupEnd();

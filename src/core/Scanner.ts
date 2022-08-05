@@ -37,20 +37,20 @@ export class TagScanner extends Camera {
     }
 
     logger.log('Info', () => {
-      console.info('Mediastream -> ', this.mediaStream);
-      console.info('The viewfinder -> ', this.viewfinder);
-      console.info('The video track -> ', this.videoTrack);
-      console.info('Camera settings -> ', this.videoTrackSettings);
-      console.info('Current orientation -> ', this.currentOrientation);
-      console.info(
+      console.log('Mediastream -> ', this.mediaStream);
+      console.log('The viewfinder -> ', this.viewfinder);
+      console.log('The video track -> ', this.videoTrack);
+      console.log('Camera settings -> ', this.videoTrackSettings);
+      console.log('Current orientation -> ', this.currentOrientation);
+      console.log(
         'Camera is torch capable -> ',
         Boolean(this.capabilities.torch)
       );
-      console.info(
+      console.log(
         'Camera is zoom capable -> ',
         Boolean(this.capabilities.zoom)
       );
-      console.info(
+      console.log(
         'Camera resolution -> ',
         this.viewfinder.videoWidth +
           'x' +
@@ -59,14 +59,14 @@ export class TagScanner extends Camera {
           this.videoTrack.getSettings().frameRate +
           'fps'
       );
-      console.info(
+      console.log(
         'Viewport (CSS pixel) resolution -> ',
         this.viewfinder.width + 'x' + this.viewfinder.height
       );
-      console.info('Current capture -> ', this.capture);
-      console.info('Crop instructions -> ', this.cropDimensions);
-      console.info('Number of captures -> ', this._scanRetries);
-      console.info('Scanning duration ->', this._scanDuration);
+      console.log('Current capture -> ', this.capture);
+      console.log('Crop instructions -> ', this.cropDimensions);
+      console.log('Number of captures -> ', this._scanRetries);
+      console.log('Scanning duration ->', this._scanDuration);
     });
   }
 

@@ -94,28 +94,26 @@ class Camera extends Postprocessor {
   }
 
   public reportCameraFeatures() {
-    logger.log('Info', () => {
-      console.group('Starting camera');
-      console.info(
-        'Camera resolution -> ',
-        this.viewfinder.videoWidth,
-        this.viewfinder.videoHeight
-      );
-      console.info(
-        'Viewfinder dimensions -> ',
-        this.viewfinder.width,
-        this.viewfinder.height
-      );
-      console.info(
-        'Camera is capable of zooming: ',
-        Boolean(this.capabilities?.zoom)
-      );
-      console.info(
-        'Camera is capable of using the torch: ',
-        Boolean(this.capabilities?.torch)
-      );
-      console.groupEnd();
-    });
+    console.group('Starting camera');
+    console.info(
+      'Camera resolution -> ',
+      this.viewfinder.videoWidth,
+      this.viewfinder.videoHeight
+    );
+    console.info(
+      'Viewfinder dimensions -> ',
+      this.viewfinder.width,
+      this.viewfinder.height
+    );
+    console.info(
+      'Camera is capable of zooming: ',
+      Boolean(this.capabilities?.zoom)
+    );
+    console.info(
+      'Camera is capable of using the torch: ',
+      Boolean(this.capabilities?.torch)
+    );
+    console.groupEnd();
   }
 }
 

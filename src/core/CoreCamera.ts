@@ -94,11 +94,9 @@ class CoreCamera {
       .catch((error) => {
         console.error('media stream capture failed', error);
         if (error instanceof OverconstrainedError) {
-          logger.log('Error', () => {
-            console.error(
-              'Could not set camera constraints. The device/viewport dimensions should not be bigger than the resolution of the camera; or the camera is not capable of framerates over 15.'
-            );
-          });
+          console.error(
+            'Could not set camera constraints. The device/viewport dimensions should not be bigger than the resolution of the camera; or the camera is not capable of framerates over 15.'
+          );
           throw handleError(ErrorRegistry.overconstrainedError, error as Error);
         }
         throw new Error(error);

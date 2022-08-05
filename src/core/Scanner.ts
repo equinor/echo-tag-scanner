@@ -82,11 +82,9 @@ export class TagScanner extends Camera {
       const scans: Blob[] = [];
       const interval = (this._scanRetries / this._scanDuration) * 100;
       const intervalId = setInterval(async () => {
-        logger.log('Info', () => {
-          console.group('NEW SCAN STARTED');
-          console.info('crop area ->', area.width, area.height);
-          console.groupEnd();
-        });
+        console.group('NEW SCAN STARTED');
+        console.info('crop area ->', area.width, area.height);
+        console.groupEnd();
         var capture = await this.capturePhoto(area);
         if (capture.size > 50000) capture = await this.scale(0.5);
         scans.push(capture);

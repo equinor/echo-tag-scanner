@@ -43,12 +43,10 @@ class CanvasHandler {
           width: entry[0].contentRect.width,
           height: entry[0].contentRect.height
         };
-        logger.log('Info', () => {
-          console.info(
-            'device orientation changed -> ',
-            this._standardCanvasDimensions
-          );
-        });
+        console.info(
+          'device orientation changed -> ',
+          this._standardCanvasDimensions
+        );
         this.logCanvasStats();
       }
     });

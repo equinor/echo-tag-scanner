@@ -107,6 +107,10 @@ class CoreCamera {
         throw new Error(error);
       });
 
+    const t = mediaStream.getVideoTracks()[0].getSettings();
+    console.info('Post mediastream report');
+    console.log('Dimensions -> ', t.width + 'x' + t.height);
+
     return mediaStream;
   }
 

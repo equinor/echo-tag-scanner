@@ -74,10 +74,12 @@ class CoreCamera {
            * The canvas operations relies on the <video> element's intrinsic dimensions.
            */
           width: {
-            exact: globalThis.innerWidth
+            min: globalThis.innerWidth,
+            max: globalThis.innerWidth
           },
           height: {
-            exact: globalThis.innerHeight
+            min: globalThis.innerHeight,
+            max: globalThis.innerHeight
           },
 
           // Higher FPS is good for a scanning operation.

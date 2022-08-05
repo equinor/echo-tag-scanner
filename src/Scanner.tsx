@@ -23,11 +23,13 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
-  // Run a complete debug on startup.
-  logger.log('Info', () => {
-    console.info('Starting camera');
-    tagScanner.debugAll(false);
-  });
+  if (tagScanner) {
+    // Run a complete debug on startup.
+    logger.log('Info', () => {
+      console.info('Starting camera');
+      tagScanner.debugAll(false);
+    });
+  }
 
   // Controls the availability of scanning.
   // We currently have no good way of setting the initial mounted value.

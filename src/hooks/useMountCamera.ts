@@ -6,7 +6,7 @@ import { CameraProps } from '@types';
 import { assignZoomSettings } from '@utils';
 
 type CameraInfrastructure = {
-  tagScanner: TagScanner;
+  tagScanner?: TagScanner;
   setZoomInputRef: Dispatch<SetStateAction<HTMLInputElement>>;
 };
 

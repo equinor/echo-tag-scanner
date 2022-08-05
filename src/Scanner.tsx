@@ -25,10 +25,8 @@ function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
 
   if (tagScanner) {
     // Run a complete debug on startup.
-    logger.log('Info', () => {
-      console.info('Starting camera');
-      tagScanner.debugAll(false);
-    });
+    console.info('Starting camera');
+    tagScanner.debugAll(false);
   }
 
   // Controls the availability of scanning.

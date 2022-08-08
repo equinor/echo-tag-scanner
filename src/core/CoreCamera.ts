@@ -131,6 +131,7 @@ class CoreCamera {
       const newTrack = newMediastream.getVideoTracks()[0];
       const newConstraints = newTrack.getConstraints();
       await this._videoTrack.applyConstraints(newConstraints);
+      this.viewfinder.srcObject = newMediastream;
     } catch (error) {
       console.error('An error occured while refreshing stream: ', error);
       if (typeof error === 'object') console.error(error.toString());

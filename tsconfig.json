@@ -3,58 +3,59 @@
     "src"
   ],
   "compilerOptions": {
-      "target": "es5",
-      "lib": [
-        "esnext",
-        "dom",
-        "dom.iterable"
+    "target": "es5",
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
+    "allowJs": true,
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "module": "esnext",
+    "removeComments": true,
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "downlevelIteration": true,
+    "types": [
+      "@equinor/echo-scripts",
+      "@types/webpack-env",
+      "@types/node",
+      "@types/w3c-image-capture"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@components": [
+        "src/components/"
       ],
-      "allowJs": true,
-      "sourceMap": true,
-      "noImplicitAny": false,
-      "module": "esnext",
-      "removeComments": true,
-      "allowSyntheticDefaultImports": true,
-      "jsx": "react",
-      "esModuleInterop": true,
-      "resolveJsonModule": true,
-      "moduleResolution": "node",
-      "downlevelIteration": true,
-      "types": [
-        "@equinor/echo-scripts",
-        "@types/webpack-env",
-        "@types/node",
-        "@types/w3c-image-capture"
+      "@pages": [
+        "src/pages/"
       ],
-      "baseUrl": ".",
-      "paths": {
-        "@components": [
-          "src/components/"
-        ],
-        "@pages": [
-          "src/pages/"
-        ],
-        "@enums": [
-          "src/enums"
-        ],
-        "@hooks": [
-          "src/hooks"
-        ],
-        "@contexts": [
-          "src/contexts/"
-        ],
-        "@providers": [
-          "src/providers/"
-        ],
-        "@services": [
-          "src/services/"
-        ],
-        "@types": [
-          "src/types/"
-        ],
-        "@utils": [
-          "src/utils/"
-        ]
-  }
+      "@enums": [
+        "src/enums"
+      ],
+      "@hooks": [
+        "src/hooks"
+      ],
+      "@contexts": [
+        "src/contexts/"
+      ],
+      "@providers": [
+        "src/providers/"
+      ],
+      "@services": [
+        "src/services/"
+      ],
+      "@types": [
+        "src/types/"
+      ],
+      "@utils": [
+        "src/utils/"
+      ]
     }
+  }
 }

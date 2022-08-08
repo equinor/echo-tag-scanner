@@ -1,37 +1,56 @@
-import React, { useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
+
+import EchoUtils from '@equinor/echo-utils';
 
 import { ScanningArea, Viewfinder } from '@components';
 import { logger, ObjectName } from '@utils';
+import { ErrorBoundary } from '@services';
 
+import { TagScanner } from './core/Scanner';
 import { Scanner } from './Scanner';
+
+const useEffectAsync = EchoUtils.Hooks.useEffectAsync;
 
 const EchoCamera = () => {
   useEffect(() => {
     logger.moduleStarted();
   }, []);
 
+  // the media stream for out videoelement
+  const [stream, setStream] = useState<MediaStream | undefined>();
+  useEffectAsync(async () => {
+    const mediaStream = await TagScanner.promptCameraUsage();
+    setStream(mediaStream);
+  }, []);
+
   // Represets the camera viewfinder.
-  const viewfinder = useRef<HTMLVideoElement>(null);
+  const [viewfinder, setViewfinder] = useState<HTMLVideoElement>(null);
   // Used for postprocessing of captures.
-  const canvas = useRef<HTMLCanvasElement>(null);
+  const [canvas, setCanvas] = useState<HTMLCanvasElement>(null);
   // All tags within this bounding box will be scanned.
-  const scanArea = useRef<HTMLElement>(null);
+  const [scanArea, setScanArea] = useState<HTMLElement>(null);
+
+  if (!stream) {
+    return null;
+  }
 
   return (
-    <>
-      <Viewfinder canvasRef={canvas} videoRef={viewfinder} />
-      <ScanningArea captureAreaRef={scanArea} />
+    <main>
+      <ErrorBoundary stackTraceEnabled>
+        <Viewfinder canvasRef={setCanvas} videoRef={setViewfinder} />
+        <ScanningArea captureAreaRef={setScanArea} />
 
-      {viewfinder.current && canvas.current && scanArea.current && (
-        <Scanner
-          viewfinder={viewfinder.current}
-          canvas={canvas.current}
-          scanArea={scanArea.current}
-        />
-      )}
-    </>
+        {viewfinder && canvas && scanArea && (
+          <Scanner
+            stream={stream}
+            viewfinder={viewfinder}
+            canvas={canvas}
+            scanArea={scanArea}
+          />
+        )}
+      </ErrorBoundary>
+    </main>
   );
 };
 
-export { EchoCamera };
-export default EchoCamera;
+export default memo(EchoCamera);

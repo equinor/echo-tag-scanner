@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { CaptureAndTorch, SearchResults, ZoomSlider } from '@components';
@@ -11,23 +11,32 @@ import {
 } from '@utils';
 
 interface ScannerProps {
+  stream: MediaStream;
   viewfinder: HTMLVideoElement;
   canvas: HTMLCanvasElement;
   scanArea: HTMLElement;
 }
-function Scanner({ viewfinder, canvas, scanArea }: ScannerProps) {
+function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   const [validatedTags, setValidatedTags] = useState<
     TagSummaryDto[] | undefined
   >(undefined);
-  const { tagScanner, setZoomInputRef } = useMountScanner(viewfinder, canvas);
+  const { tagScanner, setZoomInputRef } = useMountScanner(
+    viewfinder,
+    canvas,
+    stream
+  );
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
-  if (tagScanner) {
-    // Run a complete debug on startup.
-    console.info('Starting camera');
-    tagScanner.debugAll(false);
-  }
+  useEffect(() => {
+    if (tagScanner) {
+      // Run a complete debug on startup.
+      console.info('Starting camera');
+      tagScanner.debugAll(false);
+    }
+  }, [tagScanner]);
+
+  console.log('ViewFinder', tagScanner?.viewfinder.videoHeight);
 
   // Controls the availability of scanning.
   // We currently have no good way of setting the initial mounted value.

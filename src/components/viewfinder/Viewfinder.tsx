@@ -1,14 +1,17 @@
 import React, {
   VideoHTMLAttributes,
   CanvasHTMLAttributes,
-  RefObject
+  RefObject,
+  SetStateAction,
+  useState
 } from 'react';
 import styled from 'styled-components';
 
 import { useScanningAreaDimensions } from './viewFinderUtils';
+
 interface ViewfinderProps {
-  canvasRef: RefObject<HTMLCanvasElement>;
-  videoRef: RefObject<HTMLVideoElement>;
+  canvasRef: React.Dispatch<SetStateAction<HTMLCanvasElement>>;
+  videoRef: React.Dispatch<SetStateAction<HTMLVideoElement>>;
   canvasOptions?: CanvasHTMLAttributes<HTMLCanvasElement>;
   videoOptions?: VideoHTMLAttributes<HTMLVideoElement>;
 }

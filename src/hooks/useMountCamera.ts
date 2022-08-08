@@ -13,20 +13,20 @@ type CameraInfrastructure = {
 const { useEffectAsync } = EchoUtils.Hooks;
 export function useMountScanner(
   viewfinder: HTMLVideoElement,
-  canvas: HTMLCanvasElement
+  canvas: HTMLCanvasElement,
+  stream: MediaStream
 ): CameraInfrastructure {
   // Zoom controls. Currently only Android.
   const [zoomRef, setZoomInputRef] = useState<HTMLInputElement>(null);
   const [tagScanner, setCamera] = useState<TagScanner | undefined>(undefined);
 
   useEffectAsync(async (signal) => {
-    const mediaStream = await TagScanner.promptCameraUsage();
-
     const props: CameraProps = {
-      mediaStream,
+      mediaStream: stream,
       viewfinder,
       canvas
     };
+
     const camera = new TagScanner(props);
 
     if (!signal.aborted) {

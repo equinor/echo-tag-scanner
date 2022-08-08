@@ -1,10 +1,10 @@
-import React, { RefObject } from 'react';
+import React, { RefObject, SetStateAction } from 'react';
 import styled from 'styled-components';
 
 import { Dimensions, useScanningAreaDimensions } from './viewFinderUtils';
 
 interface ScanningAreaProps {
-  captureAreaRef: RefObject<HTMLElement>;
+  captureAreaRef: React.Dispatch<SetStateAction<HTMLElement>>;
 }
 
 const ScanningArea = (props: ScanningAreaProps): JSX.Element => {

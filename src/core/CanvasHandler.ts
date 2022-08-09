@@ -92,6 +92,7 @@ class CanvasHandler {
 
     this.clearCanvas();
     drawImage();
+    console.log('DRAW IMAGE INPUTS:', image, params);
     return this.getBlob(1, 'image/jpeg');
   }
 
@@ -126,6 +127,12 @@ class CanvasHandler {
       if ((typeof quality === 'number' && quality < 0) || Number(quality) > 1) {
         reject('Quality must be between 0 and 1, got ' + quality + '.');
       }
+
+      console.log(
+        'CANVAS WIDTH/HEIGHT in GETBLOB: ',
+        this._canvas.width,
+        this._canvas.height
+      );
 
       this._canvas.toBlob(
         (blobbedDrawing) => {

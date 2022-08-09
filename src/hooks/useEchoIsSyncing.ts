@@ -1,39 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-import { EchoEnv, eventHub } from '@equinor/echo-core';
-import EchoUtils from '@equinor/echo-utils';
-import { logger } from '@utils';
+import { Syncer } from '@equinor/echo-search';
 
 function useEchoIsSyncing() {
-  const [tagSyncIsDone, setTagSyncIsDone] = useState(false);
-  EchoUtils.Hooks.useEffectAsync(async (signal) => {
-    // When Echo is done syncing, we can rerender and open for scanning.
-    const unsubscribe = eventHub.subscribe(
-      'isSyncing',
-      (isSyncing: boolean) => {
-        logger.log('Info', () => console.log('Echo is syncing: ', isSyncing));
-        if (signal.aborted) return;
+  const [progress, setProgress] = useState<number>(0);
 
-        if (!isSyncing) {
-          logger.log('Info', () => console.log('Echo is syncing: ', isSyncing));
-          setTagSyncIsDone(true);
-        }
+  useEffect(() => {
+    const offlineSystem = Syncer.OfflineSystem.Tags;
+    const unsubscribeFunction = Syncer.syncStates
+      .getSyncStateBy(offlineSystem)
+      .progressPercentage.subscribe((currentProgress) => {
+        setProgress(currentProgress);
+      });
+
+    return () => {
+      if (unsubscribeFunction) {
+        unsubscribeFunction();
       }
-    );
-
-    // Since we do not have tag syncing in development, this will mimick an interval where Echopedia is syncing.
-    if (EchoEnv.isDevelopment()) {
-      const syncDelayMs = 2000;
-      setTimeout(() => {
-        if (signal.aborted) return;
-        setTagSyncIsDone(true);
-      }, syncDelayMs);
-    }
-
-    return () => unsubscribe();
+    };
   }, []);
 
-  return tagSyncIsDone;
+  console.log('Current progress -> ', progress);
+  return progress === 100;
 }
 
 export { useEchoIsSyncing };

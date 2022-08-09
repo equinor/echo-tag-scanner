@@ -58,39 +58,19 @@ class Camera extends Postprocessor {
   /**
    * Captures a photo, and stores it as a drawing on the postprocessing canvas.
    */
-  protected async capturePhoto(
-    captureArea: DOMRect
-  ): Promise<Blob | undefined> {
+  protected async capturePhoto(captureArea: DOMRect): Promise<Blob> {
     this.canvasHandler.clearCanvas();
-    const settings = this.videoTrack?.getSettings();
-
-    if (settings) {
-      if (
-        typeof settings.height === 'number' &&
-        typeof settings.width === 'number'
-      ) {
-        const params: DrawImageParameters = {
-          sx: captureArea.x,
-          sy: captureArea.y,
-          sHeight: captureArea.height,
-          sWidth: captureArea.width,
-          dx: 0,
-          dy: 0,
-          dHeight: captureArea.height,
-          dWidth: captureArea.width
-        };
-        var captureBlob = await this._canvasHandler.draw(
-          this.viewfinder,
-          params
-        );
-      }
-    } else {
-      throw new Error(
-        'The camera was not able to do an initial capture because of missing settings.'
-      );
-    }
-
-    return captureBlob;
+    const params: DrawImageParameters = {
+      sx: captureArea.x,
+      sy: captureArea.y,
+      sHeight: captureArea.height,
+      sWidth: captureArea.width,
+      dx: 0,
+      dy: 0,
+      dHeight: captureArea.height,
+      dWidth: captureArea.width
+    };
+    return await this._canvasHandler.draw(this.viewfinder, params);
   }
 
   public reportCameraFeatures() {

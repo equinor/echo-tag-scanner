@@ -26,8 +26,8 @@ export class TagScanner extends Camera {
   }
 
   public async debugAll(previewCapture = false) {
-    if (previewCapture) {
-      const scanArea = document.getElementById('scan-area');
+    const scanArea = document.getElementById('scan-area');
+    if (previewCapture && scanArea) {
       var capture = await this.capturePhoto(scanArea.getBoundingClientRect());
       const obUrl = URL.createObjectURL(capture);
       const link = document.createElement('a');
@@ -43,24 +43,22 @@ export class TagScanner extends Camera {
     console.log('Current orientation -> ', this.currentOrientation);
     console.log(
       'Camera is torch capable -> ',
-      Boolean(this.capabilities.torch)
+      Boolean(this.capabilities?.torch)
     );
-    console.log('Camera is zoom capable -> ', Boolean(this.capabilities.zoom));
+    console.log('Camera is zoom capable -> ', Boolean(this.capabilities?.zoom));
     console.log(
       'Camera resolution -> ',
       this.viewfinder.videoWidth +
         'x' +
         this.viewfinder.videoHeight +
         '@' +
-        this.videoTrack.getSettings().frameRate +
+        this.videoTrack?.getSettings().frameRate +
         'fps'
     );
     console.log(
       'Viewport (CSS pixel) resolution -> ',
       this.viewfinder.width + 'x' + this.viewfinder.height
     );
-    console.log('Current capture -> ', this.capture);
-    console.log('Crop instructions -> ', this.cropDimensions);
     console.log('Number of captures -> ', this._scanRetries);
     console.log('Scanning duration ->', this._scanDuration);
   }
@@ -85,7 +83,7 @@ export class TagScanner extends Camera {
         console.group('NEW SCAN STARTED');
         console.info('crop area ->', area.width, area.height);
         console.groupEnd();
-        var capture = await this.capturePhoto(area);
+        let capture = await this.capturePhoto(area);
         if (capture.size > 50000) capture = await this.scale(0.5);
         scans.push(capture);
 

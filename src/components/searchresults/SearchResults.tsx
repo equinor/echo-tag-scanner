@@ -14,7 +14,7 @@ interface SearchResultsProps {
   onClose: () => void;
 }
 
-const SearchResults = (props: SearchResultsProps): JSX.Element => {
+const SearchResults = (props: SearchResultsProps): JSX.Element | null => {
   // Log new tag summaries as they arrive.
   useEffect(() => {
     function logTagSummaries() {
@@ -29,7 +29,7 @@ const SearchResults = (props: SearchResultsProps): JSX.Element => {
       }
     }
 
-    EchoEnv.isDevelopment && logTagSummaries();
+    EchoEnv.isDevelopment() && logTagSummaries();
   }, [props.tagSummary]);
 
   function createSearchResult(tag: TagSummaryDto, index: number) {

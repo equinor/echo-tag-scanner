@@ -10,8 +10,8 @@ import styled from 'styled-components';
 import { useScanningAreaDimensions } from './viewFinderUtils';
 
 interface ViewfinderProps {
-  canvasRef: React.Dispatch<SetStateAction<HTMLCanvasElement>>;
-  videoRef: React.Dispatch<SetStateAction<HTMLVideoElement>>;
+  canvasRef: React.Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
+  videoRef: React.Dispatch<SetStateAction<HTMLVideoElement | undefined>>;
   canvasOptions?: CanvasHTMLAttributes<HTMLCanvasElement>;
   videoOptions?: VideoHTMLAttributes<HTMLVideoElement>;
 }
@@ -23,7 +23,7 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
     <>
       <ViewFinder
         playsInline // needed for the viewfinder to work in Safari
-        ref={props.videoRef}
+        ref={(el: HTMLVideoElement) => props.videoRef(el)}
         autoPlay
         disablePictureInPicture
         controls={false}
@@ -32,7 +32,7 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         {...props.videoOptions}
       />
       <Canvas
-        ref={props.canvasRef}
+        ref={(el: HTMLCanvasElement) => props.canvasRef(el)}
         width={dimensions.width}
         height={dimensions.height}
         {...props.canvasOptions}

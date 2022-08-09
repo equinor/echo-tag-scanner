@@ -3,13 +3,16 @@ import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { logger } from './logger';
 
 function hasContent(data: unknown) {
-  if (typeof data === 'string' || typeof data === 'number') {
-    return data != null;
-  } else if (Array.isArray(data)) {
-    return data.length > 0;
-  } else if (typeof data === 'object') {
-    return Reflect.ownKeys(data).length > 0;
+  if (data != null) {
+    if (typeof data === 'string' || typeof data === 'number') {
+      return data != null;
+    } else if (Array.isArray(data)) {
+      return data.length > 0;
+    } else if (typeof data === 'object') {
+      return Reflect.ownKeys(data).length > 0;
+    }
   }
+  return false;
 }
 
 /**
@@ -30,9 +33,16 @@ async function findClosestTag(possibleTagNumber: string) {
 /**
  * Accepts a validated tag and fetches its tag summary locally.
  */
-async function getTagSummary(validationResult: string) {
-  const result = await Search.Tags.getAsync(validationResult);
-  if (result.isSuccess && hasContent(result.value)) return result.value;
+async function getTagSummary(validationResult: string): Promise<TagSummaryDto> {
+  return new Promise((resolve, reject) => {
+    Search.Tags.getAsync(validationResult).then((result) => {
+      if (result.isSuccess && result.value != null) {
+        resolve(result.value);
+      } else {
+        reject(result.value);
+      }
+    });
+  });
 }
 
 /**
@@ -41,8 +51,12 @@ async function getTagSummary(validationResult: string) {
 async function createTagValidator(
   possibleTagNumber: string
 ): Promise<TagSummaryDto> {
-  const closestTagMatch = await findClosestTag(possibleTagNumber);
-  return await getTagSummary(closestTagMatch);
+  return new Promise((resolve, reject) => {
+    findClosestTag(possibleTagNumber).then((closestTagMatch) => {
+      if (closestTagMatch) resolve(getTagSummary(closestTagMatch));
+      else reject(closestTagMatch);
+    });
+  });
 }
 
 /**
@@ -58,11 +72,10 @@ export async function runTagValidation(
   const tagValidationResults = await Promise.allSettled([
     ...tagValidationTasks
   ]);
+  const unwrapped: TagSummaryDto[] = [];
+  tagValidationResults.forEach((res) => {
+    if (res.status === 'fulfilled') unwrapped.push(res.value);
+  });
 
-  // Filter away rejected promises and return the validated tags.
-  return tagValidationResults
-    .map((result) => {
-      if (result.status === 'fulfilled') return result.value;
-    })
-    .filter((result) => Boolean(result));
+  return unwrapped;
 }

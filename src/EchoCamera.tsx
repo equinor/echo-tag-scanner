@@ -18,17 +18,18 @@ const EchoCamera = () => {
 
   // the media stream for out videoelement
   const [stream, setStream] = useState<MediaStream | undefined>();
+  console.log('STREAM', stream);
   useEffectAsync(async () => {
     const mediaStream = await TagScanner.promptCameraUsage();
     setStream(mediaStream);
   }, []);
 
   // Represets the camera viewfinder.
-  const [viewfinder, setViewfinder] = useState<HTMLVideoElement>(null);
+  const [viewfinder, setViewfinder] = useState<HTMLVideoElement>();
   // Used for postprocessing of captures.
-  const [canvas, setCanvas] = useState<HTMLCanvasElement>(null);
+  const [canvas, setCanvas] = useState<HTMLCanvasElement>();
   // All tags within this bounding box will be scanned.
-  const [scanArea, setScanArea] = useState<HTMLElement>(null);
+  const [scanArea, setScanArea] = useState<HTMLElement>();
 
   if (!stream) {
     return null;

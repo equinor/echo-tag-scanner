@@ -4,18 +4,12 @@ import { CameraProps, DrawImageParameters } from '@types';
 import { CanvasHandler } from './CanvasHandler';
 import { CoreCamera } from './CoreCamera';
 
-type CropInstructions = {
-  width: number;
-  height: number;
-};
-
 /**
  * This object is concerned with the altering of captures done with the camera.
  */
 class Postprocessor extends CoreCamera {
   protected _capture?: Blob;
   protected _canvas: HTMLCanvasElement;
-  private _cropDimensions: CropInstructions;
   protected _canvasHandler: CanvasHandler;
 
   constructor(props: CameraProps) {
@@ -24,20 +18,16 @@ class Postprocessor extends CoreCamera {
     this._canvasHandler = new CanvasHandler({ canvas: props.canvas });
   }
 
-  protected get capture() {
+  protected get capture(): Blob | undefined {
     return this._capture;
   }
 
-  protected set capture(capture: Blob) {
+  protected set capture(capture: Blob | undefined) {
     this._capture = capture;
   }
 
   protected get canvasHandler() {
     return this._canvasHandler;
-  }
-
-  public get cropDimensions() {
-    return this._cropDimensions;
   }
 
   /**
@@ -78,7 +68,16 @@ class Postprocessor extends CoreCamera {
       imgData.data[i + 3] = 255;
     }
 
-    const bwImgBlob = await this._canvasHandler.draw(imgData, { dx: 0, dy: 0 });
+    const bwImgBlob = await this._canvasHandler.draw(imgData, {
+      dx: 0,
+      dy: 0,
+      sx: 0,
+      sy: 0,
+      sWidth: 0,
+      sHeight: 0,
+      dWidth: 0,
+      dHeight: 0
+    });
     return bwImgBlob;
   }
 
@@ -103,7 +102,13 @@ class Postprocessor extends CoreCamera {
     }
     const grayscaleImgBlob = await this._canvasHandler.draw(imgData, {
       dx: 0,
-      dy: 0
+      dy: 0,
+      sx: 0,
+      sy: 0,
+      sWidth: 0,
+      sHeight: 0,
+      dWidth: 0,
+      dHeight: 0
     });
 
     return grayscaleImgBlob;

@@ -39,12 +39,11 @@ function reportTimeTakenForRequest(startDate: Date, endDate: Date) {
 function parseResponse(
   response: ComputerVisionResponse
 ): ParsedComputerVisionResponse {
-  const possibleTagNumbers = [];
+  const possibleTagNumbers: string[] = [];
   response.regions.forEach((region) =>
     region.lines.forEach((line) =>
       line.words.forEach((word) => {
-        if (word.text && word.text.length >= 7) {
-          // TODO: Improve regexp to include filter everything expect "-", alphanumerics, and aA-zZ.
+        if (word.text && word.text.length >= 5) {
           possibleTagNumbers.push(word.text.replaceAll(/[\(\)']+/g, ''));
         }
       })

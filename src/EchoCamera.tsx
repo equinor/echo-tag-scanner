@@ -18,7 +18,6 @@ const EchoCamera = () => {
 
   // the media stream for out videoelement
   const [stream, setStream] = useState<MediaStream | undefined>();
-  console.log('STREAM', stream);
   useEffectAsync(async () => {
     const mediaStream = await TagScanner.promptCameraUsage();
     setStream(mediaStream);

@@ -11,7 +11,7 @@
     "fileUri": "https://echocamera-dev.equinor.com/index.js",
     "devFileUri": "https://echocamera-dev.equinor.com/index.js",
     "qaFileUri": "https://echocamera-dev.equinor.com/index.js",
-    "testFileUri": "https://red-hill-093221b03.1.azurestaticapps.net/index.js"
+    "testFileUri": "https://echocamera-dev.equinor.com/index.js"
   },
   "server": {
     "contentBase": "/build",

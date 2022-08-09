@@ -7,7 +7,7 @@ import { assignZoomSettings } from '@utils';
 
 type CameraInfrastructure = {
   tagScanner?: TagScanner;
-  setZoomInputRef: Dispatch<SetStateAction<HTMLInputElement>>;
+  setZoomInputRef: Dispatch<SetStateAction<HTMLInputElement | undefined>>;
 };
 
 const { useEffectAsync } = EchoUtils.Hooks;
@@ -17,7 +17,7 @@ export function useMountScanner(
   stream: MediaStream
 ): CameraInfrastructure {
   // Zoom controls. Currently only Android.
-  const [zoomRef, setZoomInputRef] = useState<HTMLInputElement>(null);
+  const [zoomRef, setZoomInputRef] = useState<HTMLInputElement>();
   const [tagScanner, setCamera] = useState<TagScanner | undefined>(undefined);
 
   useEffectAsync(async (signal) => {
@@ -41,7 +41,7 @@ export function useMountScanner(
   // Handling zoom assignments
   useEffect(() => {
     if (!tagScanner) return;
-    if (zoomRef === null) return;
+    if (zoomRef == null) return;
 
     // Setup the zoom slider with the min, max and step values.
     zoomRef.min = assignZoomSettings('min', tagScanner);

@@ -56,7 +56,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   }
 
   function handleNoTagsFound() {
-    tagScanner.resumeViewfinder();
+    tagScanner?.resumeViewfinder();
     setValidatedTags([]);
   }
 
@@ -76,26 +76,31 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
 
     const start = new Date();
     // Capture image.
-    let scans = await tagScanner.scan(scanArea.getBoundingClientRect());
-    // Run OCR and validation to get possible tag numbers.
-    const validatedTags = await tagScanner.ocr(scans);
-    const end = new Date();
+    let scans = await tagScanner?.scan(scanArea.getBoundingClientRect());
 
-    const seconds = (start.getTime() - end.getTime()) / 1000;
-    const found = validatedTags.length;
-    logger.doneScanning({ seconds, found });
+    if (scans) {
+      // Run OCR and validation to get possible tag numbers.
+      const validatedTags = await tagScanner?.ocr(scans);
+      const end = new Date();
 
-    // Put the validated tags in state.
-    changeTagScanStatus('scanning', false);
+      const seconds = (start.getTime() - end.getTime()) / 1000;
+      const found = validatedTags?.length ?? 0;
+      logger.doneScanning({ seconds, found });
 
-    if (validatedTags.length === 0) {
-      dispatchNotification({
-        message: 'No tags detected.',
-        autohideDuration: 2000
-      })();
-    } else {
       // Put the validated tags in state.
-      presentValidatedTags(validatedTags);
+      changeTagScanStatus('scanning', false);
+
+      if (Array.isArray(validatedTags) && validatedTags?.length === 0) {
+        dispatchNotification({
+          message: 'No tags detected.',
+          autohideDuration: 2000
+        })();
+      } else {
+        if (validatedTags) {
+          // Put the validated tags in state.
+          presentValidatedTags(validatedTags);
+        }
+      }
     }
   };
 
@@ -117,7 +122,9 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
               onScanning={onScanning}
               isDisabled={!tagSyncIsDone}
               isScanning={tagScanStatus.scanning}
-              supportedFeatures={{ torch: tagScanner?.capabilities?.torch }}
+              supportedFeatures={{
+                torch: Boolean(tagScanner?.capabilities?.torch)
+              }}
               onDebug={tagScanner.debugAll.bind(tagScanner, true)}
             />
           </>
@@ -131,7 +138,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
             onTagSearch={tagSearch}
             onClose={() => {
               tagScanner
-                .prepareNewScan()
+                ?.prepareNewScan()
                 .then(() => setValidatedTags(undefined));
             }}
           />

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Dimensions, useScanningAreaDimensions } from './viewFinderUtils';
 
 interface ScanningAreaProps {
-  captureAreaRef: React.Dispatch<SetStateAction<HTMLElement>>;
+  captureAreaRef: React.Dispatch<SetStateAction<HTMLElement | undefined>>;
 }
 
 const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
@@ -13,7 +13,7 @@ const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
   return (
     <SvgContainer
       id="scan-area"
-      ref={props.captureAreaRef}
+      ref={(el: HTMLElement) => props.captureAreaRef(el)}
       dimensions={dimensions}
     />
   );

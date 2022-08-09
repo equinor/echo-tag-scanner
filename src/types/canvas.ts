@@ -1,12 +1,12 @@
 export type DrawImageParameters = {
-  sx?: number;
-  sy?: number;
-  sWidth?: number;
-  sHeight?: number;
-  dx?: number;
-  dy?: number;
-  dWidth?: number;
-  dHeight?: number;
+  sx: number;
+  sy: number;
+  sWidth: number;
+  sHeight: number;
+  dx: number;
+  dy: number;
+  dWidth: number;
+  dHeight: number;
 };
 
 export type CanvasDimensions = {

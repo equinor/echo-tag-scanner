@@ -11,7 +11,7 @@ import {
  */
 class CanvasHandler {
   private _canvas: HTMLCanvasElement;
-  protected _canvasContext: CanvasRenderingContext2D;
+  protected _canvasContext: CanvasRenderingContext2D | null;
   private _standardCanvasDimensions: CanvasDimensions;
   private _currentOrientation: 'landscape' | 'portrait';
 
@@ -69,12 +69,12 @@ class CanvasHandler {
     params: DrawImageParameters
   ): Promise<Blob> {
     //--------------
-    function drawImage() {
+    const drawImage = () => {
       // Before drawing, set the canvas dimensions to be equal to whatever is being drawn.
-      this._canvas.width = params.dWidth;
-      this._canvas.height = params.dHeight;
+      this._canvas.width = params.dWidth ?? 0;
+      this._canvas.height = params.dHeight ?? 0;
       if (!(image instanceof ImageData)) {
-        this._canvasContext.drawImage(
+        this._canvasContext?.drawImage(
           image,
           params.sx,
           params.sy,
@@ -86,13 +86,13 @@ class CanvasHandler {
           params.dHeight
         );
       } else {
-        this._canvasContext.putImageData(image, params.dx, params.dy);
+        this._canvasContext?.putImageData(image, params.dx, params.dy);
       }
-    }
+    };
 
     this.clearCanvas();
-    drawImage.call(this);
-    return await this.getBlob(1, 'image/jpeg');
+    drawImage();
+    return this.getBlob(1, 'image/jpeg');
   }
 
   /**
@@ -103,13 +103,17 @@ class CanvasHandler {
     sh?: number,
     settings?: ImageDataSettings
   ): ImageData {
-    return this._canvasContext.getImageData(
+    const imageData = this._canvasContext?.getImageData(
       0,
       0,
       sw ?? this._standardCanvasDimensions.width,
       sh ?? this._standardCanvasDimensions.height,
       settings
     );
+
+    if (imageData) {
+      return imageData;
+    } else throw new Error('Failed to get imagedata from the canvas');
   }
 
   /**
@@ -117,18 +121,16 @@ class CanvasHandler {
    * @param quality {number|undefined} A number between 0 and 1 indicating the image quality.
    * @param mimeType {string|undefined} A valid mime type.
    */
-  public getBlob(
-    quality?: number,
-    mimeType?: AllowedMimeTypes
-  ): Promise<Blob | null> {
+  public getBlob(quality?: number, mimeType?: AllowedMimeTypes): Promise<Blob> {
     return new Promise((resolve, reject) => {
-      if ((typeof quality === 'number' && quality < 0) || quality > 1) {
+      if ((typeof quality === 'number' && quality < 0) || Number(quality) > 1) {
         reject('Quality must be between 0 and 1, got ' + quality + '.');
       }
 
       this._canvas.toBlob(
-        (blobbedDrawing?: Blob) => {
-          resolve(blobbedDrawing);
+        (blobbedDrawing) => {
+          if (blobbedDrawing) resolve(blobbedDrawing);
+          else reject('Could not get a blob from the canvas.');
         },
         mimeType,
         quality
@@ -140,13 +142,13 @@ class CanvasHandler {
    * Erases and resets the canvas.
    */
   public clearCanvas(): void {
-    this._canvasContext.clearRect(
+    this._canvasContext?.clearRect(
       0,
       0,
       this._canvas.width,
       this._canvas.height
     );
-    this._canvasContext.beginPath();
+    this._canvasContext?.beginPath();
   }
 
   public logCanvasStats() {

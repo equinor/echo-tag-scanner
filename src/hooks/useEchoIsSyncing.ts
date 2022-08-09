@@ -22,7 +22,7 @@ function useEchoIsSyncing() {
     );
 
     // Since we do not have tag syncing in development, this will mimick an interval where Echopedia is syncing.
-    if (EchoEnv.isDevelopment) {
+    if (EchoEnv.isDevelopment()) {
       const syncDelayMs = 2000;
       setTimeout(() => {
         if (signal.aborted) return;

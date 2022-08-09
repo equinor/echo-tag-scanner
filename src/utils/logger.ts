@@ -78,7 +78,7 @@ class BaseLogger {
     const modulePath = echomodule.manifest.path;
 
     // We only log things when module path matches our module
-    if (!location.pathname.includes(modulePath)) return;
+    if (!location.pathname.includes(modulePath)) return 0;
 
     if (this._logLevelOverride) {
       return this._logLevelOverride;

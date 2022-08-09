@@ -35,7 +35,7 @@ const NotificationHandler: FC = () => {
   }
 
   function isCustomDetail(event: unknown): event is CustomEventDetail {
-    if (typeof event === 'object') {
+    if (event != null && typeof event === 'object') {
       return (
         Reflect.has(event, 'autohideDuration') && Reflect.has(event, 'message')
       );

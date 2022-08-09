@@ -4,11 +4,22 @@ import EchoUtils from '@equinor/echo-utils';
 import { TagScanner } from '../core/Scanner';
 import { CameraProps } from '@types';
 import { assignZoomSettings } from '@utils';
+import { Search } from '@equinor/echo-search';
 
 type CameraInfrastructure = {
   tagScanner?: TagScanner;
   setZoomInputRef: Dispatch<SetStateAction<HTMLInputElement | undefined>>;
+  tagsAreSynced: boolean;
 };
+
+async function getTagSyncStatus(): Promise<boolean> {
+  const status = await Search.Tags.isInMemoryReadyAsync();
+  console.log('is done?', status.value);
+  if (status.isSuccess) {
+    return Boolean(status.value);
+  }
+  return false;
+}
 
 const { useEffectAsync } = EchoUtils.Hooks;
 export function useMountScanner(
@@ -19,6 +30,7 @@ export function useMountScanner(
   // Zoom controls. Currently only Android.
   const [zoomRef, setZoomInputRef] = useState<HTMLInputElement>();
   const [tagScanner, setCamera] = useState<TagScanner | undefined>(undefined);
+  const [tagsAreSynced, setTagsAreSynced] = useState(false);
 
   useEffectAsync(async (signal) => {
     const props: CameraProps = {
@@ -31,6 +43,7 @@ export function useMountScanner(
 
     if (!signal.aborted) {
       setCamera(camera);
+      setTagsAreSynced(await getTagSyncStatus());
     }
 
     return () => {
@@ -63,6 +76,7 @@ export function useMountScanner(
 
   return {
     tagScanner,
-    setZoomInputRef
+    setZoomInputRef,
+    tagsAreSynced
   };
 }

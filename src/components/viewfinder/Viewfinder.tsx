@@ -49,6 +49,13 @@ const ViewFinder = styled.video`
   object-fit: cover;
 `;
 
-const Canvas = styled.canvas``;
+const Canvas = styled.canvas`
+  // Centering of absolutely placed elements
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  //-------//
+`;
 
 export { Viewfinder };

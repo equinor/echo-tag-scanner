@@ -75,21 +75,24 @@ class CanvasHandler {
     this._canvas.width = params.dWidth ?? 0;
     this._canvas.height = params.dHeight ?? 0;
 
-    console.log('DRAWIMAGE: ', params);
-
     if (image instanceof ImageData) {
       this._canvasContext?.putImageData(image, params.dx, params.dy);
     } else {
       this._canvasContext?.drawImage(
         image,
-        params.sx,
-        params.sy,
-        params.sWidth,
-        params.sHeight,
-        params.dx,
-        params.dy,
-        params.dWidth,
-        params.dHeight
+        0,
+        0,
+        this._canvas.width,
+        this._canvas.height
+      );
+
+      console.log(
+        this._canvasContext?.getImageData(
+          0,
+          0,
+          this._canvas.width,
+          this._canvas.height
+        )
       );
     }
 

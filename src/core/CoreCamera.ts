@@ -72,14 +72,14 @@ class CoreCamera {
            * This is needed in order to correctly crop the captures.
            * The canvas operations relies on the <video> element's intrinsic dimensions.
            */
-          width: {
-            min: globalThis.innerWidth,
-            max: globalThis.innerWidth
-          },
-          height: {
-            min: globalThis.innerHeight,
-            max: globalThis.innerHeight
-          },
+          // width: {
+          //   min: globalThis.innerWidth,
+          //   max: globalThis.innerWidth
+          // },
+          // height: {
+          //   min: globalThis.innerHeight,
+          //   max: globalThis.innerHeight
+          // },
 
           // Higher FPS is good for a scanning operation.
           frameRate: {

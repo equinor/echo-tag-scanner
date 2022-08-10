@@ -71,7 +71,6 @@ class Camera extends Postprocessor {
       dHeight: captureArea.height,
       dWidth: captureArea.width
     };
-    console.log('Capture Area params: ', captureArea, params);
     return this._canvasHandler.draw(this.viewfinder, params);
   }
 

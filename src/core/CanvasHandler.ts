@@ -69,32 +69,36 @@ class CanvasHandler {
     params: DrawImageParameters
   ): Promise<Blob> {
     //--------------
-    const drawImage = () => {
-      // Before drawing, set the canvas dimensions to be equal to whatever is being drawn.
-      this._canvas.width = params.dWidth ?? 0;
-      this._canvas.height = params.dHeight ?? 0;
-
-      console.log("This is what we're drawing on canvas: ", image, params);
-      if (!(image instanceof ImageData)) {
-        this._canvasContext?.drawImage(
-          image,
-          params.sx,
-          params.sy,
-          params.sWidth,
-          params.sHeight,
-          params.dx,
-          params.dy,
-          params.dWidth,
-          params.dHeight
-        );
-      } else {
-        this._canvasContext?.putImageData(image, params.dx, params.dy);
-      }
-    };
-
     this.clearCanvas();
-    drawImage();
-    console.log('DRAW IMAGE INPUTS:', image, params);
+
+    // Before drawing, set the canvas dimensions to be equal to whatever is being drawn.
+    this._canvas.width = params.dWidth ?? 0;
+    this._canvas.height = params.dHeight ?? 0;
+
+    console.log(
+      "This is what we're drawing on canvas: ",
+      image,
+      params,
+      this._canvas,
+      this._canvasContext
+    );
+
+    if (!(image instanceof ImageData)) {
+      this._canvasContext?.drawImage(
+        image,
+        params.sx,
+        params.sy,
+        params.sWidth,
+        params.sHeight,
+        params.dx,
+        params.dy,
+        params.dWidth,
+        params.dHeight
+      );
+    } else {
+      this._canvasContext?.putImageData(image, params.dx, params.dy);
+    }
+
     return this.getBlob(1, 'image/jpeg');
   }
 
@@ -129,12 +133,6 @@ class CanvasHandler {
       if ((typeof quality === 'number' && quality < 0) || Number(quality) > 1) {
         reject('Quality must be between 0 and 1, got ' + quality + '.');
       }
-
-      console.log(
-        'CANVAS WIDTH/HEIGHT in GETBLOB: ',
-        this._canvas.width,
-        this._canvas.height
-      );
 
       this._canvas.toBlob((blobbedDrawing) => {
         if (blobbedDrawing) resolve(blobbedDrawing);

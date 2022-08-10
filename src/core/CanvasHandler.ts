@@ -73,6 +73,8 @@ class CanvasHandler {
       // Before drawing, set the canvas dimensions to be equal to whatever is being drawn.
       this._canvas.width = params.dWidth ?? 0;
       this._canvas.height = params.dHeight ?? 0;
+
+      console.log("This is what we're drawing on canvas: ", image, params);
       if (!(image instanceof ImageData)) {
         this._canvasContext?.drawImage(
           image,

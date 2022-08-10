@@ -75,16 +75,11 @@ class CanvasHandler {
     this._canvas.width = params.dWidth ?? 0;
     this._canvas.height = params.dHeight ?? 0;
 
-    console.log(
-      "This is what we're drawing on canvas: ",
-      image,
-      params,
-      this._canvas,
-      this._canvasContext
-    );
-
-    if (!(image instanceof ImageData)) {
-      this._canvasContext?.drawImage(
+    if (image instanceof ImageData) {
+      this._canvasContext?.putImageData(image, params.dx, params.dy);
+    } else {
+      const ctx = this.canvas.getContext('2d');
+      ctx?.drawImage(
         image,
         params.sx,
         params.sy,
@@ -95,8 +90,6 @@ class CanvasHandler {
         params.dWidth,
         params.dHeight
       );
-    } else {
-      this._canvasContext?.putImageData(image, params.dx, params.dy);
     }
 
     return this.getBlob(1, 'image/jpeg');

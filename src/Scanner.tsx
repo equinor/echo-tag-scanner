@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { TagSummaryDto } from '@equinor/echo-search';
+import { Syncer, TagSummaryDto } from '@equinor/echo-search';
 import { CaptureAndTorch, SearchResults, ZoomSlider } from '@components';
 import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
@@ -9,6 +9,7 @@ import {
   getNotificationDispatcher as dispatchNotification,
   logger
 } from '@utils';
+import { EchoEnv } from '@equinor/echo-core';
 
 interface ScannerProps {
   stream: MediaStream;
@@ -16,11 +17,22 @@ interface ScannerProps {
   canvas: HTMLCanvasElement;
   scanArea: HTMLElement;
 }
+
+function initial() {
+  if (EchoEnv.isDevelopment()) {
+    return true;
+  } else {
+    return Syncer.syncStates
+      .getSyncStateBy(Syncer.OfflineSystem.Tags)
+      .isSyncing.getValue();
+  }
+}
+
 function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   const [validatedTags, setValidatedTags] = useState<
     TagSummaryDto[] | undefined
   >(undefined);
-  const { tagScanner, setZoomInputRef, tagsAreSynced } = useMountScanner(
+  const { tagScanner, setZoomInputRef } = useMountScanner(
     viewfinder,
     canvas,
     stream
@@ -28,9 +40,22 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
+  const [tagSyncIsDone, setTagsAreSynced] = useState(initial());
+  useEffect(() => {
+    const unsubscribeFunction = Syncer.syncStates
+      .getSyncStateBy(Syncer.OfflineSystem.Tags)
+      .progressPercentage.subscribe((currentProgress) => {
+        setTagsAreSynced(currentProgress === 100);
+      });
+
+    return () => {
+      if (unsubscribeFunction) {
+        unsubscribeFunction();
+      }
+    };
+  }, []);
+
   console.log('ViewFinder', tagScanner?.viewfinder.videoHeight);
-  // Controls the availability of scanning.
-  const tagSyncIsDone = useEchoIsSyncing(tagsAreSynced);
   console.log('Echo is done syncing -> ', tagSyncIsDone);
 
   // Accepts a list of validated tags and sets them in memory for presentation.

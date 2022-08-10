@@ -7,11 +7,9 @@ import { EchoEnv } from '@equinor/echo-core';
  * @param {boolean} isSynced Indicate if the sync process is already done.
  */
 function useEchoIsSyncing(isSynced: boolean) {
-  const offlineSystem = Syncer.OfflineSystem.Tags;
-  const [tagsAreDoneSyncing, setTagsAreDoneSyncing] = useState(
-    Syncer.syncStates.getSyncStateBy(offlineSystem).isSyncing.getValue()
-  );
+  const [tagsAreDoneSyncing, setTagsAreDoneSyncing] = useState(isSynced);
   useEffect(() => {
+    const offlineSystem = Syncer.OfflineSystem.Tags;
     const unsubscribeFunction = Syncer.syncStates
       .getSyncStateBy(offlineSystem)
       .progressPercentage.subscribe((currentProgress) => {
@@ -23,7 +21,7 @@ function useEchoIsSyncing(isSynced: boolean) {
         unsubscribeFunction();
       }
     };
-  }, [offlineSystem]);
+  }, []);
 
   if (EchoEnv.isDevelopment()) {
     return true;

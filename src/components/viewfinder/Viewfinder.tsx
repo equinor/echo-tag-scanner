@@ -46,6 +46,7 @@ const ViewFinder = styled.video`
   transition: all 0.3s ease;
   width: 100%;
   height: 100vh;
+  object-fit: cover;
 `;
 
 const Canvas = styled.canvas`

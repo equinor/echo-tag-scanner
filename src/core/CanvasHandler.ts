@@ -85,15 +85,6 @@ class CanvasHandler {
         this._canvas.width,
         this._canvas.height
       );
-
-      console.log(
-        this._canvasContext?.getImageData(
-          0,
-          0,
-          this._canvas.width,
-          this._canvas.height
-        )
-      );
     }
 
     return this.getBlob(1, 'image/jpeg');

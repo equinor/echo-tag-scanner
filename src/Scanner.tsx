@@ -45,8 +45,6 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   //   };
   // }, []);
 
-  console.log('ViewFinder', tagScanner?.viewfinder.videoHeight);
-
   // Accepts a list of validated tags and sets them in memory for presentation.
   function presentValidatedTags(tags: TagSummaryDto[]) {
     if (Array.isArray(tags) && tags.length > 0) {

@@ -62,12 +62,6 @@ class CoreCamera {
   static async promptCameraUsage(
     additionalCaptureOptions?: DisplayMediaStreamConstraints
   ): Promise<MediaStream> {
-    console.info('Getting fresh mediastream');
-    console.log(
-      'Attempting to set this camera resolution -> ',
-      globalThis.innerWidth + 'x' + globalThis.innerHeight
-    );
-    console.log('Current orientation -> ', getOrientation());
     const mediaStream = await navigator.mediaDevices
       .getUserMedia({
         video: {
@@ -108,8 +102,6 @@ class CoreCamera {
       });
 
     const t = mediaStream.getVideoTracks()[0].getSettings();
-    console.info('Post mediastream report');
-    console.log('Dimensions -> ', t.width + 'x' + t.height);
 
     return mediaStream;
   }

@@ -22,17 +22,13 @@ const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
 const SvgContainer = styled.section<{ dimensions: Dimensions }>`
   // Centering of absolutely placed elements
   position: absolute;
-  /* top: 50%;
+  top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); */
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  transform: translate(-50%, -50%);
   //-------//
 
-  /* width: ${(props) => props.dimensions.width}px;
-  height: ${(props) => props.dimensions.height}px; */
+  width: ${(props) => props.dimensions.width}px;
+  height: ${(props) => props.dimensions.height}px;
   border: 3px dotted var(--outOfService);
 `;
 

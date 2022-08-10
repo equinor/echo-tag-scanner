@@ -1,31 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Syncer, TagSummaryDto } from '@equinor/echo-search';
+import { TagSummaryDto } from '@equinor/echo-search';
 import { CaptureAndTorch, SearchResults, ZoomSlider } from '@components';
-import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
+import { useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import {
   getTorchToggleProvider,
   getNotificationDispatcher as dispatchNotification,
   logger
 } from '@utils';
-import { EchoEnv } from '@equinor/echo-core';
 
 interface ScannerProps {
   stream: MediaStream;
   viewfinder: HTMLVideoElement;
   canvas: HTMLCanvasElement;
   scanArea: HTMLElement;
-}
-
-function initial() {
-  if (EchoEnv.isDevelopment()) {
-    return true;
-  } else {
-    return Syncer.syncStates
-      .getSyncStateBy(Syncer.OfflineSystem.Tags)
-      .isSyncing.getValue();
-  }
 }
 
 function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
@@ -40,23 +29,23 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
-  const [tagSyncIsDone, setTagsAreSynced] = useState(initial());
-  useEffect(() => {
-    const unsubscribeFunction = Syncer.syncStates
-      .getSyncStateBy(Syncer.OfflineSystem.Tags)
-      .progressPercentage.subscribe((currentProgress) => {
-        setTagsAreSynced(currentProgress === 100);
-      });
+  const [tagSyncIsDone, setTagsAreSynced] = useState(true);
 
-    return () => {
-      if (unsubscribeFunction) {
-        unsubscribeFunction();
-      }
-    };
-  }, []);
+  // useEffect(() => {
+  //   const unsubscribeFunction = Syncer.syncStates
+  //     .getSyncStateBy(Syncer.OfflineSystem.Tags)
+  //     .progressPercentage.subscribe((currentProgress) => {
+  //       setTagsAreSynced(currentProgress === 100);
+  //     });
+
+  //   return () => {
+  //     if (unsubscribeFunction) {
+  //       unsubscribeFunction();
+  //     }
+  //   };
+  // }, []);
 
   console.log('ViewFinder', tagScanner?.viewfinder.videoHeight);
-  console.log('Echo is done syncing -> ', tagSyncIsDone);
 
   // Accepts a list of validated tags and sets them in memory for presentation.
   function presentValidatedTags(tags: TagSummaryDto[]) {

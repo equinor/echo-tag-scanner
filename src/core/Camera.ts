@@ -60,6 +60,7 @@ class Camera extends Postprocessor {
    */
   protected async capturePhoto(captureArea: DOMRect): Promise<Blob> {
     this.canvasHandler.clearCanvas();
+
     const params: DrawImageParameters = {
       sx: captureArea.x,
       sy: captureArea.y,
@@ -70,7 +71,8 @@ class Camera extends Postprocessor {
       dHeight: captureArea.height,
       dWidth: captureArea.width
     };
-    return await this._canvasHandler.draw(this.viewfinder, params);
+    console.log('Capture Area params: ', captureArea, params);
+    return this._canvasHandler.draw(this.viewfinder, params);
   }
 
   public reportCameraFeatures() {

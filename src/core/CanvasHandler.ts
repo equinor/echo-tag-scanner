@@ -136,14 +136,10 @@ class CanvasHandler {
         this._canvas.height
       );
 
-      this._canvas.toBlob(
-        (blobbedDrawing) => {
-          if (blobbedDrawing) resolve(blobbedDrawing);
-          else reject('Could not get a blob from the canvas.');
-        },
-        mimeType,
-        quality
-      );
+      this._canvas.toBlob((blobbedDrawing) => {
+        if (blobbedDrawing) resolve(blobbedDrawing);
+        else reject('Could not get a blob from the canvas.');
+      });
     });
   }
 

@@ -8,6 +8,7 @@ import { ErrorBoundary } from '@services';
 
 import { TagScanner } from './core/Scanner';
 import { Scanner } from './Scanner';
+import { EchoEnv } from '@equinor/echo-core';
 
 const useEffectAsync = EchoUtils.Hooks.useEffectAsync;
 
@@ -22,21 +23,6 @@ const EchoCamera = () => {
     const mediaStream = await TagScanner.promptCameraUsage();
     setStream(mediaStream);
   }, []);
-
-  useEffect(() => {
-    if (stream) {
-      navigator.mediaDevices.enumerateDevices().then((devices) => {
-        devices.forEach((device) => {
-          if (device.kind === 'videoinput') {
-            console.info('Found a video device: -> ');
-            console.log(device.deviceId);
-            console.log(device.label);
-            console.log(device.groupId);
-          }
-        });
-      });
-    }
-  }, [stream]);
 
   // Represets the camera viewfinder.
   const [viewfinder, setViewfinder] = useState<HTMLVideoElement>();

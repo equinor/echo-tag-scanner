@@ -130,13 +130,16 @@ class CoreCamera {
   }
 
   public zoom(zoomValue: number): void {
-    if (this._capabilities?.zoom) {
-      this._videoTrack
-        ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
-        .catch(onZoomRejection);
-    }
+    console.log('new zoom value ->', zoomValue);
+    this._videoTrack
+      ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
+      .catch(onZoomRejection);
 
     function onZoomRejection(reason: unknown) {
+      console.error(
+        'Encountered an error while toggling the torch. -> ',
+        reason
+      );
       throw handleError(
         ErrorRegistry.zoomError,
         new Error('A zoom action failed, more info: ' + reason)

@@ -14,8 +14,14 @@ class Camera extends Postprocessor {
   }
 
   public toggleTorch = (): void => {
-    this._torchState = !this._torchState;
-    this.torch(this._torchState);
+    if (this.capabilities?.zoom) {
+      this._torchState = !this._torchState;
+      this.torch(this._torchState);
+    } else {
+      console.warn(
+        'Torch toggling failed. The video track is not capable of using the torch'
+      );
+    }
   };
 
   public pauseViewfinder(): boolean {

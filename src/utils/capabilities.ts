@@ -36,9 +36,9 @@ function getTorchToggleProvider(camera: Camera) {
     };
 
     if (camera.capabilities?.torch) {
-      return onToggleTorch;
+      return onToggleTorch();
     } else {
-      return onToggleUnsupportedTorch;
+      return onToggleUnsupportedTorch();
     }
   };
 }

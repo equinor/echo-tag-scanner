@@ -130,7 +130,6 @@ class CoreCamera {
   }
 
   public zoom(zoomValue: number): void {
-    console.log('new zoom value ->', zoomValue);
     this._videoTrack
       ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
       .catch(onZoomRejection);

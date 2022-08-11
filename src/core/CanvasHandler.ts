@@ -5,6 +5,7 @@ import {
   CanvasHandlerProps,
   DrawImageParameters
 } from '@types';
+import EchoUtils from '@equinor/echo-utils';
 
 /**
  * This object implements different operations on the postprocessing canvas.
@@ -75,15 +76,43 @@ class CanvasHandler {
     this._canvas.width = params.dWidth ?? 0;
     this._canvas.height = params.dHeight ?? 0;
 
+    console.log('DRAWIMAGE: ', params);
+
+    const isIos = EchoUtils.Utils.iOs.isIosDevice();
+    console.log('Is IOS? -> ', isIos);
+
     if (image instanceof ImageData) {
       this._canvasContext?.putImageData(image, params.dx, params.dy);
     } else {
+      if (isIos) {
+        this._canvasContext?.drawImage(
+          image,
+          params.dx,
+          params.dy,
+          undefined,
+          undefined,
+          params.sx,
+          params.sy,
+          params.sWidth,
+          params.sHeight,
+          //@ts-ignore
+          params.dx,
+          params.dy,
+          params.dWidth,
+          params.dHeight
+        );
+      } else {
+      }
       this._canvasContext?.drawImage(
         image,
-        0,
-        0,
-        this._canvas.width,
-        this._canvas.height
+        params.sx,
+        params.sy,
+        params.sWidth,
+        params.sHeight,
+        params.dx,
+        params.dy,
+        params.dWidth,
+        params.dHeight
       );
     }
 

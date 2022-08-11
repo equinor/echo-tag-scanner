@@ -49,7 +49,7 @@ export function getComputerVisionOcrResources(
 
   let { url, apiKey } = getComputerVisionEndpoint();
   const params: ComputerVisionOcrParams = {
-    language: 'unk',
+    language: 'en',
     detectOrientation: false,
     modelVersion: '2022-04-30'
   };

@@ -85,6 +85,7 @@ class CanvasHandler {
       this._canvasContext?.putImageData(image, params.dx, params.dy);
     } else {
       if (isIos) {
+        console.log('CALLING IOS DRAWIMAGE');
         this._canvasContext?.drawImage(
           image,
           params.dx,

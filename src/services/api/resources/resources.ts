@@ -16,8 +16,8 @@ type ComputerVisionOcrParams = {
   modelVersion: string | 'latest';
 };
 
-function getEndpoint() {
-  // TODO: Move to env vars.
+function getComputerVisionEndpoint() {
+  // TODO: Move sensitive API stuff out + rotate the API keys. Suggested method is Azure functions.
   const computerVisionOcrEndpointDev: EndpointInfo = {
     url: 'https://echocamera-tag-scanner-dev.cognitiveservices.azure.com/vision/v3.2/ocr',
     apiKey: [
@@ -27,15 +27,15 @@ function getEndpoint() {
   };
 
   const computerVisionOcrEndpointProd: EndpointInfo = {
-    url: 'https://cv-echotagscanner.cognitiveservices.azure.com/',
+    url: 'https://cv-echotagscanner.cognitiveservices.azure.com/vision/v3.2/ocr',
     apiKey: [
       '38297f4586b141d98838e854c14334bc',
       'c3a36b9c198149b695b77e96ef73f93f'
     ]
   };
-  const env = EchoEnv.env().REACT_APP_API_URL;
 
-  if (env === 'https://dt-echopedia-api-dev.azurewebsites.net') {
+  const apiUrl = EchoEnv.env().REACT_APP_API_URL;
+  if (apiUrl === 'https://dt-echopedia-api-dev.azurewebsites.net') {
     return computerVisionOcrEndpointDev;
   } else {
     return computerVisionOcrEndpointProd;
@@ -47,7 +47,7 @@ export function getComputerVisionOcrResources(
 ): [url: string, body: Blob, requestInit: RequestInit] {
   const body = image;
 
-  let { url, apiKey } = getEndpoint();
+  let { url, apiKey } = getComputerVisionEndpoint();
   const params: ComputerVisionOcrParams = {
     language: 'unk',
     detectOrientation: false,

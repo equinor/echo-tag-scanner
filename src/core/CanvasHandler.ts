@@ -152,10 +152,20 @@ class CanvasHandler {
         reject('Quality must be between 0 and 1, got ' + quality + '.');
       }
 
-      this._canvas.toBlob((blobbedDrawing) => {
-        if (blobbedDrawing) resolve(blobbedDrawing);
-        else reject('Could not get a blob from the canvas.');
-      });
+      console.log(
+        'CANVAS WIDTH/HEIGHT in GETBLOB: ',
+        this._canvas.width,
+        this._canvas.height
+      );
+
+      this._canvas.toBlob(
+        (blobbedDrawing) => {
+          if (blobbedDrawing) resolve(blobbedDrawing);
+          else reject('Could not get a blob from the canvas.');
+        },
+        mimeType,
+        quality
+      );
     });
   }
 

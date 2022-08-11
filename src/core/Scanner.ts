@@ -84,7 +84,7 @@ export class TagScanner extends Camera {
         console.info('crop area ->', area.width, area.height);
         console.groupEnd();
         let capture = await this.capturePhoto(area);
-        if (capture.size > 50000) capture = await this.scale(0.5);
+        // if (capture.size > 50000) capture = await this.scale(0.5);
         scans.push(capture);
 
         // Log some image stats and a blob preview in network tab.

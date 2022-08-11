@@ -99,8 +99,8 @@ class CanvasHandler {
           //@ts-ignore
           params.dx,
           params.dy,
-          params.dWidth,
-          params.dHeight
+          params.dWidth * 0.5,
+          params.dHeight * 0.5
         );
       } else {
       }
@@ -112,8 +112,8 @@ class CanvasHandler {
         params.sHeight,
         params.dx,
         params.dy,
-        params.dWidth,
-        params.dHeight
+        params.dWidth * 0.5,
+        params.dHeight * 0.5
       );
     }
 

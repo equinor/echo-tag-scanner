@@ -99,19 +99,25 @@ class CanvasHandler {
       this._canvas.width = params.sWidth;
       this._canvas.height = params.sHeight;
 
-      // finds center of video intrinsics and uses capture area width / 2 to find sX
-      // TODO: params.sWidth area is based off of the _scaled_ up image. Convert to original width/height
-      const sX = videoWidth / 2 - params.sWidth / 2;
+      // gotta figure out a better / more normalized? way of doing this.
+      // not _entirely_ sure why it works - draw it out monday?
 
-      // same thing goes for this.
-      const sY = videoHeight / 2 - params.sHeight / 2;
+      const scale_x = elementWidth / videoWidth;
+      const scale_y = videoHeight / elementHeight;
+
+      // width and height of the capture area scaled to original image
+      const captureWidth = params.sWidth * scale_x;
+      const captureHeight = params.sHeight * scale_y;
+
+      const sX = videoWidth / 2 - captureWidth / 2;
+      const sY = videoHeight / 2 - captureHeight / 2;
 
       this._canvasContext.drawImage(
         video,
         sX,
         sY,
-        params.sWidth,
-        params.sHeight,
+        captureWidth,
+        captureHeight,
         0,
         0,
         params.dWidth,

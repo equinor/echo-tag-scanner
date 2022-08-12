@@ -92,22 +92,18 @@ class CanvasHandler {
       const elementWidth = (image as HTMLVideoElement).width;
       // this is 428px on iPhone
       const videoHeight = (image as HTMLVideoElement).videoHeight;
-      // this is 746px
-      const elementHeight = (image as HTMLVideoElement).height;
 
       const video = image as HTMLVideoElement;
       this._canvas.width = params.sWidth;
       this._canvas.height = params.sHeight;
 
       // gotta figure out a better / more normalized? way of doing this.
-      // not _entirely_ sure why it works - draw it out monday?
-
-      const scale_x = elementWidth / videoWidth;
-      const scale_y = videoHeight / elementHeight;
+      // will not work if elementWidth is ever larger than videoWidth...i think?
+      const scale = elementWidth / videoWidth;
 
       // width and height of the capture area scaled to original image
-      const captureWidth = params.sWidth * scale_x;
-      const captureHeight = params.sHeight * scale_y;
+      const captureWidth = params.sWidth * scale;
+      const captureHeight = params.sHeight * scale;
 
       const sX = videoWidth / 2 - captureWidth / 2;
       const sY = videoHeight / 2 - captureHeight / 2;

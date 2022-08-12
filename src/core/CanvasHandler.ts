@@ -86,8 +86,8 @@ class CanvasHandler {
       const sHeight = params.sHeight;
 
       // destination image size/pos
-      const dWidth = sWidth / 2;
-      const dHeight = sHeight / 2;
+      const dWidth = sWidth / 3;
+      const dHeight = sHeight / 3;
       const dX = this._canvas.width / 2 - dWidth / 2;
       const dY = this._canvas.height / 2 - dHeight / 2;
 

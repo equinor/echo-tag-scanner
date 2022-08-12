@@ -76,44 +76,24 @@ class CanvasHandler {
     this._canvas.width = params.dWidth ?? 0;
     this._canvas.height = params.dHeight ?? 0;
 
-    console.log('DRAWIMAGE: ', params);
-
-    const isIos = EchoUtils.Utils.iOs.isIosDevice();
-    console.log('Is IOS? -> ', isIos);
-
     if (image instanceof ImageData) {
       this._canvasContext?.putImageData(image, params.dx, params.dy);
     } else {
-      if (isIos) {
-        console.log('CALLING IOS DRAWIMAGE');
-        this._canvasContext?.drawImage(
-          image,
-          params.dx,
-          params.dy,
-          undefined,
-          undefined,
-          params.sx,
-          params.sy,
-          params.sWidth,
-          params.sHeight,
-          //@ts-ignore
-          params.dx,
-          params.dy,
-          params.dWidth * 0.5,
-          params.dHeight * 0.5
-        );
-      } else {
-      }
+      const hRatio = this._canvas.width / params.sWidth;
+      const vRatio = this._canvas.height / params.sHeight;
+      const ratio = Math.min(hRatio, vRatio);
+      const centershift_x = (this._canvas.width - params.sWidth * ratio) / 2;
+      const centershift_y = (this._canvas.height - params.sHeight * ratio) / 2;
       this._canvasContext?.drawImage(
         image,
-        params.sx,
-        params.sy,
+        0,
+        0,
         params.sWidth,
         params.sHeight,
-        params.dx,
-        params.dy,
-        params.dWidth * 0.5,
-        params.dHeight * 0.5
+        centershift_x,
+        centershift_y,
+        params.sWidth * ratio,
+        params.sHeight * ratio
       );
     }
 

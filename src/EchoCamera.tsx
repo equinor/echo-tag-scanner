@@ -9,6 +9,7 @@ import { ErrorBoundary } from '@services';
 import { TagScanner } from './core/Scanner';
 import { Scanner } from './Scanner';
 import { EchoEnv } from '@equinor/echo-core';
+import styled from 'styled-components';
 
 const useEffectAsync = EchoUtils.Hooks.useEffectAsync;
 
@@ -36,7 +37,7 @@ const EchoCamera = () => {
   }
 
   return (
-    <main>
+    <Main>
       <ErrorBoundary stackTraceEnabled>
         <Viewfinder canvasRef={setCanvas} videoRef={setViewfinder} />
         <ScanningArea captureAreaRef={setScanArea} />
@@ -50,8 +51,12 @@ const EchoCamera = () => {
           />
         )}
       </ErrorBoundary>
-    </main>
+    </Main>
   );
 };
+
+const Main = styled.main`
+  touch-action: none;
+`;
 
 export default memo(EchoCamera);

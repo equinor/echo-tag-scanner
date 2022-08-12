@@ -12,7 +12,7 @@ import EchoUtils from '@equinor/echo-utils';
  */
 class CanvasHandler {
   private _canvas: HTMLCanvasElement;
-  protected _canvasContext: CanvasRenderingContext2D | null;
+  protected _canvasContext: CanvasRenderingContext2D;
   private _standardCanvasDimensions: CanvasDimensions;
   private _currentOrientation: 'landscape' | 'portrait';
 
@@ -22,7 +22,15 @@ class CanvasHandler {
         'Could not construct CanvasHandler. The canvas element reference is missing.'
       );
     this._canvas = props.canvas;
-    this._canvasContext = this._canvas.getContext('2d');
+
+    const context = this._canvas.getContext('2d');
+
+    if (context) {
+      this._canvasContext = context;
+    } else {
+      throw new Error('fuk u');
+    }
+
     this._standardCanvasDimensions = {
       width: this._canvas.width,
       height: this._canvas.height
@@ -72,35 +80,42 @@ class CanvasHandler {
     //--------------
     this.clearCanvas();
 
-    // Before drawing, set the canvas dimensions to be equal to whatever is being drawn.
-    this._canvas.width = params.dWidth ?? 0;
-    this._canvas.height = params.dHeight ?? 0;
-
     if (image instanceof ImageData) {
+      // Before drawing, set the canvas dimensions to be equal to whatever is being drawn.
+      this._canvas.width = params.dWidth ?? 0;
+      this._canvas.height = params.dHeight ?? 0;
       this._canvasContext?.putImageData(image, params.dx, params.dy);
     } else {
-      // capture area rectangle within video element.
-      const sX = params.sx;
-      const sY = params.sy;
-      const sWidth = params.sWidth;
-      const sHeight = params.sHeight;
+      // this is 746px on iPhone
+      const videoWidth = (image as HTMLVideoElement).videoWidth;
+      // this is 428px on iPhone
+      const elementWidth = (image as HTMLVideoElement).width;
+      // this is 428px on iPhone
+      const videoHeight = (image as HTMLVideoElement).videoHeight;
+      // this is 746px
+      const elementHeight = (image as HTMLVideoElement).height;
 
-      // destination image size/pos
-      const dWidth = sWidth / 4;
-      const dHeight = sHeight / 4;
-      const dX = this._canvas.width / 2 - dWidth / 2;
-      const dY = this._canvas.height / 2 - dHeight / 2;
+      const video = image as HTMLVideoElement;
+      this._canvas.width = params.sWidth;
+      this._canvas.height = params.sHeight;
 
-      this._canvasContext?.drawImage(
-        image,
+      // finds center of video intrinsics and uses capture area width / 2 to find sX
+      // TODO: params.sWidth area is based off of the _scaled_ up image. Convert to original width/height
+      const sX = videoWidth / 2 - params.sWidth / 2;
+
+      // same thing goes for this.
+      const sY = videoHeight / 2 - params.sHeight / 2;
+
+      this._canvasContext.drawImage(
+        video,
         sX,
         sY,
-        sWidth,
-        sHeight,
-        dX,
-        dY,
-        dWidth,
-        dHeight
+        params.sWidth,
+        params.sHeight,
+        0,
+        0,
+        params.dWidth,
+        params.dHeight
       );
     }
 

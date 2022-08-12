@@ -74,6 +74,14 @@ export function useMountScanner(
     { passive: false }
   );
 
+  viewfinder.addEventListener(
+    'gesturestart',
+    (e) => {
+      e.preventDefault();
+    },
+    { passive: false }
+  );
+
   return {
     tagScanner,
     setZoomInputRef,

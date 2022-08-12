@@ -63,25 +63,6 @@ export function useMountScanner(
     zoomRef.value = '1';
   }, [tagScanner, zoomRef]);
 
-  // Handle multitouch events.
-  viewfinder.addEventListener(
-    'touchstart',
-    (e) => {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    },
-    { passive: false }
-  );
-
-  viewfinder.addEventListener(
-    'gesturestart',
-    (e) => {
-      e.preventDefault();
-    },
-    { passive: false }
-  );
-
   return {
     tagScanner,
     setZoomInputRef,

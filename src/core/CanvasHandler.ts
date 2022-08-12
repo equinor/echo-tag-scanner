@@ -73,27 +73,30 @@ class CanvasHandler {
     this.clearCanvas();
 
     // Before drawing, set the canvas dimensions to be equal to whatever is being drawn.
-    this._canvas.width = params.dWidth ?? 0;
-    this._canvas.height = params.dHeight ?? 0;
+    // this._canvas.width = params.dWidth ?? 0;
+    // this._canvas.height = params.dHeight ?? 0;
 
     if (image instanceof ImageData) {
       this._canvasContext?.putImageData(image, params.dx, params.dy);
     } else {
-      const hRatio = this._canvas.width / params.sWidth;
-      const vRatio = this._canvas.height / params.sHeight;
+      const sourcewidth = (image as HTMLVideoElement).width;
+      const sourceheight = (image as HTMLVideoElement).height;
+      const hRatio = this._canvas.width / sourcewidth;
+      const vRatio = this._canvas.height / sourceheight;
       const ratio = Math.min(hRatio, vRatio);
       const centershift_x = (this._canvas.width - params.sWidth * ratio) / 2;
       const centershift_y = (this._canvas.height - params.sHeight * ratio) / 2;
+
       this._canvasContext?.drawImage(
         image,
         0,
         0,
-        params.sWidth,
-        params.sHeight,
+        sourcewidth,
+        sourceheight,
         centershift_x,
         centershift_y,
-        params.sWidth * ratio,
-        params.sHeight * ratio
+        sourcewidth * ratio,
+        sourceheight * ratio
       );
     }
 

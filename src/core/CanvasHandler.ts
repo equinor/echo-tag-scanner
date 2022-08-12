@@ -79,24 +79,28 @@ class CanvasHandler {
     if (image instanceof ImageData) {
       this._canvasContext?.putImageData(image, params.dx, params.dy);
     } else {
-      const sourcewidth = (image as HTMLVideoElement).width;
-      const sourceheight = (image as HTMLVideoElement).height;
-      const hRatio = this._canvas.width / sourcewidth;
-      const vRatio = this._canvas.height / sourceheight;
-      const ratio = Math.min(hRatio, vRatio);
-      const centershift_x = (this._canvas.width - params.sWidth * ratio) / 2;
-      const centershift_y = (this._canvas.height - params.sHeight * ratio) / 2;
+      // capture area rectangle within video element.
+      const sX = params.sx;
+      const sY = params.sy;
+      const sWidth = params.sWidth;
+      const sHeight = params.sHeight;
+
+      // destination image size/pos
+      const dWidth = sWidth;
+      const dHeight = sHeight;
+      const dX = this._canvas.width / 2 - dWidth / 2;
+      const dY = this._canvas.height / 2 - dHeight / 2;
 
       this._canvasContext?.drawImage(
         image,
-        0,
-        0,
-        sourcewidth,
-        sourceheight,
-        centershift_x,
-        centershift_y,
-        sourcewidth * ratio,
-        sourceheight * ratio
+        sX,
+        sY,
+        sWidth,
+        sHeight,
+        dX,
+        dY,
+        dWidth,
+        dHeight
       );
     }
 

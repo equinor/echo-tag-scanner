@@ -3,6 +3,7 @@ import { baseApiClient } from '../base/base';
 import { ComputerVisionResponse, ParsedComputerVisionResponse } from '@types';
 import { handleError, logger } from '@utils';
 import { ErrorRegistry } from '../../../enums';
+import { BackendError } from '@equinor/echo-base';
 
 export async function ocrRead(
   image: Blob
@@ -21,8 +22,19 @@ export async function ocrRead(
     const parsedResponse = parseResponse(response.data);
     return parsedResponse;
   } catch (error) {
-    logger.log('Error', () => console.error('API Error -> ', error));
-    throw handleError(ErrorRegistry.ocrError, error as Error);
+    if (error instanceof BackendError && error.httpStatusCode === 429) {
+      // Here we handle the event where users might go over the Computer vision usage quota.
+      // We do not percieve this as an error on the client side. The user will simply try again.
+      logger.log('Warning', () =>
+        console.warn(
+          'The scan operation resulted in an overload in the usage quota for Computer Vision. This is normally not a problem and we simply return empty results to the users. This will prompt them to try again.'
+        )
+      );
+      return [];
+    } else {
+      logger.log('Error', () => console.error('API Error -> ', error));
+      throw handleError(ErrorRegistry.ocrError, error as Error);
+    }
   }
 }
 

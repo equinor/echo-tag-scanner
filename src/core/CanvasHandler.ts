@@ -96,8 +96,8 @@ class CanvasHandler {
         params.sy,
         params.sWidth,
         params.sHeight,
-        0,
-        0,
+        params.dx,
+        params.dy,
         params.dWidth,
         params.dHeight
       );

@@ -77,8 +77,7 @@ class Camera extends Postprocessor {
     // FIXME: move to own handling - should only need to be calculated on
     // resize observer thingymajiggy -- and should probably always be <1?
     // Gotta verify on screens with larger viewport than mediastream/video intrinsic size
-    const scale = elementWidth / videoWidth;
-
+    let scale = elementWidth / videoWidth;
     // width and height of the capture area scaled to original image
     const sWidth = captureArea.height * scale;
     const sHeight = captureArea.width * scale;

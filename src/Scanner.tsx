@@ -29,7 +29,11 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
-  const [tagSyncIsDone, setTagsAreSynced] = useState(true);
+  const [tagSyncIsDone, setTagsAreSynced] = useState(
+    Syncer.syncStates
+      .getSyncStateBy(Syncer.OfflineSystem.Tags)
+      .isSyncing.getValue()
+  );
   console.log('Echo is done syncing ->', tagSyncIsDone);
 
   useEffect(() => {

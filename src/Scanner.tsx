@@ -29,18 +29,18 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
-  const [tagSyncIsDone, setTagsAreSynced] = useState(
-    Syncer.syncStates
+  const [echoIsSyncing, setEchoIsSyncing] = useState(
+    !Syncer.syncStates
       .getSyncStateBy(Syncer.OfflineSystem.Tags)
       .isSyncing.getValue()
   );
-  console.log('Echo is done syncing ->', tagSyncIsDone);
+  console.log('Echo is done syncing ->', echoIsSyncing);
 
   useEffect(() => {
     const unsubscribeFunction = Syncer.syncStates
       .getSyncStateBy(Syncer.OfflineSystem.Tags)
       .progressPercentage.subscribe((currentProgress) => {
-        setTagsAreSynced(currentProgress === 100);
+        setEchoIsSyncing(currentProgress !== 100);
       });
 
     return () => {
@@ -69,7 +69,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
 
   const onScanning = async () => {
     // Prevent scanning if Echo is syncing, otherwise the validation will not work.
-    if (!tagSyncIsDone) {
+    if (echoIsSyncing) {
       dispatchNotification({
         message: 'Scanning is available as soon as the syncing is done.',
         autohideDuration: 2000
@@ -127,7 +127,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
             <CaptureAndTorch
               onToggleTorch={getTorchToggleProvider(tagScanner)}
               onScanning={onScanning}
-              isDisabled={!tagSyncIsDone}
+              isDisabled={echoIsSyncing}
               isScanning={tagScanStatus.scanning}
               supportedFeatures={{
                 torch: Boolean(tagScanner?.capabilities?.torch)

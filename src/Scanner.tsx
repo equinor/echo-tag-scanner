@@ -34,12 +34,13 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
       .getSyncStateBy(Syncer.OfflineSystem.Tags)
       .isSyncing.getValue()
   );
-  console.log('Echo is done syncing ->', echoIsSyncing);
+  console.log('Echo is syncing ->', echoIsSyncing);
 
   useEffect(() => {
     const unsubscribeFunction = Syncer.syncStates
       .getSyncStateBy(Syncer.OfflineSystem.Tags)
       .progressPercentage.subscribe((currentProgress) => {
+        console.log('Syncing progress ->', currentProgress);
         setEchoIsSyncing(currentProgress !== 100);
       });
 

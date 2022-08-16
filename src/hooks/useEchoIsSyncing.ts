@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Syncer } from '@equinor/echo-search';
-import { EchoEnv } from '@equinor/echo-core';
+import { logger } from '@utils';
 
 /**
  * Returns a boolean indicating if echo is syncing the tags in IndexedDB.
- * @param {boolean} isSynced Indicate if the sync process is already done.
  */
-function useEchoIsSyncing(isSynced: boolean) {
-  const [tagsAreDoneSyncing, setTagsAreDoneSyncing] = useState(isSynced);
+function useEchoIsSyncing() {
+  const [echoIsSyncing, setEchoIsSyncing] = useState(
+    Syncer.syncStates
+      .getSyncStateBy(Syncer.OfflineSystem.Tags)
+      .isSyncing.getValue()
+  );
+
   useEffect(() => {
-    const offlineSystem = Syncer.OfflineSystem.Tags;
     const unsubscribeFunction = Syncer.syncStates
-      .getSyncStateBy(offlineSystem)
+      .getSyncStateBy(Syncer.OfflineSystem.Tags)
       .progressPercentage.subscribe((currentProgress) => {
-        setTagsAreDoneSyncing(currentProgress === 100);
+        setEchoIsSyncing(currentProgress !== 100);
       });
 
     return () => {
@@ -23,11 +26,8 @@ function useEchoIsSyncing(isSynced: boolean) {
     };
   }, []);
 
-  if (EchoEnv.isDevelopment()) {
-    return true;
-  } else {
-    return tagsAreDoneSyncing;
-  }
+  logger.log('Info', () => console.info('Echo is syncing ->', echoIsSyncing));
+  return echoIsSyncing;
 }
 
 export { useEchoIsSyncing };

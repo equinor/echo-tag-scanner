@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Syncer, TagSummaryDto } from '@equinor/echo-search';
 import { CaptureAndTorch, SearchResults, ZoomSlider } from '@components';
-import { useMountScanner, useSetActiveTagNo } from '@hooks';
+import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import {
   getTorchToggleProvider,
@@ -28,28 +28,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   );
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
-
-  const [echoIsSyncing, setEchoIsSyncing] = useState(
-    Syncer.syncStates
-      .getSyncStateBy(Syncer.OfflineSystem.Tags)
-      .isSyncing.getValue()
-  );
-  console.log('Echo is syncing ->', echoIsSyncing);
-
-  useEffect(() => {
-    const unsubscribeFunction = Syncer.syncStates
-      .getSyncStateBy(Syncer.OfflineSystem.Tags)
-      .progressPercentage.subscribe((currentProgress) => {
-        console.log('Syncing progress ->', currentProgress);
-        setEchoIsSyncing(currentProgress !== 100);
-      });
-
-    return () => {
-      if (unsubscribeFunction) {
-        unsubscribeFunction();
-      }
-    };
-  }, []);
+  const echoIsSyncing = useEchoIsSyncing();
 
   // Accepts a list of validated tags and sets them in memory for presentation.
   function presentValidatedTags(tags: TagSummaryDto[]) {

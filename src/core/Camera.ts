@@ -67,11 +67,30 @@ class Camera extends Postprocessor {
   protected async capturePhoto(captureArea: DOMRect): Promise<Blob> {
     this.canvasHandler.clearCanvas();
 
+    // this is 746px on iPhone
+    const videoWidth = this.viewfinder.videoWidth;
+    // this is 428px on iPhone
+    const elementWidth = this.viewfinder.width;
+    // this is 428px on iPhone
+    const videoHeight = this.viewfinder.videoHeight;
+
+    // FIXME: move to own handling - should only need to be calculated on
+    // resize observer thingymajiggy -- and should probably always be <1?
+    // Gotta verify on screens with larger viewport than mediastream/video intrinsic size
+    const scale = elementWidth / videoWidth;
+
+    // width and height of the capture area scaled to original image
+    const sWidth = captureArea.height * scale;
+    const sHeight = captureArea.width * scale;
+
+    const sx = videoWidth / 2 - sWidth / 2;
+    const sy = videoHeight / 2 - sHeight / 2;
+
     const params: DrawImageParameters = {
-      sx: captureArea.x,
-      sy: captureArea.y,
-      sHeight: captureArea.height,
-      sWidth: captureArea.width,
+      sx,
+      sy,
+      sHeight,
+      sWidth,
       dx: 0,
       dy: 0,
       dHeight: captureArea.height,

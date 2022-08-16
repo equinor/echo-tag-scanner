@@ -90,43 +90,32 @@ class CanvasHandler {
       const videoWidth = (image as HTMLVideoElement).videoWidth;
       // this is 428px on iPhone
       const elementWidth = (image as HTMLVideoElement).width;
-      const elementHeight = (image as HTMLVideoElement).height;
       // this is 428px on iPhone
       const videoHeight = (image as HTMLVideoElement).videoHeight;
 
       const video = image as HTMLVideoElement;
+      this._canvas.width = params.sWidth;
+      this._canvas.height = params.sHeight;
 
-      const horizontalScale = elementWidth / videoWidth;
-      const verticalScale = elementHeight / videoHeight;
+      // gotta figure out a better / more normalized? way of doing this.
+      // will not work if elementWidth is ever larger than videoWidth...i think?
+      const scale = elementWidth / videoWidth;
 
       // width and height of the capture area scaled to original image
-      const captureWidth = params.sWidth;
-      const captureHeight = params.sHeight;
+      const captureWidth = params.sWidth * scale;
+      const captureHeight = params.sHeight * scale;
 
       const sX = videoWidth / 2 - captureWidth / 2;
       const sY = videoHeight / 2 - captureHeight / 2;
 
-      console.group('maffs');
-      console.info('video width ->', videoWidth);
-      console.info('video height ->', videoHeight);
-      console.info('element width -> ', elementWidth);
-      console.info('element height ->', elementHeight);
-      console.info('horizontal scale ->', horizontalScale);
-      console.info('vertical scale -> ', verticalScale);
-      console.info('capture width -> ', captureWidth);
-      console.info('capture height ->', captureHeight);
-      console.info('sx -> ', sX);
-      console.info('sy -> ', sY);
-      console.groupEnd();
-
       this._canvasContext.drawImage(
-        video,
-        sX,
-        sY,
-        captureWidth,
-        captureHeight,
-        0,
-        0,
+        image,
+        params.sx,
+        params.sy,
+        params.sWidth,
+        params.sHeight,
+        params.dx,
+        params.dy,
         params.dWidth,
         params.dHeight
       );

@@ -30,7 +30,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
   const [echoIsSyncing, setEchoIsSyncing] = useState(
-    !Syncer.syncStates
+    Syncer.syncStates
       .getSyncStateBy(Syncer.OfflineSystem.Tags)
       .isSyncing.getValue()
   );

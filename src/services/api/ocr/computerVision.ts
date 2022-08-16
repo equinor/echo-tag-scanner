@@ -44,7 +44,7 @@ function parseResponse(
     region.lines.forEach((line) =>
       line.words.forEach((word) => {
         if (word.text && word.text.length >= 5) {
-          possibleTagNumbers.push(word.text.replaceAll(/[\(\)']+/g, ''));
+          possibleTagNumbers.push(word.text);
         }
       })
     )

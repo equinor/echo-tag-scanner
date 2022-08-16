@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { TagSummaryDto } from '@equinor/echo-search';
+import { Syncer, TagSummaryDto } from '@equinor/echo-search';
 import { CaptureAndTorch, SearchResults, ZoomSlider } from '@components';
 import { useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
@@ -30,20 +30,21 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
 
   const [tagSyncIsDone, setTagsAreSynced] = useState(true);
+  console.log('Echo is done syncing ->', tagSyncIsDone);
 
-  // useEffect(() => {
-  //   const unsubscribeFunction = Syncer.syncStates
-  //     .getSyncStateBy(Syncer.OfflineSystem.Tags)
-  //     .progressPercentage.subscribe((currentProgress) => {
-  //       setTagsAreSynced(currentProgress === 100);
-  //     });
+  useEffect(() => {
+    const unsubscribeFunction = Syncer.syncStates
+      .getSyncStateBy(Syncer.OfflineSystem.Tags)
+      .progressPercentage.subscribe((currentProgress) => {
+        setTagsAreSynced(currentProgress === 100);
+      });
 
-  //   return () => {
-  //     if (unsubscribeFunction) {
-  //       unsubscribeFunction();
-  //     }
-  //   };
-  // }, []);
+    return () => {
+      if (unsubscribeFunction) {
+        unsubscribeFunction();
+      }
+    };
+  }, []);
 
   // Accepts a list of validated tags and sets them in memory for presentation.
   function presentValidatedTags(tags: TagSummaryDto[]) {

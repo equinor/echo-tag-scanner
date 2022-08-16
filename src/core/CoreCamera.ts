@@ -85,7 +85,7 @@ class CoreCamera {
           frameRate: {
             ideal: 60
           },
-          facingMode: { exact: 'environment' }
+          facingMode: 'environment'
         },
         audio: false,
         ...additionalCaptureOptions

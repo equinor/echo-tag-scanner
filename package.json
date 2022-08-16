@@ -8,10 +8,8 @@
     "license": "MIT",
     "scripts": {
         "start": "echo-build -s -d",
-        "build": "echo-build -c && npm run runEnv",
-        "runEnv": "bash ./env.sh",
-        "build:module": "echo-build",
-        "start-admin": "echo-build -s -d -a"
+        "build": "echo-build -c && bash ./env.sh",
+        "analyze": "echo-build -b"
     },
     "devDependencies": {
         "@equinor/echo-base": "^0.6.12",

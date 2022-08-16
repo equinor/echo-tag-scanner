@@ -32,16 +32,7 @@ const CaptureAndTorch = (props: CameraControlsProps): JSX.Element => {
           isDisabled={props.isDisabled}
           isScanning={props.isScanning}
         />
-        <Button
-          variant="ghost"
-          style={{ gridArea: 'empty-cell', background: 'hotpink' }}
-          onClick={props.onDebug}
-        >
-          <span>
-            Developer <br />
-            test
-          </span>
-        </Button>
+        <DebugButton variant="ghost" onClick={props.onDebug}></DebugButton>
       </CaptureAndTorchGrid>
     </CaptureAndTorchWrapper>
   );
@@ -53,6 +44,11 @@ const CaptureAndTorchWrapper = styled.div`
   @media screen and (orientation: landscape) {
     height: 100%;
   }
+`;
+
+const DebugButton = styled(Button)`
+  grid-area: empty-cell;
+  background: hotpink;
 `;
 
 const CaptureAndTorchGrid = styled.div`

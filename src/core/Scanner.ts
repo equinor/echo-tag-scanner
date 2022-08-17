@@ -28,7 +28,8 @@ export class TagScanner extends Camera {
   public async debugAll(previewCapture = false) {
     const scanArea = document.getElementById('scan-area');
     if (previewCapture && scanArea) {
-      await this.capturePhoto(scanArea.getBoundingClientRect());
+      let capture = await this.capturePhoto(scanArea.getBoundingClientRect());
+      if (capture.size > 50000) capture = await this.scale(0.5);
     }
 
     console.log('Mediastream -> ', this.mediaStream);

@@ -77,37 +77,15 @@ class CanvasHandler {
     image: CanvasImageSource | ImageData,
     params: DrawImageParameters
   ): Promise<Blob> {
-    //--------------
     this.clearCanvas();
 
+    // Before drawing, set the canvas dimensions to be equal to whatever is being drawn.
+    this._canvas.width = params.dWidth ?? 0;
+    this._canvas.height = params.dHeight ?? 0;
+
     if (image instanceof ImageData) {
-      // Before drawing, set the canvas dimensions to be equal to whatever is being drawn.
-      this._canvas.width = params.dWidth ?? 0;
-      this._canvas.height = params.dHeight ?? 0;
       this._canvasContext?.putImageData(image, params.dx, params.dy);
     } else {
-      // this is 746px on iPhone
-      const videoWidth = (image as HTMLVideoElement).videoWidth;
-      // this is 428px on iPhone
-      const elementWidth = (image as HTMLVideoElement).width;
-      // this is 428px on iPhone
-      const videoHeight = (image as HTMLVideoElement).videoHeight;
-
-      const video = image as HTMLVideoElement;
-      this._canvas.width = params.sWidth;
-      this._canvas.height = params.sHeight;
-
-      // gotta figure out a better / more normalized? way of doing this.
-      // will not work if elementWidth is ever larger than videoWidth...i think?
-      const scale = elementWidth / videoWidth;
-
-      // width and height of the capture area scaled to original image
-      const captureWidth = params.sWidth * scale;
-      const captureHeight = params.sHeight * scale;
-
-      const sX = videoWidth / 2 - captureWidth / 2;
-      const sY = videoHeight / 2 - captureHeight / 2;
-
       this._canvasContext.drawImage(
         image,
         params.sx,

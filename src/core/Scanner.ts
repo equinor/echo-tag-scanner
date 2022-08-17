@@ -28,12 +28,7 @@ export class TagScanner extends Camera {
   public async debugAll(previewCapture = false) {
     const scanArea = document.getElementById('scan-area');
     if (previewCapture && scanArea) {
-      var capture = await this.capturePhoto(scanArea.getBoundingClientRect());
-      const obUrl = URL.createObjectURL(capture);
-      const link = document.createElement('a');
-      link.href = obUrl;
-      link.target = '_blank';
-      link.click();
+      await this.capturePhoto(scanArea.getBoundingClientRect());
     }
 
     console.log('Mediastream -> ', this.mediaStream);

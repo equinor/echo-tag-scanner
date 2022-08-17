@@ -73,27 +73,42 @@ class Camera extends Postprocessor {
     const elementWidth = this.viewfinder.width;
     // this is 428px on iPhone
     const videoHeight = this.viewfinder.videoHeight;
+    // this is 746px on iPhone
+    const elementHeight = this.viewfinder.height;
 
     // FIXME: move to own handling - should only need to be calculated on
     // resize observer thingymajiggy -- and should probably always be <1?
     // Gotta verify on screens with larger viewport than mediastream/video intrinsic size
-    let scale = elementWidth / videoWidth;
-    // width and height of the capture area scaled to original image
-    const sWidth = captureArea.height * scale;
-    const sHeight = captureArea.width * scale;
+    let scale_x = elementWidth / videoWidth;
+    let scale_y = elementHeight / videoHeight;
 
+    // When scale is larger here it means that the element is larger than videofeed
+    // so our scaling factor needs to be swapped?
+    // Not sure we ever need X and Y scaling tho..
+    if (scale_x > 1) {
+      scale_x = videoWidth / elementWidth;
+    }
+
+    if (scale_y > 1) {
+      scale_y = videoHeight / elementHeight;
+    }
+
+    // width and height of the capture area on the videofeed
+    const sWidth = captureArea.width * scale_x;
+    const sHeight = captureArea.height * scale_y;
+    // x and y position of top left corner of the capture area on videofeed
     const sx = videoWidth / 2 - sWidth / 2;
     const sy = videoHeight / 2 - sHeight / 2;
 
     const params: DrawImageParameters = {
       sx,
       sy,
-      sHeight,
       sWidth,
+      sHeight,
       dx: 0,
       dy: 0,
-      dHeight: captureArea.height,
-      dWidth: captureArea.width
+      dWidth: captureArea.width,
+      dHeight: captureArea.height
     };
     return this._canvasHandler.draw(this.viewfinder, params);
   }

@@ -47,7 +47,7 @@ const CaptureAndTorchWrapper = styled.div`
 `;
 
 const DebugButton = styled(Button)`
-  grid-area: empty-cell;
+  grid-area: torch;
   background: hotpink;
 `;
 

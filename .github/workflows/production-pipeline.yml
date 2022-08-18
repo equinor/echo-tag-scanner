@@ -20,6 +20,10 @@ jobs:
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
+        env:
+            REACT_APP_API_URL: https://dt-echopedia-api-prod.azurewebsites.net
+            REACT_APP_AZURE_AD_CLIENT_ID: 3ac1c2ce-4522-4b1c-b274-75a4fe540553
+            REACT_APP_API_CLIENT_ID: 1aea60eb-dd88-45b9-aa2c-ab12f44ed79b
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_VICTORIOUS_PEBBLE_043419E03 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)

@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { TorchButton, ScannerButton } from '@components';
 import { Button } from '@equinor/eds-core-react';
+import { isDevelopment } from '@utils';
 
 interface CameraControlsProps {
   /* Scanning callback */
@@ -32,7 +33,9 @@ const CaptureAndTorch = (props: CameraControlsProps): JSX.Element => {
           isDisabled={props.isDisabled}
           isScanning={props.isScanning}
         />
-        <DebugButton variant="ghost" onClick={props.onDebug}></DebugButton>
+        {isDevelopment && (
+          <DebugButton variant="ghost" onClick={props.onDebug}></DebugButton>
+        )}
       </CaptureAndTorchGrid>
     </CaptureAndTorchWrapper>
   );

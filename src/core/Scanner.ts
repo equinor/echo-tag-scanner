@@ -1,9 +1,8 @@
 import { CameraProps, ParsedComputerVisionResponse } from '@types';
 import { ocrRead } from '@services';
-import { logger, runTagValidation } from '@utils';
+import { isDevelopment, logger, runTagValidation } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { Camera } from './Camera';
-import { EchoEnv } from '@equinor/echo-core';
 
 /**
  * This object implements tag scanning logic.
@@ -15,7 +14,7 @@ export class TagScanner extends Camera {
   constructor(props: CameraProps) {
     super(props);
 
-    if (EchoEnv.isDevelopment()) {
+    if (isDevelopment) {
       globalThis.setScanRetires = (r: number) => (this._scanRetries = r);
       globalThis.setScanDuraction = (t: number) => (this._scanDuration = t);
       globalThis.pause = () => this.pauseViewfinder();

@@ -4,8 +4,7 @@ import { Button } from '@equinor/eds-core-react';
 import { TagContextMenu, TagIcon, getIcon } from '@equinor/echo-components';
 import { getLegendStatusColor } from '@equinor/echo-framework';
 import { TagSummaryDto } from '@equinor/echo-search';
-import { logger } from '@utils';
-import { EchoEnv } from '@equinor/echo-core';
+import { logger, isDevelopment } from '@utils';
 
 interface SearchResultsProps {
   tagSummary: TagSummaryDto[];
@@ -28,7 +27,7 @@ const SearchResults = (props: SearchResultsProps): JSX.Element | null => {
       }
     }
 
-    EchoEnv.isDevelopment() && logTagSummaries();
+    isDevelopment && logTagSummaries();
   }, [props.tagSummary]);
 
   function createSearchResult(tag: TagSummaryDto, index: number) {

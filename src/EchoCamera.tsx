@@ -1,12 +1,11 @@
 import React, { memo, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
 import { ScanningArea, Viewfinder } from '@components';
-import { logger } from '@utils';
+import { logger, isDevelopment } from '@utils';
 import { ErrorBoundary } from '@services';
 import { TagScanner } from './core/Scanner';
 import { Scanner } from './Scanner';
 import styled from 'styled-components';
-import { EchoEnv } from '@equinor/echo-core';
 
 const useEffectAsync = EchoUtils.Hooks.useEffectAsync;
 
@@ -18,7 +17,9 @@ const EchoCamera = () => {
   // the media stream for out videoelement
   const [stream, setStream] = useState<MediaStream | undefined>();
   useEffectAsync(async () => {
-    console.info('We are in development ->', EchoEnv.isDevelopment());
+    console.info('We are in development ->', isDevelopment);
+    console.log('outers', globalThis.outerHeight);
+    console.log('inners', globalThis.innerHeight);
     const mediaStream = await TagScanner.promptCameraUsage();
     setStream(mediaStream);
   }, []);
@@ -55,6 +56,8 @@ const EchoCamera = () => {
 
 const Main = styled.main`
   touch-action: none;
+  height: 100vh;
+  width: 100vw;
 `;
 
 export default memo(EchoCamera);

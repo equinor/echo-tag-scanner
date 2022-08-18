@@ -1,7 +1,6 @@
-import { handleError, getOrientation, logger } from '@utils';
+import { handleError, getOrientation, logger, isDevelopment } from '@utils';
 import { ErrorRegistry } from '@enums';
 import { CameraProps } from '@types';
-import { EchoEnv } from '@equinor/echo-core';
 
 /**
  * This object is concerned with the core features of a camera.
@@ -82,7 +81,7 @@ class CoreCamera {
 
         // In production, we always want the rear camera to be selected.
         facingMode:
-          { exact: facingModeOverride } || EchoEnv.isDevelopment()
+          { exact: facingModeOverride } || isDevelopment
             ? { ideal: 'environment' }
             : { exact: 'environment' }
       },
@@ -97,7 +96,7 @@ class CoreCamera {
           console.group(
             'We could not select a camera because of an overconstrain error'
           );
-          if (EchoEnv.isProduction()) {
+          if (isDevelopment) {
             console.info(
               'This error is likely because you do not have a rear-facing camera on your device, which is a requirement in production'
             );

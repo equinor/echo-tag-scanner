@@ -1,6 +1,7 @@
 import { handleError, getOrientation, logger } from '@utils';
 import { ErrorRegistry } from '@enums';
 import { CameraProps } from '@types';
+import { EchoEnv } from '@equinor/echo-core';
 
 /**
  * This object is concerned with the core features of a camera.
@@ -13,6 +14,7 @@ class CoreCamera {
   private _orientationObserver: ResizeObserver;
   private _capabilities?: MediaTrackCapabilities = undefined;
   private _currentOrientation: 'portrait' | 'landscape';
+  private _activeCamera?: string;
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
@@ -21,6 +23,7 @@ class CoreCamera {
     this._capabilities = this._videoTrack.getCapabilities();
     this._videoTrackSettings = this._videoTrack.getSettings();
     this._currentOrientation = getOrientation();
+    this._activeCamera = this._videoTrackSettings.facingMode;
     this._orientationObserver = new ResizeObserver(
       this.handleOrientationChange.bind(this)
     );
@@ -60,6 +63,7 @@ class CoreCamera {
    * Asks the user for permission to use the device camera and resolves a MediaStream object.
    */
   static async promptCameraUsage(
+    facingModeOverride?: 'environment' | 'user',
     additionalCaptureOptions?: DisplayMediaStreamConstraints
   ): Promise<MediaStream> {
     const mediaStream = await navigator.mediaDevices
@@ -73,19 +77,20 @@ class CoreCamera {
            * The canvas operations relies on the <video> element's intrinsic dimensions.
            */
           width: {
-            min: globalThis.innerWidth,
-            max: globalThis.innerWidth
+            ideal: globalThis.innerWidth
           },
           height: {
-            min: globalThis.innerHeight,
-            max: globalThis.innerHeight
+            ideal: globalThis.innerHeight
           },
 
           // Higher FPS is good for a scanning operation.
           frameRate: {
             ideal: 60
           },
-          facingMode: 'environment'
+          facingMode:
+            { exact: facingModeOverride } || EchoEnv.isDevelopment()
+              ? { ideal: 'environment' }
+              : { exact: 'environment' }
         },
         audio: false,
         ...additionalCaptureOptions
@@ -115,9 +120,18 @@ class CoreCamera {
     }
   }
 
-  public async refreshStream() {
+  public async refreshStream(toggleCamera = false) {
+    const newActiveCamera = (() => {
+      if (toggleCamera) {
+        if (this._activeCamera === 'environment') return 'user';
+        else return 'environment';
+      }
+    })();
+    console.log(newActiveCamera);
     try {
-      const newMediastream = await CoreCamera.promptCameraUsage();
+      const newMediastream = await CoreCamera.promptCameraUsage(
+        newActiveCamera
+      );
       const newTrack = newMediastream.getVideoTracks()[0];
       const newConstraints = newTrack.getConstraints();
       await this._videoTrack?.applyConstraints(newConstraints);

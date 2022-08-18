@@ -22,6 +22,8 @@ export class TagScanner extends Camera {
       globalThis.resume = () => this.resumeViewfinder();
       globalThis.debugCamera = (preview) => this.debugAll(preview);
       globalThis.refresh = () => this.refreshStream();
+      globalThis.toggleCamera = async () =>
+        await this.refreshStream(Boolean('toggleCamera'));
     }
   }
 

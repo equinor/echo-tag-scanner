@@ -6,6 +6,7 @@ import { ErrorBoundary } from '@services';
 import { TagScanner } from './core/Scanner';
 import { Scanner } from './Scanner';
 import styled from 'styled-components';
+import { EchoEnv } from '@equinor/echo-core';
 
 const useEffectAsync = EchoUtils.Hooks.useEffectAsync;
 
@@ -17,6 +18,7 @@ const EchoCamera = () => {
   // the media stream for out videoelement
   const [stream, setStream] = useState<MediaStream | undefined>();
   useEffectAsync(async () => {
+    console.info('We are in development ->', EchoEnv.isDevelopment());
     const mediaStream = await TagScanner.promptCameraUsage();
     setStream(mediaStream);
   }, []);

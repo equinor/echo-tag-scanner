@@ -21,6 +21,10 @@ jobs:
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
+        env:
+            REACT_APP_API_URL: ${{secrets.REACT_APP_API_URL_DEV}}
+            REACT_APP_AZURE_AD_CLIENT_ID: ${{secrets.REACT_APP_AZURE_AD_CLIENT_ID_DEV}}
+            REACT_APP_API_CLIENT_ID: ${{secrets.REACT_APP_API_CLIENT_ID_DEV}}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_RED_HILL_093221B03 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)

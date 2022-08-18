@@ -11,12 +11,3 @@ export function debounce(func: Function, timeout = 300) {
     }, timeout);
   };
 }
-
-function getIsDevelopment() {
-  return (
-    EchoEnv.env().REACT_APP_API_URL ===
-    'https://dt-echopedia-api-dev.azurewebsites.net'
-  );
-}
-
-export const isDevelopment = getIsDevelopment();

@@ -7,3 +7,4 @@ export * from './url';
 export * from './tag';
 export * from './logger';
 export * from './viewport';
+export * from './developer';

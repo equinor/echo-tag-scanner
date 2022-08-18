@@ -1,4 +1,4 @@
-import React, { RefObject, SetStateAction } from 'react';
+import React, { SetStateAction } from 'react';
 import styled from 'styled-components';
 
 import { Dimensions, useScanningAreaDimensions } from './viewFinderUtils';

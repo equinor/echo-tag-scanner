@@ -1,5 +1,4 @@
 import { analytics, AnalyticsEvent, AnalyticsModule } from '@equinor/echo-core';
-
 import echomodule from '../../echoModule.config.json';
 
 export enum ObjectName {

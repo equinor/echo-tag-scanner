@@ -1,6 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-
 import { TagScanner } from '../core/Scanner';
 import { CameraProps } from '@types';
 import { assignZoomSettings } from '@utils';

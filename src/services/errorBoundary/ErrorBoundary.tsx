@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-
 import { eventHub } from '@equinor/echo-core';
 import { BaseError } from '@equinor/echo-base';
 import {
@@ -12,7 +11,6 @@ import {
   Icon
 } from '@equinor/eds-core-react';
 import { warning_filled } from '@equinor/eds-icons';
-
 import { ErrorKey } from '@enums';
 import { EchoCameraError } from '@types';
 

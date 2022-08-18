@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { getNotificationDispatcher as dispatchNotification } from '@utils';
 import { Button } from '@equinor/eds-core-react';
 import { TagContextMenu, TagIcon, getIcon } from '@equinor/echo-components';
 import { getLegendStatusColor } from '@equinor/echo-framework';

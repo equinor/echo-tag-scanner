@@ -1,6 +1,4 @@
-import { logger } from '@utils';
 import { CameraProps, DrawImageParameters } from '@types';
-
 import { CanvasHandler } from './CanvasHandler';
 import { CoreCamera } from './CoreCamera';
 
@@ -45,6 +43,7 @@ class Postprocessor extends CoreCamera {
       dHeight: this._canvas.height * byFactor,
       dWidth: this._canvas.width * byFactor
     };
+
     const downscaledImgBlob = await this._canvasHandler.draw(bitmap, params);
     return downscaledImgBlob;
   }

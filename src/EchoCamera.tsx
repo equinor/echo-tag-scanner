@@ -1,14 +1,10 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
-
+import React, { memo, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-
 import { ScanningArea, Viewfinder } from '@components';
-import { logger, ObjectName } from '@utils';
+import { logger } from '@utils';
 import { ErrorBoundary } from '@services';
-
 import { TagScanner } from './core/Scanner';
 import { Scanner } from './Scanner';
-import { EchoEnv } from '@equinor/echo-core';
 import styled from 'styled-components';
 
 const useEffectAsync = EchoUtils.Hooks.useEffectAsync;

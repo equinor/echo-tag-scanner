@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Syncer, TagSummaryDto } from '@equinor/echo-search';
+import { TagSummaryDto } from '@equinor/echo-search';
 import { CaptureAndTorch, SearchResults, ZoomSlider } from '@components';
 import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';

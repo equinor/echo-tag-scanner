@@ -66,42 +66,45 @@ class CoreCamera {
     facingModeOverride?: 'environment' | 'user',
     additionalCaptureOptions?: DisplayMediaStreamConstraints
   ): Promise<MediaStream> {
-    const mediaStream = await navigator.mediaDevices
-      .getUserMedia({
-        video: {
-          /**
-           * Set the intrinsic dimensions of the <video> element (videoHeight and videoWidth)
-           * to whatever is the viewport width and height.
-           *
-           * This is needed in order to correctly crop the captures.
-           * The canvas operations relies on the <video> element's intrinsic dimensions.
-           */
-          width: {
-            ideal: globalThis.innerWidth
-          },
-          height: {
-            ideal: globalThis.innerHeight
-          },
-
-          // Higher FPS is good for a scanning operation.
-          frameRate: {
-            ideal: 60
-          },
-          facingMode:
-            { exact: facingModeOverride } || EchoEnv.isDevelopment()
-              ? { ideal: 'environment' }
-              : { exact: 'environment' }
+    const cameraPreferences = {
+      video: {
+        width: {
+          ideal: globalThis.innerWidth
         },
-        audio: false,
-        ...additionalCaptureOptions
-      })
+        height: {
+          ideal: globalThis.innerHeight
+        },
+
+        // Higher FPS is good for a scanning operation.
+        frameRate: {
+          ideal: 60
+        },
+
+        // In production, we always want the rear camera to be selected.
+        facingMode:
+          { exact: facingModeOverride } || EchoEnv.isDevelopment()
+            ? { ideal: 'environment' }
+            : { exact: 'environment' }
+      },
+      audio: false,
+      ...additionalCaptureOptions
+    };
+
+    const mediaStream = await navigator.mediaDevices
+      .getUserMedia(cameraPreferences)
       .catch((error) => {
-        console.error('media stream capture failed', error);
         if (error instanceof OverconstrainedError) {
-          console.error(
-            'Could not set camera constraints. The device/viewport dimensions should not be bigger than the resolution of the camera; or the camera is not capable of framerates over 15.'
+          console.group(
+            'We could not select a camera because of an overconstrain error'
           );
-          throw handleError(ErrorRegistry.overconstrainedError, error as Error);
+          if (EchoEnv.isProduction()) {
+            console.info(
+              'This error is likely because you do not have a rear-facing camera on your device, which is a requirement in production'
+            );
+          }
+          console.error(error);
+          console.info('Here is what was requested', cameraPreferences);
+          console.groupEnd();
         }
         throw new Error(error);
       });

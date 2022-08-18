@@ -5,7 +5,6 @@ import {
   CanvasHandlerProps,
   DrawImageParameters
 } from '@types';
-import EchoUtils from '@equinor/echo-utils';
 
 /**
  * This object implements different operations on the postprocessing canvas.
@@ -77,15 +76,22 @@ class CanvasHandler {
     image: CanvasImageSource | ImageData,
     params: DrawImageParameters
   ): Promise<Blob> {
-    this.clearCanvas();
+    if (params.dWidth === 0 || params.dHeight === 0) {
+      throw new Error(
+        'Could not draw image onto a canvas with zero height or width'
+      );
+    }
+    // Before drawing, set the canvas dimensions to be equal to whatever is being drawn..
+    this._canvas.width = params.dWidth;
+    this._canvas.height = params.dHeight;
 
-    // Before drawing, set the canvas dimensions to be equal to whatever is being drawn.
-    this._canvas.width = params.dWidth ?? 0;
-    this._canvas.height = params.dHeight ?? 0;
+    // ..and blank the canvas.
+    this.clearCanvas();
 
     if (image instanceof ImageData) {
       this._canvasContext?.putImageData(image, params.dx, params.dy);
     } else {
+      console.log('Drawing onto canvas with the following params: ', params);
       this._canvasContext.drawImage(
         image,
         params.sx,
@@ -133,12 +139,6 @@ class CanvasHandler {
       if ((typeof quality === 'number' && quality < 0) || Number(quality) > 1) {
         reject('Quality must be between 0 and 1, got ' + quality + '.');
       }
-
-      console.log(
-        'CANVAS WIDTH/HEIGHT in GETBLOB: ',
-        this._canvas.width,
-        this._canvas.height
-      );
 
       this._canvas.toBlob(
         (blobbedDrawing) => {

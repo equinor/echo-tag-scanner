@@ -73,10 +73,11 @@ const InvisibleWrapper = styled.div`
   display: flex;
   flex-direction: column;
   pointer-events: all;
+  gap: var(--small);
 `;
 
 const SearchResult = styled(TagContextMenu)`
-  margin-bottom: var(--small);
+  padding-bottom: var(--small);
 `;
 
 export { SearchResults };

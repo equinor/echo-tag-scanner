@@ -2,19 +2,6 @@ import { ParsedComputerVisionResponse } from '@types';
 import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { logger } from './logger';
 
-function hasContent(data: unknown) {
-  if (data != null) {
-    if (typeof data === 'string' || typeof data === 'number') {
-      return data != null;
-    } else if (Array.isArray(data)) {
-      return data.length > 0;
-    } else if (typeof data === 'object') {
-      return Reflect.ownKeys(data).length > 0;
-    }
-  }
-  return false;
-}
-
 /**
  * Accepts a possible tag number as string value and runs it through Echo Search for validation.
  */
@@ -72,10 +59,10 @@ export async function runTagValidation(
   const tagValidationResults = await Promise.allSettled([
     ...tagValidationTasks
   ]);
-  const unwrapped: TagSummaryDto[] = [];
+  const validatedTags: TagSummaryDto[] = [];
   tagValidationResults.forEach((res) => {
-    if (res.status === 'fulfilled') unwrapped.push(res.value);
+    if (res.status === 'fulfilled') validatedTags.push(res.value);
   });
 
-  return unwrapped;
+  return validatedTags;
 }

@@ -1,5 +1,4 @@
 import { CameraProps, DrawImageParameters } from '@types';
-import { logger } from '@utils';
 import { Postprocessor } from './Postprocessor';
 
 /**
@@ -110,6 +109,19 @@ class Camera extends Postprocessor {
       dWidth: captureArea.width,
       dHeight: captureArea.height
     };
+    console.group('The maffs');
+    console.info('video width ->', videoWidth);
+    console.info('video height ->', videoHeight);
+    console.info('element width -> ', elementWidth);
+    console.info('element height ->', elementHeight);
+    console.info('horizontal scale ->', scale_y);
+    console.info('vertical scale -> ', scale_x);
+    console.info('capture width -> ', sWidth);
+    console.info('capture height ->', sHeight);
+    console.info('sx -> ', sx);
+    console.info('sy -> ', sy);
+    console.info('viewport complete', globalThis.visualViewport);
+    console.groupEnd();
     return this._canvasHandler.draw(this.viewfinder, params);
   }
 

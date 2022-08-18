@@ -1,39 +1,25 @@
 module.exports = {
-  parser: '@typescript-eslint/parser', // Specifies the ESLint parser
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2020, // Allows for the parsing of modern ECMAScript features
-    sourceType: 'module', // Allows for the use of imports
+    ecmaVersion: 2021,
+    sourceType: 'module',
     ecmaFeatures: {
-      jsx: true // Allows for the parsing of JSX
+      jsx: true
     }
   },
+  plugins: ['react', 'react-hooks'],
+  extends: ['plugin:react/recommended', 'plugin:prettier/recommended'],
   settings: {
     react: {
-      version: 'detect' // Tells eslint-plugin-react to automatically detect the version of React to use
+      version: 'detect'
     }
   },
-  plugins: ['react-hooks'],
-  extends: [
-    'plugin:react/recommended', // Uses the recommended rules from @eslint-plugin-react
-    'plugin:@typescript-eslint/recommended,', // Uses the recommended rules from the @typescript-eslint/eslint-plugin
-    //'plugin:prettier/recommended', // Enables eslint-plugin-prettier and eslint-config-prettier. This will display prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
-    'prettier'
-  ],
+  env: { browser: true, node: true, es6: true },
   rules: {
-    // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
-    // e.g. "@typescript-eslint/explicit-function-return-type": "off",
-    'no-multi-spaces': ['error'],
-    '@typescript-eslint/no-use-before-define': 'off',
-    '@typescript-eslint/no-non-null-assertion': 'off',
+    'no-multi-spaces': ['warn'],
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
-    'react/react-in-jsx-scope': 'off',
-    'prettier/prettier': [
-      'error',
-      {
-        endOfLine: 'auto'
-      }
-    ],
-    'react/prop-types': 'off'
+    'react/prop-types': 0,
+    'react/react-in-jsx-scope': 0
   }
 };

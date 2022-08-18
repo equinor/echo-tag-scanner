@@ -1,24 +1,16 @@
 # Echo Camera Web
+
 An Echo module for recognising tag numbers with a camera.
-The camera communicates with MadOCR API.
+
+Full documentation:
+https://github.com/equinor/echo-camera-web/blob/dev/docs/index.md
 
 ## First time development setup
+
 1. Clone the repo
 2. ```npm install```
 3. ```npm run predev``` -> get your self-signed certificates
 4. ```npm start``` -> a webpack dev server instance is available at https://localhost:3000
-
-
-## Local development with EchopediaWeb
-In order to test Smart Portal running locally under EchopediaWeb, a soft-link between the repos can be created with [yalc](https://www.npmjs.com/package/yalc).
-1. (in Echo Camera) ```npm run build```
-2. (in Echo Camera) ```npx yalc publish```
-3. (in EchopediaWeb) ```npx yalc add @equinor/smart-portal```
-4.  (in EchopediaWeb) ```npm install```
-5. (in EchopediaWeb) ```npm start```
-6. (in Echo Camera) make your changes then ```npm run build && npx yalc push```
-
-EchopediaWeb dev server will recompile and you changes should be reflected in the browser.
 
 ## Coding rules
 
@@ -42,10 +34,12 @@ EchopediaWeb dev server will recompile and you changes should be reflected in th
 ##  VS Code Extensions
 
 ### Must-have
+
 - ESLint
 - Prettier
 
 ### Suggested
+
 - GitHub Pull Requests
 - Import Cost
 - SVG

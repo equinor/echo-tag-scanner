@@ -1,29 +1,28 @@
-import React, { useState, useEffect, FC } from 'react';
-import EchoCore from '@equinor/echo-core';
-import { EchoCamera } from './EchoCamera';
-import { ErrorBoundary } from '@services';
+import React, { Suspense } from 'react';
 
-const App: FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+import { DialogGenerator } from '@equinor/echo-components';
+import { Dialog, Progress } from '@equinor/eds-core-react';
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      if (EchoCore.EchoAuthProvider.isAuthenticated) {
-        setIsAuthenticated(true);
-      } else {
-        EchoCore.EchoAuthProvider.handleLogin().then(() => {
-          if (EchoCore.EchoAuthProvider.isAuthenticated) {
-            setIsAuthenticated(true);
-          }
-        });
-      }
-    }
-  }, [isAuthenticated]);
+// import EchoCamera from './EchoCamera';
+const LazyCamera = React.lazy(() => import('./EchoCamera'));
 
+const FallbackLoading = (): JSX.Element => {
   return (
-    <ErrorBoundary stackTraceEnabled>
-      <EchoCamera />
-    </ErrorBoundary>
+    <DialogGenerator title="Loading..." actionButtons={[]} open>
+      <Dialog.CustomContent>
+        <Progress.Circular
+          style={{ margin: 'auto', display: 'block !important' }}
+        />
+      </Dialog.CustomContent>
+    </DialogGenerator>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Suspense fallback={<FallbackLoading />}>
+      <LazyCamera />
+    </Suspense>
   );
 };
 

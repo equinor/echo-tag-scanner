@@ -1,16 +1,18 @@
-import React from "react";
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 import { TorchButton, ScannerButton } from '@components';
-import { SupportedCameraFeatures } from '@types';
+import { Button } from '@equinor/eds-core-react';
 
 interface CameraControlsProps {
   /* Scanning callback */
   onScanning: () => void;
   /* Torch callback. If undefined, the torch is not supported. */
   onToggleTorch?: () => void;
+  onDebug?: () => void;
 
   isDisabled?: boolean;
-  supportedFeatures: SupportedCameraFeatures;
+  isScanning?: boolean;
+  supportedFeatures: Pick<MediaTrackCapabilities, 'torch'>;
 }
 
 /**
@@ -18,28 +20,38 @@ interface CameraControlsProps {
  * @param {callback} - The scanning action
  * @param {callback} - The torch action. If undefined, the torch button is disabled.
  */
-const CameraControls = (props: CameraControlsProps): JSX.Element => {
-  function onScanning() {
-    props.onScanning();
-  }
-
+const CaptureAndTorch = (props: CameraControlsProps): JSX.Element => {
   return (
-    <CameraControlsWrapper>
-      <CameraController role="toolbar">
+    <CaptureAndTorchWrapper>
+      <CaptureAndTorchGrid role="toolbar">
         {props.supportedFeatures.torch && (
           <TorchButton name="lightbulb" onClick={props.onToggleTorch} />
         )}
-        <ScannerButton onClick={onScanning} isDisabled={props.isDisabled} />
-      </CameraController>
-    </CameraControlsWrapper>
+        <ScannerButton
+          onClick={props.onScanning}
+          isDisabled={props.isDisabled}
+          isScanning={props.isScanning}
+        />
+        <DebugButton variant="ghost" onClick={props.onDebug}></DebugButton>
+      </CaptureAndTorchGrid>
+    </CaptureAndTorchWrapper>
   );
 };
 
-const CameraControlsWrapper = styled.section`
+const CaptureAndTorchWrapper = styled.div`
   width: 100%;
+
+  @media screen and (orientation: landscape) {
+    height: 100%;
+  }
 `;
 
-const CameraController = styled.div`
+const DebugButton = styled(Button)`
+  grid-area: torch;
+  background: hotpink;
+`;
+
+const CaptureAndTorchGrid = styled.div`
   display: grid;
   grid-template-columns: [torch]1fr [shutter]1fr [empty-cell]1fr;
   justify-items: center;
@@ -48,6 +60,13 @@ const CameraController = styled.div`
   label {
     margin-right: 1.5em;
   }
+
+  @media screen and (orientation: landscape) {
+    width: auto;
+    height: 100%;
+    grid-template-columns: 1fr;
+    grid-template-rows: [empty-cell]1fr [shutter]1fr [torch]1fr;
+  }
 `;
 
-export { CameraControls };
+export { CaptureAndTorch };

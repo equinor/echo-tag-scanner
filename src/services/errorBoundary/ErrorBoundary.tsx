@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-
 import { eventHub } from '@equinor/echo-core';
 import { BaseError } from '@equinor/echo-base';
 import {
@@ -12,7 +11,6 @@ import {
   Icon
 } from '@equinor/eds-core-react';
 import { warning_filled } from '@equinor/eds-icons';
-
 import { ErrorKey } from '@enums';
 import { EchoCameraError } from '@types';
 
@@ -138,8 +136,8 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
                 </DialogueTitleSection>
                 <Dialog.CustomContent>
                   <ErrorBoundaryContent>
-                    <Typography variant="body_long">
-                      Smart Portal ran into an issue. Check the marked message
+                    <section>
+                      The Camera ran into an issue. Check the marked message
                       below for more details.
                       <p>
                         <mark>
@@ -151,7 +149,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
                         If you want to report this, be sure to expand
                         &quot;Developer information&quot; below
                       </p>
-                    </Typography>
+                    </section>
                     <Developer>
                       <Details>
                         <summary>Developer information</summary>

@@ -1,8 +1,9 @@
 import { getComputerVisionOcrResources } from '../resources/resources';
 import { baseApiClient } from '../base/base';
 import { ComputerVisionResponse, ParsedComputerVisionResponse } from '@types';
-import { handleError } from '@utils';
+import { handleError, logger } from '@utils';
 import { ErrorRegistry } from '../../../enums';
+import { BackendError } from '@equinor/echo-base';
 
 export async function ocrRead(
   image: Blob
@@ -21,33 +22,44 @@ export async function ocrRead(
     const parsedResponse = parseResponse(response.data);
     return parsedResponse;
   } catch (error) {
-    console.error('API Error -> ', error);
-    throw handleError(ErrorRegistry.ocrError, error as Error);
+    if (error instanceof BackendError && error.httpStatusCode === 429) {
+      // Here we handle the event where users might go over the Computer vision usage quota.
+      // We do not percieve this as an error on the client side. The user will simply try again.
+      logger.log('Warning', () =>
+        console.warn(
+          'The scan operation resulted in an overload in the usage quota for Computer Vision. This is normally not a problem and we simply return empty results to the users. This will prompt them to try again.'
+        )
+      );
+      return [];
+    } else {
+      logger.log('Error', () => console.error('API Error -> ', error));
+      throw handleError(ErrorRegistry.ocrError, error as Error);
+    }
   }
 }
 
 function reportTimeTakenForRequest(startDate: Date, endDate: Date) {
   const result = endDate.getMilliseconds() - startDate.getMilliseconds();
-  console.group('Request timer');
-  console.info(`OCR Scanning took ${result} milliseconds`);
-  console.groupEnd();
+  logger.log('Info', () => {
+    console.group('Request timer');
+    console.info(`OCR Scanning took ${result} milliseconds`);
+    console.groupEnd();
+  });
 }
 
 // TODO: Improve this, possibly do validation here.
 function parseResponse(
   response: ComputerVisionResponse
 ): ParsedComputerVisionResponse {
-  const possibleTagNumbers = [];
+  const possibleTagNumbers: string[] = [];
   response.regions.forEach((region) =>
     region.lines.forEach((line) =>
       line.words.forEach((word) => {
-        if (word.text && word.text.length >= 7) {
-          // TODO: Improve regexp to include filter everything expect "-", alphanumerics, and aA-zZ.
-          possibleTagNumbers.push(word.text.replaceAll(/[\(\)']+/g, ''));
+        if (word.text && word.text.length >= 5) {
+          possibleTagNumbers.push(word.text);
         }
       })
     )
   );
-  console.log('ocr result: ', possibleTagNumbers);
-  return { results: possibleTagNumbers };
+  return possibleTagNumbers;
 }

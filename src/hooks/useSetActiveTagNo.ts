@@ -1,12 +1,20 @@
-import EchoFramework from '@equinor/echo-framework';
+import EchoFramework, { SetActiveTagNo } from '@equinor/echo-framework';
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+import { logger } from '@utils';
+
 export function useSetActiveTagNo() {
   try {
     return EchoFramework.Hooks.useSetActiveTagNo();
   } catch (error) {
-    return (tagNo: string) => {
-      console.warn('SetActiveTagNo does not work locally. Here is the tagNo: ', tagNo);
+    const setActiveTagNo: SetActiveTagNo = (tagNo) => {
+      logger.log('Warning', () =>
+        console.warn(
+          'SetActiveTagNo does not work locally. Here is the tagNo: ',
+          tagNo
+        )
+      );
     };
+
+    return setActiveTagNo;
   }
 }

@@ -1,98 +1,33 @@
-import { RefObject } from 'react';
-import { handleError } from '@utils';
+import { handleError, getOrientation, logger, isDevelopment } from '@utils';
 import { ErrorRegistry } from '@enums';
+import { CameraProps } from '@types';
 
-export interface CoreCameraProps {
-  viewfinder: RefObject<HTMLVideoElement>;
-  canvas: RefObject<HTMLCanvasElement>;
-  additionalCaptureOptions?: DisplayMediaStreamConstraints;
-}
-
+/**
+ * This object is concerned with the core features of a camera.
+ */
 class CoreCamera {
-  private _cameraEnabled = true;
-  private _capture?: Blob;
-  private _mediaStream?: MediaStream;
-  private _canvas?: RefObject<HTMLCanvasElement>;
-  protected _viewfinder?: RefObject<HTMLVideoElement>;
+  private _mediaStream: MediaStream;
+  private _viewfinder: HTMLVideoElement;
   private _videoTrack?: MediaStreamTrack;
-  public _capabilities?: MediaTrackCapabilities = undefined;
-  private _settings?: MediaTrackSettings;
+  private _videoTrackSettings?: MediaTrackSettings;
+  private _orientationObserver: ResizeObserver;
+  private _capabilities?: MediaTrackCapabilities = undefined;
+  private _currentOrientation: 'portrait' | 'landscape';
+  private _activeCamera?: string;
 
-  constructor(props: CoreCameraProps) {
+  constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
-    this._canvas = props.canvas;
-
-    // Request camera usage.
-    this.promptCameraUsage(props.additionalCaptureOptions).then(
-      onApproval.bind(this),
-      onRejection
+    this._mediaStream = props.mediaStream;
+    this._videoTrack = props.mediaStream.getVideoTracks()[0];
+    this._capabilities = this._videoTrack.getCapabilities();
+    this._videoTrackSettings = this._videoTrack.getSettings();
+    this._currentOrientation = getOrientation();
+    this._activeCamera = this._videoTrackSettings.facingMode;
+    this._orientationObserver = new ResizeObserver(
+      this.handleOrientationChange.bind(this)
     );
-
-    function onApproval(mediaStream: MediaStream) {
-      this._mediaStream = mediaStream;
-      this._videoTrack = this._mediaStream.getVideoTracks()[0];
-      this._capabilities = this._videoTrack.getCapabilities();
-      this._settings = this.videoTrack?.getSettings();
-      if (this._viewfinder?.current) {
-        this._viewfinder.current.srcObject = mediaStream;
-      }
-
-      console.group('Camera capabilities');
-      console.info(
-        'Camera is capable of zooming: ',
-        Boolean(this._capabilities.zoom)
-      );
-      console.info(
-        'Camera is capable of using the torch: ',
-        Boolean(this._capabilities.torch)
-      );
-      console.groupEnd();
-    }
-
-    function onRejection(reason: unknown) {
-      console.info('Camera usage was rejected.');
-      console.error(reason);
-    }
-  }
-
-  private async promptCameraUsage(
-    additionalCaptureOptions?: DisplayMediaStreamConstraints
-  ) {
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: {
-            min: 1280,
-            ideal: 1920,
-            max: 2560
-          },
-          height: {
-            min: 720,
-            ideal: 1080,
-            max: 1440
-          },
-          frameRate: {
-            ideal: 30,
-            min: 15
-          },
-          facingMode: 'environment'
-        },
-        audio: false,
-        ...additionalCaptureOptions
-      });
-      return mediaStream;
-    } catch (error) {
-      throw new Error(error);
-    }
-
-  }
-
-  public get cameraEnabled(): boolean {
-    return this._cameraEnabled;
-  }
-
-  public get capture(): Blob | undefined {
-    return this._capture;
+    this._orientationObserver.observe(this._viewfinder);
+    this._viewfinder.srcObject = props.mediaStream;
   }
 
   public get videoTrack(): MediaStreamTrack | undefined {
@@ -103,18 +38,123 @@ class CoreCamera {
     return this._capabilities;
   }
 
-  public get settings(): MediaTrackSettings | undefined {
-    return this._settings;
+  public get videoTrackSettings(): MediaTrackSettings | undefined {
+    return this._videoTrackSettings;
+  }
+
+  public get viewfinder() {
+    return this._viewfinder;
+  }
+
+  public get orientationObserver() {
+    return this._orientationObserver;
+  }
+
+  public get mediaStream() {
+    return this._mediaStream;
+  }
+
+  public get currentOrientation() {
+    return this._currentOrientation;
+  }
+
+  /**
+   * Asks the user for permission to use the device camera and resolves a MediaStream object.
+   */
+  static async promptCameraUsage(
+    facingModeOverride?: 'environment' | 'user',
+    additionalCaptureOptions?: DisplayMediaStreamConstraints
+  ): Promise<MediaStream> {
+    const cameraPreferences = {
+      video: {
+        width: {
+          ideal: globalThis.innerWidth
+        },
+        height: {
+          ideal: globalThis.innerHeight
+        },
+
+        // Higher FPS is good for a scanning operation.
+        frameRate: {
+          ideal: 60
+        },
+
+        // In production, we always want the rear camera to be selected.
+        facingMode:
+          { exact: facingModeOverride } || isDevelopment
+            ? { ideal: 'environment' }
+            : { exact: 'environment' }
+      },
+      audio: false,
+      ...additionalCaptureOptions
+    };
+
+    const mediaStream = await navigator.mediaDevices
+      .getUserMedia(cameraPreferences)
+      .catch((error) => {
+        if (error instanceof OverconstrainedError) {
+          console.group(
+            'We could not select a camera because of an overconstrain error'
+          );
+          if (isDevelopment) {
+            console.info(
+              'This error is likely because you do not have a rear-facing camera on your device, which is a requirement in production'
+            );
+          }
+          console.error(error);
+          console.info('Here is what was requested', cameraPreferences);
+          console.groupEnd();
+        }
+        throw new Error(error);
+      });
+
+    return mediaStream;
+  }
+
+  private handleOrientationChange() {
+    const newOrientation = getOrientation();
+
+    if (newOrientation !== this._currentOrientation) {
+      console.info('Switching orientation to: ', newOrientation);
+      // Device orientation has changed. Refresh the video stream.
+      this._currentOrientation = newOrientation;
+      this.refreshStream();
+    }
+  }
+
+  public async refreshStream(toggleCamera = false) {
+    const newActiveCamera = (() => {
+      if (toggleCamera) {
+        if (this._activeCamera === 'environment') return 'user';
+        else return 'environment';
+      }
+    })();
+    console.log(newActiveCamera);
+    try {
+      const newMediastream = await CoreCamera.promptCameraUsage(
+        newActiveCamera
+      );
+      const newTrack = newMediastream.getVideoTracks()[0];
+      const newConstraints = newTrack.getConstraints();
+      await this._videoTrack?.applyConstraints(newConstraints);
+      this.viewfinder.srcObject = newMediastream;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+    }
   }
 
   public zoom(zoomValue: number): void {
-    if (this._capabilities?.zoom) {
-      this._videoTrack
-        ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
-        .catch(onZoomRejection);
-    }
+    this._videoTrack
+      ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
+      .catch(onZoomRejection);
 
     function onZoomRejection(reason: unknown) {
+      console.error(
+        'Encountered an error while toggling the torch. -> ',
+        reason
+      );
       throw handleError(
         ErrorRegistry.zoomError,
         new Error('A zoom action failed, more info: ' + reason)
@@ -128,7 +168,9 @@ class CoreCamera {
         ?.applyConstraints({ advanced: [{ torch: toggled }] })
         .catch(onTorchRejection);
     } else {
-      console.warn('Device does not support the torch');
+      logger.log('Warning', () =>
+        console.warn('Device does not support the torch')
+      );
     }
 
     function onTorchRejection(reason: unknown) {
@@ -136,93 +178,6 @@ class CoreCamera {
         ErrorRegistry.torchError,
         new Error('The torch could not be toggled, more info: ' + reason)
       );
-    }
-  }
-
-  public stopCamera() {
-    if (this._videoTrack) {
-      this._videoTrack.stop();
-    }
-  }
-
-  protected async capturePhoto(): Promise<void> {
-    const videoTracks = this._mediaStream?.getVideoTracks();
-
-    function handleLegacyCaptureError(error) {
-      console.warn('Something bad happened with legacy canvas frame capture.');
-      console.error(error);
-    }
-    if (Array.isArray(videoTracks) && videoTracks.length === 1) {
-      //@ts-ignore
-      if (globalThis.ImageCapture) {
-        this._capture = await capture(videoTracks[0]);
-      } else {
-        // use legacy frame capture
-        await legacyCapture
-          .call(this)
-          .then((stillFrame: Blob) => {
-            console.info('captured frame', stillFrame);
-            this._capture = stillFrame;
-          })
-          .catch(handleLegacyCaptureError);
-      }
-    }
-
-    async function capture(videoTrack: MediaStreamTrack) {
-      const capture = new ImageCapture(videoTrack);
-      return await capture.takePhoto();
-    }
-
-    /**
-     * Captures a photo for browsers that does not support ImageCapture.
-     * @this CoreCamera
-     */
-    async function legacyCapture(): Promise<Blob | undefined> {
-      // Captures a frame from the viewfinder and stores it in a hidden canvas.
-      const writeViewfinderToCanvas = () => {
-        return new Promise((resolve, reject) => {
-          if (this._canvas?.current != null) {
-            const settings = this._videoTrack?.getSettings();
-            if (settings) {
-              if (
-                typeof settings.height === 'number' &&
-                typeof settings.width === 'number'
-              ) {
-                this._canvas.current.width = settings.width;
-                this._canvas.current.height = settings.height;
-                const canvasContext = this._canvas.current.getContext('2d');
-
-                if (canvasContext && this._viewfinder?.current != null) {
-                  canvasContext.drawImage(
-                    this._viewfinder?.current,
-                    0,
-                    0,
-                    settings.width,
-                    settings.height
-                  );
-                  resolve(undefined);
-                }
-              }
-            }
-          } else {
-            reject('Could not find a canvas to capture a frame to.');
-          }
-        });
-      };
-
-      // Retrieve the current contents of the hidden canvas as a Blob.
-      const getBlob = (): Promise<Blob | undefined> => {
-        return new Promise((resolve) => {
-          if (this._canvas.current != null) {
-            this._canvas.current.toBlob((blob: Blob) => {
-              resolve(blob);
-            });
-          }
-        });
-      };
-
-      await writeViewfinderToCanvas();
-      return await getBlob();
     }
   }
 }

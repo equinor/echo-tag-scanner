@@ -35,7 +35,7 @@ const NotificationHandler: FC = () => {
   }
 
   function isCustomDetail(event: unknown): event is CustomEventDetail {
-    if (typeof event === 'object') {
+    if (event != null && typeof event === 'object') {
       return (
         Reflect.has(event, 'autohideDuration') && Reflect.has(event, 'message')
       );
@@ -66,9 +66,9 @@ const NotificationHandler: FC = () => {
 };
 
 const Notification = styled(Toast)`
-    position: absolute !important;
-    bottom: 25% !important;
-    left: 50% !important;
-`
+  position: absolute !important;
+  bottom: 25% !important;
+  left: 50% !important;
+`;
 
 export { NotificationHandler };

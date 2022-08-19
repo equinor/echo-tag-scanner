@@ -89,24 +89,9 @@ class CoreCamera {
       ...additionalCaptureOptions
     };
 
-    const mediaStream = await navigator.mediaDevices
-      .getUserMedia(cameraPreferences)
-      .catch((error) => {
-        if (error instanceof OverconstrainedError) {
-          console.group(
-            'We could not select a camera because of an overconstrain error'
-          );
-          if (isDevelopment) {
-            console.info(
-              'This error is likely because you do not have a rear-facing camera on your device, which is a requirement in production'
-            );
-          }
-          console.error(error);
-          console.info('Here is what was requested', cameraPreferences);
-          console.groupEnd();
-        }
-        throw new Error(error);
-      });
+    const mediaStream = await navigator.mediaDevices.getUserMedia(
+      cameraPreferences
+    );
 
     return mediaStream;
   }

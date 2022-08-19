@@ -1,11 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-import {
-  OverconstrainedAlert,
-  OverconstrainedAlert,
-  ScanningArea,
-  Viewfinder
-} from '@components';
+import { OverconstrainedAlert, ScanningArea, Viewfinder } from '@components';
 import { logger, isDevelopment } from '@utils';
 import { ErrorBoundary } from '@services';
 import { TagScanner } from './core/Scanner';

@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-import { ScanningArea, Viewfinder } from '@components';
+import { OverconstrainedAlert, ScanningArea, Viewfinder } from '@components';
 import { logger, isDevelopment } from '@utils';
 import { ErrorBoundary } from '@services';
 import { TagScanner } from './core/Scanner';
@@ -16,12 +16,18 @@ const EchoCamera = () => {
 
   // the media stream for out videoelement
   const [stream, setStream] = useState<MediaStream | undefined>();
+  const [overConstrainedCameraDetails, setoverConstrainedCameraDetails] =
+    useState<OverconstrainedError | undefined>(undefined);
   useEffectAsync(async () => {
     console.info('We are in development ->', isDevelopment);
-    console.log('outers', globalThis.outerHeight);
-    console.log('inners', globalThis.innerHeight);
-    const mediaStream = await TagScanner.promptCameraUsage();
-    setStream(mediaStream);
+    try {
+      const mediaStream = await TagScanner.promptCameraUsage();
+      setStream(mediaStream);
+    } catch (error) {
+      console.error('we caught it', error instanceof OverconstrainedError);
+      if (error instanceof OverconstrainedError)
+        setoverConstrainedCameraDetails(error);
+    }
   }, []);
 
   // Represets the camera viewfinder.
@@ -30,6 +36,12 @@ const EchoCamera = () => {
   const [canvas, setCanvas] = useState<HTMLCanvasElement>();
   // All tags within this bounding box will be scanned.
   const [scanArea, setScanArea] = useState<HTMLElement>();
+
+  if (overConstrainedCameraDetails) {
+    return (
+      <OverconstrainedAlert technicalInfo={overConstrainedCameraDetails} />
+    );
+  }
 
   if (!stream) {
     return null;

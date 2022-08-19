@@ -1,6 +1,11 @@
 import React, { memo, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-import { OverconstrainedAlert, ScanningArea, Viewfinder } from '@components';
+import {
+  OverconstrainedAlert,
+  OverconstrainedAlert,
+  ScanningArea,
+  Viewfinder
+} from '@components';
 import { logger, isDevelopment } from '@utils';
 import { ErrorBoundary } from '@services';
 import { TagScanner } from './core/Scanner';
@@ -47,6 +52,12 @@ const EchoCamera = () => {
   const [canvas, setCanvas] = useState<HTMLCanvasElement>();
   // All tags within this bounding box will be scanned.
   const [scanArea, setScanArea] = useState<HTMLElement>();
+
+  if (overConstrainedCameraDetails) {
+    return (
+      <OverconstrainedAlert technicalInfo={overConstrainedCameraDetails} />
+    );
+  }
 
   if (overConstrainedCameraDetails) {
     return (

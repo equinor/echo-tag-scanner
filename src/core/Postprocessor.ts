@@ -29,10 +29,12 @@ class Postprocessor extends CoreCamera {
   }
 
   /**
-   * Scales the image by a given factor and returns the new scaled image as blob.
+   * Scales the image by a given factor, or no less than 50x50, and returns the new scaled image as blob.
    */
   protected async scale(byFactor: number): Promise<Blob> {
+    if (byFactor <= 0) throw new Error('The scale factor cannot be 0 or less.');
     const bitmap = await createImageBitmap(await this._canvasHandler.getBlob());
+
     const params: DrawImageParameters = {
       sx: 0,
       sy: 0,
@@ -44,8 +46,12 @@ class Postprocessor extends CoreCamera {
       dWidth: this._canvas.width * byFactor
     };
 
-    const downscaledImgBlob = await this._canvasHandler.draw(bitmap, params);
-    return downscaledImgBlob;
+    // If the scaled image is destined to become less than 50x50, we preserve the original dimensions.
+    if (params.dHeight <= 50 && params.dWidth <= 50) {
+      params.dHeight = this._canvas.height;
+      params.dWidth = this._canvas.width;
+    }
+    return await this._canvasHandler.draw(bitmap, params);
   }
 
   /**

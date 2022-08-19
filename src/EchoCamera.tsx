@@ -18,15 +18,26 @@ const EchoCamera = () => {
   const [stream, setStream] = useState<MediaStream | undefined>();
   const [overConstrainedCameraDetails, setoverConstrainedCameraDetails] =
     useState<OverconstrainedError | undefined>(undefined);
+
   useEffectAsync(async () => {
-    console.info('We are in development ->', isDevelopment);
     try {
       const mediaStream = await TagScanner.promptCameraUsage();
       setStream(mediaStream);
     } catch (error) {
-      console.error('we caught it', error instanceof OverconstrainedError);
-      if (error instanceof OverconstrainedError)
+      if (error instanceof OverconstrainedError) {
         setoverConstrainedCameraDetails(error);
+      } else if (
+        error instanceof DOMException &&
+        error.name === 'NotAllowedError'
+      ) {
+        console.error('We do not have access to your camera, navigating back.');
+        console.error(
+          'Check your browser settings that ' +
+            globalThis.location.href +
+            ' is not blacklisted and that you are running with HTTPS.'
+        );
+        !isDevelopment && globalThis.history.back();
+      }
     }
   }, []);
 
@@ -36,6 +47,12 @@ const EchoCamera = () => {
   const [canvas, setCanvas] = useState<HTMLCanvasElement>();
   // All tags within this bounding box will be scanned.
   const [scanArea, setScanArea] = useState<HTMLElement>();
+
+  if (overConstrainedCameraDetails) {
+    return (
+      <OverconstrainedAlert technicalInfo={overConstrainedCameraDetails} />
+    );
+  }
 
   if (overConstrainedCameraDetails) {
     return (

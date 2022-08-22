@@ -1,4 +1,5 @@
 import { CameraProps, DrawImageParameters } from '@types';
+import { logger } from '../utils';
 import { Postprocessor } from './Postprocessor';
 
 /**
@@ -109,43 +110,32 @@ class Camera extends Postprocessor {
       dWidth: captureArea.width,
       dHeight: captureArea.height
     };
-    console.group('The maffs');
-    console.info('video width ->', videoWidth);
-    console.info('video height ->', videoHeight);
-    console.info('element width -> ', elementWidth);
-    console.info('element height ->', elementHeight);
-    console.info('horizontal scale ->', scale_y);
-    console.info('vertical scale -> ', scale_x);
-    console.info('capture width -> ', sWidth);
-    console.info('capture height ->', sHeight);
-    console.info('sx -> ', sx);
-    console.info('sy -> ', sy);
-    console.info('viewport complete', globalThis.visualViewport);
-    console.groupEnd();
     return this._canvasHandler.draw(this.viewfinder, params);
   }
 
   public reportCameraFeatures() {
-    console.group('Starting camera');
-    console.info(
-      'Camera resolution -> ',
-      this.viewfinder.videoWidth,
-      this.viewfinder.videoHeight
-    );
-    console.info(
-      'Viewfinder dimensions -> ',
-      this.viewfinder.width,
-      this.viewfinder.height
-    );
-    console.info(
-      'Camera is capable of zooming: ',
-      Boolean(this.capabilities?.zoom)
-    );
-    console.info(
-      'Camera is capable of using the torch: ',
-      Boolean(this.capabilities?.torch)
-    );
-    console.groupEnd();
+    logger.log('QA', () => {
+      console.group('Starting camera');
+      console.info(
+        'Camera resolution -> ',
+        this.viewfinder.videoWidth,
+        this.viewfinder.videoHeight
+      );
+      console.info(
+        'Viewfinder dimensions -> ',
+        this.viewfinder.width,
+        this.viewfinder.height
+      );
+      console.info(
+        'Camera is capable of zooming: ',
+        Boolean(this.capabilities?.zoom)
+      );
+      console.info(
+        'Camera is capable of using the torch: ',
+        Boolean(this.capabilities?.torch)
+      );
+      console.groupEnd();
+    });
   }
 }
 

@@ -26,7 +26,9 @@ function useEchoIsSyncing() {
     };
   }, []);
 
-  logger.log('Info', () => console.info('Echo is syncing ->', echoIsSyncing));
+  logger.log('EchoDevelopment', () =>
+    console.info('Echo is syncing ->', echoIsSyncing)
+  );
   return echoIsSyncing;
 }
 

@@ -30,12 +30,14 @@ const EchoCamera = () => {
         error instanceof DOMException &&
         error.name === 'NotAllowedError'
       ) {
-        console.error('We do not have access to your camera, navigating back.');
-        console.error(
-          'Check your browser settings that ' +
-            globalThis.location.href +
-            ' is not blacklisted and that you are running with HTTPS.'
-        );
+        logger.log('QA', () => {
+          console.error('We do not have access to your camera.');
+          console.error(
+            'Check your browser settings that ' +
+              globalThis.location.href +
+              ' is not blacklisted and that you are running with HTTPS.'
+          );
+        });
         !isDevelopment && globalThis.history.back();
       }
     }

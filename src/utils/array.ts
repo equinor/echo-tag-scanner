@@ -20,7 +20,7 @@ function removeFromArray<T>(
       if (Reflect.deleteProperty(targetClone || target, deleteIndex)) {
         return (targetClone || target).filter((t) => Boolean(t));
       } else {
-        logger.log('Warning', () =>
+        logger.log('EchoDevelopment', () =>
           console.warn(
             'Could not remove indice, returning unaltered array. Maybe propertyKey is invalid or array is write protected?'
           )

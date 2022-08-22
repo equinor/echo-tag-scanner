@@ -17,10 +17,8 @@ const SearchResults = (props: SearchResultsProps): JSX.Element | null => {
   useEffect(() => {
     function logTagSummaries() {
       if (props.tagSummary.length > 0) {
-        logger.log('Info', () => {
-          console.group(
-            'This information will only be logged when LogLevel is Info'
-          );
+        logger.log('QA', () => {
+          console.group('The following tags was successfully read');
           props.tagSummary.forEach((tag) => console.table(tag));
           console.groupEnd();
         });

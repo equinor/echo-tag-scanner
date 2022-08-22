@@ -100,7 +100,6 @@ class CoreCamera {
     const newOrientation = getOrientation();
 
     if (newOrientation !== this._currentOrientation) {
-      console.info('Switching orientation to: ', newOrientation);
       // Device orientation has changed. Refresh the video stream.
       this._currentOrientation = newOrientation;
       this.refreshStream();
@@ -114,7 +113,6 @@ class CoreCamera {
         else return 'environment';
       }
     })();
-    console.log(newActiveCamera);
     try {
       const newMediastream = await CoreCamera.promptCameraUsage(
         newActiveCamera
@@ -123,8 +121,16 @@ class CoreCamera {
       const newConstraints = newTrack.getConstraints();
       await this._videoTrack?.applyConstraints(newConstraints);
       this.viewfinder.srcObject = newMediastream;
+      logger.log('EchoDevelopment', () => {
+        console.group('Refreshing camera stream');
+        console.info('The mediastream ->', newMediastream);
+        console.info('The new camera constraints -> ', newConstraints);
+        console.info('The new video track -> ', newTrack);
+        console.groupEnd();
+      });
     } catch (error) {
       if (error instanceof Error) {
+        logger.trackError(error);
         throw error;
       }
     }
@@ -136,10 +142,12 @@ class CoreCamera {
       .catch(onZoomRejection);
 
     function onZoomRejection(reason: unknown) {
-      console.error(
-        'Encountered an error while toggling the torch. -> ',
-        reason
-      );
+      logger.log('QA', () => {
+        console.error(
+          'Encountered an error while toggling the torch. -> ',
+          reason
+        );
+      });
       throw handleError(
         ErrorRegistry.zoomError,
         new Error('A zoom action failed, more info: ' + reason)
@@ -153,9 +161,7 @@ class CoreCamera {
         ?.applyConstraints({ advanced: [{ torch: toggled }] })
         .catch(onTorchRejection);
     } else {
-      logger.log('Warning', () =>
-        console.warn('Device does not support the torch')
-      );
+      logger.log('QA', () => console.warn('Device does not support the torch'));
     }
 
     function onTorchRejection(reason: unknown) {

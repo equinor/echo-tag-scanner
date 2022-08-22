@@ -13,6 +13,7 @@ interface CameraControlsProps {
 
   isDisabled?: boolean;
   isScanning?: boolean;
+  echoIsSyncing?: boolean;
   supportedFeatures: Pick<MediaTrackCapabilities, 'torch'>;
 }
 
@@ -32,6 +33,7 @@ const CaptureAndTorch = (props: CameraControlsProps): JSX.Element => {
           onClick={props.onScanning}
           isDisabled={props.isDisabled}
           isScanning={props.isScanning}
+          echoIsSyncing={props.echoIsSyncing}
         />
         {isDevelopment && (
           <DebugButton variant="ghost" onClick={props.onDebug}></DebugButton>

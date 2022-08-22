@@ -21,6 +21,7 @@ const TorchButton = (props: TorchButtonProps): JSX.Element => {
 interface CaptureButtonProps {
   isDisabled?: boolean;
   isScanning?: boolean;
+  echoIsSyncing?: boolean;
   className?: string;
   onClick?: () => void;
 }
@@ -33,6 +34,8 @@ const ScannerButton = (props: CaptureButtonProps): JSX.Element => {
     return <DisabledScannerButton />;
   } else if (props.isScanning) {
     return <ScannerButtonIsScanning />;
+  } else if (props.echoIsSyncing) {
+    return <EchoIsSyncingButton onClick={props.onClick} />;
   } else {
     return <StyledScannerButton onClick={props.onClick} />;
   }
@@ -46,6 +49,10 @@ const StyledScannerButton = styled.button`
   height: 75px;
   background-color: var(--white);
   grid-area: shutter;
+`;
+
+const EchoIsSyncingButton = styled(StyledScannerButton)`
+  background-color: var(--warningIcon);
 `;
 
 const DisabledScannerButton = styled(StyledScannerButton)`

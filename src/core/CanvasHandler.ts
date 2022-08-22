@@ -27,7 +27,7 @@ class CanvasHandler {
     if (context) {
       this._canvasContext = context;
     } else {
-      throw new Error('fuk u');
+      throw new Error('Did not get a reference to a new canvas context');
     }
 
     this._standardCanvasDimensions = {
@@ -51,11 +51,12 @@ class CanvasHandler {
           width: entry[0].contentRect.width,
           height: entry[0].contentRect.height
         };
-        console.info(
-          'device orientation changed -> ',
-          this._standardCanvasDimensions
-        );
-        this.logCanvasStats();
+        logger.log('EchoDevelopment', () => {
+          console.info(
+            'Device orientation changed -> ',
+            this._standardCanvasDimensions
+          );
+        });
       }
     });
     orientationResizer.observe(this._canvas);
@@ -91,7 +92,6 @@ class CanvasHandler {
     if (image instanceof ImageData) {
       this._canvasContext?.putImageData(image, params.dx, params.dy);
     } else {
-      console.log('Drawing onto canvas with the following params: ', params);
       this._canvasContext.drawImage(
         image,
         params.sx,
@@ -162,14 +162,6 @@ class CanvasHandler {
       this._canvas.height
     );
     this._canvasContext?.beginPath();
-  }
-
-  public logCanvasStats() {
-    logger.log('Info', () => {
-      console.group('Canvas info');
-      console.info('Dimensions w/h', this._canvas.width, this._canvas.height);
-      console.groupEnd();
-    });
   }
 }
 

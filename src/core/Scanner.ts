@@ -32,32 +32,36 @@ export class TagScanner extends Camera {
       let capture = await this.capturePhoto(scanArea.getBoundingClientRect());
       if (capture.size > 50000) capture = await this.scale(0.5);
     }
-
-    console.log('Mediastream -> ', this.mediaStream);
-    console.log('The viewfinder -> ', this.viewfinder);
-    console.log('The video track -> ', this.videoTrack);
-    console.log('Camera settings -> ', this.videoTrackSettings);
-    console.log('Current orientation -> ', this.currentOrientation);
-    console.log(
-      'Camera is torch capable -> ',
-      Boolean(this.capabilities?.torch)
-    );
-    console.log('Camera is zoom capable -> ', Boolean(this.capabilities?.zoom));
-    console.log(
-      'Camera resolution -> ',
-      this.viewfinder.videoWidth +
-        'x' +
-        this.viewfinder.videoHeight +
-        '@' +
-        this.videoTrack?.getSettings().frameRate +
-        'fps'
-    );
-    console.log(
-      'Viewport (CSS pixel) resolution -> ',
-      this.viewfinder.width + 'x' + this.viewfinder.height
-    );
-    console.log('Number of captures -> ', this._scanRetries);
-    console.log('Scanning duration ->', this._scanDuration);
+    logger.log('EchoDevelopment', () => {
+      console.log('Mediastream -> ', this.mediaStream);
+      console.log('The viewfinder -> ', this.viewfinder);
+      console.log('The video track -> ', this.videoTrack);
+      console.log('Camera settings -> ', this.videoTrackSettings);
+      console.log('Current orientation -> ', this.currentOrientation);
+      console.log(
+        'Camera is torch capable -> ',
+        Boolean(this.capabilities?.torch)
+      );
+      console.log(
+        'Camera is zoom capable -> ',
+        Boolean(this.capabilities?.zoom)
+      );
+      console.log(
+        'Camera resolution -> ',
+        this.viewfinder.videoWidth +
+          'x' +
+          this.viewfinder.videoHeight +
+          '@' +
+          this.videoTrack?.getSettings().frameRate +
+          'fps'
+      );
+      console.log(
+        'Viewport (CSS pixel) resolution -> ',
+        this.viewfinder.width + 'x' + this.viewfinder.height
+      );
+      console.log('Number of captures -> ', this._scanRetries);
+      console.log('Scanning duration ->', this._scanDuration);
+    });
   }
 
   // Prepare for a new scan by resetting the camera.
@@ -77,9 +81,6 @@ export class TagScanner extends Camera {
       const scans: Blob[] = [];
       const interval = (this._scanRetries / this._scanDuration) * 100;
       const intervalId = setInterval(async () => {
-        console.group('NEW SCAN STARTED');
-        console.info('crop area ->', area.width, area.height);
-        console.groupEnd();
         let capture = await this.capturePhoto(area);
         if (capture.size > 50000) capture = await this.scale(0.5);
         scans.push(capture);
@@ -103,7 +104,7 @@ export class TagScanner extends Camera {
       if (ocrResult.length >= 1) {
         var validation = await this.validateTags(ocrResult);
         if (validation.length >= 1) return validation;
-      } else logger.log('Info', () => console.info('OCR returned no results'));
+      } else logger.log('QA', () => console.info('OCR returned no results'));
     }
 
     return [];
@@ -122,7 +123,7 @@ export class TagScanner extends Camera {
       const afterValidation = new Date();
       const timeMS =
         afterValidation.getMilliseconds() - beforeValidation.getMilliseconds();
-      logger.log('Info', () =>
+      logger.log('QA', () =>
         console.info(`Tag validation took ${timeMS} milliseconds.`)
       );
       return result;

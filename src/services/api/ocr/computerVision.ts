@@ -25,14 +25,14 @@ export async function ocrRead(
     if (error instanceof BackendError && error.httpStatusCode === 429) {
       // Here we handle the event where users might go over the Computer vision usage quota.
       // We do not percieve this as an error on the client side. The user will simply try again.
-      logger.log('Warning', () =>
+      logger.log('EchoDevelopment', () =>
         console.warn(
           'The scan operation resulted in an overload in the usage quota for Computer Vision. This is normally not a problem and we simply return empty results to the users. This will prompt them to try again.'
         )
       );
       return [];
     } else {
-      logger.log('Error', () => console.error('API Error -> ', error));
+      logger.log('QA', () => console.error('API Error -> ', error));
       throw handleError(ErrorRegistry.ocrError, error as Error);
     }
   }
@@ -40,7 +40,7 @@ export async function ocrRead(
 
 function reportTimeTakenForRequest(startDate: Date, endDate: Date) {
   const result = endDate.getMilliseconds() - startDate.getMilliseconds();
-  logger.log('Info', () => {
+  logger.log('QA', () => {
     console.group('Request timer');
     console.info(`OCR Scanning took ${result} milliseconds`);
     console.groupEnd();

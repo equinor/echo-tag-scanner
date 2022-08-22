@@ -51,7 +51,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
     // Prevent scanning if Echo is syncing, otherwise the validation will not work.
     if (echoIsSyncing) {
       dispatchNotification({
-        message: 'Scanning is available as soon as the syncing is done.',
+        message: 'Scanning is available as soon as the tag syncing is done.',
         autohideDuration: 2000
       })();
       return;
@@ -107,7 +107,8 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
             <CaptureAndTorch
               onToggleTorch={getTorchToggleProvider(tagScanner)}
               onScanning={onScanning}
-              isDisabled={echoIsSyncing}
+              isDisabled={false /* Use this for when Echo fails to sync tags */}
+              echoIsSyncing={echoIsSyncing}
               isScanning={tagScanStatus.scanning}
               supportedFeatures={{
                 torch: Boolean(tagScanner?.capabilities?.torch)

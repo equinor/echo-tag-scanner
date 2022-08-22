@@ -1,12 +1,10 @@
 import React, {
   VideoHTMLAttributes,
   CanvasHTMLAttributes,
-  RefObject,
-  SetStateAction,
-  useState
+  SetStateAction
 } from 'react';
 import styled from 'styled-components';
-
+import { isLocalDevelopment } from '@utils';
 import { useScanningAreaDimensions } from './viewFinderUtils';
 
 interface ViewfinderProps {
@@ -47,6 +45,7 @@ const ViewFinder = styled.video`
   width: 100%;
   height: 100vh;
   object-fit: cover;
+  z-index: 1;
 `;
 
 const Canvas = styled.canvas`
@@ -55,6 +54,7 @@ const Canvas = styled.canvas`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  z-index: {isLocalDevelopment ? 1 : -1}
   //-------//
 `;
 

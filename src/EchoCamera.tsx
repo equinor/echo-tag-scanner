@@ -1,7 +1,11 @@
 import React, { memo, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
 import { OverconstrainedAlert, ScanningArea, Viewfinder } from '@components';
-import { logger, isDevelopment } from '@utils';
+import {
+  logger,
+  isDevelopment,
+  getNotificationDispatcher as dispatchNotification
+} from '@utils';
 import { ErrorBoundary } from '@services';
 import { TagScanner } from './core/Scanner';
 import { Scanner } from './Scanner';
@@ -21,6 +25,7 @@ const EchoCamera = () => {
 
   useEffectAsync(async () => {
     try {
+      dispatchNotification('Creating stream')();
       const mediaStream = await TagScanner.promptCameraUsage();
       setStream(mediaStream);
     } catch (error) {
@@ -38,10 +43,16 @@ const EchoCamera = () => {
               ' is not blacklisted and that you are running with HTTPS.'
           );
         });
-        !isDevelopment && globalThis.history.back();
+        // This didn't quite work because browsers might "remember" the
+        // denial and the results is that the users are instantly navigated back.
+        // !isDevelopment && globalThis.history.back();
       }
     }
   }, []);
+
+  useEffect(() => {
+    dispatchNotification('Creating stream')();
+  }, [stream]);
 
   // Represets the camera viewfinder.
   const [viewfinder, setViewfinder] = useState<HTMLVideoElement>();

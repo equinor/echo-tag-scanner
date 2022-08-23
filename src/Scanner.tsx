@@ -9,6 +9,7 @@ import {
   getNotificationDispatcher as dispatchNotification,
   logger
 } from '@utils';
+import { SystemInfoTrigger } from './components/viewfinder/SystemInfoTrigger';
 
 interface ScannerProps {
   stream: MediaStream;
@@ -96,6 +97,9 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
       <ControlPad>
         {tagScanner && (
           <>
+            <SystemInfoTrigger
+              onDelayedTrigger={tagScanner.clipboardThis.bind(tagScanner)}
+            />
             {tagScanner.capabilities?.zoom && (
               <ZoomSlider
                 onSlide={tagScanner.alterZoom}

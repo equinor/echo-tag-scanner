@@ -4,7 +4,6 @@ import React, {
   SetStateAction
 } from 'react';
 import styled from 'styled-components';
-import { isLocalDevelopment } from '@utils';
 import { useScanningAreaDimensions } from './viewFinderUtils';
 
 interface ViewfinderProps {

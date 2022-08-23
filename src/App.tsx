@@ -8,7 +8,7 @@ const LazyCamera = React.lazy(() => import('./EchoCamera'));
 
 const FallbackLoading = (): JSX.Element => {
   return (
-    <DialogGenerator title="Loading..." actionButtons={[]} open>
+    <DialogGenerator title="Loading Tag Scanner..." actionButtons={[]} open>
       <Dialog.CustomContent>
         <Progress.Circular
           style={{ margin: 'auto', display: 'block !important' }}

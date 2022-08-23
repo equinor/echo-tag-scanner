@@ -1,6 +1,3 @@
-import BaseResources from '../base/resources';
-
-import { combineUrls } from '@utils';
 import { EchoEnv } from '@equinor/echo-core';
 
 /* --------------- Computer Vision OCR -------------------------------------- */

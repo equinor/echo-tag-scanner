@@ -58,6 +58,10 @@ class CoreCamera {
     return this._currentOrientation;
   }
 
+  public get activeCamera() {
+    return this._activeCamera;
+  }
+
   /**
    * Asks the user for permission to use the device camera and resolves a MediaStream object.
    */

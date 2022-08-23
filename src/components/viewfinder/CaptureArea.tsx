@@ -30,6 +30,9 @@ const SvgContainer = styled.section<{ dimensions: Dimensions }>`
   width: ${(props) => props.dimensions.width}px;
   height: ${(props) => props.dimensions.height}px;
   border: 3px dotted var(--outOfService);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 `;
 
 export { ScanningArea };

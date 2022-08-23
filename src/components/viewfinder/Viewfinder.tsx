@@ -45,6 +45,9 @@ const ViewFinder = styled.video`
   height: 100vh;
   object-fit: cover;
   z-index: 1;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 `;
 
 const Canvas = styled.canvas`
@@ -55,6 +58,9 @@ const Canvas = styled.canvas`
   transform: translate(-50%, -50%);
   z-index: {isLocalDevelopment ? 1 : -1}
   //-------//
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 `;
 
 export { Viewfinder };

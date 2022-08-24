@@ -35,8 +35,8 @@
       "@pages": [
         "src/pages/"
       ],
-      "@enums": [
-        "src/enums"
+      "@const": [
+        "src/const"
       ],
       "@hooks": [
         "src/hooks"

@@ -1,5 +1,5 @@
 import { handleError, getOrientation, logger, isDevelopment } from '@utils';
-import { ErrorRegistry } from '@enums';
+import { ErrorRegistry } from '@const';
 import { CameraProps } from '@types';
 
 /**

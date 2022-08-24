@@ -11,7 +11,7 @@ import {
   Icon
 } from '@equinor/eds-core-react';
 import { warning_filled } from '@equinor/eds-icons';
-import { ErrorKey } from '@enums';
+import { ErrorKey } from '@const';
 import { EchoCameraError } from '@types';
 
 interface ErrorBoundaryProps {

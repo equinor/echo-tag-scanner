@@ -1,4 +1,4 @@
-import { ErrorRecord } from '@enums';
+import { ErrorRecord } from '@const';
 import { EchoCameraError } from '@types';
 import { BaseError, eventHub } from '@equinor/echo-base';
 /**

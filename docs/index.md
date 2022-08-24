@@ -20,7 +20,7 @@ For browsers, we have established a rough minimum requirement based on the suppo
 - iOS Safari 11
 - Opera 42
 
-As for the device. It must run one of the browsers above, and it must have a working camera.
+As for the device. It must run one of the browsers above, a working rear-mounted camera, and an internet connection.
 
 ## Who are the users
 The scanner is available for all Echo users on all installations. A sizeable grouping of the userbase is working in an offshore setting, which means they might have a slow and congested internet connection.

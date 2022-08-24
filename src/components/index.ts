@@ -7,3 +7,4 @@ export { ZoomSlider } from './cameracontrols/zoom/ZoomSlider';
 export { SearchResults } from './searchresults/SearchResults';
 export { ScanningIndicator } from './progress/ScanningLoading';
 export { OverconstrainedAlert } from './error/OverconstrainedAlert';
+export { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';

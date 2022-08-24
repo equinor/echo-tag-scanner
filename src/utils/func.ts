@@ -1,5 +1,3 @@
-import { EchoEnv } from '@equinor/echo-core';
-
 export function debounce(func: Function, timeout = 300) {
   let timer: NodeJS.Timeout;
 

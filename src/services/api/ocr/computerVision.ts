@@ -2,7 +2,7 @@ import { getComputerVisionOcrResources } from '../resources/resources';
 import { baseApiClient } from '../base/base';
 import { ComputerVisionResponse, ParsedComputerVisionResponse } from '@types';
 import { handleError, logger } from '@utils';
-import { ErrorRegistry } from '../../../enums';
+import { ErrorRegistry } from '@const';
 import { BackendError } from '@equinor/echo-base';
 
 export async function ocrRead(

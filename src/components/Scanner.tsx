@@ -9,7 +9,7 @@ import {
   getNotificationDispatcher as dispatchNotification,
   logger
 } from '@utils';
-import { SystemInfoTrigger } from './components/viewfinder/SystemInfoTrigger';
+import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 
 interface ScannerProps {
   stream: MediaStream;

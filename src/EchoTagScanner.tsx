@@ -3,12 +3,11 @@ import EchoUtils from '@equinor/echo-utils';
 import { OverconstrainedAlert, ScanningArea, Viewfinder } from '@components';
 import {
   logger,
-  isDevelopment,
   getNotificationDispatcher as dispatchNotification
 } from '@utils';
 import { ErrorBoundary } from '@services';
 import { TagScanner } from './core/Scanner';
-import { Scanner } from './Scanner';
+import { Scanner } from './components/Scanner';
 import styled from 'styled-components';
 
 const useEffectAsync = EchoUtils.Hooks.useEffectAsync;
@@ -18,7 +17,6 @@ const EchoCamera = () => {
     logger.moduleStarted();
   }, []);
 
-  // the media stream for out videoelement
   const [stream, setStream] = useState<MediaStream | undefined>();
   const [overConstrainedCameraDetails, setoverConstrainedCameraDetails] =
     useState<OverconstrainedError | undefined>(undefined);

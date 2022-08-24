@@ -18,7 +18,7 @@ function defineResolves(rootPath) {
           '@utils': join(rootPath, '/src/utils/'),
           '@models': join(rootPath, '/src/models/'),
           '@workers': join(rootPath, '/src/workers/'),
-          '@enums': join(rootPath, '/src/enums/')
+          '@const': join(rootPath, '/src/const/')
         }
       }
 }

@@ -23,7 +23,6 @@ const EchoCamera = () => {
 
   useEffectAsync(async () => {
     try {
-      dispatchNotification('Creating stream')();
       const mediaStream = await TagScanner.promptCameraUsage();
       setStream(mediaStream);
     } catch (error) {

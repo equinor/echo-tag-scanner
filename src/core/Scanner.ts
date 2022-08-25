@@ -33,16 +33,22 @@ export class TagScanner extends Camera {
     return `
 Camera Information
 #################################
-Camera resolution: ${this.viewfinder.videoWidth}x${
-      this.viewfinder.videoHeight
-    }@${this.videoTrack?.getSettings().frameRate}fps.
-Viewfinder resolution (in CSS pixels): ${this.viewfinder.width}x${
-      this.viewfinder.height
-    }.
-Camera is torch capable: ${Boolean(this.capabilities?.torch)}.
+Camera resolution: 
+   ${this.viewfinder.videoWidth}x${this.viewfinder.videoHeight}@${
+      this.videoTrack?.getSettings().frameRate
+    }fps.
+Viewfinder resolution (in CSS pixels): 
+    ${this.viewfinder.width}x${this.viewfinder.height}.
+Camera is torch capable: 
+    ${Boolean(this.capabilities?.torch)}.
 Camera is zoom capable: ${Boolean(this.capabilities?.zoom)}.
-Other camera settings: \n ${getReadableVideotrackSettings.call(this)}
-Current camera facing mode: ${this.activeCamera}
+${getReadableVideotrackSettings.call(this)}
+Current camera facing mode: 
+    ${this.activeCamera}
+MediaStream details:
+    ${this.mediaStream.toString()}
+Videotrack details:
+    ${this.videoTrack?.toString()}
 
 Scanning Area
 #################################
@@ -51,10 +57,11 @@ ${getCaptureAreaInfo.call(this)}
 Device information
 #################################
 User agent:
-${navigator.userAgent}
+    ${navigator.userAgent}
 Cameras:
-${await getHRDevices.call(this)}
-Current orientation: ${this.currentOrientation}
+    ${await getHRDevices.call(this)}
+Current orientation: 
+    ${this.currentOrientation}
 
 `;
 

@@ -1,4 +1,12 @@
-import { handleError, getOrientation, logger, isDevelopment } from '@utils';
+import {
+  handleError,
+  getOrientation,
+  logger,
+  isDevelopment,
+  reportMediaStream,
+  reportVideoTrack,
+  getNotificationDispatcher as dispatchNotification
+} from '@utils';
 import { ErrorRegistry } from '@const';
 import { CameraProps } from '@types';
 
@@ -28,6 +36,22 @@ class CoreCamera {
     );
     this._orientationObserver.observe(this._viewfinder);
     this._viewfinder.srcObject = props.mediaStream;
+    this.setupDebug();
+  }
+
+  private setupDebug() {
+    this._mediaStream.toString = reportMediaStream.bind(this._mediaStream);
+    if (this._videoTrack) {
+      this._videoTrack.toString = reportVideoTrack.bind(this._videoTrack);
+      this._videoTrack.onended = function () {
+        console.info('The video track has ended.');
+        dispatchNotification('The video track has ended.')();
+      };
+      this._videoTrack.onmute = function () {
+        console.info('The video track has been muted');
+        dispatchNotification('The video track has been muted.')();
+      };
+    }
   }
 
   public get videoTrack(): MediaStreamTrack | undefined {

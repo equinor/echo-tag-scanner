@@ -5,6 +5,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import { useScanningAreaDimensions } from './viewFinderUtils';
+import { isLocalDevelopment } from '@utils';
 
 interface ViewfinderProps {
   canvasRef: React.Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
@@ -32,6 +33,7 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         ref={(el: HTMLCanvasElement) => props.canvasRef(el)}
         width={dimensions.width}
         height={dimensions.height}
+        isLocalDevelopment={isLocalDevelopment}
         {...props.canvasOptions}
       />
     </>
@@ -50,14 +52,14 @@ const ViewFinder = styled.video`
   -moz-user-select: none;
 `;
 
-const Canvas = styled.canvas`
+const Canvas = styled.canvas<{ isLocalDevelopment: boolean }>`
   // Centering of absolutely placed elements
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: {isLocalDevelopment ? 1 : -1}
   //-------//
+  opacity: ${(props) => (props.isLocalDevelopment ? 1 : 0)};
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;

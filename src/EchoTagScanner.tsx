@@ -47,10 +47,6 @@ const EchoCamera = () => {
     }
   }, []);
 
-  useEffect(() => {
-    dispatchNotification('Creating stream')();
-  }, [stream]);
-
   // Represets the camera viewfinder.
   const [viewfinder, setViewfinder] = useState<HTMLVideoElement>();
   // Used for postprocessing of captures.

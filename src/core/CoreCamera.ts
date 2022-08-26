@@ -40,17 +40,15 @@ class CoreCamera {
   }
 
   private setupDebug() {
+    globalThis.addEventListener('visibilitychange', visibility);
     this._mediaStream.toString = reportMediaStream.bind(this._mediaStream);
     if (this._videoTrack) {
       this._videoTrack.toString = reportVideoTrack.bind(this._videoTrack);
-      this._videoTrack.onended = function () {
-        console.info('The video track has ended.');
-        dispatchNotification('The video track has ended.')();
-      };
-      this._videoTrack.onmute = function () {
-        console.info('The video track has been muted');
-        dispatchNotification('The video track has been muted.')();
-      };
+    }
+
+    function visibility() {
+      console.log('visibility changed');
+      dispatchNotification('Visibility has changed')();
     }
   }
 

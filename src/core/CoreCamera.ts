@@ -43,6 +43,12 @@ class CoreCamera {
     this._mediaStream.toString = reportMediaStream.bind(this._mediaStream);
     if (this._videoTrack) {
       this._videoTrack.toString = reportVideoTrack.bind(this._videoTrack);
+      this._videoTrack.addEventListener('ended', handleEndedTrack.bind(this));
+    }
+
+    function handleEndedTrack(this: CoreCamera, endedEvent: Event) {
+      dispatchNotification('The camera stream ended, attempting refresh')();
+      this.refreshStream();
     }
   }
 
@@ -138,7 +144,6 @@ class CoreCamera {
       );
       const newTrack = newMediastream.getVideoTracks()[0];
       const newConstraints = newTrack.getConstraints();
-      await this._videoTrack?.applyConstraints(newConstraints);
       this.viewfinder.srcObject = newMediastream;
       logger.log('EchoDevelopment', () => {
         console.group('Refreshing camera stream');
@@ -149,6 +154,7 @@ class CoreCamera {
       });
     } catch (error) {
       if (error instanceof Error) {
+        console.log('%c⧭', 'color: #ff0000', error);
         logger.trackError(error);
         throw error;
       }

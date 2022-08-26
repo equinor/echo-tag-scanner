@@ -23,6 +23,10 @@ export class TagScanner extends Camera {
       globalThis.refresh = () => this.refreshStream();
       globalThis.toggleCamera = async () =>
         await this.refreshStream(Boolean('toggleCamera'));
+      globalThis.stopStream = () => {
+        this.videoTrack?.stop();
+        this.videoTrack?.dispatchEvent(new Event('ended'));
+      };
     }
   }
 

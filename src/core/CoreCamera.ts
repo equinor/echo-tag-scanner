@@ -40,23 +40,9 @@ class CoreCamera {
   }
 
   private setupDebug() {
-    globalThis.addEventListener('visibilitychange', () =>
-      log('visibilitychange')
-    );
-    globalThis.addEventListener('focus', () => log('focused'));
-    globalThis.addEventListener('freeze', () => log('frozen'));
-    globalThis.addEventListener('resume', () => log('resumed'));
-    globalThis.addEventListener('pageshow', () => log('pageshow'));
-    globalThis.addEventListener('beforeunload', () => log('beforeunload'));
-    globalThis.addEventListener('unload', () => log('unload'));
-
     this._mediaStream.toString = reportMediaStream.bind(this._mediaStream);
     if (this._videoTrack) {
       this._videoTrack.toString = reportVideoTrack.bind(this._videoTrack);
-    }
-
-    function log(msg: string) {
-      console.log(msg);
     }
   }
 
@@ -114,10 +100,7 @@ class CoreCamera {
         },
 
         // In production, we always want the rear camera to be selected.
-        facingMode:
-          { exact: facingModeOverride } || isDevelopment
-            ? { ideal: 'environment' }
-            : { exact: 'environment' }
+        facingMode: { exact: 'user' }
       },
       audio: false,
       ...additionalCaptureOptions

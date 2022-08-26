@@ -100,7 +100,9 @@ class CoreCamera {
         },
 
         // In production, we always want the rear camera to be selected.
-        facingMode: { exact: 'user' }
+        facingMode: isDevelopment
+          ? { ideal: 'environment' }
+          : { exact: 'environment' }
       },
       audio: false,
       ...additionalCaptureOptions

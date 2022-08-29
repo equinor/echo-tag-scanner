@@ -22,11 +22,13 @@ class CoreCamera {
   private _capabilities?: MediaTrackCapabilities = undefined;
   private _currentOrientation: 'portrait' | 'landscape';
   private _activeCamera?: string;
+  private _backupVideoTrack?: MediaStreamTrack;
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
     this._mediaStream = props.mediaStream;
     this._videoTrack = props.mediaStream.getVideoTracks()[0];
+    this._backupVideoTrack = this._videoTrack.clone();
     this._capabilities = this._videoTrack.getCapabilities();
     this._videoTrackSettings = this._videoTrack.getSettings();
     this._currentOrientation = getOrientation();
@@ -36,24 +38,22 @@ class CoreCamera {
     );
     this._orientationObserver.observe(this._viewfinder);
     this._viewfinder.srcObject = props.mediaStream;
-    this.setupDebug();
-  }
-
-  private setupDebug() {
-    this._mediaStream.toString = reportMediaStream.bind(this._mediaStream);
-    if (this._videoTrack) {
-      this._videoTrack.toString = reportVideoTrack.bind(this._videoTrack);
-      this._videoTrack.addEventListener('ended', handleEndedTrack.bind(this));
-    }
-
-    function handleEndedTrack(this: CoreCamera, endedEvent: Event) {
-      dispatchNotification('The camera stream ended, attempting refresh')();
-      this.refreshStream();
-    }
   }
 
   public get videoTrack(): MediaStreamTrack | undefined {
     return this._videoTrack;
+  }
+
+  public set videoTrack(newVideoTrack) {
+    this._videoTrack = newVideoTrack;
+  }
+
+  public set backupVideoTrack(newBackupVideoTrack) {
+    this._backupVideoTrack = newBackupVideoTrack;
+  }
+
+  public get backupVideoTrack(): MediaStreamTrack | undefined {
+    return this._backupVideoTrack;
   }
 
   public get capabilities(): MediaTrackCapabilities | undefined {
@@ -123,6 +123,7 @@ class CoreCamera {
 
   private handleOrientationChange() {
     const newOrientation = getOrientation();
+    console.log('%c⧭', 'color: #00e600', newOrientation);
 
     if (newOrientation !== this._currentOrientation) {
       // Device orientation has changed. Refresh the video stream.
@@ -143,12 +144,19 @@ class CoreCamera {
         newActiveCamera
       );
       const newTrack = newMediastream.getVideoTracks()[0];
-      const newConstraints = newTrack.getConstraints();
       this.viewfinder.srcObject = newMediastream;
+      this._videoTrack = newTrack;
+      this._videoTrackSettings = newTrack.getSettings();
+      this._currentOrientation = getOrientation();
+      this._activeCamera = this._videoTrackSettings.facingMode;
+
       logger.log('EchoDevelopment', () => {
         console.group('Refreshing camera stream');
         console.info('The mediastream ->', newMediastream);
-        console.info('The new camera constraints -> ', newConstraints);
+        console.info(
+          'The new camera constraints -> ',
+          newTrack.getConstraints()
+        );
         console.info('The new video track -> ', newTrack);
         console.groupEnd();
       });

@@ -1,5 +1,5 @@
 import { CameraProps, DrawImageParameters } from '@types';
-import { logger } from '../utils';
+import { logger, reportMediaStream } from '@utils';
 import { Postprocessor } from './Postprocessor';
 
 /**
@@ -11,6 +11,34 @@ class Camera extends Postprocessor {
 
   constructor(props: CameraProps) {
     super(props);
+    this.mediaStream.toString = reportMediaStream.bind(this.mediaStream);
+
+    if (this.videoTrack) {
+      this.videoTrack.addEventListener(
+        'ended',
+        this.refreshVideoTrack.bind(this)
+      );
+    }
+  }
+
+  private refreshVideoTrack() {
+    if (this.videoTrack && this.backupVideoTrack) {
+      this.mediaStream.removeTrack(this.videoTrack);
+      this.mediaStream.addTrack(this.backupVideoTrack);
+      this.videoTrack = this.backupVideoTrack;
+      this.backupVideoTrack = this.videoTrack.clone();
+      this.videoTrack.addEventListener(
+        'ended',
+        this.refreshVideoTrack.bind(this)
+      );
+
+      console.group('Backup video track was deployed');
+      console.log('New track -> ', this.videoTrack);
+      console.log('New backup track -> ', this.backupVideoTrack);
+      console.groupEnd();
+    } else {
+      throw new Error('An error occured while trying to refresh video track');
+    }
   }
 
   public toggleTorch = (): void => {

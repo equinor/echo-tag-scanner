@@ -23,8 +23,10 @@ const EchoCamera = () => {
 
   useEffectAsync(async () => {
     try {
-      const mediaStream = await TagScanner.promptCameraUsage();
+      const mediaStream = await TagScanner.getMediastream();
+      // mediaStream.addEventListener('removetrack', test);
       setStream(mediaStream);
+      // return mediaStream.removeEventListener('removetrack', test);
     } catch (error) {
       if (error instanceof OverconstrainedError) {
         setoverConstrainedCameraDetails(error);

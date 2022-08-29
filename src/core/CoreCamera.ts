@@ -18,7 +18,6 @@ class CoreCamera {
   private _viewfinder: HTMLVideoElement;
   private _videoTrack?: MediaStreamTrack;
   private _videoTrackSettings?: MediaTrackSettings;
-  private _orientationObserver: ResizeObserver;
   private _capabilities?: MediaTrackCapabilities = undefined;
   private _currentOrientation: 'portrait' | 'landscape';
   private _activeCamera?: string;
@@ -33,10 +32,6 @@ class CoreCamera {
     this._videoTrackSettings = this._videoTrack.getSettings();
     this._currentOrientation = getOrientation();
     this._activeCamera = this._videoTrackSettings.facingMode;
-    this._orientationObserver = new ResizeObserver(
-      this.handleOrientationChange.bind(this)
-    );
-    this._orientationObserver.observe(this._viewfinder);
     this._viewfinder.srcObject = props.mediaStream;
   }
 
@@ -60,16 +55,20 @@ class CoreCamera {
     return this._capabilities;
   }
 
+  public set capabilities(newCapabilities) {
+    this._capabilities = newCapabilities;
+  }
+
   public get videoTrackSettings(): MediaTrackSettings | undefined {
     return this._videoTrackSettings;
   }
 
-  public get viewfinder() {
-    return this._viewfinder;
+  public set videoTrackSettings(newVideoTrackSettings) {
+    this._videoTrackSettings = newVideoTrackSettings;
   }
 
-  public get orientationObserver() {
-    return this._orientationObserver;
+  public get viewfinder() {
+    return this._viewfinder;
   }
 
   public get mediaStream() {
@@ -80,17 +79,22 @@ class CoreCamera {
     return this._currentOrientation;
   }
 
+  public set currentOrientation(newOrientation) {
+    this._currentOrientation = newOrientation;
+  }
+
   public get activeCamera() {
     return this._activeCamera;
+  }
+
+  public set activeCamera(newActiveCamera) {
+    this._activeCamera = newActiveCamera;
   }
 
   /**
    * Asks the user for permission to use the device camera and resolves a MediaStream object.
    */
-  static async promptCameraUsage(
-    facingModeOverride?: 'environment' | 'user',
-    additionalCaptureOptions?: DisplayMediaStreamConstraints
-  ): Promise<MediaStream> {
+  static async getMediastream(): Promise<MediaStream> {
     const cameraPreferences = {
       video: {
         width: {
@@ -110,63 +114,10 @@ class CoreCamera {
           ? { ideal: 'environment' }
           : { exact: 'environment' }
       },
-      audio: false,
-      ...additionalCaptureOptions
+      audio: false
     };
 
-    const mediaStream = await navigator.mediaDevices.getUserMedia(
-      cameraPreferences
-    );
-
-    return mediaStream;
-  }
-
-  private handleOrientationChange() {
-    const newOrientation = getOrientation();
-    console.log('%c⧭', 'color: #00e600', newOrientation);
-
-    if (newOrientation !== this._currentOrientation) {
-      // Device orientation has changed. Refresh the video stream.
-      this._currentOrientation = newOrientation;
-      this.refreshStream();
-    }
-  }
-
-  public async refreshStream(toggleCamera = false) {
-    const newActiveCamera = (() => {
-      if (toggleCamera) {
-        if (this._activeCamera === 'environment') return 'user';
-        else return 'environment';
-      }
-    })();
-    try {
-      const newMediastream = await CoreCamera.promptCameraUsage(
-        newActiveCamera
-      );
-      const newTrack = newMediastream.getVideoTracks()[0];
-      this.viewfinder.srcObject = newMediastream;
-      this._videoTrack = newTrack;
-      this._videoTrackSettings = newTrack.getSettings();
-      this._currentOrientation = getOrientation();
-      this._activeCamera = this._videoTrackSettings.facingMode;
-
-      logger.log('EchoDevelopment', () => {
-        console.group('Refreshing camera stream');
-        console.info('The mediastream ->', newMediastream);
-        console.info(
-          'The new camera constraints -> ',
-          newTrack.getConstraints()
-        );
-        console.info('The new video track -> ', newTrack);
-        console.groupEnd();
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log('%c⧭', 'color: #ff0000', error);
-        logger.trackError(error);
-        throw error;
-      }
-    }
+    return await navigator.mediaDevices.getUserMedia(cameraPreferences);
   }
 
   public zoom(zoomValue: number): void {

@@ -3,8 +3,10 @@ import {
   logger,
   reportMediaStream,
   getNotificationDispatcher as dispatchNotification,
-  reportVideoTrack
+  reportVideoTrack,
+  getOrientation
 } from '@utils';
+import { CoreCamera } from './CoreCamera';
 import { Postprocessor } from './Postprocessor';
 
 /**
@@ -13,25 +15,24 @@ import { Postprocessor } from './Postprocessor';
  */
 class Camera extends Postprocessor {
   private _torchState = false;
+  private _orientationObserver: ResizeObserver;
 
   constructor(props: CameraProps) {
     super(props);
-    this.mediaStream.toString = reportMediaStream.bind(this.mediaStream);
-    if (this.videoTrack) {
-      this.videoTrack.toString = reportVideoTrack.bind(this.videoTrack);
-    }
-
+    this._orientationObserver = new ResizeObserver(
+      this.handleOrientationChange.bind(this)
+    );
+    this._orientationObserver.observe(this.viewfinder);
     if (this.videoTrack) {
       this.videoTrack.addEventListener(
         'ended',
-        this.refreshVideoTrack.bind(this)
-      );
-
-      this.videoTrack.addEventListener(
-        'mute',
-        this.refreshVideoTrack.bind(this)
+        this.refreshStream.bind(this, false)
       );
     }
+
+    // For debugging purposes.
+    MediaStreamTrack.prototype.toString = reportVideoTrack;
+    MediaStream.prototype.toString = reportMediaStream;
   }
 
   private logMute() {
@@ -39,6 +40,45 @@ class Camera extends Postprocessor {
     dispatchNotification('The video track was muted')();
   }
 
+  /**
+   * Performs a complete refresh of the camera stream by requesting a new mediastream object.
+   */
+  public async refreshStream() {
+    try {
+      const newMediastream = await CoreCamera.getMediastream();
+
+      const newTrack = newMediastream.getVideoTracks()[0];
+      newTrack.addEventListener('ended', this.refreshStream.bind(this, false));
+      this.videoTrackSettings = newTrack.getSettings();
+      this.videoTrack = newTrack;
+      this.viewfinder.srcObject = newMediastream;
+      this.capabilities = newTrack.getCapabilities();
+      this.activeCamera = this.videoTrackSettings.facingMode;
+      this.currentOrientation = getOrientation();
+
+      logger.log('EchoDevelopment', () => {
+        console.group('The media stream was refreshed');
+        console.info('The mediastream ->', newMediastream);
+        console.info(
+          'The new camera constraints -> ',
+          newTrack.getConstraints()
+        );
+        console.info('The new video track -> ', newTrack);
+        console.groupEnd();
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log('%c⧭', 'color: #ff0000', error);
+        logger.trackError(error);
+        throw error;
+      }
+    }
+  }
+
+  /**
+   * Performs a refresh of the video stream by applying a previously backed up video track
+   * to the current media stream.
+   */
   private refreshVideoTrack() {
     if (this.videoTrack && this.backupVideoTrack) {
       // Remove the ended video track from the stream.
@@ -81,6 +121,17 @@ class Camera extends Postprocessor {
     }
   }
 
+  private handleOrientationChange() {
+    const newOrientation = getOrientation();
+    console.log('%c⧭', 'color: #00e600', newOrientation);
+
+    if (newOrientation !== this.currentOrientation) {
+      // Device orientation has changed. Refresh the video stream.
+      this.currentOrientation = newOrientation;
+      this.refreshStream();
+    }
+  }
+
   public toggleTorch = (): void => {
     if (this.capabilities?.zoom) {
       this._torchState = !this._torchState;
@@ -106,7 +157,7 @@ class Camera extends Postprocessor {
     if (this.videoTrack) {
       this.videoTrack.stop();
     }
-    this.orientationObserver.disconnect();
+    this._orientationObserver.disconnect();
   }
 
   public alterZoom = (

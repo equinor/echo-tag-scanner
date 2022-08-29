@@ -1,6 +1,3 @@
-/**
- * This function is assigned to the toString function of MediaStream
- */
 export function reportMediaStream(this: MediaStream) {
   return `
       Stream is active: ${this.active}

@@ -1,5 +1,9 @@
 import { CameraProps, DrawImageParameters } from '@types';
-import { logger, reportMediaStream } from '@utils';
+import {
+  logger,
+  reportMediaStream,
+  getNotificationDispatcher as dispatchNotification
+} from '@utils';
 import { Postprocessor } from './Postprocessor';
 
 /**
@@ -18,24 +22,50 @@ class Camera extends Postprocessor {
         'ended',
         this.refreshVideoTrack.bind(this)
       );
+
+      this.videoTrack.addEventListener('mute', this.logMute);
     }
+  }
+
+  private logMute() {
+    console.log('video track is muted');
+    dispatchNotification('The video track was muted')();
   }
 
   private refreshVideoTrack() {
     if (this.videoTrack && this.backupVideoTrack) {
+      dispatchNotification({
+        message: 'The video track has ended',
+        autohideDuration: 2000
+      })();
+
+      // Remove the ended video track from the stream.
+      this.videoTrack.removeEventListener(
+        'ended',
+        this.refreshVideoTrack.bind(this)
+      );
       this.mediaStream.removeTrack(this.videoTrack);
-      this.mediaStream.addTrack(this.backupVideoTrack);
+
+      // Take a fresh backup before assigning the backuped track.
+      const newBackupVideoTrack = this.backupVideoTrack.clone();
+
+      // Assign backed up track and setup
       this.videoTrack = this.backupVideoTrack;
-      this.backupVideoTrack = this.videoTrack.clone();
       this.videoTrack.addEventListener(
         'ended',
         this.refreshVideoTrack.bind(this)
       );
+      this.videoTrack.addEventListener('mute', this.logMute.bind(this));
+      this.mediaStream.addTrack(this.videoTrack);
 
-      console.group('Backup video track was deployed');
-      console.log('New track -> ', this.videoTrack);
-      console.log('New backup track -> ', this.backupVideoTrack);
-      console.groupEnd();
+      // Save the new cloned backup
+      this.backupVideoTrack = newBackupVideoTrack;
+      if (this.videoTrack.readyState === 'live') {
+        console.group('Backup video track was deployed');
+        console.log('New track -> ', this.videoTrack);
+        console.log('New backup track -> ', this.backupVideoTrack);
+        console.groupEnd();
+      }
     } else {
       throw new Error('An error occured while trying to refresh video track');
     }

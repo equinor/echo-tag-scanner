@@ -2,7 +2,8 @@ import { CameraProps, DrawImageParameters } from '@types';
 import {
   logger,
   reportMediaStream,
-  getNotificationDispatcher as dispatchNotification
+  getNotificationDispatcher as dispatchNotification,
+  reportVideoTrack
 } from '@utils';
 import { Postprocessor } from './Postprocessor';
 
@@ -16,6 +17,9 @@ class Camera extends Postprocessor {
   constructor(props: CameraProps) {
     super(props);
     this.mediaStream.toString = reportMediaStream.bind(this.mediaStream);
+    if (this.videoTrack) {
+      this.videoTrack.toString = reportVideoTrack.bind(this.videoTrack);
+    }
 
     if (this.videoTrack) {
       this.videoTrack.addEventListener(
@@ -23,7 +27,10 @@ class Camera extends Postprocessor {
         this.refreshVideoTrack.bind(this)
       );
 
-      this.videoTrack.addEventListener('mute', this.logMute);
+      this.videoTrack.addEventListener(
+        'mute',
+        this.refreshVideoTrack.bind(this)
+      );
     }
   }
 
@@ -50,7 +57,11 @@ class Camera extends Postprocessor {
         'ended',
         this.refreshVideoTrack.bind(this)
       );
-      this.videoTrack.addEventListener('mute', this.logMute.bind(this));
+      this.videoTrack.addEventListener(
+        'mute',
+        this.refreshVideoTrack.bind(this)
+      );
+      this.videoTrack.toString = reportVideoTrack.bind(this.videoTrack);
       this.mediaStream.addTrack(this.videoTrack);
 
       // Save the new cloned backup

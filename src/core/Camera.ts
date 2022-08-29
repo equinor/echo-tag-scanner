@@ -34,11 +34,6 @@ class Camera extends Postprocessor {
 
   private refreshVideoTrack() {
     if (this.videoTrack && this.backupVideoTrack) {
-      dispatchNotification({
-        message: 'The video track has ended',
-        autohideDuration: 2000
-      })();
-
       // Remove the ended video track from the stream.
       this.videoTrack.removeEventListener(
         'ended',
@@ -61,6 +56,10 @@ class Camera extends Postprocessor {
       // Save the new cloned backup
       this.backupVideoTrack = newBackupVideoTrack;
       if (this.videoTrack.readyState === 'live') {
+        dispatchNotification({
+          message: 'The video track was refreshed',
+          autohideDuration: 2000
+        })();
         console.group('Backup video track was deployed');
         console.log('New track -> ', this.videoTrack);
         console.log('New backup track -> ', this.backupVideoTrack);

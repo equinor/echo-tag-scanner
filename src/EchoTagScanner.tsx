@@ -7,7 +7,7 @@ import {
 } from '@utils';
 import { ErrorBoundary } from '@services';
 import { TagScanner } from './core/Scanner';
-import { Scanner } from './components/Scanner';
+import { Scanner } from './components/ScannerUI';
 import styled from 'styled-components';
 
 const useEffectAsync = EchoUtils.Hooks.useEffectAsync;

@@ -249,21 +249,19 @@ function calculateScaleFactor(viewfinder: HTMLVideoElement): {
   // this is 746px on iPhone
   const elementHeight = viewfinder.height;
 
-  // FIXME: move to own handling - should only need to be calculated on
-  // resize observer thingymajiggy -- and should probably always be <1?
-  // Gotta verify on screens with larger viewport than mediastream/video intrinsic size
+  // This finds scale x + y and handles enlargement / reduction in sizes.
   let scale_x = elementWidth / videoWidth;
-  let scale_y = elementHeight / videoHeight;
-
   if (scale_x > 1) {
     scale_x = videoWidth / elementWidth;
   }
 
+  let scale_y = elementHeight / videoHeight;
   if (scale_y > 1) {
     scale_y = videoHeight / elementHeight;
   }
 
-  // finding the _most scaled_ value and use that as base scaling.
+  // FIXME: This makes it better width'wise in browsers
+  // but we still have small offset issues in iphone/mobiles...
   let scale = Math.min(scale_x, scale_y);
 
   return { scale, videoWidth, videoHeight };

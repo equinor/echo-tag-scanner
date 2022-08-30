@@ -186,35 +186,12 @@ class Camera extends Postprocessor {
   protected async capturePhoto(captureArea: DOMRect): Promise<Blob> {
     this.canvasHandler.clearCanvas();
 
-    // this is 746px on iPhone
-    const videoWidth = this.viewfinder.videoWidth;
-    // this is 428px on iPhone
-    const elementWidth = this.viewfinder.width;
-    // this is 428px on iPhone
-    const videoHeight = this.viewfinder.videoHeight;
-    // this is 746px on iPhone
-    const elementHeight = this.viewfinder.height;
-
-    // FIXME: move to own handling - should only need to be calculated on
-    // resize observer thingymajiggy -- and should probably always be <1?
-    // Gotta verify on screens with larger viewport than mediastream/video intrinsic size
-    let scale_x = elementWidth / videoWidth;
-    let scale_y = elementHeight / videoHeight;
-
-    // When scale is larger here it means that the element is larger than videofeed
-    // so our scaling factor needs to be swapped?
-    // Not sure we ever need X and Y scaling tho..
-    if (scale_x > 1) {
-      scale_x = videoWidth / elementWidth;
-    }
-
-    if (scale_y > 1) {
-      scale_y = videoHeight / elementHeight;
-    }
-
+    const { scale, videoWidth, videoHeight } = calculateScaleFactor(
+      this.viewfinder
+    );
     // width and height of the capture area on the videofeed
-    const sWidth = captureArea.width * scale_x;
-    const sHeight = captureArea.height * scale_y;
+    const sWidth = captureArea.width * scale;
+    const sHeight = captureArea.height * scale;
     // x and y position of top left corner of the capture area on videofeed
     const sx = videoWidth / 2 - sWidth / 2;
     const sy = videoHeight / 2 - sHeight / 2;
@@ -256,6 +233,40 @@ class Camera extends Postprocessor {
       console.groupEnd();
     });
   }
+}
+
+function calculateScaleFactor(viewfinder: HTMLVideoElement): {
+  scale: number;
+  videoWidth: number;
+  videoHeight: number;
+} {
+  // this is 746px on iPhone
+  const videoWidth = viewfinder.videoWidth;
+  // this is 428px on iPhone
+  const elementWidth = viewfinder.width;
+  // this is 428px on iPhone
+  const videoHeight = viewfinder.videoHeight;
+  // this is 746px on iPhone
+  const elementHeight = viewfinder.height;
+
+  // FIXME: move to own handling - should only need to be calculated on
+  // resize observer thingymajiggy -- and should probably always be <1?
+  // Gotta verify on screens with larger viewport than mediastream/video intrinsic size
+  let scale_x = elementWidth / videoWidth;
+  let scale_y = elementHeight / videoHeight;
+
+  if (scale_x > 1) {
+    scale_x = videoWidth / elementWidth;
+  }
+
+  if (scale_y > 1) {
+    scale_y = videoHeight / elementHeight;
+  }
+
+  // finding the _most scaled_ value and use that as base scaling.
+  let scale = Math.min(scale_x, scale_y);
+
+  return { scale, videoWidth, videoHeight };
 }
 
 export { Camera };

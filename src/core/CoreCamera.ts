@@ -21,13 +21,11 @@ class CoreCamera {
   private _capabilities?: MediaTrackCapabilities = undefined;
   private _currentOrientation: 'portrait' | 'landscape';
   private _activeCamera?: string;
-  private _backupVideoTrack?: MediaStreamTrack;
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
     this._mediaStream = props.mediaStream;
     this._videoTrack = props.mediaStream.getVideoTracks()[0];
-    this._backupVideoTrack = this._videoTrack.clone();
     this._capabilities = this._videoTrack.getCapabilities();
     this._videoTrackSettings = this._videoTrack.getSettings();
     this._currentOrientation = getOrientation();
@@ -41,14 +39,6 @@ class CoreCamera {
 
   public set videoTrack(newVideoTrack) {
     this._videoTrack = newVideoTrack;
-  }
-
-  public set backupVideoTrack(newBackupVideoTrack) {
-    this._backupVideoTrack = newBackupVideoTrack;
-  }
-
-  public get backupVideoTrack(): MediaStreamTrack | undefined {
-    return this._backupVideoTrack;
   }
 
   public get capabilities(): MediaTrackCapabilities | undefined {

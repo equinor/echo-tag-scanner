@@ -35,9 +35,14 @@ class Camera extends Postprocessor {
     MediaStream.prototype.toString = reportMediaStream;
   }
 
-  private logMute() {
-    console.log('video track is muted');
-    dispatchNotification('The video track was muted')();
+  private handleOrientationChange() {
+    const newOrientation = getOrientation();
+
+    if (newOrientation !== this.currentOrientation) {
+      // Device orientation has changed. Refresh the video stream.
+      this.currentOrientation = newOrientation;
+      this.refreshStream();
+    }
   }
 
   /**
@@ -68,67 +73,9 @@ class Camera extends Postprocessor {
       });
     } catch (error) {
       if (error instanceof Error) {
-        console.log('%c⧭', 'color: #ff0000', error);
         logger.trackError(error);
         throw error;
       }
-    }
-  }
-
-  /**
-   * Performs a refresh of the video stream by applying a previously backed up video track
-   * to the current media stream.
-   */
-  private refreshVideoTrack() {
-    if (this.videoTrack && this.backupVideoTrack) {
-      // Remove the ended video track from the stream.
-      this.videoTrack.removeEventListener(
-        'ended',
-        this.refreshVideoTrack.bind(this)
-      );
-      this.mediaStream.removeTrack(this.videoTrack);
-
-      // Take a fresh backup before assigning the backuped track.
-      const newBackupVideoTrack = this.backupVideoTrack.clone();
-
-      // Assign backed up track and setup
-      this.videoTrack = this.backupVideoTrack;
-      this.videoTrack.addEventListener(
-        'ended',
-        this.refreshVideoTrack.bind(this)
-      );
-      this.videoTrack.addEventListener(
-        'mute',
-        this.refreshVideoTrack.bind(this)
-      );
-      this.videoTrack.toString = reportVideoTrack.bind(this.videoTrack);
-      this.mediaStream.addTrack(this.videoTrack);
-
-      // Save the new cloned backup
-      this.backupVideoTrack = newBackupVideoTrack;
-      if (this.videoTrack.readyState === 'live') {
-        dispatchNotification({
-          message: 'The video track was refreshed',
-          autohideDuration: 2000
-        })();
-        console.group('Backup video track was deployed');
-        console.log('New track -> ', this.videoTrack);
-        console.log('New backup track -> ', this.backupVideoTrack);
-        console.groupEnd();
-      }
-    } else {
-      throw new Error('An error occured while trying to refresh video track');
-    }
-  }
-
-  private handleOrientationChange() {
-    const newOrientation = getOrientation();
-    console.log('%c⧭', 'color: #00e600', newOrientation);
-
-    if (newOrientation !== this.currentOrientation) {
-      // Device orientation has changed. Refresh the video stream.
-      this.currentOrientation = newOrientation;
-      this.refreshStream();
     }
   }
 

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { debounce, getOrientation } from '@utils';
-import { CAPTUREAREA_DIMENSIONS } from '@const';
 import EchoUtils from '@equinor/echo-utils';
 
 export type Dimensions = {
@@ -33,8 +32,14 @@ function getDimensions(): Dimensions {
   const viewMode = getOrientation();
 
   if (viewMode === 'portrait') {
-    return CAPTUREAREA_DIMENSIONS.portrait;
+    return {
+      width: globalThis.innerWidth * 0.8,
+      height: globalThis.innerHeight * (1 / 3)
+    };
   } else {
-    return CAPTUREAREA_DIMENSIONS.landscape;
+    return {
+      width: globalThis.innerWidth * 0.7,
+      height: globalThis.innerHeight * (1 / 3)
+    };
   }
 }

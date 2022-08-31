@@ -16,7 +16,7 @@ type ComputerVisionOcrParams = {
 function getComputerVisionEndpoint() {
   // TODO: Move sensitive API stuff out + rotate the API keys. Suggested method is Azure functions.
   const computerVisionOcrEndpointDev: EndpointInfo = {
-    url: 'https://cv-echotagscanner-dev.cognitiveservices.azure.com//vision/v3.2/ocr',
+    url: 'https://cv-echotagscanner-dev.cognitiveservices.azure.com/vision/v3.2/ocr',
     apiKey: [
       'a2059f2013384252afd314c10f3a5a50',
       '10541f1b2cfa461fa84b51dc2c256f4b'

@@ -38,7 +38,7 @@ export type ScanAttempt = {
   readText: string;
 
   /** The validated tag number */
-  validatedText: string;
+  validatedText?: string;
 
   isSuccess: boolean;
 };

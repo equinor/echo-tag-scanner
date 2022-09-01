@@ -197,18 +197,26 @@ Regular offset from left-edge: ${bcr.x};
    * Runs OCR and tag validation on a list of blobs until a result is obtained or it reaches the end of the list.
    */
   public async ocr(scans: Blob[]): Promise<TagSummaryDto[]> {
+    this._OCR.refreshAttemptId();
     for (let i = 0; i < scans.length; i++) {
       const filteredResponse = await this._OCR.runOCR(scans[i]);
       if (filteredResponse.length >= 1) {
         var validation = await this._OCR.handleValidation(filteredResponse);
         if (validation.length >= 1) {
-          // Log a successful scan
           return validation;
+        } else {
+          logger.log('QA', () =>
+            console.info(
+              'OCR returned no results that was validated by Echo-Search.'
+            )
+          );
         }
       } else {
-        // Log an unsuccessful scan
-
-        logger.log('QA', () => console.info('OCR returned no results'));
+        logger.log('QA', () =>
+          console.info(
+            'OCR returned no results that made it through the filtering step.'
+          )
+        );
       }
     }
 

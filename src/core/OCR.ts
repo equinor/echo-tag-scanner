@@ -8,16 +8,21 @@ import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { randomBytes } from 'crypto';
 
 export class OCR {
-  private _attemptLog: ScanAttempt[] | undefined = undefined;
-  private _attemptId: string = this.getAttemptId();
+  private _attemptId?: string = undefined;
 
   /** Generates a pseudorandom sequence of 16 bytes and returns them hex encoded. */
-  private getAttemptId() {
+  public get attemptId(): string {
     return randomBytes(16).toString('hex');
   }
 
+  //TODO: Handle possible errors on randomBytes call.
+  public refreshAttemptId(): string {
+    const newId = randomBytes(16).toString('hex');
+    this._attemptId = newId;
+    return newId;
+  }
+
   public async runOCR(scan: Blob): Promise<ParsedComputerVisionResponse> {
-    this._attemptId = this.getAttemptId();
     const [url, body, init] = getComputerVisionOcrResources(scan);
     try {
       const response = await baseApiClient.postAsync<ComputerVisionResponse>(
@@ -71,8 +76,41 @@ export class OCR {
       ...tagValidationTasks
     ]);
     const validatedTags: TagSummaryDto[] = [];
-    tagValidationResults.forEach((res) => {
-      if (res.status === 'fulfilled') validatedTags.push(res.value);
+    tagValidationResults.forEach((validationResult) => {
+      if (!this._attemptId)
+        throw new Error('A pseudoranom log entry ID has not been established.');
+      // Log the successfull OCR.
+      if (validationResult.status === 'fulfilled') {
+        const logEntry = {
+          id: this._attemptId,
+          isSuccess: true,
+          readText: validationResult.value.testValue,
+          validatedText: validationResult.value.validatedTagSummary.tagNo
+        };
+        logger.scanAttempt(logEntry);
+        logger.log('QA', () =>
+          console.info('A successful OCR was logged: ', logEntry)
+        );
+
+        // Record the fetched tag summary for use later in presentation.
+        validatedTags.push(validationResult.value.validatedTagSummary);
+      } else if (validationResult.status === 'rejected') {
+        if ((validationResult.reason as FailedTagValidation).EchoSearchError) {
+          // TODO: Handle or log Echo search errors here
+        } else {
+          // Log the failed OCR.
+          const failedLogEntry = {
+            id: this._attemptId,
+            isSuccess: false,
+            validatedText: undefined,
+            readText: (validationResult.reason as FailedTagValidation).testValue
+          };
+          logger.scanAttempt(failedLogEntry);
+          logger.log('QA', () =>
+            console.info('A failed OCR was logged: ', failedLogEntry)
+          );
+        }
+      }
     });
 
     return validatedTags;
@@ -89,6 +127,15 @@ export class OCR {
           console.groupEnd();
         });
         return result.value;
+      } else {
+        logger.log('QA', () => {
+          console.group('Running validation for ', possibleTagNumber);
+          console.info(
+            'Echo Search could not establish a close match to ' +
+              possibleTagNumber
+          );
+          console.groupEnd();
+        });
       }
     }
 
@@ -109,16 +156,43 @@ export class OCR {
       });
     }
 
+    type TagValidationResult = {
+      validatedTagSummary: TagSummaryDto;
+      testValue: string;
+    };
+
+    type FailedTagValidation = {
+      EchoSearchError?: unknown;
+      testValue: string;
+    };
     /**
      * Returns a promise to validate a string as a tag number.
+     * @fulfill {TagValidationResult} The {TagSummaryDto} and the test value.
+     * @reject {FailedValidation} The test value
      */
     async function createTagValidator(
-      possibleTagNumber: string
-    ): Promise<TagSummaryDto> {
+      testValue: string
+    ): Promise<TagValidationResult> {
       return new Promise((resolve, reject) => {
-        findClosestTag(possibleTagNumber).then((closestTagMatch) => {
-          if (closestTagMatch) resolve(getTagSummary(closestTagMatch));
-          else reject(closestTagMatch);
+        findClosestTag(testValue).then((closestTagMatch) => {
+          if (closestTagMatch) {
+            getTagSummary(closestTagMatch)
+              .then((res) =>
+                resolve({
+                  validatedTagSummary: res,
+                  testValue: testValue
+                } as TagValidationResult)
+              )
+              // An error was caught from Echo-search
+              .catch((reason) => {
+                reject({
+                  EchoSearchError: reason,
+                  testValue: testValue
+                } as FailedTagValidation);
+              });
+          } else {
+            reject({ testValue: testValue } as FailedTagValidation);
+          }
         });
       });
     }

@@ -180,10 +180,6 @@ class EchoTagScannerLogger extends BaseLogger {
   public scanAttempt(props: ScanAttempt) {
     this.trackEvent(ObjectName.ScanAttempt, 'ScanAttempt', props);
   }
-
-  public doneScanning(props: ScannerActionsProperties) {
-    this.trackEvent(ObjectName.DoneScanning, 'DoneScanning', props);
-  }
 }
 
 const moduleShortName = echomodule.manifest.shortName;

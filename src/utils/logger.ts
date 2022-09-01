@@ -3,17 +3,20 @@ import echomodule from '../../echoModule.config.json';
 
 export enum ObjectName {
   Module = 'Module',
-  Scanner = 'Scanner'
+  DoneScanning = 'Scanner',
+  ScanAttempt = 'ScanAttempt'
 }
 
 type ActionNames = {
   [ObjectName.Module]: ModuleActions;
-  [ObjectName.Scanner]: ScannerActions;
+  [ObjectName.DoneScanning]: ScannerActions;
+  [ObjectName.ScanAttempt]: ScannerActions;
 };
 
 type ActionProperties = {
   [ObjectName.Module]: ModuleActionProperties;
-  [ObjectName.Scanner]: ScannerActionsProperties;
+  [ObjectName.DoneScanning]: ScannerActionsProperties;
+  [ObjectName.ScanAttempt]: ScanAttempt;
 };
 
 type ModuleActions = 'Started';
@@ -21,10 +24,23 @@ type ModuleActionProperties = {
   message?: string;
 };
 
-type ScannerActions = 'DoneScanning';
+type ScannerActions = 'DoneScanning' | 'ScanAttempt';
 type ScannerActionsProperties = {
   seconds: number;
   found: number;
+};
+
+export type ScanAttempt = {
+  /** The ID of a single scan attempt */
+  id: string;
+
+  /** The tag number which was returned from OCR after filtering */
+  readText: string;
+
+  /** The validated tag number */
+  validatedText: string;
+
+  isSuccess: boolean;
 };
 
 enum LogLevel {
@@ -122,11 +138,11 @@ class BaseLogger {
   }
 }
 
-interface EchoTagScannnerLoggerProps extends BaseLoggerProps {
+interface EchoTagScannerLoggerProps extends BaseLoggerProps {
   moduleName: string;
   moduleShortName: string;
 }
-class EchoTagScannnerLogger extends BaseLogger {
+class EchoTagScannerLogger extends BaseLogger {
   private _moduleName: string;
   private _moduleShortName: string;
 
@@ -134,7 +150,7 @@ class EchoTagScannnerLogger extends BaseLogger {
     moduleName,
     moduleShortName,
     ...baseProps
-  }: EchoTagScannnerLoggerProps) {
+  }: EchoTagScannerLoggerProps) {
     super(baseProps);
     this._moduleName = moduleName;
     this._moduleShortName = moduleShortName;
@@ -161,8 +177,12 @@ class EchoTagScannnerLogger extends BaseLogger {
     });
   }
 
+  public scanAttempt(props: ScanAttempt) {
+    this.trackEvent(ObjectName.ScanAttempt, 'ScanAttempt', props);
+  }
+
   public doneScanning(props: ScannerActionsProperties) {
-    this.trackEvent(ObjectName.Scanner, 'DoneScanning', props);
+    this.trackEvent(ObjectName.DoneScanning, 'DoneScanning', props);
   }
 }
 
@@ -170,7 +190,7 @@ const moduleShortName = echomodule.manifest.shortName;
 const moduleName = echomodule.manifest.name;
 
 const overrideLogLevel = localStorage.getItem(`${moduleShortName}.logOverride`);
-const logger = new EchoTagScannnerLogger({
+const logger = new EchoTagScannerLogger({
   moduleName,
   moduleShortName,
   analytics: analytics.createAnalyticsModule(moduleShortName),

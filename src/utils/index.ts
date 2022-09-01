@@ -4,7 +4,6 @@ export * from './event';
 export * from './func';
 export * from './error';
 export * from './url';
-export * from './tag';
 export * from './logger';
 export * from './viewport';
 export * from './developer';

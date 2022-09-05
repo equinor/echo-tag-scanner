@@ -62,18 +62,12 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
     setValidatedTags(undefined);
     changeTagScanStatus('scanning', true);
 
-    const start = new Date();
     // Capture image.
     let scans = await tagScanner?.scan(scanArea.getBoundingClientRect());
 
     if (scans) {
       // Run OCR and validation to get possible tag numbers.
       const validatedTags = await tagScanner?.ocr(scans);
-      const end = new Date();
-
-      const seconds = (start.getTime() - end.getTime()) / 1000;
-      const found = validatedTags?.length ?? 0;
-      logger.doneScanning({ seconds, found });
 
       // Put the validated tags in state.
       changeTagScanStatus('scanning', false);

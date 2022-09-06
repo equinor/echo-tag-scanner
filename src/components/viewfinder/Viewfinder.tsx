@@ -44,7 +44,7 @@ const ViewFinder = styled.video`
   background-color: var(--black);
   transition: all 0.3s ease;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   object-fit: cover;
   z-index: 1;
   user-select: none;

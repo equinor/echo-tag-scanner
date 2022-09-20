@@ -128,3 +128,28 @@ Knowing about the users connection quality would be invaluable information.
 
 ### Barcode scanning
 New installations like Wisting might futureproof their installations by using barcodes in addition to tag numbers. Barcodes are, by design, relatively easy to read.
+
+## Logging
+The scanner is connected to Azure App Insights where it can perform logging operations. At the time of writing, there are 2 instances of App Insights; [shared](https://portal.azure.com/#@StatoilSRM.onmicrosoft.com/resource/subscriptions/f9892073-3b09-40b7-8f33-1e0320e683c8/resourceGroups/Echopedia/providers/microsoft.insights/components/ai-dt-echopedia-shared/overview) and [prod](https://portal.azure.com/#@StatoilSRM.onmicrosoft.com/resource/subscriptions/f9892073-3b09-40b7-8f33-1e0320e683c8/resourceGroups/Echopedia-prod/providers/microsoft.insights/components/ai-dt-echopedia-prod/overview). Log operations from QA, test and dev environments wind up in the shared instance.
+The scanner is configured to log when the user start ETS and it will log all scanning attempts; be it successful or unsuccessfull hits.
+
+### How to see number of users per month.
+![image](https://user-images.githubusercontent.com/10920843/189661348-705f11d6-dbe9-47d8-b213-e8cc7fd3b0d4.png)
+
+### How to see scanning logs
+__TODO: document this once its ready in production
+
+## Logging tools
+The scanner comes with logging tools that can be utilized by developers and testers. ETS can do log operations to the console depending on which environment it is running on. The current environments are LocalDevelopment, EchoDevelopment, QA and Prod. The difference between LocalDevelopment and EchoDevelopment is that in EchoDevelopment, the code is running in EchopediaDev. In LocalDevelopment, the code is running locally on the developers computer.
+
+In order to do a selective console log, the developer can do something like this:
+```
+logger.log('EchoDevelopment', () => {
+    console.log(
+      'I will run if the env is EchoDevelopment or LocalDevelopment'
+    );
+  }); 
+  ```
+As the log entry suggests, the console log will be invoked in both EchoDevelopment and LocalDevelopment because LocalDevelopment is "below".
+
+

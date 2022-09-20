@@ -1,8 +1,8 @@
-import { CameraProps, ParsedComputerVisionResponse } from '@types';
-import { ocrRead } from '@services';
-import { isDevelopment, logger, runTagValidation } from '@utils';
+import { CameraProps } from '@types';
+import { isDevelopment, logger } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { Camera } from './Camera';
+import { OCR } from './OCR';
 
 /**
  * This object implements tag scanning logic.
@@ -10,6 +10,7 @@ import { Camera } from './Camera';
 export class TagScanner extends Camera {
   private _scanRetries = 5;
   private _scanDuration = 2; //seconds
+  private _OCR = new OCR();
 
   constructor(props: CameraProps) {
     super(props);
@@ -196,36 +197,29 @@ Regular offset from left-edge: ${bcr.x};
    * Runs OCR and tag validation on a list of blobs until a result is obtained or it reaches the end of the list.
    */
   public async ocr(scans: Blob[]): Promise<TagSummaryDto[]> {
+    this._OCR.refreshAttemptId();
     for (let i = 0; i < scans.length; i++) {
-      var ocrResult = await ocrRead(scans[i]);
-      if (ocrResult.length >= 1) {
-        var validation = await this.validateTags(ocrResult);
-        if (validation.length >= 1) return validation;
-      } else logger.log('QA', () => console.info('OCR returned no results'));
+      const filteredResponse = await this._OCR.runOCR(scans[i]);
+      if (filteredResponse.length >= 1) {
+        var validation = await this._OCR.handleValidation(filteredResponse);
+        if (validation.length >= 1) {
+          return validation;
+        } else {
+          logger.log('QA', () =>
+            console.info(
+              'OCR returned no results that was validated by Echo-Search.'
+            )
+          );
+        }
+      } else {
+        logger.log('QA', () =>
+          console.info(
+            'OCR returned no results that made it through the filtering step.'
+          )
+        );
+      }
     }
 
     return [];
-  }
-
-  /**
-   * Accepts a list of possible tag numbers and returns a filtered list containing tags which are
-   * available in IndexedDB.
-   */
-  public async validateTags(
-    possibleTagNumbers: ParsedComputerVisionResponse
-  ): Promise<TagSummaryDto[]> {
-    if (Array.isArray(possibleTagNumbers) && possibleTagNumbers.length > 0) {
-      const beforeValidation = new Date();
-      const result = await runTagValidation(possibleTagNumbers);
-      const afterValidation = new Date();
-      const timeMS =
-        afterValidation.getMilliseconds() - beforeValidation.getMilliseconds();
-      logger.log('QA', () =>
-        console.info(`Tag validation took ${timeMS} milliseconds.`)
-      );
-      return result;
-    } else {
-      return [];
-    }
   }
 }

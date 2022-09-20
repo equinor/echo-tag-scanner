@@ -87,12 +87,7 @@ class CoreCamera {
   static async getMediastream(): Promise<MediaStream> {
     const cameraPreferences = {
       video: {
-        width: {
-          ideal: globalThis.innerWidth
-        },
-        height: {
-          ideal: globalThis.innerHeight
-        },
+        aspectRatio: { exact: 16 / 9 },
 
         // Higher FPS is good for a scanning operation.
         frameRate: {
@@ -105,7 +100,7 @@ class CoreCamera {
           : { exact: 'environment' }
       },
       audio: false
-    };
+    } as MediaStreamConstraints;
 
     return await navigator.mediaDevices.getUserMedia(cameraPreferences);
   }

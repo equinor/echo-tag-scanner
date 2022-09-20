@@ -11,6 +11,7 @@ interface ZoomSliderProps {
   zoomOptions?: MediaSettingsRange;
 }
 
+/** A component that renders a slider element that allows the user to perform native digital zoom. */
 const ZoomSlider = (props: ZoomSliderProps): JSX.Element => {
   return (
     <SliderWrapper>

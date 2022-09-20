@@ -1,9 +1,9 @@
-export { CaptureAndTorch } from './cameracontrols/cameraControls';
+export { CaptureAndTorch } from './cameracontrols/captureAndTorch';
 export { TorchButton, ScannerButton } from './camerabutton/CameraButton';
 export { ScanningArea } from './viewfinder/CaptureArea';
 export { Viewfinder } from './viewfinder/Viewfinder';
 export { Toast } from './notification/Toast';
-export { ZoomSlider } from './cameracontrols/zoom/ZoomSlider';
+export { ZoomSlider } from './cameracontrols/ZoomSlider';
 export { SearchResults } from './searchresults/SearchResults';
 export { ScanningIndicator } from './progress/ScanningLoading';
 export { OverconstrainedAlert } from './error/OverconstrainedAlert';

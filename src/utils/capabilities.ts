@@ -1,5 +1,6 @@
 import { Camera } from '../core/Camera';
 import { getNotificationDispatcher as dispatchNotification } from '@utils';
+import { ZoomMethod } from '@types';
 
 function assignZoomSettings(
   type: 'min' | 'max' | 'step' | 'value',
@@ -43,4 +44,24 @@ function getTorchToggleProvider(camera: Camera) {
   };
 }
 
-export { assignZoomSettings, getTorchToggleProvider };
+function determineZoomMethod(this: Camera): ZoomMethod | undefined {
+  console.log('%c⧭', 'color: #733d00', this);
+  // Device has native support.
+  if (this.capabilities?.zoom) {
+    return {
+      type: 'native',
+      min: 1,
+      max: this.capabilities?.zoom.max
+    } as ZoomMethod;
+
+    // Device does not have native support, but the camera could allow for simulated zoom.
+  } else {
+    return {
+      type: 'simulated',
+      min: 1,
+      max: 3 // TODO: Find the max zoom value based on max camera resolution.
+    } as ZoomMethod;
+  }
+}
+
+export { assignZoomSettings, getTorchToggleProvider, determineZoomMethod };

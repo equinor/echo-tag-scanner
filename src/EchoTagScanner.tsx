@@ -1,13 +1,14 @@
 import React, { memo, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-import { OverconstrainedAlert, ScanningArea, Viewfinder } from '@components';
 import {
-  logger,
-  getNotificationDispatcher as dispatchNotification
-} from '@utils';
+  OverconstrainedAlert,
+  ScanningArea,
+  Viewfinder,
+  Scanner as ScannerUI
+} from '@ui';
+import { logger } from '@utils';
 import { ErrorBoundary } from '@services';
-import { TagScanner } from './core/Scanner';
-import { Scanner } from './components/ScannerUI';
+import { TagScanner } from '@cameraLogic';
 import styled from 'styled-components';
 
 const useEffectAsync = EchoUtils.Hooks.useEffectAsync;
@@ -79,7 +80,7 @@ const EchoCamera = () => {
         <ScanningArea captureAreaRef={setScanArea} />
 
         {viewfinder && canvas && scanArea && (
-          <Scanner
+          <ScannerUI
             stream={stream}
             viewfinder={viewfinder}
             canvas={canvas}

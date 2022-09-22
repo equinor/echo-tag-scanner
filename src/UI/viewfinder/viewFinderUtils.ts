@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { debounce, getOrientation } from '@utils';
 import EchoUtils from '@equinor/echo-utils';
-
-export type Dimensions = {
-  width: number;
-  height: number;
-};
+import { Dimensions } from '@types';
 
 export function useScanningAreaDimensions() {
   const [dimensions, setDimensions] = useState<Dimensions>(getDimensions());

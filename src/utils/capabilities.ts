@@ -1,4 +1,4 @@
-import { Camera } from '../core/Camera';
+import { Camera } from '@cameraLogic';
 import { getNotificationDispatcher as dispatchNotification } from '@utils';
 import { ZoomMethod } from '@types';
 

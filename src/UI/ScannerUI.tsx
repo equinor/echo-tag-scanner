@@ -6,12 +6,13 @@ import {
   SearchResults,
   ZoomSlider,
   SimulatedZoomTrigger
-} from '@components';
+} from '@ui';
 import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import {
   getTorchToggleProvider,
-  getNotificationDispatcher as dispatchNotification
+  getNotificationDispatcher as dispatchNotification,
+  isDevelopment
 } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 
@@ -89,13 +90,19 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
       }
     }
   };
-  console.log(tagScanner?.zoomMethod);
 
   return (
     <>
       <ControlPad>
         {tagScanner && (
           <>
+            {isDevelopment && (
+              <output
+                style={{ justifySelf: 'start', backgroundColor: 'hotpink' }}
+              >
+                {`${tagScanner.videoTrackSettings?.width}x${tagScanner.videoTrackSettings?.height}@${tagScanner.videoTrackSettings?.frameRate}`}
+              </output>
+            )}
             <SystemInfoTrigger
               onDelayedTrigger={tagScanner.clipboardThis.bind(tagScanner)}
             />
@@ -122,7 +129,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
               supportedFeatures={{
                 torch: Boolean(tagScanner?.capabilities?.torch)
               }}
-              onDebug={tagScanner.alterSimulatedZoom.bind(tagScanner, 2)}
+              onDebug={tagScanner.debugAll.bind(tagScanner, false)}
             />
           </>
         )}

@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Toast } from '@components';
+import { Toast } from '@ui';
 import { CustomEventDetail } from '@types';
 /**
  * A top level element that displays an EDS Snackbar if it detects the custom event "notification"

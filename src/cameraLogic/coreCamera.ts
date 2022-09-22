@@ -1,14 +1,6 @@
-import {
-  handleError,
-  getOrientation,
-  logger,
-  isDevelopment,
-  reportMediaStream,
-  reportVideoTrack,
-  getNotificationDispatcher as dispatchNotification
-} from '@utils';
+import { handleError, getOrientation, logger, isDevelopment } from '@utils';
 import { ErrorRegistry } from '@const';
-import { CameraProps } from '@types';
+import { CameraProps, CameraResolution, ZoomSteps } from '@types';
 
 /**
  * This object is concerned with the core features of a camera.
@@ -21,6 +13,10 @@ class CoreCamera {
   private _capabilities?: MediaTrackCapabilities = undefined;
   private _currentOrientation: 'portrait' | 'landscape';
   private _activeCamera?: string;
+  private _zoom: ZoomSteps;
+
+  /** Records the base camera resolution before any simulated zoom has taken place. */
+  private _baseResolution: CameraResolution | undefined;
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
@@ -31,6 +27,12 @@ class CoreCamera {
     this._currentOrientation = getOrientation();
     this._activeCamera = this._videoTrackSettings.facingMode;
     this._viewfinder.srcObject = props.mediaStream;
+    this._zoom = 1;
+    this._baseResolution = {
+      width: this._videoTrackSettings.height,
+      height: this._videoTrackSettings.width,
+      fps: this._videoTrackSettings.frameRate
+    };
   }
 
   public get videoTrack(): MediaStreamTrack | undefined {
@@ -81,33 +83,22 @@ class CoreCamera {
     this._activeCamera = newActiveCamera;
   }
 
-  /**
-   * Asks the user for permission to use the device camera and resolves a MediaStream object.
-   */
-  static async getMediastream(): Promise<MediaStream> {
-    const cameraPreferences = {
-      video: {
-        aspectRatio: { exact: 16 / 9 },
-
-        // Higher FPS is good for a scanning operation.
-        frameRate: {
-          ideal: 60
-        },
-
-        // In production, we always want the rear camera to be selected.
-        facingMode: isDevelopment
-          ? { ideal: 'environment' }
-          : { exact: 'environment' }
-      },
-      audio: false
-    } as MediaStreamConstraints;
-
-    return await navigator.mediaDevices.getUserMedia(cameraPreferences);
+  public get baseResolution() {
+    return this._baseResolution;
   }
 
-  public zoom(zoomValue: number): void {
+  public set baseResolution(newBaseResolution) {
+    this._baseResolution = newBaseResolution;
+  }
+
+  public get zoom(): ZoomSteps {
+    return this._zoom;
+  }
+
+  public set zoom(zoomValue: ZoomSteps) {
     this._videoTrack
       ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
+      .then(() => (this._zoom = zoomValue))
       .catch(onZoomRejection);
 
     function onZoomRejection(reason: unknown) {
@@ -122,6 +113,41 @@ class CoreCamera {
         new Error('A zoom action failed, more info: ' + reason)
       );
     }
+  }
+
+  /**
+   * Asks the user for permission to use the device camera and resolves a MediaStream object.
+   */
+  static async getMediastream(
+    requestedResolution?: CameraResolution
+  ): Promise<MediaStream> {
+    console.log('%c⧭', 'color: #e50000', requestedResolution);
+    const cameraPreferences = {
+      video: {
+        width: requestedResolution?.width
+          ? { exact: requestedResolution?.width }
+          : undefined,
+        height: requestedResolution?.height
+          ? { exact: requestedResolution?.height }
+          : undefined,
+
+        // aspectRatio: { exact: 16 / 9 },
+
+        // Higher FPS is good for a scanning operation.
+        frameRate: {
+          ideal: requestedResolution?.fps ?? 60
+        },
+
+        // In production, we always want the rear camera to be selected.
+        facingMode: isDevelopment
+          ? { ideal: 'environment' }
+          : { exact: 'environment' }
+      },
+      audio: false
+    } as MediaStreamConstraints;
+
+    console.log('%c⧭', 'color: #733d00', cameraPreferences);
+    return await navigator.mediaDevices.getUserMedia(cameraPreferences);
   }
 
   protected torch(toggled: boolean): void {

@@ -1,8 +1,7 @@
-import { CameraProps } from '@types';
+import { CameraProps, ZoomSteps } from '@types';
 import { isDevelopment, logger } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
-import { Camera } from './Camera';
-import { OCR } from './OCR';
+import { Camera, OCR } from '.';
 
 /**
  * This object implements tag scanning logic.
@@ -27,6 +26,8 @@ export class TagScanner extends Camera {
         this.videoTrack?.stop();
         this.videoTrack?.dispatchEvent(new Event('ended'));
       };
+      globalThis.simZoom = (newZoom: ZoomSteps) =>
+        this.alterSimulatedZoom(newZoom);
     }
   }
 
@@ -124,6 +125,12 @@ Regular offset from left-edge: ${bcr.x};
 
   public async debugAll(previewCapture = false) {
     navigator.clipboard.writeText(await this.clipboardThis());
+
+    logger.log('EchoDevelopment', () => {
+      console.log(
+        'I will run if the env is EchoDevelopment or LocalDevelopment'
+      );
+    });
 
     const scanArea = document.getElementById('scan-area');
     if (previewCapture && scanArea) {

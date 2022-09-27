@@ -1,54 +1,78 @@
-import React, { useState } from 'react';
-import { ZoomSteps } from '@types';
+import React, { useEffect, useState } from 'react';
+import { CameraResolution, ZoomSteps } from '@types';
+import { isCustomResolutionEvent } from '@utils';
 
 type SimulatedZoomTriggerProps = {
-  onSimulatedZoom: (newZoom: ZoomSteps) => Promise<boolean>;
+  onSimulatedZoom: (newZoom: ZoomSteps) => CameraResolution | undefined;
 };
 
 /** This component returns a button that will control the simulated zoom for the supported devices. */
 const SimulatedZoomTrigger = (
   props: SimulatedZoomTriggerProps
 ): JSX.Element => {
-  const [label, setLabel] = useState<ZoomSteps>(1);
+  const [currentSimulatedZoom, setCurrentSimulatedZoom] =
+    useState<ZoomSteps>(1);
 
-  /** Performs the callback in order to alter the simulated zoom
-   * If the simulated zoom is successful, the button label can be altered.
-   */
-  async function advanceZoom() {
-    /**
-     * TODO: There is a possibility that the max zoom level can be calculated JIT.
-     * If the callback returns some clue or we catch the overcontrain error here, we can reset the zoom back to 1x.
-     */
-    switch (label) {
+  /** Initially mounts an event listener on in the global context in
+   * order to do local state changes for when the simulated zoom is altered in the camera logic. */
+  useEffect(function setupSimulatedZoomStateChangeFromEvent() {
+    globalThis.addEventListener(
+      'simulatedZoomSuccess',
+      handleSimulatedZoomEvent
+    );
+    return () =>
+      globalThis.removeEventListener(
+        'simulatedZoomSuccess',
+        handleSimulatedZoomEvent
+      );
+
+    /** Handles the state change from the zoom event so that button label and zoom step is updated. */
+    function handleSimulatedZoomEvent(simulatedZoomEvent: Event) {
+      if (isCustomResolutionEvent(simulatedZoomEvent)) {
+        if (typeof simulatedZoomEvent.detail.zoomLevel === 'number') {
+          setCurrentSimulatedZoom(simulatedZoomEvent.detail.zoomLevel);
+        }
+      } else {
+        console.warn(
+          'Encountered a type of custom event which was not expected -> ',
+          simulatedZoomEvent.type
+        );
+        console.info(
+          'Simulated zoom may have been performed, but the zoom trigger label will be out of sync.'
+        );
+      }
+    }
+  }, []);
+
+  async function advanceSimulatedZoom() {
+    switch (currentSimulatedZoom) {
       case 1:
-        var hasBeenZoomed = await props.onSimulatedZoom(2);
-        if (hasBeenZoomed) setLabel(2);
+        props.onSimulatedZoom(2);
         break;
       case 2:
-        var hasBeenZoomed = await props.onSimulatedZoom(3);
-        if (hasBeenZoomed) setLabel(3);
+        props.onSimulatedZoom(3);
         break;
       case 3:
-        var hasBeenZoomed = await props.onSimulatedZoom(1);
-        if (hasBeenZoomed) setLabel(1);
+        props.onSimulatedZoom(1);
         break;
       default:
-        break;
+        return;
     }
   }
 
+  // TODO: Style the zoom button.
   return (
     <div style={{ width: '100%', textAlign: 'center' }}>
       <button
-        onClick={advanceZoom}
+        onClick={advanceSimulatedZoom}
         style={{
           backgroundColor: 'hotpink',
-          width: '24px',
-          height: '24px',
+          width: '42px',
+          height: '42px',
           borderRadius: '10px'
         }}
       >
-        {label}x
+        {currentSimulatedZoom}x
       </button>
     </div>
   );

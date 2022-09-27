@@ -11,8 +11,7 @@ import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import {
   getTorchToggleProvider,
-  getNotificationDispatcher as dispatchNotification,
-  isDevelopment
+  getNotificationDispatcher as dispatchNotification
 } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 
@@ -96,13 +95,6 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
       <ControlPad>
         {tagScanner && (
           <>
-            {isDevelopment && (
-              <output
-                style={{ justifySelf: 'start', backgroundColor: 'hotpink' }}
-              >
-                {`${tagScanner.videoTrackSettings?.width}x${tagScanner.videoTrackSettings?.height}@${tagScanner.videoTrackSettings?.frameRate}`}
-              </output>
-            )}
             <SystemInfoTrigger
               onDelayedTrigger={tagScanner.clipboardThis.bind(tagScanner)}
             />

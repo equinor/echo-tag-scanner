@@ -2,6 +2,7 @@ import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Toast } from '@ui';
 import { CustomEventDetail } from '@types';
+import { isCustomEvent } from '@utils';
 /**
  * A top level element that displays an EDS Snackbar if it detects the custom event "notification"
  */
@@ -19,7 +20,8 @@ const NotificationHandler: FC = () => {
       globalThis.removeEventListener('notification', updateToastMessage);
 
     function updateToastMessage(event: Event) {
-      if (isCustomEvent(event)) {
+      //TODO: improve this by checking the event.detail for the required properties.
+      if (isCustomEvent<CustomEventDetail>(event)) {
         if (event.detail) {
           setCurrentEvent(event.detail);
         } else {
@@ -28,11 +30,6 @@ const NotificationHandler: FC = () => {
       }
     }
   }, []);
-
-  /** CustomEvent cannot be type inferred from Event. This will instead type guard it. */
-  function isCustomEvent(event: Event): event is CustomEvent {
-    return (event as CustomEvent).detail != undefined;
-  }
 
   function isCustomDetail(event: unknown): event is CustomEventDetail {
     if (event != null && typeof event === 'object') {

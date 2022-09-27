@@ -1,4 +1,4 @@
-import { CustomEventDetail } from '@types';
+import { CustomEventDetail, Dimensions } from '@types';
 
 /**
  * Returns a dispatch closure for sending notifications to the user.

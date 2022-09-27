@@ -14,7 +14,6 @@ import {
 } from '@utils';
 import { CoreCamera } from './coreCamera';
 import { Postprocessor } from './postprocessor';
-console.log('%c⧭', 'color: #00bf00', Postprocessor);
 
 /**
  * This object acts as a proxy towards CoreCamera.
@@ -43,10 +42,7 @@ class Camera extends Postprocessor {
     this._zoomMethod = determineZoomMethod.call(this);
 
     if (this.videoTrack) {
-      this.videoTrack.addEventListener(
-        'ended',
-        this.refreshStream.bind(this, this.baseResolution)
-      );
+      this.videoTrack.addEventListener('ended', this.refreshStream.bind(this));
     }
 
     // For debugging purposes.
@@ -75,21 +71,14 @@ class Camera extends Postprocessor {
   /**
    * Performs a complete refresh of the camera stream by requesting a new mediastream object.
    * @param {number} requestedResolution Override the requested resolution.
+   * @returns {CameraResolution} Returns the new camera dimensions and framerate.
    */
-  public async refreshStream(
-    requestedResolution?: CameraResolution
-  ): Promise<CameraResolution> {
+  public async refreshStream(): Promise<CameraResolution> {
     try {
-      console.log('%c⧭', 'color: #aa00ff', requestedResolution);
-      const newMediastream = await CoreCamera.getMediastream(
-        requestedResolution
-      );
+      const newMediastream = await CoreCamera.getMediastream();
 
       const newTrack = newMediastream.getVideoTracks()[0];
-      newTrack.addEventListener(
-        'ended',
-        this.refreshStream.bind(this, this.baseResolution)
-      );
+      newTrack.addEventListener('ended', this.refreshStream.bind(this));
 
       this.videoTrackSettings = newTrack.getSettings();
       this.videoTrack = newTrack;
@@ -162,26 +151,42 @@ class Camera extends Postprocessor {
 
   /**
    * Performs a simulated digital zoom.
-   * @param {ZoomSteps} newZoom The new zoom value.
-   * @returns {boolean} If the zoom operation was successful or not.
+   * @param {ZoomSteps} newZoomLevel The new zoom value.
+   * @returns {CameraResolution} Information about the new viewfinder resolution.
    */
-  public async alterSimulatedZoom(newZoom: ZoomSteps): Promise<boolean> {
-    if (newZoom === 1) {
-      var cameraResolutionRequest = this.baseResolution;
-    } else if (newZoom === 2 || newZoom === 3) {
+  public alterSimulatedZoom(
+    newZoomLevel: ZoomSteps
+  ): CameraResolution | undefined {
+    if (newZoomLevel === 1) {
+      var simulatedZoom = this.baseResolution;
+    } else if (newZoomLevel === 2 || newZoomLevel === 3) {
       if (this.baseResolution?.width && this.baseResolution?.height) {
-        var cameraResolutionRequest: CameraResolution | undefined = {
-          width: this.baseResolution.width * newZoom,
-          height: this.baseResolution.height * newZoom,
-          fps: this.baseResolution.fps
+        var simulatedZoom: CameraResolution | undefined = {
+          width: this.baseResolution.width * newZoomLevel,
+          height: this.baseResolution.height * newZoomLevel,
+          fps: this.baseResolution.fps,
+          zoomLevel: newZoomLevel
         };
       }
     } else {
-      throw new Error('Zoom step is out of bounds: ', newZoom);
-      // handle newZoom out of bounds
+      throw new Error('Zoom step is out of bounds: ', newZoomLevel);
     }
 
-    return Boolean(await this.refreshStream(cameraResolutionRequest));
+    if (simulatedZoom) {
+      notifySimulatedZoom(simulatedZoom);
+    }
+    return simulatedZoom;
+
+    /** Dispatches an event after simulated zoom is done. */
+    function notifySimulatedZoom(result: CameraResolution) {
+      const refreshEvent = new CustomEvent<CameraResolution>(
+        'simulatedZoomSuccess',
+        {
+          detail: result
+        }
+      );
+      globalThis.dispatchEvent(refreshEvent);
+    }
   }
 
   /** Accepts a new zoom value from the Zoom slider component and attempts to perform a native digital zoom */

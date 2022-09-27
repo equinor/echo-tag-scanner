@@ -26,7 +26,6 @@ export function useMountScanner(
       viewfinder,
       canvas
     };
-
     const camera = new TagScanner(props);
 
     if (!signal.aborted) {

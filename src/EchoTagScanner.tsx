@@ -25,9 +25,7 @@ const EchoCamera = () => {
   useEffectAsync(async () => {
     try {
       const mediaStream = await TagScanner.getMediastream();
-      // mediaStream.addEventListener('removetrack', test);
       setStream(mediaStream);
-      // return mediaStream.removeEventListener('removetrack', test);
     } catch (error) {
       if (error instanceof OverconstrainedError) {
         setoverConstrainedCameraDetails(error);
@@ -63,12 +61,6 @@ const EchoCamera = () => {
     );
   }
 
-  if (overConstrainedCameraDetails) {
-    return (
-      <OverconstrainedAlert technicalInfo={overConstrainedCameraDetails} />
-    );
-  }
-
   if (!stream) {
     return null;
   }
@@ -93,6 +85,10 @@ const EchoCamera = () => {
 };
 
 const Main = styled.main`
+  display: flex;
+  background-color: black;
+  justify-content: center;
+  align-items: center;
   touch-action: none;
   height: 100vh;
   width: 100vw;

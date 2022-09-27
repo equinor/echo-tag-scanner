@@ -1,4 +1,10 @@
-import { handleError, getOrientation, logger, isDevelopment } from '@utils';
+import {
+  handleError,
+  getOrientation,
+  logger,
+  getCameraPreferences,
+  isLocalDevelopment
+} from '@utils';
 import { ErrorRegistry } from '@const';
 import { CameraProps, CameraResolution, ZoomSteps } from '@types';
 
@@ -29,9 +35,10 @@ class CoreCamera {
     this._viewfinder.srcObject = props.mediaStream;
     this._zoom = 1;
     this._baseResolution = {
-      width: this._videoTrackSettings.height,
-      height: this._videoTrackSettings.width,
-      fps: this._videoTrackSettings.frameRate
+      width: this._videoTrackSettings.width,
+      height: this._videoTrackSettings.height,
+      fps: this._videoTrackSettings.frameRate,
+      zoomLevel: 1
     };
   }
 
@@ -118,35 +125,11 @@ class CoreCamera {
   /**
    * Asks the user for permission to use the device camera and resolves a MediaStream object.
    */
-  static async getMediastream(
-    requestedResolution?: CameraResolution
-  ): Promise<MediaStream> {
-    console.log('%c⧭', 'color: #e50000', requestedResolution);
-    const cameraPreferences = {
-      video: {
-        width: requestedResolution?.width
-          ? { exact: requestedResolution?.width }
-          : undefined,
-        height: requestedResolution?.height
-          ? { exact: requestedResolution?.height }
-          : undefined,
-
-        // aspectRatio: { exact: 16 / 9 },
-
-        // Higher FPS is good for a scanning operation.
-        frameRate: {
-          ideal: requestedResolution?.fps ?? 60
-        },
-
-        // In production, we always want the rear camera to be selected.
-        facingMode: isDevelopment
-          ? { ideal: 'environment' }
-          : { exact: 'environment' }
-      },
-      audio: false
-    } as MediaStreamConstraints;
-
-    console.log('%c⧭', 'color: #733d00', cameraPreferences);
+  static async getMediastream(): Promise<MediaStream> {
+    const cameraPreferences = getCameraPreferences(isLocalDevelopment);
+    console.group('Requesting camera feed');
+    console.info(console.info('%c⧭', 'color: #0088cc', cameraPreferences));
+    console.groupEnd();
     return await navigator.mediaDevices.getUserMedia(cameraPreferences);
   }
 

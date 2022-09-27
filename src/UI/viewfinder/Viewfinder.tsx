@@ -1,21 +1,46 @@
-import React, {
-  VideoHTMLAttributes,
-  CanvasHTMLAttributes,
-  SetStateAction
-} from 'react';
+import React, { SetStateAction, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useScanningAreaDimensions } from './viewFinderUtils';
-import { isLocalDevelopment } from '@utils';
+import { isLocalDevelopment, isCustomEvent } from '@utils';
+import { CameraResolution, Dimensions } from '@types';
 
 interface ViewfinderProps {
   canvasRef: React.Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
   videoRef: React.Dispatch<SetStateAction<HTMLVideoElement | undefined>>;
-  canvasOptions?: CanvasHTMLAttributes<HTMLCanvasElement>;
-  videoOptions?: VideoHTMLAttributes<HTMLVideoElement>;
 }
 
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   const dimensions = useScanningAreaDimensions();
+
+  const [dimensionsEvent, setDimensionsEvent] = useState<Dimensions>({
+    width: undefined,
+    height: undefined
+  });
+
+  /**
+   * Mounts an event handler to the global context that changes the dimensions of the viewfinder
+   * as simulated zoom operations happen.
+   */
+  useEffect(function mountViewfinderDimensionChangeEventHandler() {
+    globalThis.addEventListener(
+      'simulatedZoomSuccess',
+      handleSimulatedZoomEvent
+    );
+    return () =>
+      globalThis.removeEventListener(
+        'simulatedZoomSuccess',
+        handleSimulatedZoomEvent
+      );
+
+    function handleSimulatedZoomEvent(newFeed: Event) {
+      if (isCustomEvent<CameraResolution>(newFeed)) {
+        setDimensionsEvent({
+          width: newFeed.detail.width,
+          height: newFeed.detail.height
+        });
+      }
+    }
+  }, []);
 
   return (
     <>
@@ -25,16 +50,14 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         autoPlay
         disablePictureInPicture
         controls={false}
-        width={globalThis.innerWidth}
-        height={globalThis.innerHeight}
-        {...props.videoOptions}
+        width={dimensionsEvent.width ?? '100%'}
+        height={dimensionsEvent.height ?? '100%'}
       />
       <Canvas
         ref={(el: HTMLCanvasElement) => props.canvasRef(el)}
         width={dimensions.width}
         height={dimensions.height}
         isLocalDevelopment={isLocalDevelopment}
-        {...props.canvasOptions}
       />
     </>
   );
@@ -43,9 +66,8 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
 const ViewFinder = styled.video`
   background-color: var(--black);
   transition: all 0.3s ease;
-  width: 100%;
-  height: 100%;
   object-fit: cover;
+
   z-index: 1;
   user-select: none;
   -webkit-user-select: none;

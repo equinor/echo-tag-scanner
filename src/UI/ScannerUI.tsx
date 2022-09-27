@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { TagSummaryDto } from '@equinor/echo-search';
-import { CaptureAndTorch, SearchResults, ZoomSlider } from '@components';
+import {
+  CaptureAndTorch,
+  SearchResults,
+  ZoomSlider,
+  SimulatedZoomTrigger
+} from '@ui';
 import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import {
   getTorchToggleProvider,
-  getNotificationDispatcher as dispatchNotification,
-  logger
+  getNotificationDispatcher as dispatchNotification
 } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 
@@ -94,11 +98,17 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
             <SystemInfoTrigger
               onDelayedTrigger={tagScanner.clipboardThis.bind(tagScanner)}
             />
-            {tagScanner.capabilities?.zoom && (
+            {tagScanner.zoomMethod?.type === 'native' && (
               <ZoomSlider
                 onSlide={tagScanner.alterZoom}
                 zoomInputRef={setZoomInputRef}
                 zoomOptions={tagScanner.capabilities?.zoom}
+              />
+            )}
+
+            {tagScanner.zoomMethod?.type === 'simulated' && (
+              <SimulatedZoomTrigger
+                onSimulatedZoom={tagScanner.alterSimulatedZoom.bind(tagScanner)}
               />
             )}
 
@@ -111,7 +121,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
               supportedFeatures={{
                 torch: Boolean(tagScanner?.capabilities?.torch)
               }}
-              onDebug={tagScanner.debugAll.bind(tagScanner, true)}
+              onDebug={tagScanner.debugAll.bind(tagScanner, false)}
             />
           </>
         )}

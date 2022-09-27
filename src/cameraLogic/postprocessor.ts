@@ -1,6 +1,6 @@
 import { CameraProps, DrawImageParameters } from '@types';
-import { CanvasHandler } from './CanvasHandler';
-import { CoreCamera } from './CoreCamera';
+import { CanvasHandler } from './canvasHandler';
+import { CoreCamera } from './coreCamera';
 
 /**
  * This object is concerned with the altering of captures done with the camera.

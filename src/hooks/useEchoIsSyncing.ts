@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Syncer } from '@equinor/echo-search';
-import { logger } from '@utils';
 
 /**
  * Returns a boolean indicating if echo is syncing the tags in IndexedDB.

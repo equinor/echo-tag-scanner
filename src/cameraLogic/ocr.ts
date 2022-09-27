@@ -1,6 +1,6 @@
 import { BackendError } from '@equinor/echo-base';
 import { ComputerVisionResponse, ParsedComputerVisionResponse } from '@types';
-import { handleError, logger, ScanAttempt } from '@utils';
+import { handleError, logger } from '@utils';
 import { ErrorRegistry } from '@const';
 import { baseApiClient } from '../services/api/base/base';
 import { getComputerVisionOcrResources } from '../services/api/resources/resources';

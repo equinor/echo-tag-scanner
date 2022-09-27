@@ -1,13 +1,14 @@
 import React, { memo, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-import { OverconstrainedAlert, ScanningArea, Viewfinder } from '@components';
 import {
-  logger,
-  getNotificationDispatcher as dispatchNotification
-} from '@utils';
+  OverconstrainedAlert,
+  ScanningArea,
+  Viewfinder,
+  Scanner as ScannerUI
+} from '@ui';
+import { logger } from '@utils';
 import { ErrorBoundary } from '@services';
-import { TagScanner } from './core/Scanner';
-import { Scanner } from './components/ScannerUI';
+import { TagScanner } from '@cameraLogic';
 import styled from 'styled-components';
 
 const useEffectAsync = EchoUtils.Hooks.useEffectAsync;
@@ -24,9 +25,7 @@ const EchoCamera = () => {
   useEffectAsync(async () => {
     try {
       const mediaStream = await TagScanner.getMediastream();
-      // mediaStream.addEventListener('removetrack', test);
       setStream(mediaStream);
-      // return mediaStream.removeEventListener('removetrack', test);
     } catch (error) {
       if (error instanceof OverconstrainedError) {
         setoverConstrainedCameraDetails(error);
@@ -62,12 +61,6 @@ const EchoCamera = () => {
     );
   }
 
-  if (overConstrainedCameraDetails) {
-    return (
-      <OverconstrainedAlert technicalInfo={overConstrainedCameraDetails} />
-    );
-  }
-
   if (!stream) {
     return null;
   }
@@ -79,7 +72,7 @@ const EchoCamera = () => {
         <ScanningArea captureAreaRef={setScanArea} />
 
         {viewfinder && canvas && scanArea && (
-          <Scanner
+          <ScannerUI
             stream={stream}
             viewfinder={viewfinder}
             canvas={canvas}
@@ -92,6 +85,10 @@ const EchoCamera = () => {
 };
 
 const Main = styled.main`
+  display: flex;
+  background-color: black;
+  justify-content: center;
+  align-items: center;
   touch-action: none;
   height: 100vh;
   width: 100vw;

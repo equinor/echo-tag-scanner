@@ -1,14 +1,8 @@
 {
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable"
-    ],
+    "lib": ["esnext", "dom", "dom.iterable"],
     "allowJs": true,
     "sourceMap": true,
     "noImplicitAny": false,
@@ -29,33 +23,13 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@components": [
-        "src/components/"
-      ],
-      "@pages": [
-        "src/pages/"
-      ],
-      "@const": [
-        "src/const"
-      ],
-      "@hooks": [
-        "src/hooks"
-      ],
-      "@contexts": [
-        "src/contexts/"
-      ],
-      "@providers": [
-        "src/providers/"
-      ],
-      "@services": [
-        "src/services/"
-      ],
-      "@types": [
-        "src/types/"
-      ],
-      "@utils": [
-        "src/utils/"
-      ]
+      "@ui": ["src/UI/"],
+      "@cameraLogic": ["src/cameraLogic/"],
+      "@const": ["src/const/"],
+      "@hooks": ["src/hooks/"],
+      "@services": ["src/services/"],
+      "@types": ["src/types/"],
+      "@utils": ["src/utils/"]
     }
   }
 }

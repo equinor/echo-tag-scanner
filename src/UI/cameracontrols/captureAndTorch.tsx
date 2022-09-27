@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { TorchButton, ScannerButton } from '@components';
+import { TorchButton, ScannerButton } from '@ui';
 import { Button } from '@equinor/eds-core-react';
 import { isDevelopment } from '@utils';
 

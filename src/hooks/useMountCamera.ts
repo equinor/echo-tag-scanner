@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-import { TagScanner } from '../core/Scanner';
-import { CameraProps } from '@types';
-import { assignZoomSettings } from '@utils';
+import { TagScanner } from '../cameraLogic/scanner';
+import { CameraProps, ZoomSteps } from '@types';
+import { zoomSteps } from '@const';
 
 type CameraInfrastructure = {
   tagScanner?: TagScanner;
@@ -18,6 +18,7 @@ export function useMountScanner(
   // Zoom controls. Currently only Android.
   const [zoomRef, setZoomInputRef] = useState<HTMLInputElement>();
   const [tagScanner, setCamera] = useState<TagScanner | undefined>(undefined);
+  const [zoom, setZoom] = useState<ZoomSteps | undefined>(undefined);
 
   useEffectAsync(async (signal) => {
     const props: CameraProps = {
@@ -25,11 +26,11 @@ export function useMountScanner(
       viewfinder,
       canvas
     };
-
     const camera = new TagScanner(props);
 
     if (!signal.aborted) {
       setCamera(camera);
+      setZoom(camera.zoom);
     }
 
     return () => {
@@ -43,11 +44,11 @@ export function useMountScanner(
     if (zoomRef == null) return;
 
     // Setup the zoom slider with the min, max and step values.
-    zoomRef.min = assignZoomSettings('min', tagScanner);
-    zoomRef.max = assignZoomSettings('max', tagScanner);
-    zoomRef.step = assignZoomSettings('step', tagScanner);
-    zoomRef.value = '1';
-  }, [tagScanner, zoomRef]);
+    zoomRef.min = String(zoomSteps[0]);
+    zoomRef.max = String(zoomSteps.at(-1));
+    zoomRef.step = '1';
+    zoomRef.value = String(zoom);
+  }, [tagScanner, zoomRef, zoom]);
 
   return {
     tagScanner,

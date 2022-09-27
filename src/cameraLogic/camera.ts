@@ -1,21 +1,37 @@
-import { CameraProps, DrawImageParameters } from '@types';
+import {
+  CameraProps,
+  CameraResolution,
+  DrawImageParameters,
+  ZoomSteps,
+  ZoomMethod
+} from '@types';
 import {
   logger,
   reportMediaStream,
-  getNotificationDispatcher as dispatchNotification,
   reportVideoTrack,
-  getOrientation
+  getOrientation,
+  determineZoomMethod
 } from '@utils';
-import { CoreCamera } from './CoreCamera';
-import { Postprocessor } from './Postprocessor';
+import { CoreCamera } from './coreCamera';
+import { Postprocessor } from './postprocessor';
 
 /**
  * This object acts as a proxy towards CoreCamera.
  * From a user perspective, it is the viewfinder and camera controls.
  */
 class Camera extends Postprocessor {
+  /** Is the torch turned on or not. */
   private _torchState = false;
+
+  /** Detects changes to the device orientation and refreshes the camera feed. */
   private _orientationObserver: ResizeObserver;
+
+  /** The method of zooming the viewfinder
+   * - undefined: Zooming is not enabled.
+   * - simulated: Manipulates the camera feed scale in order to simulate digital zoom.
+   * - native: Uses MediaStream API to apply digital zoom.
+   */
+  private _zoomMethod: ZoomMethod | undefined;
 
   constructor(props: CameraProps) {
     super(props);
@@ -23,16 +39,23 @@ class Camera extends Postprocessor {
       this.handleOrientationChange.bind(this)
     );
     this._orientationObserver.observe(this.viewfinder);
+    this._zoomMethod = determineZoomMethod.call(this);
+
     if (this.videoTrack) {
-      this.videoTrack.addEventListener(
-        'ended',
-        this.refreshStream.bind(this, false)
-      );
+      this.videoTrack.addEventListener('ended', this.refreshStream.bind(this));
     }
 
     // For debugging purposes.
     MediaStreamTrack.prototype.toString = reportVideoTrack;
     MediaStream.prototype.toString = reportMediaStream;
+  }
+
+  public get zoomMethod(): ZoomMethod | undefined {
+    return this._zoomMethod;
+  }
+
+  public set zoomMethod(newMethod: ZoomMethod | undefined) {
+    this._zoomMethod = newMethod;
   }
 
   private handleOrientationChange() {
@@ -47,19 +70,23 @@ class Camera extends Postprocessor {
 
   /**
    * Performs a complete refresh of the camera stream by requesting a new mediastream object.
+   * @param {number} requestedResolution Override the requested resolution.
+   * @returns {CameraResolution} Returns the new camera dimensions and framerate.
    */
-  public async refreshStream() {
+  public async refreshStream(): Promise<CameraResolution> {
     try {
       const newMediastream = await CoreCamera.getMediastream();
 
       const newTrack = newMediastream.getVideoTracks()[0];
-      newTrack.addEventListener('ended', this.refreshStream.bind(this, false));
+      newTrack.addEventListener('ended', this.refreshStream.bind(this));
+
       this.videoTrackSettings = newTrack.getSettings();
       this.videoTrack = newTrack;
       this.viewfinder.srcObject = newMediastream;
       this.capabilities = newTrack.getCapabilities();
       this.activeCamera = this.videoTrackSettings.facingMode;
       this.currentOrientation = getOrientation();
+      this._zoomMethod = determineZoomMethod.call(this);
 
       logger.log('EchoDevelopment', () => {
         console.group('The media stream was refreshed');
@@ -71,11 +98,17 @@ class Camera extends Postprocessor {
         console.info('The new video track -> ', newTrack);
         console.groupEnd();
       });
+
+      return {
+        width: this.videoTrackSettings.width,
+        height: this.videoTrackSettings.height,
+        fps: this.videoTrackSettings.frameRate
+      };
     } catch (error) {
       if (error instanceof Error) {
         logger.trackError(error);
-        throw error;
       }
+      throw error;
     }
   }
 
@@ -90,16 +123,25 @@ class Camera extends Postprocessor {
     }
   };
 
+  /** Pauses the viewfinder.
+   * @returns {boolean} A boolean indicating if the viewfinder is paused.
+   */
   public pauseViewfinder(): boolean {
     this.viewfinder.pause();
     return this.viewfinder.paused;
   }
 
+  /** Resumes the viewfinder
+   * @returns {boolean} A boolean indicating if the viewfinder is paused.
+   */
   public resumeViewfinder(): boolean {
     this.viewfinder.play();
     return this.viewfinder.paused;
   }
 
+  /** Stops the camera and cleans up the orientation observer.
+   * If this is invoked, the viewfinder cannot be resumed again.
+   */
   public stopCamera() {
     if (this.videoTrack) {
       this.videoTrack.stop();
@@ -107,25 +149,61 @@ class Camera extends Postprocessor {
     this._orientationObserver.disconnect();
   }
 
-  public alterZoom = (
-    ev: React.FormEvent<HTMLDivElement>,
-    newValue: number[] | number
-  ): void => {
-    if (Array.isArray(newValue) && ev.target && this.isValidZoom(newValue[0])) {
-      this.zoom(newValue[0]);
-    } else if (typeof newValue === 'number') {
-      this.zoom(newValue);
+  /**
+   * Performs a simulated digital zoom.
+   * @param {ZoomSteps} newZoomLevel The new zoom value.
+   * @returns {CameraResolution} Information about the new viewfinder resolution.
+   */
+  public alterSimulatedZoom(
+    newZoomLevel: ZoomSteps
+  ): CameraResolution | undefined {
+    if (newZoomLevel === 1) {
+      var simulatedZoom = this.baseResolution;
+    } else if (newZoomLevel === 2 || newZoomLevel === 3) {
+      if (this.baseResolution?.width && this.baseResolution?.height) {
+        var simulatedZoom: CameraResolution | undefined = {
+          width: this.baseResolution.width * newZoomLevel,
+          height: this.baseResolution.height * newZoomLevel,
+          fps: this.baseResolution.fps,
+          zoomLevel: newZoomLevel
+        };
+      }
+    } else {
+      throw new Error('Zoom step is out of bounds: ', newZoomLevel);
     }
-  };
 
-  private isValidZoom(zoomValue: number) {
-    if (this.capabilities?.zoom && typeof zoomValue === 'number') {
-      return (
-        zoomValue >= this.capabilities?.zoom?.min &&
-        zoomValue <= this.capabilities?.zoom?.max
+    if (simulatedZoom) {
+      notifySimulatedZoom(simulatedZoom);
+    }
+    return simulatedZoom;
+
+    /** Dispatches an event after simulated zoom is done. */
+    function notifySimulatedZoom(result: CameraResolution) {
+      const refreshEvent = new CustomEvent<CameraResolution>(
+        'simulatedZoomSuccess',
+        {
+          detail: result
+        }
       );
+      globalThis.dispatchEvent(refreshEvent);
     }
   }
+
+  /** Accepts a new zoom value from the Zoom slider component and attempts to perform a native digital zoom */
+  public alterZoom = (
+    ev: React.FormEvent<HTMLDivElement>,
+    newZoom: number[] | number
+  ): void => {
+    if (Array.isArray(newZoom) && ev.target) {
+      if (newZoom[0] === 1 || newZoom[0] === 2 || newZoom[0] === 3) {
+        this.zoom = newZoom[0];
+      }
+    } else if (typeof newZoom === 'number') {
+      if (newZoom === 1 || newZoom === 2 || newZoom === 3) {
+        this.zoom = newZoom;
+      }
+    }
+  };
 
   /**
    * Captures a photo, and stores it as a drawing on the postprocessing canvas.

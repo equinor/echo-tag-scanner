@@ -7,20 +7,17 @@ function defineResolves(rootPath) {
     }
 
     return {
-        extensions: ['.tsx', '.ts', '.js', '.jsx', '.css'],
-        alias: {
-          '@components': join(rootPath, '/src/components/'),
-          '@pages': join(rootPath, '/src/pages/'),
-          '@hooks': join(rootPath, '/src/hooks/'),
-          '@contexts': join(rootPath, '/src/contexts/'),
-          '@types': join(rootPath, '/src/types/'),
-          '@services': join(rootPath, '/src/services/'),
-          '@utils': join(rootPath, '/src/utils/'),
-          '@models': join(rootPath, '/src/models/'),
-          '@workers': join(rootPath, '/src/workers/'),
-          '@const': join(rootPath, '/src/const/')
-        }
+      extensions: ['.tsx', '.ts', '.js', '.jsx', '.css'],
+      alias: {
+        '@ui': join(rootPath, '/src/UI/'),
+        '@cameraLogic': join(rootPath, '/src/cameraLogic'),
+        '@hooks': join(rootPath, '/src/hooks/'),
+        '@types': join(rootPath, '/src/types/'),
+        '@services': join(rootPath, '/src/services/'),
+        '@utils': join(rootPath, '/src/utils/'),
+        '@const': join(rootPath, '/src/const/')
       }
+    };
 }
 
 module.exports = {defineResolves}

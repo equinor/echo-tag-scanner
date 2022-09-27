@@ -1,5 +1,6 @@
-import { Camera } from '../core/Camera';
+import { Camera } from '@cameraLogic';
 import { getNotificationDispatcher as dispatchNotification } from '@utils';
+import { ZoomMethod } from '@types';
 
 function assignZoomSettings(
   type: 'min' | 'max' | 'step' | 'value',
@@ -43,4 +44,68 @@ function getTorchToggleProvider(camera: Camera) {
   };
 }
 
-export { assignZoomSettings, getTorchToggleProvider };
+function determineZoomMethod(this: Camera): ZoomMethod | undefined {
+  // Device has native support.
+  if (this.capabilities?.zoom) {
+    return {
+      type: 'native',
+      min: 1,
+      max: this.capabilities?.zoom.max
+    } as ZoomMethod;
+
+    // Device does not have native support, but the camera could allow for simulated zoom.
+  } else {
+    return {
+      type: 'simulated',
+      min: 1,
+      max: 3
+    } as ZoomMethod;
+  }
+}
+
+function getCameraPreferences(
+  isLocalDevelopment: boolean
+): MediaStreamConstraints {
+  if (isLocalDevelopment) {
+    return {
+      video: {
+        width: { min: 1280 },
+        height: { min: 720 },
+
+        // Higher FPS is good for a scanning operation.
+        frameRate: {
+          ideal: 60
+        },
+
+        // Require a specific camera here.
+        deviceId: {
+          exact: ''
+        }
+      },
+      audio: false
+    } as MediaStreamConstraints;
+  } else {
+    return {
+      video: {
+        width: { min: 1280 },
+        height: { min: 720 },
+
+        // Higher FPS is good for a scanning operation.
+        frameRate: {
+          ideal: 60
+        },
+
+        // Require a specific camera here.
+        facingMode: { exact: 'environment' }
+      },
+      audio: false
+    } as MediaStreamConstraints;
+  }
+}
+
+export {
+  assignZoomSettings,
+  getTorchToggleProvider,
+  determineZoomMethod,
+  getCameraPreferences
+};

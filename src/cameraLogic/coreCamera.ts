@@ -22,7 +22,7 @@ class CoreCamera {
   private _zoom: ZoomSteps;
 
   /** Records the base camera resolution before any simulated zoom has taken place. */
-  private _baseResolution: CameraResolution | undefined;
+  private _baseResolution: CameraResolution;
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
@@ -34,10 +34,13 @@ class CoreCamera {
     this._activeCamera = this._videoTrackSettings.facingMode;
     this._viewfinder.srcObject = props.mediaStream;
     this._zoom = 1;
+
+    /** Currently holds a reference to the initial viewfinder dimensions.
+     * Can be improved by moving these to an extended HTMLVideoElement
+     */
     this._baseResolution = {
-      width: this._videoTrackSettings.width,
-      height: this._videoTrackSettings.height,
-      fps: this._videoTrackSettings.frameRate,
+      width: this._viewfinder.width,
+      height: this._viewfinder.height,
       zoomLevel: 1
     };
   }

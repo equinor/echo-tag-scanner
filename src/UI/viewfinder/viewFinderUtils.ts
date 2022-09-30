@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { debounce, getOrientation } from '@utils';
 import EchoUtils from '@equinor/echo-utils';
-import { Dimensions } from '@types';
+import { ViewfinderDimensions } from '@types';
 
 export function useScanningAreaDimensions() {
-  const [dimensions, setDimensions] = useState<Dimensions>(getDimensions());
+  const [dimensions, setDimensions] = useState<ViewfinderDimensions>(
+    getDimensions()
+  );
 
   // Handles the resize of the scanning area whenever the viewport dimensions changes.
   EchoUtils.Hooks.useEffectAsync(async (signal) => {
@@ -24,18 +26,22 @@ export function useScanningAreaDimensions() {
   return dimensions;
 }
 
-function getDimensions(): Dimensions {
+function getDimensions(): ViewfinderDimensions {
   const viewMode = getOrientation();
 
   if (viewMode === 'portrait') {
     return {
-      width: globalThis.innerWidth * 0.8,
-      height: globalThis.innerHeight * (1 / 3)
+      // width: globalThis.innerWidth * 0.8,
+      // height: globalThis.innerHeight * (1 / 3)
+      width: globalThis.innerWidth,
+      height: globalThis.innerHeight
     };
   } else {
     return {
-      width: globalThis.innerWidth * 0.7,
-      height: globalThis.innerHeight * (1 / 3)
+      // width: globalThis.innerWidth * 0.7,
+      // height: globalThis.innerHeight * (1 / 3)
+      width: globalThis.innerWidth,
+      height: globalThis.innerHeight
     };
   }
 }

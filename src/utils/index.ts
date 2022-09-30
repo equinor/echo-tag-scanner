@@ -1,5 +1,5 @@
 export * from './array';
-export * from './capabilities';
+export * from './camera';
 export * from './event';
 export * from './func';
 export * from './error';

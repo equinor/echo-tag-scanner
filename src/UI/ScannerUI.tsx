@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { TagSummaryDto } from '@equinor/echo-search';
 import {
@@ -11,9 +11,11 @@ import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import {
   getTorchToggleProvider,
-  getNotificationDispatcher as dispatchNotification
+  getNotificationDispatcher as dispatchNotification,
+  isCustomEvent
 } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
+import { CameraResolution, ViewfinderDimensions } from '@types';
 
 interface ScannerProps {
   stream: MediaStream;
@@ -34,6 +36,59 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
   const echoIsSyncing = useEchoIsSyncing();
+
+  type DebugInfo = {
+    viewfinder: ViewfinderDimensions;
+    scanArea: ViewfinderDimensions;
+    cameraFeed: CameraResolution;
+    viewport: ViewfinderDimensions;
+  };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    function getFreshDebugInfo() {
+      return {
+        viewfinder: { width: viewfinder.width, height: viewfinder.height },
+        scanArea: {
+          width: scanArea.clientWidth,
+          height: scanArea.clientHeight
+        },
+        cameraFeed: {
+          width: tagScanner?.videoTrackSettings?.width,
+          height: tagScanner?.videoTrackSettings?.height
+        },
+        viewport: {
+          width: globalThis.visualViewport?.width,
+          height: globalThis.visualViewport?.height
+        }
+      };
+    }
+    console.log('refreshign debug info');
+    setDebugInfo(getFreshDebugInfo());
+  }, [
+    viewfinder.width,
+    viewfinder.height,
+    scanArea.clientWidth,
+    scanArea.clientHeight,
+    tagScanner?.videoTrackSettings?.width,
+    tagScanner?.videoTrackSettings?.height
+  ]);
+
+  const [debugInfo, setDebugInfo] = useState<DebugInfo>({
+    viewfinder: { width: viewfinder.width, height: viewfinder.height },
+    scanArea: {
+      width: scanArea.clientWidth,
+      height: scanArea.clientHeight
+    },
+    cameraFeed: {
+      width: tagScanner?.videoTrackSettings?.width,
+      height: tagScanner?.videoTrackSettings?.height
+    },
+    viewport: {
+      width: globalThis.visualViewport?.width,
+      height: globalThis.visualViewport?.height
+    }
+  });
 
   // Accepts a list of validated tags and sets them in memory for presentation.
   function presentValidatedTags(tags: TagSummaryDto[]) {
@@ -92,6 +147,38 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
 
   return (
     <>
+      <output
+        style={{ position: 'absolute', top: '20%', left: '20%', zIndex: 10 }}
+      >
+        <mark>
+          Viewfinder:
+          {debugInfo.viewfinder.width ?? 'undefined'}x
+          {debugInfo.viewfinder.height ?? 'undefined'}
+        </mark>
+        <br />
+        {debugInfo.scanArea?.width && debugInfo.scanArea?.height && (
+          <mark
+            style={{
+              backgroundColor: 'var(--outOfService)'
+            }}
+          >
+            Scanning area:
+            {Math.floor(debugInfo.scanArea?.width)}x
+            {Math.floor(debugInfo.scanArea?.height)}
+          </mark>
+        )}
+        <br />
+        {debugInfo.cameraFeed && (
+          <mark style={{ backgroundColor: 'hotpink' }}>
+            Camera feed: {debugInfo.cameraFeed.width}x
+            {debugInfo.cameraFeed.height}
+          </mark>
+        )}
+        <br />
+        <mark style={{ backgroundColor: 'lightblue' }}>
+          Viewport: {debugInfo.viewport?.width}x{debugInfo.viewport?.height}
+        </mark>
+      </output>
       <ControlPad>
         {tagScanner && (
           <>
@@ -121,7 +208,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
               supportedFeatures={{
                 torch: Boolean(tagScanner?.capabilities?.torch)
               }}
-              onDebug={tagScanner.debugAll.bind(tagScanner, false)}
+              onDebug={tagScanner.debugAll.bind(tagScanner, true)}
             />
           </>
         )}
@@ -151,7 +238,7 @@ const ControlPad = styled.section`
   bottom: 10px;
   height: 20%;
   width: 100%;
-  z-index: 1;
+  z-index: 20;
 
   // Move the control pad to the right;
   @media screen and (orientation: landscape) {

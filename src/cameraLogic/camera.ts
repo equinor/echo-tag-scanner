@@ -14,6 +14,7 @@ import {
 } from '@utils';
 import { CoreCamera } from './coreCamera';
 import { Postprocessor } from './postprocessor';
+import { getNotificationDispatcher as dispatchNotification } from '@utils';
 
 /**
  * This object acts as a proxy towards CoreCamera.
@@ -39,6 +40,7 @@ class Camera extends Postprocessor {
       this.handleOrientationChange.bind(this)
     );
     this._orientationObserver.observe(this.viewfinder);
+    this._orientationObserver;
     this._zoomMethod = determineZoomMethod.call(this);
 
     if (this.videoTrack) {
@@ -58,13 +60,28 @@ class Camera extends Postprocessor {
     this._zoomMethod = newMethod;
   }
 
+  /** Handles how the camera shoudl behave when an orientation change happens.
+   * This should eventually be replaced with the Screen Orientation API.
+   */
   private handleOrientationChange() {
     const newOrientation = getOrientation();
 
     if (newOrientation !== this.currentOrientation) {
       // Device orientation has changed. Refresh the video stream.
       this.currentOrientation = newOrientation;
-      this.refreshStream();
+      this.refreshStream().then((res) => {
+        const newOrientationEvent = new CustomEvent<CameraResolution>(
+          'orientationChange',
+          {
+            detail: {
+              width: this.videoTrackSettings?.width,
+              height: this.videoTrackSettings?.height,
+              fps: this.videoTrackSettings?.frameRate
+            }
+          }
+        );
+        globalThis.dispatchEvent(newOrientationEvent);
+      });
     }
   }
 
@@ -157,36 +174,26 @@ class Camera extends Postprocessor {
   public alterSimulatedZoom(
     newZoomLevel: ZoomSteps
   ): CameraResolution | undefined {
-    if (newZoomLevel === 1) {
-      var simulatedZoom = this.baseResolution;
-    } else if (newZoomLevel === 2 || newZoomLevel === 3) {
-      if (this.baseResolution?.width && this.baseResolution?.height) {
-        var simulatedZoom: CameraResolution | undefined = {
-          width: this.baseResolution.width * newZoomLevel,
-          height: this.baseResolution.height * newZoomLevel,
-          fps: this.baseResolution.fps,
-          zoomLevel: newZoomLevel
-        };
-      }
-    } else {
-      throw new Error('Zoom step is out of bounds: ', newZoomLevel);
+    let simulatedZoom: CameraResolution | undefined = undefined;
+
+    if (this.baseResolution?.width && this.baseResolution?.height) {
+      simulatedZoom = {
+        width: this.baseResolution.width * newZoomLevel,
+        height: this.baseResolution.height * newZoomLevel,
+        zoomLevel: newZoomLevel
+      };
     }
 
-    if (simulatedZoom) {
-      notifySimulatedZoom(simulatedZoom);
+    console.log(
+      'SIMULATED ZOOM',
+      simulatedZoom?.width + 'x' + simulatedZoom?.height
+    );
+
+    if (simulatedZoom?.width && simulatedZoom?.height) {
+      this.viewfinder.width = simulatedZoom.width;
+      this.viewfinder.height = simulatedZoom.height;
     }
     return simulatedZoom;
-
-    /** Dispatches an event after simulated zoom is done. */
-    function notifySimulatedZoom(result: CameraResolution) {
-      const refreshEvent = new CustomEvent<CameraResolution>(
-        'simulatedZoomSuccess',
-        {
-          detail: result
-        }
-      );
-      globalThis.dispatchEvent(refreshEvent);
-    }
   }
 
   /** Accepts a new zoom value from the Zoom slider component and attempts to perform a native digital zoom */
@@ -288,6 +295,8 @@ function calculateScaleFactor(viewfinder: HTMLVideoElement): {
   // FIXME: This makes it better width'wise in browsers
   // but we still have small offset issues in iphone/mobiles...
   let scale = Math.min(scale_x, scale_y);
+
+  dispatchNotification({ message: String(scale), autohideDuration: 5000 })();
 
   return { scale, videoWidth, videoHeight };
 }

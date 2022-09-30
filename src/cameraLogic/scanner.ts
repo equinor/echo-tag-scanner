@@ -135,7 +135,7 @@ Regular offset from left-edge: ${bcr.x};
     const scanArea = document.getElementById('scan-area');
     if (previewCapture && scanArea) {
       let capture = await this.capturePhoto(scanArea.getBoundingClientRect());
-      if (capture.size > 50000) capture = await this.scale(0.5);
+      // if (capture.size > 50000) capture = await this.scale(0.5);
     }
     logger.log('EchoDevelopment', () => {
       console.log('Mediastream -> ', this.mediaStream);

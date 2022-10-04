@@ -13,7 +13,6 @@ class CanvasHandler {
   private _canvas: HTMLCanvasElement;
   protected _canvasContext: CanvasRenderingContext2D;
   private _standardCanvasDimensions: CanvasDimensions;
-  private _currentOrientation: 'landscape' | 'portrait';
 
   constructor(props: CanvasHandlerProps) {
     if (!props.canvas)
@@ -33,32 +32,6 @@ class CanvasHandler {
       width: this._canvas.width,
       height: this._canvas.height
     };
-
-    /**
-     * This will save the initial canvas dimensions when the device changes its orientation.
-     * It is done because we also downscale the canvas during a downscale operation.
-     *  An alternative approach now in use is to set the canvas dimensions to whatever is being
-     * drawn on it (see this.draw). Code below can maybe be removed.
-     */
-    this._currentOrientation = getOrientation();
-    const orientationResizer = new ResizeObserver((entry) => {
-      const newOrientation = getOrientation();
-
-      if (entry[0] && newOrientation !== this._currentOrientation) {
-        this._currentOrientation = newOrientation;
-        this._standardCanvasDimensions = {
-          width: entry[0].contentRect.width,
-          height: entry[0].contentRect.height
-        };
-        logger.log('EchoDevelopment', () => {
-          console.info(
-            'Device orientation changed -> ',
-            this._standardCanvasDimensions
-          );
-        });
-      }
-    });
-    orientationResizer.observe(this._canvas);
   }
 
   public get canvasContext() {

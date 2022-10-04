@@ -24,9 +24,6 @@ class Camera extends Postprocessor {
   /** Is the torch turned on or not. */
   private _torchState = false;
 
-  /** Detects changes to the device orientation and refreshes the camera feed. */
-  private _orientationObserver: ResizeObserver;
-
   /** The method of zooming the viewfinder
    * - undefined: Zooming is not enabled.
    * - simulated: Manipulates the camera feed scale in order to simulate digital zoom.
@@ -36,11 +33,6 @@ class Camera extends Postprocessor {
 
   constructor(props: CameraProps) {
     super(props);
-    this._orientationObserver = new ResizeObserver(
-      this.handleOrientationChange.bind(this)
-    );
-    this._orientationObserver.observe(this.viewfinder);
-    this._orientationObserver;
     this._zoomMethod = determineZoomMethod.call(this);
 
     if (this.videoTrack) {
@@ -58,31 +50,6 @@ class Camera extends Postprocessor {
 
   public set zoomMethod(newMethod: ZoomMethod | undefined) {
     this._zoomMethod = newMethod;
-  }
-
-  /** Handles how the camera shoudl behave when an orientation change happens.
-   * This should eventually be replaced with the Screen Orientation API.
-   */
-  private handleOrientationChange() {
-    const newOrientation = getOrientation();
-
-    if (newOrientation !== this.currentOrientation) {
-      // Device orientation has changed. Refresh the video stream.
-      this.currentOrientation = newOrientation;
-      this.refreshStream().then((res) => {
-        const newOrientationEvent = new CustomEvent<CameraResolution>(
-          'orientationChange',
-          {
-            detail: {
-              width: this.videoTrackSettings?.width,
-              height: this.videoTrackSettings?.height,
-              fps: this.videoTrackSettings?.frameRate
-            }
-          }
-        );
-        globalThis.dispatchEvent(newOrientationEvent);
-      });
-    }
   }
 
   /**
@@ -163,7 +130,6 @@ class Camera extends Postprocessor {
     if (this.videoTrack) {
       this.videoTrack.stop();
     }
-    this._orientationObserver.disconnect();
   }
 
   /**

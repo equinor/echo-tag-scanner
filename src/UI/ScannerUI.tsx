@@ -5,26 +5,26 @@ import {
   CaptureAndTorch,
   SearchResults,
   ZoomSlider,
-  SimulatedZoomTrigger
+  SimulatedZoomTrigger,
+  DebugInfoOverlay
 } from '@ui';
 import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import {
   getTorchToggleProvider,
   getNotificationDispatcher as dispatchNotification,
-  isCustomEvent
+  isDevelopment,
+  isLocalDevelopment
 } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
-import { CameraResolution, ViewfinderDimensions } from '@types';
 
 interface ScannerProps {
   stream: MediaStream;
   viewfinder: HTMLVideoElement;
   canvas: HTMLCanvasElement;
-  scanArea: HTMLElement;
 }
 
-function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
+function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
   const [validatedTags, setValidatedTags] = useState<
     TagSummaryDto[] | undefined
   >(undefined);
@@ -36,59 +36,6 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
   const tagSearch = useSetActiveTagNo();
   const { tagScanStatus, changeTagScanStatus } = useTagScanStatus();
   const echoIsSyncing = useEchoIsSyncing();
-
-  type DebugInfo = {
-    viewfinder: ViewfinderDimensions;
-    scanArea: ViewfinderDimensions;
-    cameraFeed: CameraResolution;
-    viewport: ViewfinderDimensions;
-  };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    function getFreshDebugInfo() {
-      return {
-        viewfinder: { width: viewfinder.width, height: viewfinder.height },
-        scanArea: {
-          width: scanArea.clientWidth,
-          height: scanArea.clientHeight
-        },
-        cameraFeed: {
-          width: tagScanner?.videoTrackSettings?.width,
-          height: tagScanner?.videoTrackSettings?.height
-        },
-        viewport: {
-          width: globalThis.visualViewport?.width,
-          height: globalThis.visualViewport?.height
-        }
-      };
-    }
-    console.log('refreshign debug info');
-    setDebugInfo(getFreshDebugInfo());
-  }, [
-    viewfinder.width,
-    viewfinder.height,
-    scanArea.clientWidth,
-    scanArea.clientHeight,
-    tagScanner?.videoTrackSettings?.width,
-    tagScanner?.videoTrackSettings?.height
-  ]);
-
-  const [debugInfo, setDebugInfo] = useState<DebugInfo>({
-    viewfinder: { width: viewfinder.width, height: viewfinder.height },
-    scanArea: {
-      width: scanArea.clientWidth,
-      height: scanArea.clientHeight
-    },
-    cameraFeed: {
-      width: tagScanner?.videoTrackSettings?.width,
-      height: tagScanner?.videoTrackSettings?.height
-    },
-    viewport: {
-      width: globalThis.visualViewport?.width,
-      height: globalThis.visualViewport?.height
-    }
-  });
 
   // Accepts a list of validated tags and sets them in memory for presentation.
   function presentValidatedTags(tags: TagSummaryDto[]) {
@@ -122,7 +69,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
     changeTagScanStatus('scanning', true);
 
     // Capture image.
-    let scans = await tagScanner?.scan(scanArea.getBoundingClientRect());
+    let scans = await tagScanner?.scan();
 
     if (scans) {
       // Run OCR and validation to get possible tag numbers.
@@ -147,38 +94,9 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
 
   return (
     <>
-      <output
-        style={{ position: 'absolute', top: '20%', left: '20%', zIndex: 10 }}
-      >
-        <mark>
-          Viewfinder:
-          {debugInfo.viewfinder.width ?? 'undefined'}x
-          {debugInfo.viewfinder.height ?? 'undefined'}
-        </mark>
-        <br />
-        {debugInfo.scanArea?.width && debugInfo.scanArea?.height && (
-          <mark
-            style={{
-              backgroundColor: 'var(--outOfService)'
-            }}
-          >
-            Scanning area:
-            {Math.floor(debugInfo.scanArea?.width)}x
-            {Math.floor(debugInfo.scanArea?.height)}
-          </mark>
-        )}
-        <br />
-        {debugInfo.cameraFeed && (
-          <mark style={{ backgroundColor: 'hotpink' }}>
-            Camera feed: {debugInfo.cameraFeed.width}x
-            {debugInfo.cameraFeed.height}
-          </mark>
-        )}
-        <br />
-        <mark style={{ backgroundColor: 'lightblue' }}>
-          Viewport: {debugInfo.viewport?.width}x{debugInfo.viewport?.height}
-        </mark>
-      </output>
+      {tagScanner && (isLocalDevelopment || isDevelopment) && (
+        <DebugInfoOverlay tagScanner={tagScanner} viewfinder={viewfinder} />
+      )}
       <ControlPad>
         {tagScanner && (
           <>
@@ -193,11 +111,14 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
               />
             )}
 
-            {tagScanner.zoomMethod?.type === 'simulated' && (
-              <SimulatedZoomTrigger
-                onSimulatedZoom={tagScanner.alterSimulatedZoom.bind(tagScanner)}
-              />
-            )}
+            {tagScanner.zoomMethod?.type === 'simulated' &&
+              isLocalDevelopment && (
+                <SimulatedZoomTrigger
+                  onSimulatedZoom={tagScanner.alterSimulatedZoom.bind(
+                    tagScanner
+                  )}
+                />
+              )}
 
             <CaptureAndTorch
               onToggleTorch={getTorchToggleProvider(tagScanner)}

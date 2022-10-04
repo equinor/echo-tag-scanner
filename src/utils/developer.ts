@@ -26,4 +26,4 @@ export const isLocalDevelopment = isDevelopment && getIsLocalDevelopment();
 export const isProduction = EchoEnv.isProduction();
 export const isQA =
   EchoEnv.env().REACT_APP_API_URL ===
-  'https://dt-echopedia-api-dev.azurewebsites.net';
+  'https://dt-echopedia-api-qa.azurewebsites.net';

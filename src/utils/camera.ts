@@ -1,11 +1,15 @@
 import { Camera } from '@cameraLogic';
 import {
   getNotificationDispatcher as dispatchNotification,
-  getOrientation
+  getOrientation,
+  isDevelopment,
+  isLocalDevelopment,
+  isQA
 } from '@utils';
 import { ZoomMethod } from '@types';
 import { staticResolution } from '../const';
 import EchoUtils from '@equinor/echo-utils';
+import { EchoEnv } from '@equinor/echo-core';
 
 function assignZoomSettings(
   type: 'min' | 'max' | 'step' | 'value',
@@ -68,10 +72,10 @@ function determineZoomMethod(this: Camera): ZoomMethod | undefined {
   }
 }
 
-function getCameraPreferences(
-  isLocalDevelopment: boolean
-): MediaStreamConstraints {
+function getCameraPreferences(): MediaStreamConstraints {
   const isIos = EchoUtils.Utils.iOs.isIosDevice();
+
+  // Developer enviroment, use this for desktop.
   if (isLocalDevelopment && !isIos) {
     return {
       video: {
@@ -83,15 +87,18 @@ function getCameraPreferences(
           ideal: staticResolution.fps
         },
 
-        // Require a specific camera here.
+        // Require a specific camera by its ID here.
         deviceId: {
           exact:
-            'a874c50ce1a7f877e5d365c7ef7738d4881d76a22876cd61f0b708422936dc45'
+            '883c79d936715fb3d0f70390c627a7bcb9ff395f6835fdf2b068373a35764ec2'
         }
       },
       audio: false
     } as MediaStreamConstraints;
-  } else {
+  }
+
+  // Developer environment, but testing on iDevies.
+  if (isLocalDevelopment && isIos) {
     return {
       video: {
         width: { max: staticResolution.width, min: 848 },
@@ -108,6 +115,43 @@ function getCameraPreferences(
       audio: false
     } as MediaStreamConstraints;
   }
+
+  // This one is for testers. They tend to be testing on laptops,
+  // although we can't exactly query those environments.
+  if (isQA || (isDevelopment && !isIos)) {
+    return {
+      video: {
+        width: { max: staticResolution.width, min: 848 },
+        height: { max: staticResolution.height, min: 480 },
+
+        // Higher FPS is good for a scanning operation.
+        frameRate: {
+          ideal: staticResolution.fps
+        },
+
+        // The user is likely to have a facing type camera on their laptop.
+        facingMode: { ideal: 'environment' }
+      },
+      audio: false
+    } as MediaStreamConstraints;
+  }
+
+  // This is the default preferences, which is also used in production.
+  return {
+    video: {
+      width: { max: staticResolution.width, min: 848 },
+      height: { max: staticResolution.height, min: 480 },
+
+      // Higher FPS is good for a scanning operation.
+      frameRate: {
+        ideal: staticResolution.fps
+      },
+
+      // Require a specific camera here.
+      facingMode: { exact: 'environment' }
+    },
+    audio: false
+  } as MediaStreamConstraints;
 }
 
 export {

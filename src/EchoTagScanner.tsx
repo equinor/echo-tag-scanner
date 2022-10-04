@@ -1,16 +1,10 @@
 import React, { memo, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-import {
-  OverconstrainedAlert,
-  ScanningArea,
-  Viewfinder,
-  Scanner as ScannerUI
-} from '@ui';
+import { OverconstrainedAlert, Viewfinder, Scanner as ScannerUI } from '@ui';
 import { logger } from '@utils';
 import { ErrorBoundary } from '@services';
 import { TagScanner } from '@cameraLogic';
 import styled from 'styled-components';
-import { ViewfinderDimensions } from './types';
 
 const useEffectAsync = EchoUtils.Hooks.useEffectAsync;
 
@@ -23,18 +17,10 @@ const EchoCamera = () => {
   const [overConstrainedCameraDetails, setoverConstrainedCameraDetails] =
     useState<OverconstrainedError | undefined>(undefined);
 
+  // TODO: Move this to an external hook
   useEffectAsync(async () => {
     try {
       const mediaStream = await TagScanner.getMediastream();
-      const streamSettings = mediaStream?.getVideoTracks()[0].getSettings();
-      console.log(
-        'New stream added -> ',
-        streamSettings.width + 'x' + streamSettings.height
-      );
-      setViewfinderDimensions({
-        width: streamSettings?.width,
-        height: streamSettings?.height
-      });
       setStream(mediaStream);
     } catch (error) {
       if (error instanceof OverconstrainedError) {
@@ -62,33 +48,21 @@ const EchoCamera = () => {
   const [viewfinder, setViewfinder] = useState<HTMLVideoElement>();
   // Used for postprocessing of captures.
   const [canvas, setCanvas] = useState<HTMLCanvasElement>();
-  // All tags within this bounding box will be scanned.
-  const [scanArea, setScanArea] = useState<HTMLElement>();
 
-  const [viewfinderDimensions, setViewfinderDimensions] = useState<
-    ViewfinderDimensions | undefined
-  >(undefined);
-
-  console.log('The new stream ->', viewfinderDimensions);
   if (overConstrainedCameraDetails) {
     return (
       <OverconstrainedAlert technicalInfo={overConstrainedCameraDetails} />
     );
   }
 
-  if (viewfinder instanceof HTMLVideoElement) {
-    viewfinder.addEventListener('loadeddata', () => {
-      console.log('Video element has been loaded');
-      console.log(
-        'Resolution',
-        viewfinder.videoWidth + 'x' + viewfinder.videoHeight
-      );
-    });
-  }
-
-  if (!stream || !viewfinderDimensions) {
+  if (!stream) {
     return null;
   }
+
+  const dimensions = {
+    width: stream.getVideoTracks()[0].getSettings().width,
+    height: stream.getVideoTracks()[0].getSettings().height
+  };
 
   return (
     <Main>
@@ -97,17 +71,11 @@ const EchoCamera = () => {
           setCanvasRef={setCanvas}
           setVideoRef={setViewfinder}
           videoRef={viewfinder}
-          viewfinderDimensions={viewfinderDimensions}
+          dimensions={dimensions}
         />
-        <ScanningArea captureAreaRef={setScanArea} />
 
-        {viewfinder && canvas && scanArea && (
-          <ScannerUI
-            stream={stream}
-            viewfinder={viewfinder}
-            canvas={canvas}
-            scanArea={scanArea}
-          />
+        {viewfinder && canvas && (
+          <ScannerUI stream={stream} viewfinder={viewfinder} canvas={canvas} />
         )}
       </ErrorBoundary>
     </Main>

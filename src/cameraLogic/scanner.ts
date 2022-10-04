@@ -132,10 +132,9 @@ Regular offset from left-edge: ${bcr.x};
       );
     });
 
-    const scanArea = document.getElementById('scan-area');
-    if (previewCapture && scanArea) {
-      let capture = await this.capturePhoto(scanArea.getBoundingClientRect());
-      // if (capture.size > 50000) capture = await this.scale(0.5);
+    if (previewCapture) {
+      await this.capturePhoto();
+      await this.scale(0.5);
     }
     logger.log('EchoDevelopment', () => {
       console.log('Mediastream -> ', this.mediaStream);
@@ -181,12 +180,13 @@ Regular offset from left-edge: ${bcr.x};
    * @param area A bounding box for which the capture is cropped from.
    * @returns {Blob[]} A list of blobs.
    */
-  public async scan(area: DOMRect): Promise<Blob[]> {
+  public async scan(): Promise<Blob[]> {
     return new Promise((resolve) => {
       const scans: Blob[] = [];
       const interval = (this._scanRetries / this._scanDuration) * 100;
       const intervalId = setInterval(async () => {
-        let capture = await this.capturePhoto(area);
+        let capture = await this.capturePhoto();
+        if (capture.size > 50000) capture = await this.scale(0.5);
         if (capture.size > 50000) capture = await this.scale(0.5);
         scans.push(capture);
 

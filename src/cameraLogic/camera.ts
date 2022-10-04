@@ -169,31 +169,29 @@ class Camera extends Postprocessor {
   /**
    * Performs a simulated digital zoom.
    * @param {ZoomSteps} newZoomLevel The new zoom value.
-   * @returns {CameraResolution} Information about the new viewfinder resolution.
+   * @returns {CameraResolution} Information about the new viewfinder resolution or undefined if no zooming took place.
    */
   public alterSimulatedZoom(
     newZoomLevel: ZoomSteps
   ): CameraResolution | undefined {
-    let simulatedZoom: CameraResolution | undefined = undefined;
+    if (newZoomLevel === 1 || newZoomLevel === 2) {
+      if (this.baseResolution?.width && this.baseResolution?.height) {
+        const simulatedZoom = {
+          width: this.baseResolution.width * newZoomLevel,
+          height: this.baseResolution.height * newZoomLevel,
+          zoomLevel: newZoomLevel
+        };
 
-    if (this.baseResolution?.width && this.baseResolution?.height) {
-      simulatedZoom = {
-        width: this.baseResolution.width * newZoomLevel,
-        height: this.baseResolution.height * newZoomLevel,
-        zoomLevel: newZoomLevel
-      };
+        if (simulatedZoom?.zoomLevel) this.zoom = newZoomLevel;
+        if (simulatedZoom?.width && simulatedZoom?.height) {
+          this.viewfinder.width = simulatedZoom.width;
+          this.viewfinder.height = simulatedZoom.height;
+        }
+        return simulatedZoom;
+      }
     }
 
-    console.log(
-      'SIMULATED ZOOM',
-      simulatedZoom?.width + 'x' + simulatedZoom?.height
-    );
-
-    if (simulatedZoom?.width && simulatedZoom?.height) {
-      this.viewfinder.width = simulatedZoom.width;
-      this.viewfinder.height = simulatedZoom.height;
-    }
-    return simulatedZoom;
+    return undefined;
   }
 
   /** Accepts a new zoom value from the Zoom slider component and attempts to perform a native digital zoom */
@@ -215,29 +213,24 @@ class Camera extends Postprocessor {
   /**
    * Captures a photo, and stores it as a drawing on the postprocessing canvas.
    */
-  protected async capturePhoto(captureArea: DOMRect): Promise<Blob> {
+  protected async capturePhoto(): Promise<Blob> {
     this.canvasHandler.clearCanvas();
 
-    const { scale, videoWidth, videoHeight } = calculateScaleFactor(
-      this.viewfinder
-    );
-    // width and height of the capture area on the videofeed
-    const sWidth = captureArea.width * scale;
-    const sHeight = captureArea.height * scale;
-    // x and y position of top left corner of the capture area on videofeed
-    const sx = videoWidth / 2 - sWidth / 2;
-    const sy = videoHeight / 2 - sHeight / 2;
-
+    // TODO: Document how sX and sY is determined.
+    const sx = this.zoom === 1 ? 0 : this.viewfinder.videoWidth / this.zoom / 2;
+    const sy =
+      this.zoom === 1 ? 0 : this.viewfinder.videoHeight / this.zoom / 2;
     const params: DrawImageParameters = {
       sx,
       sy,
-      sWidth,
-      sHeight,
+      sWidth: this.viewfinder.videoWidth / this.zoom,
+      sHeight: this.viewfinder.videoHeight / this.zoom,
       dx: 0,
       dy: 0,
-      dWidth: captureArea.width,
-      dHeight: captureArea.height
+      dWidth: this.viewfinder.videoWidth / this.zoom,
+      dHeight: this.viewfinder.videoHeight / this.zoom
     };
+
     return this._canvasHandler.draw(this.viewfinder, params);
   }
 

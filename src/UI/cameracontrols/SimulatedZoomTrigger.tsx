@@ -51,10 +51,6 @@ const SimulatedZoomTrigger = (
         props.onSimulatedZoom(2);
         break;
       case 2:
-        setCurrentSimulatedZoom(3);
-        props.onSimulatedZoom(3);
-        break;
-      case 3:
         setCurrentSimulatedZoom(1);
         props.onSimulatedZoom(1);
         break;

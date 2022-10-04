@@ -8,50 +8,13 @@ import { staticResolution } from '@const';
 interface ViewfinderProps {
   setCanvasRef: React.Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
   setVideoRef: React.Dispatch<SetStateAction<HTMLVideoElement | undefined>>;
-  viewfinderDimensions: ViewfinderDimensions;
   videoRef?: HTMLVideoElement;
+  dimensions: ViewfinderDimensions;
 }
-
-/* function setInitialResolution(): ViewfinderDimensions {
-  const orientation = getOrientation();
-  
-  if (orientation === "portrait") return {width: staticResolution.}
-} */
 
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   const scanningAreaDimensions = useScanningAreaDimensions();
 
-  const [viewfinderDimensions, setViewfinderDimensions] =
-    useState<ViewfinderDimensions>({
-      width: 720,
-      height: 1280
-    });
-
-  /**
-   * Mounts an event handler to the global context that changes the dimensions of the viewfinder
-   * as simulated zoom operations happen.
-   */
-  /*   useEffect(function mountViewfinderDimensionChangeEventHandler() {
-    globalThis.addEventListener(
-      'simulatedZoomSuccess',
-      handleSimulatedZoomEvent
-    );
-    return () =>
-      globalThis.removeEventListener(
-        'simulatedZoomSuccess',
-        handleSimulatedZoomEvent
-      );
-
-    function handleSimulatedZoomEvent(newFeed: Event) {
-      if (isCustomEvent<CameraResolution>(newFeed)) {
-        setDimensionsEvent({
-          width: newFeed.detail.width,
-          height: newFeed.detail.height
-        });
-      }
-    }
-  }, []);
- */
   return (
     <>
       <ViewFinder
@@ -60,8 +23,8 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         autoPlay
         disablePictureInPicture
         controls={false}
-        width={globalThis.innerWidth}
-        height={globalThis.innerHeight}
+        width={props.dimensions.width}
+        height={props.dimensions.height}
       />
 
       <Canvas
@@ -78,8 +41,6 @@ const ViewFinder = styled.video`
   background-color: var(--black);
   transition: all 0.3s ease;
   object-fit: cover;
-  height: 100%;
-  width: 100%;
   z-index: 1;
   user-select: none;
   -webkit-user-select: none;

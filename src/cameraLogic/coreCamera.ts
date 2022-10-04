@@ -106,6 +106,7 @@ class CoreCamera {
   }
 
   public set zoom(zoomValue: ZoomSteps) {
+    this._zoom = zoomValue;
     this._videoTrack
       ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
       .then(() => (this._zoom = zoomValue))
@@ -129,10 +130,7 @@ class CoreCamera {
    * Asks the user for permission to use the device camera and resolves a MediaStream object.
    */
   static async getMediastream(): Promise<MediaStream> {
-    const cameraPreferences = getCameraPreferences(isLocalDevelopment);
-    console.group('Requesting camera feed');
-    console.info(console.info('%c⧭', 'color: #0088cc', cameraPreferences));
-    console.groupEnd();
+    const cameraPreferences = getCameraPreferences();
     return await navigator.mediaDevices.getUserMedia(cameraPreferences);
   }
 

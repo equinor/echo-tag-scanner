@@ -96,8 +96,8 @@ class BaseLogger {
     this._analytics.logError(error);
   }
 
-  public log(level: LogLevelKeys, callback: Function): void {
-    if (this._logLevel > LogLevel[level]) return;
+  public log(incomingLevel: LogLevelKeys, callback: Function): void {
+    if (this._logLevel > LogLevel[incomingLevel]) return;
     callback();
   }
 

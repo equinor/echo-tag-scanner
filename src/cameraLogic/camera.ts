@@ -169,6 +169,7 @@ class Camera extends Postprocessor {
   /**
    * Performs a simulated digital zoom.
    * @param {ZoomSteps} newZoomLevel The new zoom value.
+    if (LogLevel[incomingLevel] <= this._logLevel) callback();
    * @returns {CameraResolution} Information about the new viewfinder resolution or undefined if no zooming took place.
    */
   public alterSimulatedZoom(

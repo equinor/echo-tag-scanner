@@ -1,61 +1,29 @@
 import React, { memo, useEffect, useState } from 'react';
-import EchoUtils from '@equinor/echo-utils';
-import { OverconstrainedAlert, Viewfinder, Scanner as ScannerUI } from '@ui';
+import { Viewfinder, Scanner as ScannerUI } from '@ui';
 import { logger } from '@utils';
 import { ErrorBoundary } from '@services';
-import { TagScanner } from '@cameraLogic';
+import { useGetMediastream } from '@hooks';
 import styled from 'styled-components';
-
-const useEffectAsync = EchoUtils.Hooks.useEffectAsync;
 
 const EchoCamera = () => {
   useEffect(() => {
     logger.moduleStarted();
   }, []);
 
-  const [stream, setStream] = useState<MediaStream | undefined>();
-  const [overConstrainedCameraDetails, setoverConstrainedCameraDetails] =
-    useState<OverconstrainedError | undefined>(undefined);
-
-  // TODO: Move this to an external hook
-  useEffectAsync(async () => {
-    try {
-      const mediaStream = await TagScanner.getMediastream();
-      setStream(mediaStream);
-    } catch (error) {
-      if (error instanceof OverconstrainedError) {
-        setoverConstrainedCameraDetails(error);
-      } else if (
-        error instanceof DOMException &&
-        error.name === 'NotAllowedError'
-      ) {
-        logger.log('QA', () => {
-          console.error('We do not have access to your camera.');
-          console.error(
-            'Check your browser settings that ' +
-              globalThis.location.href +
-              ' is not blacklisted and that you are running with HTTPS.'
-          );
-        });
-        // This didn't quite work because browsers might "remember" the
-        // denial and the results is that the users are instantly navigated back.
-        // !isDevelopment && globalThis.history.back();
-      }
-    }
-  }, []);
-
+  // The camera feed.
+  const mediaStream = useGetMediastream();
   // Represets the camera viewfinder.
   const [viewfinder, setViewfinder] = useState<HTMLVideoElement>();
   // Used for postprocessing of captures.
   const [canvas, setCanvas] = useState<HTMLCanvasElement>();
 
-  if (!stream) {
+  if (!mediaStream) {
     return null;
   }
 
   const dimensions = {
-    width: stream.getVideoTracks()[0].getSettings().width,
-    height: stream.getVideoTracks()[0].getSettings().height
+    width: mediaStream.getVideoTracks()[0].getSettings().width,
+    height: mediaStream.getVideoTracks()[0].getSettings().height
   };
 
   return (
@@ -69,7 +37,11 @@ const EchoCamera = () => {
         />
 
         {viewfinder && canvas && (
-          <ScannerUI stream={stream} viewfinder={viewfinder} canvas={canvas} />
+          <ScannerUI
+            stream={mediaStream}
+            viewfinder={viewfinder}
+            canvas={canvas}
+          />
         )}
       </ErrorBoundary>
     </Main>

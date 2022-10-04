@@ -1,4 +1,4 @@
-import { CustomEventDetail, Dimensions } from '@types';
+import { CustomNotificationDetail } from '@types';
 
 /**
  * Returns a dispatch closure for sending notifications to the user.
@@ -6,14 +6,14 @@ import { CustomEventDetail, Dimensions } from '@types';
  * @param trigger The triggering element. If undefined, the event is dispatched by globalThis.
  */
 function getNotificationDispatcher(
-  customEventDetail: string | CustomEventDetail,
+  customEventDetail: string | CustomNotificationDetail,
   trigger?: HTMLElement
 ) {
   return function dispatch(): boolean {
     // Throw a notification on the triggering element.
     if (trigger instanceof HTMLElement) {
       return trigger.dispatchEvent(
-        new CustomEvent<CustomEventDetail | string>('notification', {
+        new CustomEvent<CustomNotificationDetail | string>('notification', {
           detail: customEventDetail,
           bubbles: true
         })
@@ -21,7 +21,7 @@ function getNotificationDispatcher(
     } else {
       // Throw a notification in the global scope.
       return globalThis.dispatchEvent(
-        new CustomEvent<CustomEventDetail | string>('notification', {
+        new CustomEvent<CustomNotificationDetail | string>('notification', {
           detail: customEventDetail,
           bubbles: true
         })

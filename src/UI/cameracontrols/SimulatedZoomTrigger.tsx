@@ -47,12 +47,11 @@ const SimulatedZoomTrigger = (
   async function advanceSimulatedZoom() {
     switch (currentSimulatedZoom) {
       case 1:
+        setCurrentSimulatedZoom(2);
         props.onSimulatedZoom(2);
         break;
       case 2:
-        props.onSimulatedZoom(3);
-        break;
-      case 3:
+        setCurrentSimulatedZoom(1);
         props.onSimulatedZoom(1);
         break;
       default:

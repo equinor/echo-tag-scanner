@@ -1,18 +1,21 @@
 import React, { SetStateAction, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useScanningAreaDimensions } from './viewFinderUtils';
-import { isLocalDevelopment, isCustomEvent } from '@utils';
-import { CameraResolution, Dimensions } from '@types';
+import { isLocalDevelopment, isCustomEvent, getOrientation } from '@utils';
+import { CameraResolution, ViewfinderDimensions } from '@types';
+import { staticResolution } from '@const';
 
 interface ViewfinderProps {
-  canvasRef: React.Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
-  videoRef: React.Dispatch<SetStateAction<HTMLVideoElement | undefined>>;
+  setCanvasRef: React.Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
+  setVideoRef: React.Dispatch<SetStateAction<HTMLVideoElement | undefined>>;
+  videoRef?: HTMLVideoElement;
+  dimensions: ViewfinderDimensions;
 }
 
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
-  const dimensions = useScanningAreaDimensions();
+  const scanningAreaDimensions = useScanningAreaDimensions();
 
-  const [dimensionsEvent, setDimensionsEvent] = useState<Dimensions>({
+  const [dimensionsEvent, setDimensionsEvent] = useState<ViewfinderDimensions>({
     width: undefined,
     height: undefined
   });
@@ -46,17 +49,18 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
     <>
       <ViewFinder
         playsInline // needed for the viewfinder to work in Safari
-        ref={(el: HTMLVideoElement) => props.videoRef(el)}
+        ref={(el: HTMLVideoElement) => props.setVideoRef(el)}
         autoPlay
         disablePictureInPicture
         controls={false}
-        width={dimensionsEvent.width ?? '100%'}
-        height={dimensionsEvent.height ?? '100%'}
+        width={props.dimensions.width}
+        height={props.dimensions.height}
       />
+
       <Canvas
-        ref={(el: HTMLCanvasElement) => props.canvasRef(el)}
-        width={dimensions.width}
-        height={dimensions.height}
+        ref={(el: HTMLCanvasElement) => props.setCanvasRef(el)}
+        width={scanningAreaDimensions.width}
+        height={scanningAreaDimensions.height}
         isLocalDevelopment={isLocalDevelopment}
       />
     </>
@@ -85,6 +89,7 @@ const Canvas = styled.canvas<{ isLocalDevelopment: boolean }>`
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
+  z-index: 10;
 `;
 
 export { Viewfinder };

@@ -10,3 +10,4 @@ export { OverconstrainedAlert } from './error/OverconstrainedAlert';
 export { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 export { SimulatedZoomTrigger } from './cameracontrols/SimulatedZoomTrigger';
 export { Scanner } from './ScannerUI';
+export { DebugInfoOverlay } from './debug/DebugInfoOverlay';

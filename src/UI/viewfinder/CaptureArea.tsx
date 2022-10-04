@@ -1,6 +1,6 @@
 import React, { SetStateAction } from 'react';
 import styled from 'styled-components';
-import { Dimensions } from '@types';
+import { ViewfinderDimensions } from '@types';
 import { useScanningAreaDimensions } from './viewFinderUtils';
 
 interface ScanningAreaProps {
@@ -21,7 +21,7 @@ const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
   );
 };
 
-const SvgContainer = styled.section<{ dimensions: Dimensions }>`
+const SvgContainer = styled.section<{ dimensions: ViewfinderDimensions }>`
   // Centering of absolutely placed elements
   position: absolute;
   top: 50%;

@@ -1,17 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { TagSummaryDto } from '@equinor/echo-search';
 import {
   CaptureAndTorch,
   SearchResults,
   ZoomSlider,
-  SimulatedZoomTrigger
+  SimulatedZoomTrigger,
+  DebugInfoOverlay
 } from '@ui';
 import { useEchoIsSyncing, useMountScanner, useSetActiveTagNo } from '@hooks';
 import { NotificationHandler, useTagScanStatus } from '@services';
 import {
   getTorchToggleProvider,
-  getNotificationDispatcher as dispatchNotification
+  getNotificationDispatcher as dispatchNotification,
+  isDevelopment,
+  isLocalDevelopment
 } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 
@@ -19,10 +22,9 @@ interface ScannerProps {
   stream: MediaStream;
   viewfinder: HTMLVideoElement;
   canvas: HTMLCanvasElement;
-  scanArea: HTMLElement;
 }
 
-function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
+function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
   const [validatedTags, setValidatedTags] = useState<
     TagSummaryDto[] | undefined
   >(undefined);
@@ -67,7 +69,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
     changeTagScanStatus('scanning', true);
 
     // Capture image.
-    let scans = await tagScanner?.scan(scanArea.getBoundingClientRect());
+    let scans = await tagScanner?.scan();
 
     if (scans) {
       // Run OCR and validation to get possible tag numbers.
@@ -92,6 +94,9 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
 
   return (
     <>
+      {tagScanner && (isLocalDevelopment || isDevelopment) && (
+        <DebugInfoOverlay tagScanner={tagScanner} viewfinder={viewfinder} />
+      )}
       <ControlPad>
         {tagScanner && (
           <>
@@ -106,11 +111,14 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
               />
             )}
 
-            {tagScanner.zoomMethod?.type === 'simulated' && (
-              <SimulatedZoomTrigger
-                onSimulatedZoom={tagScanner.alterSimulatedZoom.bind(tagScanner)}
-              />
-            )}
+            {tagScanner.zoomMethod?.type === 'simulated' &&
+              isLocalDevelopment && (
+                <SimulatedZoomTrigger
+                  onSimulatedZoom={tagScanner.alterSimulatedZoom.bind(
+                    tagScanner
+                  )}
+                />
+              )}
 
             <CaptureAndTorch
               onToggleTorch={getTorchToggleProvider(tagScanner)}
@@ -151,7 +159,7 @@ const ControlPad = styled.section`
   bottom: 10px;
   height: 20%;
   width: 100%;
-  z-index: 1;
+  z-index: 20;
 
   // Move the control pad to the right;
   @media screen and (orientation: landscape) {

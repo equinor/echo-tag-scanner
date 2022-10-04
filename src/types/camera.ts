@@ -15,7 +15,7 @@ export type CameraResolution = {
 };
 
 /** Refers to the dimensions of the viewfinder. */
-export type Dimensions = Pick<CameraResolution, 'width' | 'height'>;
+export type ViewfinderDimensions = Pick<CameraResolution, 'width' | 'height'>;
 
 /** Describes the method of zooming for the device.
  * - Native: The camera can leverage MediaStream API to perform digital zoom.

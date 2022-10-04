@@ -1,11 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-import {
-  OverconstrainedAlert,
-  ScanningArea,
-  Viewfinder,
-  Scanner as ScannerUI
-} from '@ui';
+import { OverconstrainedAlert, Viewfinder, Scanner as ScannerUI } from '@ui';
 import { logger } from '@utils';
 import { ErrorBoundary } from '@services';
 import { TagScanner } from '@cameraLogic';
@@ -22,6 +17,7 @@ const EchoCamera = () => {
   const [overConstrainedCameraDetails, setoverConstrainedCameraDetails] =
     useState<OverconstrainedError | undefined>(undefined);
 
+  // TODO: Move this to an external hook
   useEffectAsync(async () => {
     try {
       const mediaStream = await TagScanner.getMediastream();
@@ -52,32 +48,28 @@ const EchoCamera = () => {
   const [viewfinder, setViewfinder] = useState<HTMLVideoElement>();
   // Used for postprocessing of captures.
   const [canvas, setCanvas] = useState<HTMLCanvasElement>();
-  // All tags within this bounding box will be scanned.
-  const [scanArea, setScanArea] = useState<HTMLElement>();
-
-  if (overConstrainedCameraDetails) {
-    return (
-      <OverconstrainedAlert technicalInfo={overConstrainedCameraDetails} />
-    );
-  }
 
   if (!stream) {
     return null;
   }
 
+  const dimensions = {
+    width: stream.getVideoTracks()[0].getSettings().width,
+    height: stream.getVideoTracks()[0].getSettings().height
+  };
+
   return (
     <Main>
       <ErrorBoundary stackTraceEnabled>
-        <Viewfinder canvasRef={setCanvas} videoRef={setViewfinder} />
-        <ScanningArea captureAreaRef={setScanArea} />
+        <Viewfinder
+          setCanvasRef={setCanvas}
+          setVideoRef={setViewfinder}
+          videoRef={viewfinder}
+          dimensions={dimensions}
+        />
 
-        {viewfinder && canvas && scanArea && (
-          <ScannerUI
-            stream={stream}
-            viewfinder={viewfinder}
-            canvas={canvas}
-            scanArea={scanArea}
-          />
+        {viewfinder && canvas && (
+          <ScannerUI stream={stream} viewfinder={viewfinder} canvas={canvas} />
         )}
       </ErrorBoundary>
     </Main>

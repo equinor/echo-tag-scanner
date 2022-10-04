@@ -22,7 +22,7 @@ class CoreCamera {
   private _zoom: ZoomSteps;
 
   /** Records the base camera resolution before any simulated zoom has taken place. */
-  private _baseResolution: CameraResolution | undefined;
+  private _baseResolution: CameraResolution;
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
@@ -34,10 +34,13 @@ class CoreCamera {
     this._activeCamera = this._videoTrackSettings.facingMode;
     this._viewfinder.srcObject = props.mediaStream;
     this._zoom = 1;
+
+    /** Currently holds a reference to the initial viewfinder dimensions.
+     * Can be improved by moving these to an extended HTMLVideoElement
+     */
     this._baseResolution = {
-      width: this._videoTrackSettings.width,
-      height: this._videoTrackSettings.height,
-      fps: this._videoTrackSettings.frameRate,
+      width: this._viewfinder.width,
+      height: this._viewfinder.height,
       zoomLevel: 1
     };
   }
@@ -103,6 +106,7 @@ class CoreCamera {
   }
 
   public set zoom(zoomValue: ZoomSteps) {
+    this._zoom = zoomValue;
     this._videoTrack
       ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
       .then(() => (this._zoom = zoomValue))
@@ -126,10 +130,7 @@ class CoreCamera {
    * Asks the user for permission to use the device camera and resolves a MediaStream object.
    */
   static async getMediastream(): Promise<MediaStream> {
-    const cameraPreferences = getCameraPreferences(isLocalDevelopment);
-    console.group('Requesting camera feed');
-    console.info(console.info('%c⧭', 'color: #0088cc', cameraPreferences));
-    console.groupEnd();
+    const cameraPreferences = getCameraPreferences();
     return await navigator.mediaDevices.getUserMedia(cameraPreferences);
   }
 

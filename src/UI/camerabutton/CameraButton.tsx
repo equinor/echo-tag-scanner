@@ -49,9 +49,6 @@ const StyledScannerButton = styled.button`
   height: 75px;
   background-color: var(--white);
   grid-area: shutter;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
 `;
 
 const EchoIsSyncingButton = styled(StyledScannerButton)`

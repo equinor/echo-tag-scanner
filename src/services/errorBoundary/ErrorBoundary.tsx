@@ -11,7 +11,7 @@ import {
   Icon
 } from '@equinor/eds-core-react';
 import { warning_filled } from '@equinor/eds-icons';
-import { ErrorKey } from '@const';
+import { ErrorKey, zIndexes } from '@const';
 import { EchoCameraError } from '@types';
 
 interface ErrorBoundaryProps {
@@ -203,12 +203,12 @@ const ErrorBoundaryContent = styled.section`
 
 const BannerContainer = styled(Banner)`
   // ErrorBoundary popup will have the highest z-index.
-  z-index: 501;
+  z-index: ${zIndexes.errorBoundary};
 `;
 
 const Backdrop = styled(Scrim)`
   // ErrorBoundary popup will have the highest z-index.
-  z-index: 501;
+  z-index: ${zIndexes.errorBoundary};
 `;
 
 const ErrorDialogue = styled(Dialog)`

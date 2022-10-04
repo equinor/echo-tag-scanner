@@ -17,6 +17,7 @@ import {
   isLocalDevelopment
 } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
+import { zIndexes } from '@const';
 
 interface ScannerProps {
   stream: MediaStream;
@@ -159,7 +160,7 @@ const ControlPad = styled.section`
   bottom: 10px;
   height: 20%;
   width: 100%;
-  z-index: 20;
+  z-index: ${zIndexes.cameraControls};
 
   // Move the control pad to the right;
   @media screen and (orientation: landscape) {

@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { CircularProgress, Dialog } from '@equinor/eds-core-react';
+import { zIndexes } from '@const';
 
 const ScanningIndicator = (message?: string | JSX.Element): JSX.Element => {
   function renderMessage() {
@@ -21,7 +22,7 @@ const ScanningIndicator = (message?: string | JSX.Element): JSX.Element => {
 
 const Dialogue = styled(Dialog)`
   justify-content: center;
-  z-index: 2;
+  z-index: ${zIndexes.overlays};
   width: auto;
   height: auto;
   padding: 0 1rem;

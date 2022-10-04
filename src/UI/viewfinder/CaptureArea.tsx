@@ -2,6 +2,7 @@ import React, { SetStateAction } from 'react';
 import styled from 'styled-components';
 import { ViewfinderDimensions } from '@types';
 import { useScanningAreaDimensions } from './viewFinderUtils';
+import { zIndexes } from '@const';
 
 interface ScanningAreaProps {
   captureAreaRef: React.Dispatch<SetStateAction<HTMLElement | undefined>>;
@@ -35,7 +36,7 @@ const SvgContainer = styled.section<{ dimensions: ViewfinderDimensions }>`
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
-  z-index: 10;
+  z-index: ${zIndexes.overlays};
 `;
 
 export { ScanningArea };

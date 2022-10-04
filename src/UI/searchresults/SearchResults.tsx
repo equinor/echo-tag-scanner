@@ -5,6 +5,7 @@ import { TagContextMenu, TagIcon, getIcon } from '@equinor/echo-components';
 import { getLegendStatusColor } from '@equinor/echo-framework';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { logger, isDevelopment } from '@utils';
+import { zIndexes } from '@const';
 
 interface SearchResultsProps {
   tagSummary: TagSummaryDto[];
@@ -71,7 +72,7 @@ const InvisibleWrapper = styled.div`
   flex-direction: column;
   pointer-events: all;
   gap: var(--small);
-  z-index: 1;
+  z-index: ${zIndexes.overlays};
 `;
 
 const SearchResult = styled(TagContextMenu)`

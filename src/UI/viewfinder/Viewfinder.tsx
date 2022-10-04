@@ -1,9 +1,14 @@
 import React, { SetStateAction, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useScanningAreaDimensions } from './viewFinderUtils';
-import { isLocalDevelopment, isCustomEvent, getOrientation } from '@utils';
+import {
+  isLocalDevelopment,
+  isCustomEvent,
+  getOrientation,
+  isDevelopment
+} from '@utils';
 import { CameraResolution, ViewfinderDimensions } from '@types';
-import { staticResolution } from '@const';
+import { staticResolution, zIndexes } from '@const';
 
 interface ViewfinderProps {
   setCanvasRef: React.Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
@@ -61,7 +66,6 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         ref={(el: HTMLCanvasElement) => props.setCanvasRef(el)}
         width={scanningAreaDimensions.width}
         height={scanningAreaDimensions.height}
-        isLocalDevelopment={isLocalDevelopment}
       />
     </>
   );
@@ -72,24 +76,24 @@ const ViewFinder = styled.video`
   transition: all 0.3s ease;
   object-fit: cover;
 
-  z-index: 1;
+  z-index: ${zIndexes.viewfinder};
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
 `;
 
-const Canvas = styled.canvas<{ isLocalDevelopment: boolean }>`
+const Canvas = styled.canvas`
   // Centering of absolutely placed elements
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   //-------//
-  opacity: ${(props) => (props.isLocalDevelopment ? 1 : 0)};
+  opacity: ${isLocalDevelopment || isDevelopment ? 1 : 0};
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
-  z-index: 10;
+  z-index: ${zIndexes.belowViewfinder};
 `;
 
 export { Viewfinder };

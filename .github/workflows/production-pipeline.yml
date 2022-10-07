@@ -2,6 +2,7 @@ name: Production pipeline
 
 on:
   release:
+    branches: [qa]
     types: [published]
   workflow_dispatch:
   

@@ -76,8 +76,8 @@ const AlertContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
 
   // Give some room in the bottom for the Echo bar
   padding-bottom: 3rem;

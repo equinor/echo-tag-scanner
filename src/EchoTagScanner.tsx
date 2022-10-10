@@ -93,8 +93,8 @@ const EchoCamera = () => {
 
 const Main = styled.main`
   touch-action: none;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
 `;
 
 export default memo(EchoCamera);

@@ -6,6 +6,7 @@ import React, {
 import styled from 'styled-components';
 import { useScanningAreaDimensions } from './viewFinderUtils';
 import { isLocalDevelopment } from '@utils';
+import { Backdrop } from './Backdrop';
 
 interface ViewfinderProps {
   canvasRef: React.Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
@@ -19,6 +20,7 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
 
   return (
     <>
+      <Backdrop />
       <ViewFinder
         playsInline // needed for the viewfinder to work in Safari
         ref={(el: HTMLVideoElement) => props.videoRef(el)}
@@ -41,12 +43,13 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
 };
 
 const ViewFinder = styled.video`
+  position: relative;
   background-color: var(--black);
   transition: all 0.3s ease;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 1;
+  z-index: 3;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -63,6 +66,7 @@ const Canvas = styled.canvas<{ isLocalDevelopment: boolean }>`
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
+  z-index: 3;
 `;
 
 export { Viewfinder };

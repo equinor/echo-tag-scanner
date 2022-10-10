@@ -10,6 +10,7 @@ import {
 import { ErrorBoundary } from '@services';
 import { TagScanner } from './core/Scanner';
 import { Scanner } from './components/ScannerUI';
+import { Backdrop } from '@components';
 import styled from 'styled-components';
 import { useOrientation } from './hooks';
 
@@ -109,21 +110,23 @@ const EchoCamera = () => {
   }
 
   return (
-    <Main>
-      <ErrorBoundary stackTraceEnabled>
-        <Viewfinder canvasRef={setCanvas} videoRef={setViewfinder} />
-        <ScanningArea captureAreaRef={setScanArea} />
+    <>
+      <Main>
+        <ErrorBoundary stackTraceEnabled>
+          <Viewfinder canvasRef={setCanvas} videoRef={setViewfinder} />
+          <ScanningArea captureAreaRef={setScanArea} />
 
-        {viewfinder && canvas && scanArea && (
-          <Scanner
-            stream={stream}
-            viewfinder={viewfinder}
-            canvas={canvas}
-            scanArea={scanArea}
-          />
-        )}
-      </ErrorBoundary>
-    </Main>
+          {viewfinder && canvas && scanArea && (
+            <Scanner
+              stream={stream}
+              viewfinder={viewfinder}
+              canvas={canvas}
+              scanArea={scanArea}
+            />
+          )}
+        </ErrorBoundary>
+      </Main>
+    </>
   );
 };
 
@@ -144,6 +147,7 @@ const Main = styled.main`
   touch-action: none;
   height: 100%;
   width: 100%;
+  z-index: 1;
 `;
 
 const MockEchoBottomBar = styled.div`
@@ -153,7 +157,7 @@ const MockEchoBottomBar = styled.div`
   background-color: white;
   width: 100%;
   height: 48px;
-  z-index: var(--echo-framework-z-level-bottom-bar);
+  z-index: 1445;
 
   @media screen and (orientation: landscape) {
     height: 100%;
@@ -168,7 +172,7 @@ const MockEchoSidebar = styled.div`
   background-color: white;
   width: 56px;
   height: 100%;
-  z-index: var(--echo-framework-z-level-bottom-bar);
+  z-index: 1445;
   writing-mode: vertical-lr;
 `;
 

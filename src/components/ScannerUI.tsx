@@ -140,7 +140,7 @@ const ControlPad = styled.section`
   display: grid;
   align-items: center;
   width: 100%;
-  z-index: 1;
+  z-index: 4;
 
   // Move the control pad to the right;
   @media screen and (orientation: landscape) {

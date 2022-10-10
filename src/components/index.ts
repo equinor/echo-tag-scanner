@@ -8,3 +8,4 @@ export { SearchResults } from './searchresults/SearchResults';
 export { ScanningIndicator } from './progress/ScanningLoading';
 export { OverconstrainedAlert } from './error/OverconstrainedAlert';
 export { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
+export { Backdrop } from './viewfinder/Backdrop';

@@ -33,6 +33,7 @@ const SvgContainer = styled.section<{ dimensions: Dimensions }>`
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
+  z-index: 4;
 `;
 
 export { ScanningArea };

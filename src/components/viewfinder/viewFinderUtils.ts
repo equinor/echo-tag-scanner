@@ -38,7 +38,7 @@ function getDimensions(): Dimensions {
     };
   } else {
     return {
-      width: globalThis.innerWidth * 0.7,
+      width: globalThis.innerWidth * 0.5,
       height: globalThis.innerHeight * (1 / 3)
     };
   }

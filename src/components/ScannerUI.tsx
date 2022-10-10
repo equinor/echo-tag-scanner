@@ -88,7 +88,7 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
 
   return (
     <>
-      <ControlPad>
+      <ControlPad id="control-pad">
         {tagScanner && (
           <>
             <SystemInfoTrigger
@@ -135,18 +135,17 @@ function Scanner({ stream, viewfinder, canvas, scanArea }: ScannerProps) {
 }
 
 const ControlPad = styled.section`
+  position: absolute;
+  bottom: 20px;
   display: grid;
   align-items: center;
-  position: fixed;
-  bottom: 10px;
-  height: 20%;
   width: 100%;
   z-index: 1;
 
   // Move the control pad to the right;
   @media screen and (orientation: landscape) {
     display: flex;
-    right: 20px;
+    right: 56px;
     top: 0;
     bottom: unset;
     height: 100%;

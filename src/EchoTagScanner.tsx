@@ -3,12 +3,15 @@ import EchoUtils from '@equinor/echo-utils';
 import { OverconstrainedAlert, ScanningArea, Viewfinder } from '@components';
 import {
   logger,
-  getNotificationDispatcher as dispatchNotification
+  getNotificationDispatcher as dispatchNotification,
+  isLocalDevelopment,
+  getOrientation
 } from '@utils';
 import { ErrorBoundary } from '@services';
 import { TagScanner } from './core/Scanner';
 import { Scanner } from './components/ScannerUI';
 import styled from 'styled-components';
+import { useOrientation } from './hooks';
 
 const useEffectAsync = EchoUtils.Hooks.useEffectAsync;
 
@@ -20,6 +23,7 @@ const EchoCamera = () => {
   const [stream, setStream] = useState<MediaStream | undefined>();
   const [overConstrainedCameraDetails, setoverConstrainedCameraDetails] =
     useState<OverconstrainedError | undefined>(undefined);
+  const orientation = useOrientation();
 
   useEffectAsync(async () => {
     try {
@@ -72,6 +76,38 @@ const EchoCamera = () => {
     return null;
   }
 
+  if (isLocalDevelopment) {
+    return (
+      <Wrapper>
+        <BottomBarMain>
+          <ErrorBoundary stackTraceEnabled>
+            <Viewfinder canvasRef={setCanvas} videoRef={setViewfinder} />
+            <ScanningArea captureAreaRef={setScanArea} />
+
+            {viewfinder && canvas && scanArea && (
+              <Scanner
+                stream={stream}
+                viewfinder={viewfinder}
+                canvas={canvas}
+                scanArea={scanArea}
+              />
+            )}
+          </ErrorBoundary>
+        </BottomBarMain>
+        {isLocalDevelopment && orientation === 'landscape' && (
+          <MockEchoSidebar id="mock-sidebar">
+            Sidebar placeholder
+          </MockEchoSidebar>
+        )}
+        {isLocalDevelopment && orientation === 'portrait' && (
+          <MockEchoBottomBar id="mock-bottombar">
+            Bottom bar placeholder
+          </MockEchoBottomBar>
+        )}
+      </Wrapper>
+    );
+  }
+
   return (
     <Main>
       <ErrorBoundary stackTraceEnabled>
@@ -91,10 +127,60 @@ const EchoCamera = () => {
   );
 };
 
+const BottomBarMain = styled.main`
+  position: relative;
+  touch-action: none;
+  height: calc(100% - 48px);
+  width: 100%;
+
+  @media screen and (orientation: landscape) {
+    height: 100%;
+    width: calc(100% - 56px);
+  }
+`;
+
 const Main = styled.main`
+  position: relative;
   touch-action: none;
   height: 100%;
   width: 100%;
 `;
 
-export default memo(EchoCamera);
+const MockEchoBottomBar = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  width: 100%;
+  height: 48px;
+  z-index: var(--echo-framework-z-level-bottom-bar);
+
+  @media screen and (orientation: landscape) {
+    height: 100%;
+    width: 56px;
+  }
+`;
+
+const MockEchoSidebar = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  width: 56px;
+  height: 100%;
+  z-index: var(--echo-framework-z-level-bottom-bar);
+  writing-mode: vertical-lr;
+`;
+
+const Wrapper = styled.div`
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+
+  @media screen and (orientation: landscape) {
+    flex-direction: row-reverse;
+  }
+`;
+
+export default EchoCamera;

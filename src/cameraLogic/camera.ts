@@ -10,11 +10,13 @@ import {
   reportMediaStream,
   reportVideoTrack,
   getOrientation,
-  determineZoomMethod
+  determineZoomMethod,
+  handleError
 } from '@utils';
 import { CoreCamera } from './coreCamera';
 import { Postprocessor } from './postprocessor';
 import { getNotificationDispatcher as dispatchNotification } from '@utils';
+import { ErrorRegistry } from '../const';
 
 /**
  * This object acts as a proxy towards CoreCamera.
@@ -29,7 +31,7 @@ class Camera extends Postprocessor {
    * - simulated: Manipulates the camera feed scale in order to simulate digital zoom.
    * - native: Uses MediaStream API to apply digital zoom.
    */
-  private _zoomMethod: ZoomMethod | undefined;
+  private _zoomMethod: ZoomMethod;
 
   constructor(props: CameraProps) {
     super(props);
@@ -44,11 +46,11 @@ class Camera extends Postprocessor {
     MediaStream.prototype.toString = reportMediaStream;
   }
 
-  public get zoomMethod(): ZoomMethod | undefined {
+  public get zoomMethod(): ZoomMethod {
     return this._zoomMethod;
   }
 
-  public set zoomMethod(newMethod: ZoomMethod | undefined) {
+  public set zoomMethod(newMethod: ZoomMethod) {
     this._zoomMethod = newMethod;
   }
 
@@ -131,49 +133,51 @@ class Camera extends Postprocessor {
       this.videoTrack.stop();
     }
   }
-
   /**
-   * Performs a simulated digital zoom.
+   * Performs a simulated or native digital zoom.
    * @param {ZoomSteps} newZoomLevel The new zoom value.
-    if (LogLevel[incomingLevel] <= this._logLevel) callback();
    * @returns {CameraResolution} Information about the new viewfinder resolution or undefined if no zooming took place.
    */
-  public alterSimulatedZoom(
-    newZoomLevel: ZoomSteps
-  ): CameraResolution | undefined {
-    if (newZoomLevel === 1 || newZoomLevel === 2) {
-      if (this.baseResolution?.width && this.baseResolution?.height) {
-        const simulatedZoom = {
-          width: this.baseResolution.width * newZoomLevel,
-          height: this.baseResolution.height * newZoomLevel,
-          zoomLevel: newZoomLevel
-        };
-
-        if (simulatedZoom?.zoomLevel) this.zoom = newZoomLevel;
-        if (simulatedZoom?.width && simulatedZoom?.height) {
-          this.viewfinder.width = simulatedZoom.width;
-          this.viewfinder.height = simulatedZoom.height;
-        }
-        return simulatedZoom;
-      }
-    }
-
-    return undefined;
-  }
-
-  /** Accepts a new zoom value from the Zoom slider component and attempts to perform a native digital zoom */
   public alterZoom = (
-    ev: React.FormEvent<HTMLDivElement>,
-    newZoom: number[] | number
-  ): void => {
-    if (Array.isArray(newZoom) && ev.target) {
-      if (newZoom[0] === 1 || newZoom[0] === 2 || newZoom[0] === 3) {
-        this.zoom = newZoom[0];
+    newZoomLevel: ZoomSteps,
+  ): CameraResolution | undefined => {
+    if (newZoomLevel === 1 || (newZoomLevel === 2)) {
+      if (this._zoomMethod.type === 'native') {
+        this.videoTrack
+          ?.applyConstraints({ advanced: [{ zoom: newZoomLevel }] })
+          .then(() => (this.zoom = newZoomLevel))
+          .catch(onZoomRejection);
+      } else {
+        if (this.baseResolution?.width && this.baseResolution?.height) {
+          const simulatedZoom = {
+            width: this.baseResolution.width * newZoomLevel,
+            height: this.baseResolution.height * newZoomLevel,
+            zoomLevel: newZoomLevel
+          };
+
+          if (simulatedZoom?.zoomLevel) this.zoom = newZoomLevel;
+          if (simulatedZoom?.width && simulatedZoom?.height) {
+            this.viewfinder.width = simulatedZoom.width;
+            this.viewfinder.height = simulatedZoom.height;
+          }
+          return simulatedZoom;
+        }
       }
-    } else if (typeof newZoom === 'number') {
-      if (newZoom === 1 || newZoom === 2 || newZoom === 3) {
-        this.zoom = newZoom;
-      }
+
+      console.error(`The requested zoom value (${newZoomLevel}) is not valid.`);
+      return undefined;
+    }
+    function onZoomRejection(reason: unknown) {
+      logger.log('QA', () => {
+        console.error(
+          'Encountered an error while performing native zoom. -> ',
+          reason
+        );
+      });
+      throw handleError(
+        ErrorRegistry.zoomError,
+        new Error('A zoom action failed, more info: ' + reason)
+      );
     }
   };
 

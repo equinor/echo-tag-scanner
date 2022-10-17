@@ -6,7 +6,7 @@ import {
   isLocalDevelopment
 } from '@utils';
 import { ErrorRegistry } from '@const';
-import { CameraProps, CameraResolution, ZoomSteps } from '@types';
+import { CameraProps, CameraResolution, ZoomMethod, ZoomSteps } from '@types';
 
 /**
  * This object is concerned with the core features of a camera.
@@ -107,23 +107,6 @@ class CoreCamera {
 
   public set zoom(zoomValue: ZoomSteps) {
     this._zoom = zoomValue;
-    this._videoTrack
-      ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
-      .then(() => (this._zoom = zoomValue))
-      .catch(onZoomRejection);
-
-    function onZoomRejection(reason: unknown) {
-      logger.log('QA', () => {
-        console.error(
-          'Encountered an error while toggling the torch. -> ',
-          reason
-        );
-      });
-      throw handleError(
-        ErrorRegistry.zoomError,
-        new Error('A zoom action failed, more info: ' + reason)
-      );
-    }
   }
 
   /**

@@ -61,9 +61,7 @@ function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
             {tagScanner.zoomMethod?.type === 'simulated' &&
               isLocalDevelopment && (
                 <SimulatedZoomTrigger
-                  onSimulatedZoom={tagScanner.alterSimulatedZoom.bind(
-                    tagScanner
-                  )}
+                  onSimulatedZoom={tagScanner.alterZoom.bind(tagScanner)}
                 />
               )}
 

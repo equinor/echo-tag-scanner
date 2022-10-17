@@ -26,8 +26,7 @@ export class TagScanner extends Camera {
         this.videoTrack?.stop();
         this.videoTrack?.dispatchEvent(new Event('ended'));
       };
-      globalThis.simZoom = (newZoom: ZoomSteps) =>
-        this.alterSimulatedZoom(newZoom);
+      globalThis.simZoom = (newZoom: ZoomSteps) => this.alterZoom(newZoom);
     }
   }
 
@@ -38,17 +37,17 @@ export class TagScanner extends Camera {
     return `
 Camera Information
 #################################
-Camera resolution: 
+Camera resolution:
    ${this.viewfinder.videoWidth}x${this.viewfinder.videoHeight}@${
       this.videoTrack?.getSettings().frameRate
     }fps.
-Viewfinder resolution (in CSS pixels): 
+Viewfinder resolution (in CSS pixels):
     ${this.viewfinder.width}x${this.viewfinder.height}.
-Camera is torch capable: 
+Camera is torch capable:
     ${Boolean(this.capabilities?.torch)}.
 Camera is zoom capable: ${Boolean(this.capabilities?.zoom)}.
 ${getReadableVideotrackSettings.call(this)}
-Current camera facing mode: 
+Current camera facing mode:
     ${this.activeCamera}
 MediaStream details:
     ${this.mediaStream.toString()}
@@ -65,7 +64,7 @@ User agent:
     ${navigator.userAgent}
 Cameras:
     ${await getHRDevices.call(this)}
-Current orientation: 
+Current orientation:
     ${this.currentOrientation}
 
 `;

@@ -8,7 +8,6 @@ export { SearchResults } from './searchresults/SearchResults';
 export { ScanningIndicator } from './progress/ScanningLoading';
 export { OverconstrainedAlert } from './error/OverconstrainedAlert';
 export { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
-export { SimulatedZoomTrigger } from './cameracontrols/SimulatedZoomTrigger';
 export { Scanner } from './ScannerUI';
 export { DebugInfoOverlay } from './debug/DebugInfoOverlay';
 export { GestureArea } from './cameracontrols/GestureArea';

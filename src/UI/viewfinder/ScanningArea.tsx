@@ -5,7 +5,7 @@ import { useScanningAreaDimensions } from './viewFinderUtils';
 import { zIndexes } from '@const';
 
 interface ScanningAreaProps {
-  captureAreaRef: React.Dispatch<SetStateAction<HTMLElement | undefined>>;
+  scanningAreaRef: React.Dispatch<SetStateAction<HTMLElement | undefined>>;
 }
 
 const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
@@ -14,8 +14,8 @@ const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
   return (
     <>
       <SvgContainer
-        id="scan-area"
-        ref={(el: HTMLElement) => props.captureAreaRef(el)}
+        id="scanning-area"
+        ref={(el: HTMLElement) => props.scanningAreaRef(el)}
         dimensions={dimensions}
       />
     </>
@@ -36,7 +36,7 @@ const SvgContainer = styled.section<{ dimensions: ViewfinderDimensions }>`
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
-  z-index: ${zIndexes.overlays};
+  z-index: ${zIndexes.scanningArea};
 `;
 
 export { ScanningArea };

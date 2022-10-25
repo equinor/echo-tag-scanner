@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { DialogGenerator } from '@equinor/echo-components';
 import { Dialog, Progress } from '@equinor/eds-core-react';
+import './vars.css';
 
 const FallbackLoading = (): JSX.Element => {
   return (

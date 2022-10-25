@@ -1,6 +1,6 @@
 export { CaptureAndTorch } from './cameracontrols/captureAndTorch';
 export { TorchButton, ScannerButton } from './camerabutton/CameraButton';
-export { ScanningArea } from './viewfinder/CaptureArea';
+export { ScanningArea } from './viewfinder/ScanningArea';
 export { Viewfinder } from './viewfinder/Viewfinder';
 export { Toast } from './notification/Toast';
 export { ZoomSlider } from './cameracontrols/ZoomSlider';
@@ -11,3 +11,4 @@ export { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 export { SimulatedZoomTrigger } from './cameracontrols/SimulatedZoomTrigger';
 export { Scanner } from './ScannerUI';
 export { DebugInfoOverlay } from './debug/DebugInfoOverlay';
+export { GestureArea } from './cameracontrols/GestureArea';

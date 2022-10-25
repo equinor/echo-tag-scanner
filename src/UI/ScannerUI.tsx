@@ -5,7 +5,7 @@ import {
   SearchResults,
   ZoomSlider,
   SimulatedZoomTrigger,
-  DebugInfoOverlay
+  GestureArea
 } from '@ui';
 import {
   useEchoIsSyncing,
@@ -14,11 +14,7 @@ import {
   useValidatedTags
 } from '@hooks';
 import { NotificationHandler } from '@services';
-import {
-  getTorchToggleProvider,
-  isDevelopment,
-  isLocalDevelopment
-} from '@utils';
+import { getTorchToggleProvider, isLocalDevelopment } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 import { zIndexes } from '@const';
 
@@ -41,9 +37,9 @@ function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
 
   return (
     <>
-      {tagScanner && (isLocalDevelopment || isDevelopment) && (
+      {/* {tagScanner && (isLocalDevelopment || isDevelopment) && (
         <DebugInfoOverlay tagScanner={tagScanner} viewfinder={viewfinder} />
-      )}
+      )} */}
       <ControlPad>
         {tagScanner && (
           <>
@@ -58,13 +54,6 @@ function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
               />
             )}
 
-            {tagScanner.zoomMethod?.type === 'simulated' &&
-              isLocalDevelopment && (
-                <SimulatedZoomTrigger
-                  onSimulatedZoom={tagScanner.alterZoom.bind(tagScanner)}
-                />
-              )}
-
             <CaptureAndTorch
               onToggleTorch={getTorchToggleProvider(tagScanner)}
               onScanning={onTagScan}
@@ -74,7 +63,7 @@ function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
               supportedFeatures={{
                 torch: Boolean(tagScanner?.capabilities?.torch)
               }}
-              onDebug={tagScanner.debugAll.bind(tagScanner, false)}
+              onDebug={tagScanner.debugAll.bind(tagScanner, true)}
             />
           </>
         )}
@@ -91,6 +80,7 @@ function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
           />
         )}
       </DialogueWrapper>
+      {tagScanner && <GestureArea tagScanner={tagScanner} />}
     </>
   );
 }
@@ -100,7 +90,7 @@ const ControlPad = styled.section`
   align-items: center;
   position: fixed;
   bottom: 10px;
-  height: 20%;
+  height: var(--control-pad-height);
   width: 100%;
   z-index: ${zIndexes.cameraControls};
 
@@ -111,7 +101,7 @@ const ControlPad = styled.section`
     top: 0;
     bottom: unset;
     height: 100%;
-    width: 20%;
+    width: var(--control-pad-width-landscape);
   }
 `;
 

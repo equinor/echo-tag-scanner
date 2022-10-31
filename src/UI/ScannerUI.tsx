@@ -1,12 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import {
-  CaptureAndTorch,
-  SearchResults,
-  ZoomSlider,
-  SimulatedZoomTrigger,
-  GestureArea
-} from '@ui';
+import { CaptureAndTorch, SearchResults, ZoomSlider, GestureArea } from '@ui';
 import {
   useEchoIsSyncing,
   useMountScanner,
@@ -14,7 +8,7 @@ import {
   useValidatedTags
 } from '@hooks';
 import { NotificationHandler } from '@services';
-import { getTorchToggleProvider, isLocalDevelopment } from '@utils';
+import { getTorchToggleProvider } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 import { zIndexes } from '@const';
 

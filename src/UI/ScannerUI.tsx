@@ -31,9 +31,6 @@ function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
 
   return (
     <>
-      {/* {tagScanner && (isLocalDevelopment || isDevelopment) && (
-        <DebugInfoOverlay tagScanner={tagScanner} viewfinder={viewfinder} />
-      )} */}
       <ControlPad>
         {tagScanner && (
           <>

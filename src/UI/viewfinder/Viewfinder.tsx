@@ -15,8 +15,6 @@ interface ViewfinderProps {
 }
 
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
-  const canvasDimensions = useCanvasDimensions();
-
   return (
     <>
       <Canvas

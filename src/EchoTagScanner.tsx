@@ -25,16 +25,6 @@ const EchoCamera = () => {
 
   // Whatever is inside this area is what will be the OCR target.
   const [scanningArea, setScanningArea] = useState<HTMLElement>();
-  const [scanningAreaCoordinates, setCoordinates] = useState<
-    ScanningAreaCoords | undefined
-  >();
-
-  useEffect(() => {
-    if (scanningArea instanceof HTMLElement) {
-      const rect = scanningArea.getBoundingClientRect();
-      setCoordinates({ x: rect.x, y: rect.y });
-    }
-  }, [scanningArea]);
 
   if (!mediaStream) {
     return null;
@@ -55,14 +45,6 @@ const EchoCamera = () => {
           videoRef={viewfinder}
           dimensions={dimensions}
         />
-        {scanningAreaCoordinates && (
-          <ScanningAreaCoordinates
-            x={scanningAreaCoordinates.x}
-            y={scanningAreaCoordinates.y}
-          >
-            ({scanningAreaCoordinates.x}, {scanningAreaCoordinates.y})
-          </ScanningAreaCoordinates>
-        )}
 
         {viewfinder && canvas && scanningArea && (
           <ScannerUI

@@ -7,7 +7,6 @@ interface ScanningAreaProps {
 }
 
 const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
-
   return (
     <>
       <SvgContainer

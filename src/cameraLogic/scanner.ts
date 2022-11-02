@@ -1,5 +1,5 @@
 import { CameraProps, ZoomSteps } from '@types';
-import { getOrientation, isDevelopment, logger } from '@utils';
+import { isDevelopment, logger } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { Camera, OCR } from '.';
 

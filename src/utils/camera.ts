@@ -67,7 +67,7 @@ function determineZoomMethod(this: Camera): ZoomMethod {
     return {
       type: 'simulated',
       min: 1,
-      max: 3
+      max: 2
     } as ZoomMethod;
   }
 }

@@ -9,7 +9,6 @@ const EchoCamera = () => {
   useEffect(() => {
     logger.moduleStarted();
   }, []);
-
   // The camera feed.
   const mediaStream = useGetMediastream();
   // Represets the camera viewfinder.

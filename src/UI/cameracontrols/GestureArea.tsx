@@ -2,7 +2,6 @@ import React, { PointerEvent, useState } from 'react';
 import styled from 'styled-components';
 import { zIndexes } from '@const';
 import { ZoomGestureHandler, TagScanner } from '@cameraLogic';
-import PinchZoom from 'pinch-zoom-js';
 
 interface TouchEvent extends PointerEvent<HTMLElement> {}
 interface GestureAreaProps {

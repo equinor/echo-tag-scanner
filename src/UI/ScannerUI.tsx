@@ -1,12 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import {
-  CaptureAndTorch,
-  SearchResults,
-  ZoomSlider,
-  SimulatedZoomTrigger,
-  GestureArea
-} from '@ui';
+import { CaptureAndTorch, SearchResults, GestureArea } from '@ui';
 import {
   useEchoIsSyncing,
   useMountScanner,
@@ -46,14 +40,6 @@ function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
             <SystemInfoTrigger
               onDelayedTrigger={tagScanner.clipboardThis.bind(tagScanner)}
             />
-            {tagScanner.zoomMethod?.type === 'native' && (
-              <ZoomSlider
-                onSlide={tagScanner.alterZoom}
-                zoomInputRef={setZoomInputRef}
-                zoomOptions={tagScanner.capabilities?.zoom}
-              />
-            )}
-
             <CaptureAndTorch
               onToggleTorch={getTorchToggleProvider(tagScanner)}
               onScanning={onTagScan}

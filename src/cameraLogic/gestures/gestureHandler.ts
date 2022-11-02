@@ -1,6 +1,7 @@
 import { PointerEvent } from 'react';
 import { ZoomSteps } from '@types';
 import { TagScanner } from '@cameraLogic';
+import { logger } from '@utils';
 
 interface TouchEvent extends PointerEvent<HTMLElement> {}
 
@@ -28,12 +29,36 @@ class ZoomGestureHandler {
   }
 
   private handleZoom() {
-    if (this._currentZoom === 1) {
-      this._tagScanner.alterZoom(2);
-      this._currentZoom = 2;
-    } else if (this._currentZoom === 2) {
-      this._tagScanner.alterZoom(1);
-      this._currentZoom = 1;
+    // We make the compiler ignore these since the statements below will ensure the numbers are within ZoomSteps.
+    //@ts-ignore
+    const nextZoom: ZoomSteps = this._currentZoom + 1;
+    //@ts-ignore
+    const maxZoom: ZoomSteps = this._tagScanner.zoomMethod.max;
+
+    const minZoom: ZoomSteps = this._tagScanner.zoomMethod.min;
+
+    if (this._tagScanner.zoomMethod.type === 'native') {
+      if (nextZoom >= minZoom && nextZoom < maxZoom) {
+        this._tagScanner.alterZoom(nextZoom);
+        this._currentZoom = nextZoom;
+      } else if (nextZoom === maxZoom) {
+        this._tagScanner.alterZoom(minZoom);
+        this._currentZoom = minZoom;
+      }
+    } else if (this._tagScanner.zoomMethod.type === 'simulated') {
+      if (this._currentZoom === 1) {
+        this._tagScanner.alterZoom(2);
+        this._currentZoom = 2;
+      } else if (this._currentZoom === 2) {
+        this._tagScanner.alterZoom(1);
+        this._currentZoom = 1;
+      }
+    } else {
+      logger.log('QA', () =>
+        console.warn(
+          'A zoom action was attempted with a gesture, but no method of zooming has been established.'
+        )
+      );
     }
   }
 

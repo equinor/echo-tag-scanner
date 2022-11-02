@@ -53,7 +53,7 @@ function getTorchToggleProvider(camera: Camera) {
   };
 }
 
-function determineZoomMethod(this: Camera): ZoomMethod | undefined {
+function determineZoomMethod(this: Camera): ZoomMethod {
   // Device has native support.
   if (this.capabilities?.zoom) {
     return {
@@ -67,7 +67,7 @@ function determineZoomMethod(this: Camera): ZoomMethod | undefined {
     return {
       type: 'simulated',
       min: 1,
-      max: 3
+      max: 2
     } as ZoomMethod;
   }
 }
@@ -79,8 +79,8 @@ function getCameraPreferences(): MediaStreamConstraints {
   if (isLocalDevelopment && !isIos) {
     return {
       video: {
-        width: { max: staticResolution.width, min: 848 },
-        height: { max: staticResolution.height, min: 480 },
+        width: { max: staticResolution.width, min: 1280 },
+        height: { max: staticResolution.height, min: 720 },
 
         // Higher FPS is good for a scanning operation.
         frameRate: {
@@ -90,7 +90,7 @@ function getCameraPreferences(): MediaStreamConstraints {
         // Require a specific camera by its ID here.
         deviceId: {
           exact:
-            '883c79d936715fb3d0f70390c627a7bcb9ff395f6835fdf2b068373a35764ec2'
+            'a874c50ce1a7f877e5d365c7ef7738d4881d76a22876cd61f0b708422936dc45'
         }
       },
       audio: false

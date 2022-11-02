@@ -12,7 +12,7 @@ import {
 class CanvasHandler {
   private _canvas: HTMLCanvasElement;
   protected _canvasContext: CanvasRenderingContext2D;
-  private _standardCanvasDimensions: CanvasDimensions;
+  private readonly _standardCanvasDimensions: CanvasDimensions;
 
   constructor(props: CanvasHandlerProps) {
     if (!props.canvas)
@@ -123,15 +123,21 @@ class CanvasHandler {
     });
   }
 
+  public scaleCanvas(xFactor: number, yFactor: number) {
+    this._canvasContext.scale(xFactor, yFactor);
+  }
+
   /**
    * Erases and resets the canvas.
    */
   public clearCanvas(): void {
+    this.canvas.height = this._standardCanvasDimensions.height;
+    this.canvas.width = this._standardCanvasDimensions.width;
     this._canvasContext?.clearRect(
       0,
       0,
-      this._canvas.width,
-      this._canvas.height
+      this._standardCanvasDimensions.width,
+      this._standardCanvasDimensions.height
     );
     this._canvasContext?.beginPath();
   }

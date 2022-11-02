@@ -1,4 +1,4 @@
-import { CameraProps, DrawImageParameters } from '@types';
+import { CameraProps, CropSettings, DrawImageParameters } from '@types';
 import { CanvasHandler } from './canvasHandler';
 import { CoreCamera } from './coreCamera';
 
@@ -13,7 +13,13 @@ class Postprocessor extends CoreCamera {
   constructor(props: CameraProps) {
     super(props);
     this._canvas = props.canvas;
-    this._canvasHandler = new CanvasHandler({ canvas: props.canvas });
+    this._canvasHandler = new CanvasHandler({
+      canvas: props.canvas,
+      standardCanvasDimensions: {
+        width: this.viewfinder.videoWidth,
+        height: this.viewfinder.videoHeight
+      }
+    });
   }
 
   protected get capture(): Blob | undefined {
@@ -26,6 +32,43 @@ class Postprocessor extends CoreCamera {
 
   protected get canvasHandler() {
     return this._canvasHandler;
+  }
+
+  /**
+   * Performs a crop operation on the current contents of the canvas with the provided settings.
+   * The canvas itself will also be cropped as a result.
+   * @param {CropSettings} settings Should contain the coordinate positions of the starting crop position and the dimensions of the crop.
+   * - sx: The x position.
+   * - sy: The y position.
+   * - sWidth: The width of the new cropped image.
+   * - sHeight: The height of the new cropped image.
+   * @returns {Promise<Blob>} The cropped image.
+   */
+  protected async crop(settings: CropSettings): Promise<Blob> {
+    if (settings.sx < 0 || settings.sy < 0)
+      throw new Error('sx or sy is below 0');
+    if (settings.sx > this._canvas.height)
+      throw new Error('sx is bigger than canvas');
+    if (settings.sy > this._canvas.width)
+      throw new Error('sy is bigger than canvas');
+    const bitmap = await createImageBitmap(await this._canvasHandler.getBlob());
+    console.log(
+      'canvas DIMENSIONS',
+      this._canvas.width + 'x' + this._canvas.height
+    );
+    console.log('BITMAP', bitmap.width + 'x' + bitmap.height);
+    const params: DrawImageParameters = {
+      sx: settings.sx,
+      sy: settings.sy,
+      sWidth: settings.sWidth,
+      sHeight: settings.sHeight,
+      dx: 0,
+      dy: 0,
+      dHeight: settings.sHeight,
+      dWidth: settings.sWidth
+    };
+
+    return await this._canvasHandler.draw(bitmap, params);
   }
 
   /**

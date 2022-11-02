@@ -3,7 +3,7 @@ import { debounce, getOrientation } from '@utils';
 import EchoUtils from '@equinor/echo-utils';
 import { ViewfinderDimensions } from '@types';
 
-export function useScanningAreaDimensions() {
+export function useCanvasDimensions() {
   const [dimensions, setDimensions] = useState<ViewfinderDimensions>(
     getDimensions()
   );
@@ -24,24 +24,20 @@ export function useScanningAreaDimensions() {
   }, []);
 
   return dimensions;
-}
 
-function getDimensions(): ViewfinderDimensions {
-  const viewMode = getOrientation();
+  function getDimensions(): ViewfinderDimensions {
+    const viewMode = getOrientation();
 
-  if (viewMode === 'portrait') {
-    return {
-      // width: globalThis.innerWidth * 0.8,
-      // height: globalThis.innerHeight * (1 / 3)
-      width: globalThis.innerWidth,
-      height: globalThis.innerHeight
-    };
-  } else {
-    return {
-      // width: globalThis.innerWidth * 0.7,
-      // height: globalThis.innerHeight * (1 / 3)
-      width: globalThis.innerWidth,
-      height: globalThis.innerHeight
-    };
+    if (viewMode === 'portrait') {
+      return {
+        width: globalThis.innerWidth,
+        height: globalThis.innerHeight
+      };
+    } else {
+      return {
+        width: globalThis.innerWidth,
+        height: globalThis.innerHeight
+      };
+    }
   }
 }

@@ -2,8 +2,7 @@ import {
   handleError,
   getOrientation,
   logger,
-  getCameraPreferences,
-  isLocalDevelopment
+  getCameraPreferences
 } from '@utils';
 import { ErrorRegistry } from '@const';
 import { CameraProps, CameraResolution, ZoomSteps } from '@types';
@@ -33,7 +32,7 @@ class CoreCamera {
     this._currentOrientation = getOrientation();
     this._activeCamera = this._videoTrackSettings.facingMode;
     this._viewfinder.srcObject = props.mediaStream;
-    this._zoom = 1;
+    this._zoom = 2;
 
     /** Currently holds a reference to the initial viewfinder dimensions.
      * Can be improved by moving these to an extended HTMLVideoElement
@@ -107,23 +106,6 @@ class CoreCamera {
 
   public set zoom(zoomValue: ZoomSteps) {
     this._zoom = zoomValue;
-    this._videoTrack
-      ?.applyConstraints({ advanced: [{ zoom: zoomValue }] })
-      .then(() => (this._zoom = zoomValue))
-      .catch(onZoomRejection);
-
-    function onZoomRejection(reason: unknown) {
-      logger.log('QA', () => {
-        console.error(
-          'Encountered an error while toggling the torch. -> ',
-          reason
-        );
-      });
-      throw handleError(
-        ErrorRegistry.zoomError,
-        new Error('A zoom action failed, more info: ' + reason)
-      );
-    }
   }
 
   /**

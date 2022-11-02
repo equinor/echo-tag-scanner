@@ -15,7 +15,6 @@ import {
 } from '@utils';
 import { CoreCamera } from './coreCamera';
 import { Postprocessor } from './postprocessor';
-import { getNotificationDispatcher as dispatchNotification } from '@utils';
 import { ErrorRegistry } from '../const';
 
 /**
@@ -138,36 +137,50 @@ class Camera extends Postprocessor {
    * @param {ZoomSteps} newZoomLevel The new zoom value.
    * @returns {CameraResolution} Information about the new viewfinder resolution or undefined if no zooming took place.
    */
-  public alterZoom = (
-    newZoomLevel: ZoomSteps,
-  ): CameraResolution | undefined => {
-    if (newZoomLevel === 1 || (newZoomLevel === 2)) {
+  public alterZoom(
+    newZoomLevel: ZoomSteps
+  ): Promise<CameraResolution | undefined> {
+    return new Promise((resolve) => {
       if (this._zoomMethod.type === 'native') {
-        this.videoTrack
-          ?.applyConstraints({ advanced: [{ zoom: newZoomLevel }] })
-          .then(() => (this.zoom = newZoomLevel))
-          .catch(onZoomRejection);
-      } else {
-        if (this.baseResolution?.width && this.baseResolution?.height) {
-          const simulatedZoom = {
-            width: this.baseResolution.width * newZoomLevel,
-            height: this.baseResolution.height * newZoomLevel,
-            zoomLevel: newZoomLevel
-          };
+        if (
+          newZoomLevel >= this._zoomMethod.min &&
+          newZoomLevel <= this._zoomMethod.max
+        ) {
+          this.videoTrack
+            ?.applyConstraints({ advanced: [{ zoom: newZoomLevel }] })
+            .then(() => {
+              this.zoom = newZoomLevel;
+              resolve({
+                width: this.baseResolution.width,
+                height: this.baseResolution.height,
+                zoomLevel: newZoomLevel
+              });
+            })
+            .catch(onZoomRejection);
+        } else onZoomRejection('invalid range');
+      } else if (this._zoomMethod.type === 'simulated') {
+        if (
+          newZoomLevel >= this._zoomMethod.min &&
+          newZoomLevel <= this._zoomMethod.max
+        ) {
+          if (this.baseResolution?.width && this.baseResolution?.height) {
+            const simulatedZoom = {
+              width: this.baseResolution.width * newZoomLevel,
+              height: this.baseResolution.height * newZoomLevel,
+              zoomLevel: newZoomLevel
+            };
 
-          if (simulatedZoom?.zoomLevel) this.zoom = newZoomLevel;
-          if (simulatedZoom?.width && simulatedZoom?.height) {
-            this.viewfinder.width = simulatedZoom.width;
-            this.viewfinder.height = simulatedZoom.height;
+            if (simulatedZoom?.zoomLevel) this.zoom = newZoomLevel;
+            if (simulatedZoom?.width && simulatedZoom?.height) {
+              this.viewfinder.width = simulatedZoom.width;
+              this.viewfinder.height = simulatedZoom.height;
+            }
           }
-          return simulatedZoom;
         }
       }
+    });
 
-      console.error(`The requested zoom value (${newZoomLevel}) is not valid.`);
-      return undefined;
-    }
-    function onZoomRejection(reason: unknown) {
+    function onZoomRejection(reason: MediaStreamError | 'invalid range') {
       logger.log('QA', () => {
         console.error(
           'Encountered an error while performing native zoom. -> ',
@@ -179,7 +192,7 @@ class Camera extends Postprocessor {
         new Error('A zoom action failed, more info: ' + reason)
       );
     }
-  };
+  }
 
   /**
    * Captures a photo, and stores it as a drawing on the postprocessing canvas.
@@ -187,20 +200,17 @@ class Camera extends Postprocessor {
   protected async capturePhoto(): Promise<Blob> {
     this.canvasHandler.clearCanvas();
 
-    // TODO: Document how sX and sY is determined.
-    const sx = this.zoom === 1 ? 0 : this.viewfinder.videoWidth / this.zoom / 2;
-    const sy =
-      this.zoom === 1 ? 0 : this.viewfinder.videoHeight / this.zoom / 2;
     const params: DrawImageParameters = {
-      sx,
-      sy,
-      sWidth: this.viewfinder.videoWidth / this.zoom,
-      sHeight: this.viewfinder.videoHeight / this.zoom,
+      sx: 0,
+      sy: 0,
+      sWidth: this.viewfinder.videoWidth,
+      sHeight: this.viewfinder.videoHeight,
       dx: 0,
       dy: 0,
-      dWidth: this.viewfinder.videoWidth / this.zoom,
-      dHeight: this.viewfinder.videoHeight / this.zoom
+      dWidth: this.viewfinder.videoWidth,
+      dHeight: this.viewfinder.videoHeight
     };
+    console.log('PARMAS', params);
 
     return this._canvasHandler.draw(this.viewfinder, params);
   }
@@ -259,8 +269,6 @@ function calculateScaleFactor(viewfinder: HTMLVideoElement): {
   // FIXME: This makes it better width'wise in browsers
   // but we still have small offset issues in iphone/mobiles...
   let scale = Math.min(scale_x, scale_y);
-
-  dispatchNotification({ message: String(scale), autohideDuration: 5000 })();
 
   return { scale, videoWidth, videoHeight };
 }

@@ -67,7 +67,7 @@ function determineZoomMethod(this: Camera): ZoomMethod {
     return {
       type: 'simulated',
       min: 1,
-      max: 3
+      max: 2
     } as ZoomMethod;
   }
 }
@@ -79,8 +79,8 @@ function getCameraPreferences(): MediaStreamConstraints {
   if (isLocalDevelopment && !isIos) {
     return {
       video: {
-        width: { max: staticResolution.width, min: 848 },
-        height: { max: staticResolution.height, min: 480 },
+        width: { max: staticResolution.width, min: 1280 },
+        height: { max: staticResolution.height, min: 720 },
 
         // Higher FPS is good for a scanning operation.
         frameRate: {

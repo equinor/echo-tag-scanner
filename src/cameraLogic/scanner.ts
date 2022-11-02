@@ -1,5 +1,5 @@
 import { CameraProps, ZoomSteps } from '@types';
-import { isDevelopment, logger } from '@utils';
+import { getOrientation, isDevelopment, logger } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { Camera, OCR } from '.';
 
@@ -122,49 +122,103 @@ Regular offset from left-edge: ${bcr.x};
     }
   }
 
+  public async performScanningAreaCrop(): Promise<Blob> {
+    //@ts-ignore Ignore this undefined for now.
+    const scanningArea: HTMLElement = document.getElementById('scanning-area');
+    const sWidth = scanningArea.getBoundingClientRect().width;
+    const sHeight = scanningArea.getBoundingClientRect().height;
+
+    const sx = this.viewfinder.videoWidth / 2 - sWidth / 2;
+    const sy = this.viewfinder.videoHeight / 2 - sHeight / 2;
+
+    console.group('scanning area crop');
+    console.info('sx: ', sx);
+    console.info('sy: ', sy);
+    console.info('width: ', sWidth);
+    console.info('height: ', sHeight);
+    console.info('canvas: ', this._canvas.width + 'x' + this._canvas.height);
+    console.info('sa: ', scanningArea.getBoundingClientRect());
+    console.groupEnd();
+
+    return await this.crop({
+      sx,
+      sy,
+      sWidth,
+      sHeight
+    });
+  }
+
+  public async performSimulatedZoomCrop(): Promise<Blob> {
+    //@ts-ignore Ignore this undefined for now.
+    const scanningArea: HTMLElement = document.getElementById('scanning-area');
+    const sWidth = scanningArea.getBoundingClientRect().width;
+    const sHeight = scanningArea.getBoundingClientRect().height;
+
+    let sx = this.viewfinder.videoWidth / 2 - sWidth / 2;
+    let sy = this.viewfinder.videoHeight / 2 - sHeight / 2;
+
+    console.group('zoom crop');
+    console.info('sx: ', sx);
+    console.info('sy: ', sy);
+    console.info('width: ', sWidth);
+    console.info('height: ', sHeight);
+    console.info('canvas', this._canvas.width + 'x' + this._canvas.height);
+    console.groupEnd();
+
+    return await this.crop({
+      sx,
+      sy,
+      sWidth: sWidth / this.zoom,
+      sHeight: sHeight / this.zoom
+    });
+  }
+
   public async debugAll(previewCapture = false) {
     navigator.clipboard.writeText(await this.clipboardThis());
 
-    logger.log('EchoDevelopment', () => {
-      console.log(
-        'I will run if the env is EchoDevelopment or LocalDevelopment'
-      );
-    });
-
     if (previewCapture) {
-      await this.capturePhoto();
-      await this.scale(0.5);
+      const scanningArea = document.getElementById('scanning-area');
+
+      if (scanningArea) {
+        this.prepareNewScan();
+        let capture = await this.capturePhoto();
+
+        // capture = await this.performScanningAreaCrop();
+        capture = await this.performSimulatedZoomCrop();
+        if (this.zoom > 1) {
+        }
+      }
     }
-    logger.log('EchoDevelopment', () => {
-      console.log('Mediastream -> ', this.mediaStream);
-      console.log('The viewfinder -> ', this.viewfinder);
-      console.log('The video track -> ', this.videoTrack);
-      console.log('Camera settings -> ', this.videoTrackSettings);
-      console.log('Current orientation -> ', this.currentOrientation);
-      console.log(
-        'Camera is torch capable -> ',
-        Boolean(this.capabilities?.torch)
-      );
-      console.log(
-        'Camera is zoom capable -> ',
-        Boolean(this.capabilities?.zoom)
-      );
-      console.log(
-        'Camera resolution -> ',
-        this.viewfinder.videoWidth +
-          'x' +
-          this.viewfinder.videoHeight +
-          '@' +
-          this.videoTrack?.getSettings().frameRate +
-          'fps'
-      );
-      console.log(
-        'Viewport (CSS pixel) resolution -> ',
-        this.viewfinder.width + 'x' + this.viewfinder.height
-      );
-      console.log('Number of captures -> ', this._scanRetries);
-      console.log('Scanning duration ->', this._scanDuration);
-    });
+    // logger.log('EchoDevelopment', () => {
+    //   console.log('Mediastream -> ', this.mediaStream);
+    //   console.log('The viewfinder -> ', this.viewfinder);
+    //   console.log('The video track -> ', this.videoTrack);
+    //   console.log('Camera settings -> ', this.videoTrackSettings);
+    //   console.log('Current orientation -> ', this.currentOrientation);
+    //   console.log(
+    //     'Camera is torch capable -> ',
+    //     Boolean(this.capabilities?.torch)
+    //   );
+    //   console.log(
+    //     'Camera is zoom capable -> ',
+    //     Boolean(this.capabilities?.zoom)
+    //   );
+    //   console.log(
+    //     'Camera resolution -> ',
+    //     this.viewfinder.videoWidth +
+    //       'x' +
+    //       this.viewfinder.videoHeight +
+    //       '@' +
+    //       this.videoTrack?.getSettings().frameRate +
+    //       'fps'
+    //   );
+    //   console.log(
+    //     'Viewport (CSS pixel) resolution -> ',
+    //     this.viewfinder.width + 'x' + this.viewfinder.height
+    //   );
+    //   console.log('Number of captures -> ', this._scanRetries);
+    //   console.log('Scanning duration ->', this._scanDuration);
+    // });
   }
 
   // Prepare for a new scan by resetting the camera.
@@ -185,7 +239,6 @@ Regular offset from left-edge: ${bcr.x};
       const interval = (this._scanRetries / this._scanDuration) * 100;
       const intervalId = setInterval(async () => {
         let capture = await this.capturePhoto();
-        if (capture.size > 50000) capture = await this.scale(0.5);
         if (capture.size > 50000) capture = await this.scale(0.5);
         scans.push(capture);
 

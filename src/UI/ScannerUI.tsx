@@ -8,7 +8,7 @@ import {
   useValidatedTags
 } from '@hooks';
 import { NotificationHandler } from '@services';
-import { getTorchToggleProvider, isLocalDevelopment } from '@utils';
+import { getTorchToggleProvider } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 import { zIndexes } from '@const';
 

@@ -1,4 +1,8 @@
 :root {
     --control-pad-height: 150px;
     --control-pad-width-landscape: 150px;
+    --scanning-area-width-portrait: 300px;
+        --scanning-area-height-portrait: 300px;
+        --scanning-area-width-landscape: 466px;
+        --scanning-area-height-landscape: 125px;
 }

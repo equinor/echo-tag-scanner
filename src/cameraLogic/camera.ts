@@ -15,7 +15,6 @@ import {
 } from '@utils';
 import { CoreCamera } from './coreCamera';
 import { Postprocessor } from './postprocessor';
-import { getNotificationDispatcher as dispatchNotification } from '@utils';
 import { ErrorRegistry } from '../const';
 
 /**
@@ -201,20 +200,17 @@ class Camera extends Postprocessor {
   protected async capturePhoto(): Promise<Blob> {
     this.canvasHandler.clearCanvas();
 
-    // TODO: Document how sX and sY is determined.
-    const sx = this.zoom === 1 ? 0 : this.viewfinder.videoWidth / this.zoom / 2;
-    const sy =
-      this.zoom === 1 ? 0 : this.viewfinder.videoHeight / this.zoom / 2;
     const params: DrawImageParameters = {
-      sx,
-      sy,
-      sWidth: this.viewfinder.videoWidth / this.zoom,
-      sHeight: this.viewfinder.videoHeight / this.zoom,
+      sx: 0,
+      sy: 0,
+      sWidth: this.viewfinder.videoWidth,
+      sHeight: this.viewfinder.videoHeight,
       dx: 0,
       dy: 0,
-      dWidth: this.viewfinder.videoWidth / this.zoom,
-      dHeight: this.viewfinder.videoHeight / this.zoom
+      dWidth: this.viewfinder.videoWidth,
+      dHeight: this.viewfinder.videoHeight
     };
+    console.log('PARMAS', params);
 
     return this._canvasHandler.draw(this.viewfinder, params);
   }
@@ -273,8 +269,6 @@ function calculateScaleFactor(viewfinder: HTMLVideoElement): {
   // FIXME: This makes it better width'wise in browsers
   // but we still have small offset issues in iphone/mobiles...
   let scale = Math.min(scale_x, scale_y);
-
-  dispatchNotification({ message: String(scale), autohideDuration: 5000 })();
 
   return { scale, videoWidth, videoHeight };
 }

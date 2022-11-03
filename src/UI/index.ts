@@ -10,3 +10,4 @@ export { Scanner } from './ScannerUI';
 export { DebugInfoOverlay } from './debug/DebugInfoOverlay';
 export { GestureArea } from './cameracontrols/GestureArea';
 export { VersionNumber } from './info/VersionNumber';
+export { ZoomTutorial } from './notification/ZoomTutorial';

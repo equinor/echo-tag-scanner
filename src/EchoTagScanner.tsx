@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
-import { Viewfinder, Scanner as ScannerUI } from '@ui';
+import { Viewfinder, Scanner as ScannerUI, ZoomTutorial } from '@ui';
 import { logger } from '@utils';
 import { ErrorBoundary } from '@services';
 import { useGetMediastream } from '@hooks';
@@ -54,6 +54,7 @@ const EchoCamera = () => {
           />
         )}
       </ErrorBoundary>
+      <ZoomTutorial />
     </Main>
   );
 };

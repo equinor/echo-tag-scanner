@@ -13,7 +13,7 @@ interface TorchButtonProps {
 const TorchButton = (props: TorchButtonProps): JSX.Element => {
   return (
     <StyledTorchButton onClick={props.onClick}>
-      <Icon name={'lightbulb'} color="white" />;
+      <Icon name={'lightbulb'} color="white" />
     </StyledTorchButton>
   );
 };

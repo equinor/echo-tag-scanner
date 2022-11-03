@@ -9,7 +9,7 @@
     "description": "An Echo module where the users can do searches for tags by taking pictures of tag signs.",
     "private": false,
     "fileUri": "https://echocamera.equinor.com/index.js",
-    "devFileUri": "https://echocamera-qa.equinor.com/index.js",
+    "devFileUri": "https://echocamera-dev.equinor.com/index.js",
     "qaFileUri": "https://echocamera-qa.equinor.com/index.js",
     "testFileUri": "https://echocamera-dev.equinor.com/index.js"
   },

@@ -1,7 +1,6 @@
 import { Camera } from '@cameraLogic';
 import {
   getNotificationDispatcher as dispatchNotification,
-  getOrientation,
   isDevelopment,
   isLocalDevelopment,
   isQA
@@ -9,7 +8,6 @@ import {
 import { ZoomMethod } from '@types';
 import { staticResolution } from '../const';
 import EchoUtils from '@equinor/echo-utils';
-import { EchoEnv } from '@equinor/echo-core';
 
 function assignZoomSettings(
   type: 'min' | 'max' | 'step' | 'value',
@@ -56,13 +54,16 @@ function getTorchToggleProvider(camera: Camera) {
 function determineZoomMethod(this: Camera): ZoomMethod {
   // Device has native support.
   if (this.capabilities?.zoom) {
+    // Ensure the max zoom is not above 3.
+    const maxZoom =
+      this.capabilities?.zoom.max > 3 ? 3 : this.capabilities?.zoom.max;
     return {
       type: 'native',
       min: 1,
-      max: this.capabilities?.zoom.max
+      max: maxZoom
     } as ZoomMethod;
 
-    // Device does not have native support, but the camera could allow for simulated zoom.
+    // Device does not have native support, fall back to simulated zoom.
   } else {
     return {
       type: 'simulated',

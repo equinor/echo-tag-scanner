@@ -24,4 +24,8 @@ const Mark = styled.mark`
   left: 0;
   z-index: ${zIndexes.versionNumber};
   user-select: none;
+
+  @media screen and (orientation: landscape) {
+    left: var(--echo-sidebar-width);
+  }
 `;

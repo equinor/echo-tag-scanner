@@ -90,7 +90,8 @@ function getCameraPreferences(): MediaStreamConstraints {
 
         // Require a specific camera by its ID here.
         deviceId: {
-          exact: ''
+          exact:
+            '883c79d936715fb3d0f70390c627a7bcb9ff395f6835fdf2b068373a35764ec2'
         }
       },
       audio: false

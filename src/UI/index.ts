@@ -9,4 +9,5 @@ export { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 export { Scanner } from './ScannerUI';
 export { DebugInfoOverlay } from './debug/DebugInfoOverlay';
 export { GestureArea } from './cameracontrols/GestureArea';
-export { VersionNumber } from './info/VersionNumber';
+export { VersionNumber } from './debug/VersionNumber';
+export { Backdrop } from './viewfinder/Backdrop';

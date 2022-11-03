@@ -1,4 +1,4 @@
-const belowViewfinder = 0;
+const belowViewfinder = -1;
 const viewfinder = 1;
 const scanningArea = 2;
 const overlays = 3;

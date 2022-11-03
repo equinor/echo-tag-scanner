@@ -1,6 +1,6 @@
 import React, { SetStateAction, Dispatch } from 'react';
 import styled from 'styled-components';
-import { isLocalDevelopment, isDevelopment, isProduction } from '@utils';
+import { isLocalDevelopment, isDevelopment, isQA } from '@utils';
 import { ViewfinderDimensions } from '@types';
 import { zIndexes } from '@const';
 import { ScanningArea } from './ScanningArea';
@@ -17,7 +17,7 @@ interface ViewfinderProps {
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   return (
     <>
-      {!isProduction && <VersionNumber />}
+      {(isQA || isLocalDevelopment || isDevelopment) && <VersionNumber />}
       <Canvas
         ref={(el: HTMLCanvasElement) => props.setCanvasRef(el)}
         width={1280}

@@ -6,7 +6,7 @@ import {
   isQA
 } from '@utils';
 import { ZoomMethod } from '@types';
-import { staticResolution } from '../const';
+import { cameraRequest } from '../const';
 import EchoUtils from '@equinor/echo-utils';
 
 function assignZoomSettings(
@@ -78,20 +78,27 @@ function getCameraPreferences(): MediaStreamConstraints {
 
   // Developer enviroment, use this for desktop.
   if (isLocalDevelopment && !isIos) {
+    let maxWidthDev = cameraRequest.width.max;
+    let maxHeightDev = cameraRequest.height.max;
+    let minWidthDev = cameraRequest.width.min;
+    let minHeightDev = cameraRequest.height.min;
+    const cameraId = '';
     return {
       video: {
-        width: { max: staticResolution.width, min: 1280 },
-        height: { max: staticResolution.height, min: 720 },
+        width: { max: maxWidthDev, min: minWidthDev },
+        height: {
+          max: maxHeightDev,
+          min: minHeightDev
+        },
 
         // Higher FPS is good for a scanning operation.
         frameRate: {
-          ideal: staticResolution.fps
+          ideal: cameraRequest.fps
         },
 
         // Require a specific camera by its ID here.
         deviceId: {
-          exact:
-            '883c79d936715fb3d0f70390c627a7bcb9ff395f6835fdf2b068373a35764ec2'
+          exact: cameraId
         }
       },
       audio: false
@@ -100,14 +107,21 @@ function getCameraPreferences(): MediaStreamConstraints {
 
   // Developer environment, but testing on iDevies.
   if (isLocalDevelopment && isIos) {
+    let maxWidthDev = cameraRequest.width.max;
+    let maxHeightDev = cameraRequest.height.max;
+    let minWidthDev = cameraRequest.width.min;
+    let minHeightDev = cameraRequest.height.min;
     return {
       video: {
-        width: { max: staticResolution.width, min: 848 },
-        height: { max: staticResolution.height, min: 480 },
+        width: { max: maxWidthDev, min: minWidthDev },
+        height: {
+          max: maxHeightDev,
+          min: minHeightDev
+        },
 
         // Higher FPS is good for a scanning operation.
         frameRate: {
-          ideal: staticResolution.fps
+          ideal: cameraRequest.fps
         },
 
         // Require a specific camera here.
@@ -122,12 +136,15 @@ function getCameraPreferences(): MediaStreamConstraints {
   if (isQA || (isDevelopment && !isIos)) {
     return {
       video: {
-        width: { max: staticResolution.width, min: 848 },
-        height: { max: staticResolution.height, min: 480 },
+        width: { max: cameraRequest.width.max, min: cameraRequest.width.min },
+        height: {
+          max: cameraRequest.height.max,
+          min: cameraRequest.height.min
+        },
 
         // Higher FPS is good for a scanning operation.
         frameRate: {
-          ideal: staticResolution.fps
+          ideal: cameraRequest.fps
         },
 
         // The user is likely to have a facing type camera on their laptop.
@@ -140,12 +157,12 @@ function getCameraPreferences(): MediaStreamConstraints {
   // This is the default preferences, which is also used in production.
   return {
     video: {
-      width: { max: staticResolution.width, min: 848 },
-      height: { max: staticResolution.height, min: 480 },
+      width: { max: cameraRequest.width.max, min: cameraRequest.width.min },
+      height: { max: cameraRequest.height.max, min: cameraRequest.height.min },
 
       // Higher FPS is good for a scanning operation.
       frameRate: {
-        ideal: staticResolution.fps
+        ideal: cameraRequest.fps
       },
 
       // Require a specific camera here.

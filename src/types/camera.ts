@@ -14,6 +14,12 @@ export type CameraResolution = {
   zoomLevel?: ZoomSteps;
 };
 
+export type CameraResolutionRequest = {
+  width: { min: number; max: number };
+  height: { min: number; max: number };
+  fps?: number;
+};
+
 /** Refers to the dimensions of the viewfinder. */
 export type ViewfinderDimensions = Pick<CameraResolution, 'width' | 'height'>;
 

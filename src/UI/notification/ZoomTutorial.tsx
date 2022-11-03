@@ -21,7 +21,7 @@ export const ZoomTutorial = (): JSX.Element | null => {
       <ZoomTutorialSnackbar
         open
         placement="bottom-left"
-        autoHideDuration={9999999}
+        autoHideDuration={30000} // 30 seconds, but this will not cause a dismissal.
         onClick={handleDismiss}
       >
         The camera can be zoomed with a double tap on the viewfinder.

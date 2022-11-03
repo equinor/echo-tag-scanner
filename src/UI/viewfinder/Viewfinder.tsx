@@ -4,7 +4,7 @@ import { isLocalDevelopment, isDevelopment, isQA } from '@utils';
 import { ViewfinderDimensions } from '@types';
 import { zIndexes } from '@const';
 import { ScanningArea } from './ScanningArea';
-import { VersionNumber } from '@ui';
+import { VersionNumber, Backdrop } from '@ui';
 
 interface ViewfinderProps {
   setCanvasRef: Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
@@ -17,6 +17,7 @@ interface ViewfinderProps {
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   return (
     <>
+      <Backdrop />
       {(isQA || isLocalDevelopment || isDevelopment) && <VersionNumber />}
       <Canvas
         ref={(el: HTMLCanvasElement) => props.setCanvasRef(el)}

@@ -23,4 +23,5 @@ const Mark = styled.mark`
   top: 64px; // Give some space for the echo buttons.
   left: 0;
   z-index: ${zIndexes.versionNumber};
+  user-select: none;
 `;

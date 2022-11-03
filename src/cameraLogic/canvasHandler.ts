@@ -1,4 +1,3 @@
-import { getOrientation, logger } from '@utils';
 import {
   AllowedMimeTypes,
   CanvasDimensions,

@@ -1,9 +1,6 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import {
-  getNotificationDispatcher as dispatchNotification,
-  isLocalDevelopment
-} from '@utils';
+import { getNotificationDispatcher as dispatchNotification } from '@utils';
 
 interface SystemInfoTriggerProps {
   onDelayedTrigger: () => Promise<string>;

@@ -80,31 +80,19 @@ const EchoCamera = () => {
   if (isLocalDevelopment) {
     return (
       <Wrapper>
-        <BottomBarMain>
-          <ErrorBoundary stackTraceEnabled>
-            <Viewfinder canvasRef={setCanvas} videoRef={setViewfinder} />
-            <ScanningArea captureAreaRef={setScanArea} />
+        <ErrorBoundary stackTraceEnabled>
+          <Viewfinder canvasRef={setCanvas} videoRef={setViewfinder} />
+          <ScanningArea captureAreaRef={setScanArea} />
 
-            {viewfinder && canvas && scanArea && (
-              <Scanner
-                stream={stream}
-                viewfinder={viewfinder}
-                canvas={canvas}
-                scanArea={scanArea}
-              />
-            )}
-          </ErrorBoundary>
-        </BottomBarMain>
-        {isLocalDevelopment && orientation === 'landscape' && (
-          <MockEchoSidebar id="mock-sidebar">
-            Sidebar placeholder
-          </MockEchoSidebar>
-        )}
-        {isLocalDevelopment && orientation === 'portrait' && (
-          <MockEchoBottomBar id="mock-bottombar">
-            Bottom bar placeholder
-          </MockEchoBottomBar>
-        )}
+          {viewfinder && canvas && scanArea && (
+            <Scanner
+              stream={stream}
+              viewfinder={viewfinder}
+              canvas={canvas}
+              scanArea={scanArea}
+            />
+          )}
+        </ErrorBoundary>
       </Wrapper>
     );
   }
@@ -130,50 +118,12 @@ const EchoCamera = () => {
   );
 };
 
-const BottomBarMain = styled.main`
-  position: relative;
-  touch-action: none;
-  height: calc(100% - 48px);
-  width: 100%;
-
-  @media screen and (orientation: landscape) {
-    height: 100%;
-    width: calc(100% - 56px);
-  }
-`;
-
 const Main = styled.main`
   position: relative;
   touch-action: none;
   height: 100%;
   width: 100%;
   z-index: 1;
-`;
-
-const MockEchoBottomBar = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: white;
-  width: 100%;
-  height: 48px;
-  z-index: 1445;
-
-  @media screen and (orientation: landscape) {
-    height: 100%;
-    width: 56px;
-  }
-`;
-
-const MockEchoSidebar = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: white;
-  width: 56px;
-  height: 100%;
-  z-index: 1445;
-  writing-mode: vertical-lr;
 `;
 
 const Wrapper = styled.div`

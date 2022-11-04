@@ -9,3 +9,4 @@ export * from './viewport';
 export * from './developer';
 export * from './debug';
 export * from './typeGuards';
+export * from './localstorage';

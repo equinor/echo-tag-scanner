@@ -13,7 +13,7 @@ export const VersionNumber = (): JSX.Element => {
   }
 
   return (
-    <Mark style={{ zIndex: zIndexes.versionNumber }}>
+    <Mark id="version-number-label" style={{ zIndex: zIndexes.versionNumber }}>
       {pk.version} {getEnv()}
     </Mark>
   );
@@ -24,6 +24,8 @@ const Mark = styled.mark`
   left: 0;
   z-index: ${zIndexes.versionNumber};
   user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 
   @media screen and (orientation: landscape) {
     left: var(--echo-sidebar-width);

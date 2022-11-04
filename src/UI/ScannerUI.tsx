@@ -31,7 +31,7 @@ function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
 
   return (
     <>
-      <ControlPad>
+      <ControlPad id="control-pad" role="toolbar">
         {tagScanner && (
           <>
             <SystemInfoTrigger
@@ -52,7 +52,7 @@ function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
         )}
       </ControlPad>
       <NotificationHandler />
-      <DialogueWrapper>
+      <DialogueWrapper id="dialogues">
         {validatedTags && (
           <SearchResults
             tagSummary={validatedTags}

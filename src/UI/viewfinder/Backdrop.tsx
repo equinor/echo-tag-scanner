@@ -4,7 +4,7 @@ import { zIndexes } from '@const';
 
 /** This component is intended to sit between the viewfinder and the background Echo markup in order to cover up the notch safe areas which may or may not be enabled.*/
 const Backdrop = (): JSX.Element => {
-  return <SafeAreaCover id="safe-area-cover" />;
+  return <SafeAreaCover id="backdrop" />;
 };
 
 const SafeAreaCover = styled.div`

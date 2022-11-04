@@ -32,7 +32,12 @@ const SystemInfoTrigger = (props: SystemInfoTriggerProps) => {
     }
   }
 
-  return <InvisibleButton onClick={onTriggerSystemInfo} />;
+  return (
+    <InvisibleButton
+      id="hidden-info-dump-trigger"
+      onClick={onTriggerSystemInfo}
+    />
+  );
 };
 
 const InvisibleButton = styled.button`

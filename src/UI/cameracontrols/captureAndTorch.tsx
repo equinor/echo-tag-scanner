@@ -26,18 +26,23 @@ interface CameraControlsProps {
 const CaptureAndTorch = (props: CameraControlsProps): JSX.Element => {
   return (
     <CaptureAndTorchWrapper>
-      <CaptureAndTorchGrid role="toolbar">
+      <CaptureAndTorchGrid>
         {props.supportedFeatures.torch && (
           <TorchButton name="lightbulb" onClick={props.onToggleTorch} />
         )}
         <ScannerButton
+          id="capture-button"
           onClick={props.onScanning}
           isDisabled={props.isDisabled}
           isScanning={props.isScanning}
           echoIsSyncing={props.echoIsSyncing}
         />
         {isDevelopment && (
-          <DebugButton variant="ghost" onClick={props.onDebug}>
+          <DebugButton
+            id="developer-button"
+            variant="ghost"
+            onClick={props.onDebug}
+          >
             <Icon data={info_circle} color="white" />
           </DebugButton>
         )}

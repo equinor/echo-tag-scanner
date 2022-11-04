@@ -23,6 +23,7 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         ref={(el: HTMLCanvasElement) => props.setCanvasRef(el)}
         width={1280}
         height={720}
+        id="drawing-area"
       />
       <CameraFeed
         playsInline // needed for the viewfinder to work in Safari
@@ -30,8 +31,7 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         autoPlay
         disablePictureInPicture
         controls={false}
-        width={props.dimensions.width}
-        height={props.dimensions.height}
+        id="viewfinder"
       />
 
       <ScanningArea scanningAreaRef={props.setScanningAreaRef} />
@@ -43,7 +43,8 @@ const CameraFeed = styled.video`
   background-color: var(--black);
   transition: all 0.3s ease;
   object-fit: cover;
-
+  height: 100%;
+  width: 100%;
   z-index: ${zIndexes.viewfinder};
   user-select: none;
   -webkit-user-select: none;

@@ -58,14 +58,6 @@ const EchoCamera = () => {
           )}
         </ErrorBoundary>
       </Main>
-      {isLocalDevelopment && orientation === 'landscape' && (
-        <MockEchoSidebar id="mock-sidebar">Sidebar placeholder</MockEchoSidebar>
-      )}
-      {isLocalDevelopment && orientation === 'portrait' && (
-        <MockEchoBottomBar id="mock-bottombar">
-          Bottom bar placeholder
-        </MockEchoBottomBar>
-      )}
     </Wrapper>
   );
 };
@@ -83,7 +75,7 @@ const Wrapper = styled.div`
 const Main = styled.main`
   position: relative;
   touch-action: none;
-  height: calc(100% - 46px);
+  height: 100%;
   width: 100%;
   z-index: ${zIndexes.viewfinder};
 `;

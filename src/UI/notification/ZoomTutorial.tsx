@@ -5,11 +5,14 @@ import styled from 'styled-components';
 
 export const ZoomTutorial = (): JSX.Element | null => {
   const [dismissed, setDismissed] = useState(
-    Boolean(etsStorage.read('zoom-tutorial-dismissed'))
+    Boolean(etsStorage.read('ets-zoom-tutorial-dismissed'))
   );
 
   function handleDismiss() {
-    const writeSuccess = etsStorage.write('zoom-tutorial-dismissed', 'true');
+    const writeSuccess = etsStorage.write(
+      'ets-zoom-tutorial-dismissed',
+      'true'
+    );
 
     if (writeSuccess) {
       setDismissed(true);

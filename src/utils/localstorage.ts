@@ -16,12 +16,11 @@ interface ETSStorage extends Storage {
 
 const etsStorage: ETSStorage = Object.create(globalThis.localStorage);
 
-const modPrefix = manifest.manifest.shortName;
-etsStorage.storageKeys = new Set([`${modPrefix}-zoom-tutorial-dismissed`]);
+etsStorage.storageKeys = new Set([`ets-zoom-tutorial-dismissed`]);
 
 etsStorage.write = (target: string, value: string) => {
-  if (etsStorage.storageKeys.has(`${modPrefix}-${target}`)) {
-    globalThis.localStorage.setItem(`${modPrefix}-${target}`, value);
+  if (etsStorage.storageKeys.has(target)) {
+    globalThis.localStorage.setItem(target, value);
     return { key: target, value: value };
   } else {
     console.warn(

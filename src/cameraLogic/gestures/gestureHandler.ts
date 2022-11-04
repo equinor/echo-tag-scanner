@@ -13,7 +13,7 @@ type ZoomGestureHandlerProps = {
 class ZoomGestureHandler {
   private _tagScanner: TagScanner;
   private _savedLatestTouch: TouchEvent | undefined;
-  private readonly _doubleTapThreshold = 300; //ms
+  private readonly _doubleTapThresholdMs = { max: 300, min: 100 };
   private _currentZoom: ZoomSteps = 1;
 
   constructor(props: ZoomGestureHandlerProps) {
@@ -67,9 +67,13 @@ class ZoomGestureHandler {
    */
   private isDoubleTap(latestTouchEvent?: TouchEvent) {
     if (this._savedLatestTouch && latestTouchEvent) {
+      const timeBetweenTouches =
+        latestTouchEvent.timeStamp - this._savedLatestTouch.timeStamp;
       return (
-        latestTouchEvent.timeStamp - this._savedLatestTouch.timeStamp <
-        this._doubleTapThreshold
+        // The threshold for the second touch. If too long, it will be distinguished as a seperate touch.
+        timeBetweenTouches <= this._doubleTapThresholdMs.max &&
+        // The minimum threshold. If this is lower, it is treated as a multi-touch instead.
+        timeBetweenTouches >= this._doubleTapThresholdMs.min
       );
     }
 

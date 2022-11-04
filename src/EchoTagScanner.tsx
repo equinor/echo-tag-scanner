@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
-import { Viewfinder, Scanner as ScannerUI } from '@ui';
-import { logger, getOrientation, isLocalDevelopment } from '@utils';
+import { logger, getOrientation } from '@utils';
+import { Viewfinder, Scanner as ScannerUI, ZoomTutorial } from '@ui';
 import { ErrorBoundary } from '@services';
 import { useGetMediastream } from '@hooks';
 import styled from 'styled-components';
@@ -26,7 +26,6 @@ const EchoCamera = () => {
 
   // Whatever is inside this area is what will be the OCR target.
   const [scanningArea, setScanningArea] = useState<HTMLElement>();
-  const orientation = useOrientation();
 
   if (!mediaStream) {
     return null;
@@ -38,39 +37,28 @@ const EchoCamera = () => {
   };
 
   return (
-    <Wrapper>
-      <Main>
-        <ErrorBoundary stackTraceEnabled>
-          <Viewfinder
-            setCanvasRef={setCanvas}
-            setVideoRef={setViewfinder}
-            setScanningAreaRef={setScanningArea}
-            videoRef={viewfinder}
-            dimensions={dimensions}
-          />
+    <Main>
+      <ErrorBoundary stackTraceEnabled>
+        <Viewfinder
+          setCanvasRef={setCanvas}
+          setVideoRef={setViewfinder}
+          setScanningAreaRef={setScanningArea}
+          videoRef={viewfinder}
+          dimensions={dimensions}
+        />
 
-          {viewfinder && canvas && scanningArea && (
-            <ScannerUI
-              stream={mediaStream}
-              viewfinder={viewfinder}
-              canvas={canvas}
-            />
-          )}
-        </ErrorBoundary>
-      </Main>
-    </Wrapper>
+        {viewfinder && canvas && scanningArea && (
+          <ScannerUI
+            stream={mediaStream}
+            viewfinder={viewfinder}
+            canvas={canvas}
+          />
+        )}
+        <ZoomTutorial />
+      </ErrorBoundary>
+    </Main>
   );
 };
-
-const Wrapper = styled.div`
-  display: flex;
-  height: 100%;
-  width: 100%;
-  flex-direction: column;
-  @media screen and (orientation: landscape) {
-    flex-direction: row-reverse;
-  }
-`;
 
 const Main = styled.main`
   position: relative;
@@ -79,47 +67,5 @@ const Main = styled.main`
   width: 100%;
   z-index: ${zIndexes.viewfinder};
 `;
-
-const MockEchoBottomBar = styled.div`
-  position: fixed;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: white;
-  width: 100vw;
-  height: var(--echo-bottom-bar-height);
-  z-index: ${zIndexes.echoBottombar};
-`;
-
-const MockEchoSidebar = styled.div`
-  position: fixed;
-  left: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: white;
-  width: var(--echo-sidebar-width);
-  height: 100vh;
-  z-index: ${zIndexes.echoBottombar};
-  writing-mode: vertical-lr;
-`;
-
-export function useOrientation() {
-  const [currentOrientation, setOrientation] = useState<
-    'landscape' | 'portrait'
-  >(getOrientation());
-
-  useEffect(function mount() {
-    const handleChange = () => {
-      setOrientation(getOrientation());
-    };
-
-    window.addEventListener('resize', () => handleChange());
-    return window.removeEventListener('resize', () => handleChange());
-  }, []);
-
-  return currentOrientation;
-}
 
 export default memo(EchoCamera);

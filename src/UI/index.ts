@@ -11,3 +11,4 @@ export { DebugInfoOverlay } from './debug/DebugInfoOverlay';
 export { GestureArea } from './cameracontrols/GestureArea';
 export { VersionNumber } from './debug/VersionNumber';
 export { Backdrop } from './viewfinder/Backdrop';
+export { ZoomTutorial } from './notification/ZoomTutorial';

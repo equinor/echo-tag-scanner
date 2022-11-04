@@ -1,9 +1,10 @@
 import React, { memo, useEffect, useState } from 'react';
+import { logger, getOrientation } from '@utils';
 import { Viewfinder, Scanner as ScannerUI, ZoomTutorial } from '@ui';
-import { logger } from '@utils';
 import { ErrorBoundary } from '@services';
 import { useGetMediastream } from '@hooks';
 import styled from 'styled-components';
+import { zIndexes } from '@const';
 
 type ScanningAreaCoords = {
   x: number;
@@ -53,29 +54,18 @@ const EchoCamera = () => {
             canvas={canvas}
           />
         )}
+        <ZoomTutorial />
       </ErrorBoundary>
-      <ZoomTutorial />
     </Main>
   );
 };
 
-const ScanningAreaCoordinates = styled.output<ScanningAreaCoords>`
-  position: absolute;
-  left: ${(props) => props.x}px;
-  top: ${(props) => props.y}px;
-  z-index: 10;
-  color: hotpink;
-  font-weight: bold;
-`;
-
 const Main = styled.main`
-  display: flex;
-  background-color: black;
-  justify-content: center;
-  align-items: center;
+  position: relative;
   touch-action: none;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
+  z-index: ${zIndexes.viewfinder};
 `;
 
 export default memo(EchoCamera);

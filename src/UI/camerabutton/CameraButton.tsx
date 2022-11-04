@@ -12,8 +12,8 @@ interface TorchButtonProps {
  */
 const TorchButton = (props: TorchButtonProps): JSX.Element => {
   return (
-    <StyledTorchButton onClick={props.onClick}>
-      <Icon name={'lightbulb'} color="white" />;
+    <StyledTorchButton id="torch-button" onClick={props.onClick}>
+      <Icon name={'lightbulb'} color="white" />
     </StyledTorchButton>
   );
 };
@@ -24,6 +24,7 @@ interface CaptureButtonProps {
   echoIsSyncing?: boolean;
   className?: string;
   onClick?: () => void;
+  id?: string;
 }
 
 /**
@@ -31,13 +32,13 @@ interface CaptureButtonProps {
  */
 const ScannerButton = (props: CaptureButtonProps): JSX.Element => {
   if (props.isDisabled) {
-    return <DisabledScannerButton />;
+    return <DisabledScannerButton id={props.id} />;
   } else if (props.isScanning) {
-    return <ScannerButtonIsScanning />;
+    return <ScannerButtonIsScanning id={props.id} />;
   } else if (props.echoIsSyncing) {
-    return <EchoIsSyncingButton onClick={props.onClick} />;
+    return <EchoIsSyncingButton id={props.id} onClick={props.onClick} />;
   } else {
-    return <StyledScannerButton onClick={props.onClick} />;
+    return <StyledScannerButton id={props.id} onClick={props.onClick} />;
   }
 };
 const StyledScannerButton = styled.button`

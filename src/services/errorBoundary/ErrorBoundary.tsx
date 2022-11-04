@@ -213,8 +213,8 @@ const Backdrop = styled(Scrim)`
 
 const ErrorDialogue = styled(Dialog)`
   max-width: unset !important;
-  width: 80vw;
-  max-height: 60vh;
+  width: 80%;
+  max-height: 60%;
   width: unset;
   overflow-y: auto;
 `;
@@ -235,7 +235,7 @@ const DialogueTitle = styled(Typography)`
 
 const Developer = styled.section`
   margin-top: 2rem;
-  max-width: 60vw;
+  max-width: 60%;
   padding: 1rem;
   padding-top: 0;
 `;

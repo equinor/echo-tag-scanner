@@ -1,4 +1,4 @@
-const belowViewfinder = 0;
+const belowViewfinder = -1;
 const viewfinder = 1;
 const scanningArea = 2;
 const overlays = 3;
@@ -7,6 +7,7 @@ const cameraControls = 5;
 const gestures = 6;
 const versionNumber = 7;
 const errorBoundary = 501;
+const echoBottombar = 1425;
 
 export const zIndexes = {
   belowViewfinder,
@@ -17,5 +18,6 @@ export const zIndexes = {
   canvas,
   errorBoundary,
   gestures,
-  versionNumber
+  versionNumber,
+  echoBottombar
 };

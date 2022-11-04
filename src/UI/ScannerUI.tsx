@@ -31,7 +31,7 @@ function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
 
   return (
     <>
-      <ControlPad>
+      <ControlPad id="control-pad" role="toolbar">
         {tagScanner && (
           <>
             <SystemInfoTrigger
@@ -52,7 +52,7 @@ function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
         )}
       </ControlPad>
       <NotificationHandler />
-      <DialogueWrapper>
+      <DialogueWrapper id="dialogues">
         {validatedTags && (
           <SearchResults
             tagSummary={validatedTags}
@@ -72,7 +72,10 @@ const ControlPad = styled.section`
   display: grid;
   align-items: center;
   position: fixed;
-  bottom: 10px;
+
+  // The offset should be so that the users thumb is naturally resting when the device is being held.
+  bottom: 66px;
+
   height: var(--control-pad-height);
   width: 100%;
   z-index: ${zIndexes.cameraControls};
@@ -95,8 +98,6 @@ const DialogueWrapper = styled.section`
   justify-content: center;
   position: absolute;
   top: 0;
-  // The height of this wrapper is based on the bottom offset
-  // of the zoom slider and camera controls (20% and 5% respectively).
   height: 100%;
   width: 100%;
 `;

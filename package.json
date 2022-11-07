@@ -22,7 +22,7 @@
         "@equinor/echo-framework": "^0.10.7",
         "@equinor/echo-scripts": "^0.1.5",
         "@equinor/echo-search": "^0.13.11",
-        "@equinor/eds-core-react": "^0.21.0",
+        "@equinor/eds-core-react": "^0.25.0",
         "@testing-library/jest-dom": "^5.15.1",
         "@testing-library/react": "^12.1.2",
         "@testing-library/user-event": "^13.5.0",
@@ -53,7 +53,7 @@
         "@equinor/echo-utils": "^0.2.12",
         "@equinor/echo-framework": "^0.10.7",
         "@equinor/echo-search": "^0.13.11",
-        "@equinor/eds-core-react": "^0.21.0",
+        "@equinor/eds-core-react": "^0.25.0",
         "react": "^17.0.2",
         "react-dom": "^17.0.2",
         "styled-components": "^5.3.3"

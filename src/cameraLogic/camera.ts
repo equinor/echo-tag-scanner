@@ -210,7 +210,6 @@ class Camera extends Postprocessor {
       dWidth: this.viewfinder.videoWidth,
       dHeight: this.viewfinder.videoHeight
     };
-    console.log('PARMAS', params);
 
     return this._canvasHandler.draw(this.viewfinder, params);
   }

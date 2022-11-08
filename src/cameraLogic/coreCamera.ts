@@ -32,7 +32,7 @@ class CoreCamera {
     this._currentOrientation = getOrientation();
     this._activeCamera = this._videoTrackSettings.facingMode;
     this._viewfinder.srcObject = props.mediaStream;
-    this._zoom = 2;
+    this._zoom = 1;
 
     /** Currently holds a reference to the initial viewfinder dimensions.
      * Can be improved by moving these to an extended HTMLVideoElement

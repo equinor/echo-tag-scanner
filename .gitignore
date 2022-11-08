@@ -29,6 +29,7 @@ env-config.js
 /public/env-config.js
 /public/*.js
 /public/*.js.map
+**/*.code-workspace
 
 npm-debug.log*
 yarn-debug.log*

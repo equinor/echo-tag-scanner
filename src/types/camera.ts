@@ -3,6 +3,7 @@ export interface CameraProps {
   viewfinder: HTMLVideoElement;
   canvas: HTMLCanvasElement;
   additionalCaptureOptions?: DisplayMediaStreamConstraints;
+  scanningArea: HTMLElement;
 }
 
 export type CameraResolution = {

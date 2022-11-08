@@ -126,6 +126,18 @@ class CanvasHandler {
     this._canvasContext.scale(xFactor, yFactor);
   }
 
+  public resizeCanvas(newDimensions: CanvasDimensions) {
+    console.log('Resizing canvas', newDimensions);
+    if (newDimensions.width > 0 && newDimensions.height > 0) {
+      this._canvas.width = newDimensions.width;
+      this._canvas.height = newDimensions.height;
+    } else {
+      throw new Error(
+        `Unable to resize the canvas with the following dimensions: ${newDimensions.width}x${newDimensions.height}`
+      );
+    }
+  }
+
   /**
    * Erases and resets the canvas.
    */

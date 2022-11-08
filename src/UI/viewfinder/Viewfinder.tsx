@@ -14,55 +14,48 @@ interface ViewfinderProps {
   dimensions: ViewfinderDimensions;
 }
 
+/**
+ * This component represents a viewfinder which we find on modern cameras.
+ * Everything in this component should be read-only (or maybe view-only), no interaction like buttons or gestures are allowed.
+ */
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   return (
     <>
       <Backdrop />
       {(isQA || isLocalDevelopment || isDevelopment) && <VersionNumber />}
-      <Canvas
-        ref={(el: HTMLCanvasElement) => props.setCanvasRef(el)}
-        width={1280}
-        height={720}
-        id="drawing-area"
-      />
       <CameraFeed
-        playsInline // needed for the viewfinder to work in Safari
+        id="viewfinder"
+        width={props.dimensions.width}
+        height={props.dimensions.height}
         ref={(el: HTMLVideoElement) => props.setVideoRef(el)}
+        playsInline // needed for the viewfinder to work in Safari
         autoPlay
         disablePictureInPicture
         controls={false}
-        id="viewfinder"
       />
 
-      <ScanningArea scanningAreaRef={props.setScanningAreaRef} />
+      <ScanningArea
+        scanningAreaRef={props.setScanningAreaRef}
+        setCanvasRef={props.setCanvasRef}
+        dimensions={props.dimensions}
+      />
     </>
   );
 };
 
 const CameraFeed = styled.video`
-  background-color: var(--black);
-  transition: all 0.3s ease;
-  object-fit: cover;
-  height: 100%;
-  width: 100%;
-  z-index: ${zIndexes.viewfinder};
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-`;
-
-const Canvas = styled.canvas`
   // Centering of absolutely placed elements
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   //-------//
-  opacity: ${isLocalDevelopment || isDevelopment ? 1 : 0};
+  background-color: var(--black);
+  transition: all 0.3s ease;
+  z-index: ${zIndexes.viewfinder};
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
-  z-index: ${zIndexes.canvas};
 `;
 
 export { Viewfinder };

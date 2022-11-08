@@ -23,12 +23,11 @@ const GestureArea = (props: GestureAreaProps) => {
 const GestureSection = styled.section`
   position: absolute;
   width: 100%;
+  bottom: calc(var(--control-pad-bottom-offset) + var(--control-pad-height));
+  z-index: ${zIndexes.gestures};
 
   // Temporarily give some space at the top for the Echo-buttons.
-  top: 10%;
-
-  bottom: var(--control-pad-height);
-  z-index: ${zIndexes.gestures};
+  top: 72px;
 
   @media screen and (orientation: landscape) {
     left: 0;

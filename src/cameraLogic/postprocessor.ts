@@ -1,4 +1,9 @@
-import { CameraProps, CropSettings, DrawImageParameters } from '@types';
+import {
+  CameraProps,
+  CanvasDimensions,
+  CropSettings,
+  DrawImageParameters
+} from '@types';
 import { CanvasHandler } from './canvasHandler';
 import { CoreCamera } from './coreCamera';
 
@@ -52,11 +57,6 @@ class Postprocessor extends CoreCamera {
     if (settings.sy > this._canvas.width)
       throw new Error('sy is bigger than canvas');
     const bitmap = await createImageBitmap(await this._canvasHandler.getBlob());
-    console.log(
-      'canvas DIMENSIONS',
-      this._canvas.width + 'x' + this._canvas.height
-    );
-    console.log('BITMAP', bitmap.width + 'x' + bitmap.height);
     const params: DrawImageParameters = {
       sx: settings.sx,
       sy: settings.sy,
@@ -68,6 +68,10 @@ class Postprocessor extends CoreCamera {
       dWidth: settings.sWidth
     };
 
+    this._canvasHandler.resizeCanvas({
+      width: settings.sWidth,
+      height: settings.sHeight
+    });
     return await this._canvasHandler.draw(bitmap, params);
   }
 

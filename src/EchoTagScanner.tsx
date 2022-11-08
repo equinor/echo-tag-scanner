@@ -7,6 +7,12 @@ import styled from 'styled-components';
 import { zIndexes } from '@const';
 import { ViewfinderDimensions } from '@types';
 
+/**
+ * This component will handle all of the initial React setup and renders before control is handed to the classes.
+ * - It obtains a media stream by permission from the client.
+ * - It sets all element refs
+ * - Once the refs and media stream is ready, it will render the rest of the UI hierarchy.
+ */
 const EchoCamera = () => {
   useEffect(() => {
     logger.moduleStarted();
@@ -25,6 +31,8 @@ const EchoCamera = () => {
   // Whatever is inside this area is what will be the OCR target.
   const [scanningArea, setScanningArea] = useState<HTMLElement>();
 
+  // No need to render any kind of UI and long as we're waiting for the media stream.
+  // This might be improved in the future by letting the user see some kind of camera shell.
   if (!mediaStream) {
     return null;
   }
@@ -38,8 +46,8 @@ const EchoCamera = () => {
   }
 
   return (
-    <Main>
-      <ErrorBoundary stackTraceEnabled>
+    <ErrorBoundary stackTraceEnabled>
+      <Main>
         {viewFinderDimensions && (
           <Viewfinder
             setCanvasRef={setCanvas}
@@ -51,15 +59,16 @@ const EchoCamera = () => {
         )}
 
         {viewfinder && canvas && scanningArea && (
-          <ScannerUI
+          <ScannerUI //TODO: Extract this component into ControlPad, Dialogues and DeveloperTools.
             stream={mediaStream}
             viewfinder={viewfinder}
             canvas={canvas}
+            scanningArea={scanningArea}
           />
         )}
         <ZoomTutorial />
-      </ErrorBoundary>
-    </Main>
+      </Main>
+    </ErrorBoundary>
   );
 };
 

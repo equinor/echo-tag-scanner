@@ -16,10 +16,19 @@ interface ScannerProps {
   stream: MediaStream;
   viewfinder: HTMLVideoElement;
   canvas: HTMLCanvasElement;
+  scanningArea: HTMLElement;
 }
 
-function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
-  const { tagScanner } = useMountScanner(viewfinder, canvas, stream);
+/**
+ * This component harbors everything a user interacts with.
+ */
+function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
+  const { tagScanner } = useMountScanner(
+    viewfinder,
+    canvas,
+    stream,
+    scanningArea
+  );
   const { validatedTags, onTagScan, tagScanStatus, resetValidatedTags } =
     useValidatedTags(tagScanner);
   const tagSearch = useSetActiveTagNo();
@@ -70,7 +79,7 @@ const ControlPad = styled.section`
   position: fixed;
 
   // The offset should be so that the users thumb is naturally resting when the device is being held.
-  bottom: 66px;
+  bottom: var(--control-pad-bottom-offset);
 
   height: var(--control-pad-height);
   width: 100%;

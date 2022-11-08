@@ -11,7 +11,8 @@ const { useEffectAsync } = EchoUtils.Hooks;
 export function useMountScanner(
   viewfinder: HTMLVideoElement,
   canvas: HTMLCanvasElement,
-  stream: MediaStream
+  stream: MediaStream,
+  scanningArea: HTMLElement
 ): CameraInfrastructure {
   const [tagScanner, setCamera] = useState<TagScanner | undefined>(undefined);
 
@@ -19,7 +20,8 @@ export function useMountScanner(
     const props: CameraProps = {
       mediaStream: stream,
       viewfinder,
-      canvas
+      canvas,
+      scanningArea
     };
     const camera = new TagScanner(props);
 

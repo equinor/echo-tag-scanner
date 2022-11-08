@@ -1,5 +1,3 @@
-import manifest from '../../echoModule.config.json';
-
 interface ETSStorage extends Storage {
   storageKeys: Set<string>;
   /** Writes a new key value pair to storage.

@@ -5,8 +5,6 @@ export interface CameraProps {
   additionalCaptureOptions?: DisplayMediaStreamConstraints;
 }
 
-export type PostprocessorProps = Pick<CameraProps, 'canvas'>;
-
 export type CameraResolution = {
   width?: number;
   height?: number;

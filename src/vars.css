@@ -1,10 +1,10 @@
 :root {
     --echo-bottom-bar-height: 46px;
-        --echo-sidebar-width: 56px;
+    --echo-sidebar-width: 56px;
         --control-pad-height: 85px;
-            --control-pad-width-landscape: 85px;
+        --control-pad-width-landscape: 85px;
     --scanning-area-width-portrait: 300px;
     --scanning-area-height-portrait: 300px;
-        --scanning-area-width-landscape: 466px;
+    --scanning-area-width-landscape: 466px;
     --scanning-area-height-landscape: 125px;
 }

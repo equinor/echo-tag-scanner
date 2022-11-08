@@ -19,11 +19,7 @@ interface ScannerProps {
 }
 
 function Scanner({ stream, viewfinder, canvas }: ScannerProps) {
-  const { tagScanner, setZoomInputRef } = useMountScanner(
-    viewfinder,
-    canvas,
-    stream
-  );
+  const { tagScanner } = useMountScanner(viewfinder, canvas, stream);
   const { validatedTags, onTagScan, tagScanStatus, resetValidatedTags } =
     useValidatedTags(tagScanner);
   const tagSearch = useSetActiveTagNo();

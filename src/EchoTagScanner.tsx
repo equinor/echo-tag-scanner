@@ -1,20 +1,18 @@
 import React, { memo, useEffect, useState } from 'react';
-import { logger, getOrientation } from '@utils';
+import { logger } from '@utils';
 import { Viewfinder, Scanner as ScannerUI, ZoomTutorial } from '@ui';
 import { ErrorBoundary } from '@services';
 import { useGetMediastream } from '@hooks';
 import styled from 'styled-components';
 import { zIndexes } from '@const';
-
-type ScanningAreaCoords = {
-  x: number;
-  y: number;
-};
+import { ViewfinderDimensions } from '@types';
 
 const EchoCamera = () => {
   useEffect(() => {
     logger.moduleStarted();
   }, []);
+  var viewFinderDimensions: ViewfinderDimensions | undefined = undefined;
+
   // The camera feed.
   const mediaStream = useGetMediastream();
 
@@ -31,21 +29,26 @@ const EchoCamera = () => {
     return null;
   }
 
-  const dimensions = {
-    width: mediaStream.getVideoTracks()[0].getSettings().width,
-    height: mediaStream.getVideoTracks()[0].getSettings().height
-  };
+  const videoTracks = mediaStream.getVideoTracks();
+  if (videoTracks.length > 0) {
+    viewFinderDimensions = {
+      width: mediaStream.getVideoTracks()[0].getSettings().width,
+      height: mediaStream.getVideoTracks()[0].getSettings().height
+    };
+  }
 
   return (
     <Main>
       <ErrorBoundary stackTraceEnabled>
-        <Viewfinder
-          setCanvasRef={setCanvas}
-          setVideoRef={setViewfinder}
-          setScanningAreaRef={setScanningArea}
-          videoRef={viewfinder}
-          dimensions={dimensions}
-        />
+        {viewFinderDimensions && (
+          <Viewfinder
+            setCanvasRef={setCanvas}
+            setVideoRef={setViewfinder}
+            setScanningAreaRef={setScanningArea}
+            videoRef={viewfinder}
+            dimensions={viewFinderDimensions}
+          />
+        )}
 
         {viewfinder && canvas && scanningArea && (
           <ScannerUI

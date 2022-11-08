@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Snackbar } from '@equinor/eds-core-react';
+import { Snackbar } from '@equinor/eds-core-react';
 import { etsStorage } from '@utils';
 import styled from 'styled-components';
 

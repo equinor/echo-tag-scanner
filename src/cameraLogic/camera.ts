@@ -241,36 +241,4 @@ class Camera extends Postprocessor {
   }
 }
 
-function calculateScaleFactor(viewfinder: HTMLVideoElement): {
-  scale: number;
-  videoWidth: number;
-  videoHeight: number;
-} {
-  // this is 746px on iPhone
-  const videoWidth = viewfinder.videoWidth;
-  // this is 428px on iPhone
-  const elementWidth = viewfinder.width;
-  // this is 428px on iPhone
-  const videoHeight = viewfinder.videoHeight;
-  // this is 746px on iPhone
-  const elementHeight = viewfinder.height;
-
-  // This finds scale x + y and handles enlargement / reduction in sizes.
-  let scale_x = elementWidth / videoWidth;
-  if (scale_x > 1) {
-    scale_x = videoWidth / elementWidth;
-  }
-
-  let scale_y = elementHeight / videoHeight;
-  if (scale_y > 1) {
-    scale_y = videoHeight / elementHeight;
-  }
-
-  // FIXME: This makes it better width'wise in browsers
-  // but we still have small offset issues in iphone/mobiles...
-  let scale = Math.min(scale_x, scale_y);
-
-  return { scale, videoWidth, videoHeight };
-}
-
 export { Camera };

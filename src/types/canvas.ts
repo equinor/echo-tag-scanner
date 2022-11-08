@@ -29,4 +29,3 @@ export type CropSettings = Pick<
   DrawImageParameters,
   'sx' | 'sy' | 'sWidth' | 'sHeight'
 >;
-

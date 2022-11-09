@@ -2,7 +2,8 @@ import {
   AllowedMimeTypes,
   CanvasDimensions,
   CanvasHandlerProps,
-  DrawImageParameters
+  DrawImageParameters,
+  GetImageParameters
 } from '@types';
 
 /**
@@ -79,6 +80,32 @@ class CanvasHandler {
     return this.getBlob(1, 'image/jpeg');
   }
 
+  public async getCanvasContentAsBlob(
+    params: GetImageParameters
+  ): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const imageData = this.getCanvasContents(params.sWidth, params.sHeight);
+
+      const tempCanvas: HTMLCanvasElement = document.createElement('canvas');
+      const tempCanvasContext = tempCanvas.getContext('2d');
+      tempCanvasContext?.putImageData(imageData, 0, 0);
+
+      tempCanvas.toBlob(
+        (blobbedDrawing) => {
+          if (blobbedDrawing) {
+            tempCanvas.remove();
+            resolve(blobbedDrawing);
+          } else {
+            tempCanvas.remove();
+            reject('Could not get a blob from the canvas.');
+          }
+        },
+        params.mimeType ?? 'image/jpeg',
+        1
+      );
+    });
+  }
+
   /**
    * Returns the current canvas content as ImageData.
    */
@@ -94,6 +121,10 @@ class CanvasHandler {
       sh ?? this._standardCanvasDimensions.height,
       settings
     );
+
+    const tempCanvas: HTMLCanvasElement = document.createElement('canvas');
+    const tempCanvasContext = tempCanvas.getContext('2d');
+    tempCanvasContext?.putImageData(imageData, 0, 0);
 
     if (imageData) {
       return imageData;

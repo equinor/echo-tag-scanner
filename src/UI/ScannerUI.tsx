@@ -1,14 +1,23 @@
 import React from 'react';
 import styled from 'styled-components';
-import { CaptureAndTorch, SearchResults, GestureArea } from '@ui';
+import {
+  CaptureAndTorch,
+  SearchResults,
+  GestureArea,
+  CapturePreview,
+  NotificationHandler
+} from '@ui';
 import {
   useEchoIsSyncing,
   useMountScanner,
   useSetActiveTagNo,
   useValidatedTags
 } from '@hooks';
-import { NotificationHandler } from '@services';
-import { getTorchToggleProvider } from '@utils';
+import {
+  getTorchToggleProvider,
+  isDevelopment,
+  isLocalDevelopment
+} from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 import { zIndexes } from '@const';
 
@@ -69,6 +78,9 @@ function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
         )}
       </DialogueWrapper>
       {tagScanner && <GestureArea tagScanner={tagScanner} />}
+      {tagScanner && (isLocalDevelopment || isDevelopment) && (
+        <CapturePreview camera={tagScanner} />
+      )}
     </>
   );
 }

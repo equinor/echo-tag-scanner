@@ -24,6 +24,7 @@ import { ErrorRegistry } from '../const';
 class Camera extends Postprocessor {
   /** Is the torch turned on or not. */
   private _torchState = false;
+  private _captureUrl: string | undefined;
 
   /** The method of zooming the viewfinder
    * - undefined: Zooming is not enabled.
@@ -51,6 +52,13 @@ class Camera extends Postprocessor {
 
   public set zoomMethod(newMethod: ZoomMethod) {
     this._zoomMethod = newMethod;
+  }
+  public get captureUrl(): string | undefined {
+    return this._captureUrl;
+  }
+
+  public set captureUrl(newUrl: string | undefined) {
+    this._captureUrl = newUrl;
   }
 
   /**
@@ -211,7 +219,22 @@ class Camera extends Postprocessor {
       dHeight: this.viewfinder.videoHeight
     };
 
-    return this._canvasHandler.draw(this.viewfinder, params);
+    return await this._canvasHandler.draw(this.viewfinder, params);
+  }
+
+  /**
+   * Accepts a new capture, creates an object URL from it and dispatches an event containing the new object URL.
+   */
+  protected notifyNewCapture(newCapture: Blob) {
+    // Revoke the previous object URL if it exists.
+    if (this._captureUrl) URL.revokeObjectURL(this._captureUrl);
+
+    this._captureUrl = URL.createObjectURL(newCapture);
+    globalThis.dispatchEvent(
+      new CustomEvent('ets-capture', {
+        detail: { url: this._captureUrl, size: newCapture.size }
+      })
+    );
   }
 
   public reportCameraFeatures() {

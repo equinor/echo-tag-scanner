@@ -5,7 +5,8 @@ const overlays = 3;
 const canvas = 4;
 const cameraControls = 5;
 const gestures = 6;
-const versionNumber = 7;
+const debug = 7;
+const versionNumber = debug;
 const errorBoundary = 501;
 const echoBottombar = 1425;
 
@@ -19,5 +20,6 @@ export const zIndexes = {
   errorBoundary,
   gestures,
   versionNumber,
+  debug,
   echoBottombar
 };

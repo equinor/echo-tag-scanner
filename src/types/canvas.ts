@@ -9,6 +9,15 @@ export type DrawImageParameters = {
   dHeight: number;
 };
 
+export type GetImageParameters = {
+  sx?: number;
+  sy?: number;
+  sWidth: number;
+  sHeight: number;
+  mimeType?: AllowedMimeTypes;
+  quality?: number;
+};
+
 export type CanvasDimensions = {
   width: number;
   height: number;

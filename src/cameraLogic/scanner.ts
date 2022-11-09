@@ -163,6 +163,14 @@ Regular offset from left-edge: ${bcr.x};
         this.prepareNewScan();
         let capture = await this.capturePhoto();
         capture = await this.performCropping();
+
+        const { width, height } = this._scanningArea.getBoundingClientRect();
+        capture = await this._canvasHandler.getCanvasContentAsBlob({
+          sWidth: width,
+          sHeight: height
+        });
+
+        this.notifyNewCapture(capture);
       }
     }
     logger.log('EchoDevelopment', () => {

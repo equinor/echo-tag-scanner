@@ -158,7 +158,6 @@ class CanvasHandler {
   }
 
   public resizeCanvas(newDimensions: CanvasDimensions) {
-    console.log('Resizing canvas', newDimensions);
     if (newDimensions.width > 0 && newDimensions.height > 0) {
       this._canvas.width = newDimensions.width;
       this._canvas.height = newDimensions.height;

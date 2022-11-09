@@ -13,7 +13,6 @@ export const CapturePreview = (
   props: CapturePreviewProps
 ): JSX.Element | null => {
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
-  console.log('rerender');
 
   useEffect(() => {
     globalThis.addEventListener('ets-capture', (e) =>
@@ -21,7 +20,7 @@ export const CapturePreview = (
     );
 
     function updateImageUrlFromEvent(event: Event) {
-      console.log('Capture event', event);
+      // TODO: Type guard the Event.detail contents.
       //@ts-ignore
       setImageUrl(event.detail.url);
     }

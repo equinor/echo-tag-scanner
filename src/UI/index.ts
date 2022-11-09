@@ -1,14 +1,20 @@
-export { CaptureAndTorch } from './cameracontrols/captureAndTorch';
-export { TorchButton, ScannerButton } from './camerabutton/CameraButton';
-export { Viewfinder } from './viewfinder/Viewfinder';
+export { Scanner } from './ScannerUI';
+
+export { ZoomTutorial } from './notification/ZoomTutorial';
 export { Toast } from './notification/Toast';
+export { NotificationHandler } from './notification/NotificationListener';
+export { TorchButton, ScannerButton } from './camerabutton/CameraButton';
 export { SearchResults } from './searchresults/SearchResults';
 export { ScanningIndicator } from './progress/ScanningLoading';
 export { OverconstrainedAlert } from './error/OverconstrainedAlert';
-export { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
-export { Scanner } from './ScannerUI';
-export { DebugInfoOverlay } from './debug/DebugInfoOverlay';
+
 export { GestureArea } from './cameracontrols/GestureArea';
-export { VersionNumber } from './debug/VersionNumber';
+export { CaptureAndTorch } from './cameracontrols/captureAndTorch';
+
+export { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
+export { Viewfinder } from './viewfinder/Viewfinder';
 export { Backdrop } from './viewfinder/Backdrop';
-export { ZoomTutorial } from './notification/ZoomTutorial';
+
+export { DebugInfoOverlay } from './debug/DebugInfoOverlay';
+export { VersionNumber } from './debug/VersionNumber';
+export { CapturePreview } from './debug/CapturePreview';

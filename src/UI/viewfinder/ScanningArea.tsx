@@ -17,7 +17,7 @@ const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
         id="scanning-area"
         ref={(el: HTMLElement) => props.scanningAreaRef(el)}
       >
-        <Canvas
+        <PostprocessingCanvas
           ref={(el: HTMLCanvasElement) => props.setCanvasRef(el)}
           width={props.dimensions.width}
           height={props.dimensions.height}
@@ -28,14 +28,11 @@ const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
   );
 };
 
-const Canvas = styled.canvas`
-  // Centering of absolutely placed elements
-  position: absolute;
-  top: 55%;
-  left: 210%;
-  transform: translate(-50%, -50%);
-  //-------//
-  opacity: ${isLocalDevelopment || isDevelopment ? 1 : 0};
+/** This is the main drawing canvas which will hold captures that are sent for OCR.
+ * The purpose of this canvas is to temporarily store captures which will go through postprocessing steps.
+ */
+const PostprocessingCanvas = styled.canvas`
+  opacity: 0;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;

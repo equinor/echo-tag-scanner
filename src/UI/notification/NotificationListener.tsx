@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Toast } from '@ui';
 import { CustomNotificationDetail } from '@types';
 import { isCustomEvent, isCustomNotificationDetail } from '@utils';
+
 /**
  * A top level element that displays an EDS Snackbar if it detects the custom event "notification"
  */

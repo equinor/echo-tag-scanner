@@ -36,37 +36,42 @@ export class TagScanner extends Camera {
    */
   public async clipboardThis() {
     return `
-Camera Information
+Camera software Information
 #################################
 Camera resolution:
    ${this.viewfinder.videoWidth}x${this.viewfinder.videoHeight}@${
       this.videoTrack?.getSettings().frameRate
     }fps.
+
 Viewfinder resolution (in CSS pixels):
     ${this.viewfinder.width}x${this.viewfinder.height}.
+
 Camera is torch capable:
     ${Boolean(this.capabilities?.torch)}.
-Camera is zoom capable: ${Boolean(this.capabilities?.zoom)}.
-${getReadableVideotrackSettings.call(this)}
-Current camera facing mode:
-    ${this.activeCamera}
+
+Camera zoom: ${this.zoomMethod.type} at max ${this.zoomMethod.max}x zoom.
+
 MediaStream details:
-    ${this.mediaStream.toString()}
+${this.mediaStream.toString()}
+
 Videotrack details:
-    ${this.videoTrack?.toString()}
+${this.videoTrack?.toString()}
+
+Camera hardware Information
+#################################
+All media devices:
+${await getHRDevices.call(this)}
+
+Current camera hardware:
+${getReadableVideotrackSettings.call(this)}
+
+Current orientation:
+${this.currentOrientation}
 
 Scanning Area
 #################################
-${getCaptureAreaInfo.call(this)}
+${getScanningAreaInfo.call(this)}
 
-Device information
-#################################
-User agent:
-    ${navigator.userAgent}
-Cameras:
-    ${await getHRDevices.call(this)}
-Current orientation:
-    ${this.currentOrientation}
 
 `;
 
@@ -100,8 +105,8 @@ Current orientation:
       });
     }
 
-    function getCaptureAreaInfo(this: TagScanner) {
-      const captureArea = document.getElementById('scan-area');
+    function getScanningAreaInfo(this: TagScanner) {
+      const captureArea = document.getElementById('scanning-area');
 
       if (!captureArea) {
         logger.log('QA', () =>

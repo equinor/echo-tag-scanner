@@ -45,9 +45,12 @@ jobs:
           action: "close"
 
   create_release_branch:
-    uses: peterjgrainger/action-create-branch@v2.2.0
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      branch: 'latest-release'
-      sha: '${{ github.event.pull_request.head.sha }}'
+    runs-on: ubuntu-latest
+    steps:
+        - uses: peterjgrainger/action-create-branch@v2.2.0
+        - name: Releast
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            branch: 'latest-release'
+            sha: '${{ github.event.pull_request.head.sha }}'

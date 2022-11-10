@@ -9,7 +9,7 @@ export type DrawImageParameters = {
   dHeight: number;
 };
 
-export type GetImageParameters = {
+export type GetFromCanvasParameters = {
   sx?: number;
   sy?: number;
   sWidth: number;

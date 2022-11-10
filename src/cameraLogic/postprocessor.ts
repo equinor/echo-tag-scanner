@@ -56,7 +56,9 @@ class Postprocessor extends CoreCamera {
       throw new Error('sx is bigger than canvas');
     if (settings.sy > this._canvas.width)
       throw new Error('sy is bigger than canvas');
-    const bitmap = await createImageBitmap(await this._canvasHandler.getBlob());
+    const bitmap = await createImageBitmap(
+      await this._canvasHandler.getBlobLegacy()
+    );
     const params: DrawImageParameters = {
       sx: settings.sx,
       sy: settings.sy,
@@ -80,7 +82,9 @@ class Postprocessor extends CoreCamera {
    */
   protected async scale(byFactor: number): Promise<Blob> {
     if (byFactor <= 0) throw new Error('The scale factor cannot be 0 or less.');
-    const bitmap = await createImageBitmap(await this._canvasHandler.getBlob());
+    const bitmap = await createImageBitmap(
+      await this._canvasHandler.getBlobLegacy()
+    );
 
     const params: DrawImageParameters = {
       sx: 0,
@@ -107,7 +111,13 @@ class Postprocessor extends CoreCamera {
    * but in some cases it can recolour text to be the same as the background.
    */
   protected async blackAndWhite(): Promise<Blob> {
-    const imgData = this._canvasHandler.getCanvasContents();
+    console.warn(
+      'This function will not do anything at the moment. Check sWidth and sHeight on next line'
+    );
+    const imgData = this._canvasHandler.getCanvasContents({
+      sWidth: 0,
+      sHeight: 0
+    });
 
     for (let i = 0; i < imgData.data.length; i += 4) {
       let count = imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2];
@@ -138,7 +148,13 @@ class Postprocessor extends CoreCamera {
    * This is less effective for compression than B&W, but is safer.
    */
   protected async grayscale(): Promise<Blob> {
-    const imgData = this._canvasHandler.getCanvasContents();
+    console.warn(
+      'This function will not do anything at the moment. Check sWidth and sHeight on next line'
+    );
+    const imgData = this._canvasHandler.getCanvasContents({
+      sWidth: 0,
+      sHeight: 0
+    });
 
     for (let i = 0; i < imgData.data.length; i += 4) {
       let count = imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2];

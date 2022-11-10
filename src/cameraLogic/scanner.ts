@@ -163,11 +163,10 @@ Regular offset from left-edge: ${bcr.x};
         this.prepareNewScan();
         let capture = await this.capturePhoto();
         capture = await this.performCropping();
-
         const { width, height } = this._scanningArea.getBoundingClientRect();
         capture = await this._canvasHandler.getCanvasContentAsBlob({
-          sWidth: width,
-          sHeight: height
+          sWidth: width / this.zoom,
+          sHeight: height / this.zoom
         });
 
         this.notifyNewCapture(capture);
@@ -199,26 +198,43 @@ Regular offset from left-edge: ${bcr.x};
 
   /**
    * Runs a series of captures in a set interval and appends them to a list.
-   * @param area A bounding box for which the capture is cropped from.
    * @returns {Blob[]} A list of blobs.
    */
   public async scan(): Promise<Blob[]> {
-    return new Promise((resolve) => {
+    return new Promise((finishScanning) => {
+      const { width, height } = this._scanningArea.getBoundingClientRect();
+      const extractWidth = width / this.zoom;
+      const extractHeight = height / this.zoom;
+
       const scans: Blob[] = [];
-      const interval = (this._scanRetries / this._scanDuration) * 100;
-      const intervalId = setInterval(async () => {
+      /** Determines the delay between captures in milliseconds. */
+      const scanInterval = (this._scanRetries / this._scanDuration) * 100;
+      const intervalId = setInterval(
+        handleIntervalledCapture.bind(this),
+        scanInterval
+      );
+
+      async function handleIntervalledCapture(this: TagScanner) {
         let capture = await this.capturePhoto();
         capture = await this.performCropping();
+        capture = await this._canvasHandler.getCanvasContentAsBlob({
+          sx: 0,
+          sy: 0,
+          sWidth: extractWidth,
+          sHeight: extractHeight
+        });
         // if (capture.size > 50000) capture = await this.scale(0.5);
         scans.push(capture);
 
         // Log some image stats and a blob preview in network tab.
         this.logImageStats(capture, 'The postprocessed photo.');
+
         if (scans.length === this._scanRetries) {
+          // Scanning is finished.
           clearInterval(intervalId);
-          resolve(scans);
+          finishScanning(scans);
         }
-      }, interval);
+      }
     });
   }
 

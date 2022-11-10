@@ -3,7 +3,7 @@ import {
   CanvasDimensions,
   CanvasHandlerProps,
   DrawImageParameters,
-  GetImageParameters
+  GetFromCanvasParameters
 } from '@types';
 
 /**
@@ -77,16 +77,23 @@ class CanvasHandler {
       );
     }
 
-    return this.getBlob(1, 'image/jpeg');
+    return this.getBlobLegacy(1, 'image/jpeg');
   }
 
+  /**
+   * Returns the current canvas content as Blob.
+   */
   public async getCanvasContentAsBlob(
-    params: GetImageParameters
+    params: GetFromCanvasParameters
   ): Promise<Blob> {
     return new Promise((resolve, reject) => {
-      const imageData = this.getCanvasContents(params.sWidth, params.sHeight);
-
+      const imageData = this.getCanvasContents(params);
       const tempCanvas: HTMLCanvasElement = document.createElement('canvas');
+
+      // Set explicit heights since a canvas is by default 300x150
+      tempCanvas.width = params.sWidth;
+      tempCanvas.height = params.sHeight;
+
       const tempCanvasContext = tempCanvas.getContext('2d');
       tempCanvasContext?.putImageData(imageData, 0, 0);
 
@@ -110,33 +117,28 @@ class CanvasHandler {
    * Returns the current canvas content as ImageData.
    */
   public getCanvasContents(
-    sw?: number,
-    sh?: number,
-    settings?: ImageDataSettings
+    getParams: GetFromCanvasParameters,
+    imageDataSettings?: ImageDataSettings
   ): ImageData {
-    const imageData = this._canvasContext?.getImageData(
-      0,
-      0,
-      sw ?? this._standardCanvasDimensions.width,
-      sh ?? this._standardCanvasDimensions.height,
-      settings
+    return this._canvasContext?.getImageData(
+      getParams.sx ?? 0,
+      getParams.sy ?? 0,
+      getParams.sWidth,
+      getParams.sHeight,
+      imageDataSettings
     );
-
-    const tempCanvas: HTMLCanvasElement = document.createElement('canvas');
-    const tempCanvasContext = tempCanvas.getContext('2d');
-    tempCanvasContext?.putImageData(imageData, 0, 0);
-
-    if (imageData) {
-      return imageData;
-    } else throw new Error('Failed to get imagedata from the canvas');
   }
 
   /**
-   * Returns the contents of the canvas as a blob.
+   * Returns the entire contents of the canvas as a blob.
    * @param quality {number|undefined} A number between 0 and 1 indicating the image quality.
    * @param mimeType {string|undefined} A valid mime type.
+   * @deprecated use CanvasHandler.getCanvasContentAsBlob instead.
    */
-  public getBlob(quality?: number, mimeType?: AllowedMimeTypes): Promise<Blob> {
+  public getBlobLegacy(
+    quality?: number,
+    mimeType?: AllowedMimeTypes
+  ): Promise<Blob> {
     return new Promise((resolve, reject) => {
       if ((typeof quality === 'number' && quality < 0) || Number(quality) > 1) {
         reject('Quality must be between 0 and 1, got ' + quality + '.');

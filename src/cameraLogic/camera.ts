@@ -203,7 +203,7 @@ class Camera extends Postprocessor {
   }
 
   /**
-   * Captures a photo, and stores it as a drawing on the postprocessing canvas.
+   * Captures a photo using the entire video feed, and stores it as a drawing on the postprocessing canvas.
    */
   protected async capturePhoto(): Promise<Blob> {
     this.canvasHandler.clearCanvas();

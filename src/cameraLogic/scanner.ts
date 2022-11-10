@@ -124,16 +124,24 @@ Regular offset from left-edge: ${bcr.x};
   }
 
   public async performCropping(): Promise<Blob> {
-    const sWidth = this._scanningArea.getBoundingClientRect().width;
-    const sHeight = this._scanningArea.getBoundingClientRect().height;
+    const scanningAreaWidth = this._scanningArea.getBoundingClientRect().width;
+    const scanningAreaHeight =
+      this._scanningArea.getBoundingClientRect().height;
 
-    let sx = this.viewfinder.videoWidth / 2 - sWidth / 2;
-    let sy = this.viewfinder.videoHeight / 2 - sHeight / 2;
+    // Find the (x,y) position of the scanning area on the viewfinder.
+    // TODO: Link to documentation
+    let sx = this.viewfinder.videoWidth / 2 - scanningAreaWidth / 2;
+    let sy = this.viewfinder.videoHeight / 2 - scanningAreaHeight / 2;
+    let cropWidth = scanningAreaWidth;
+    let cropHeight = scanningAreaHeight;
 
-    // If zoom value is set to something more than 1, additional crop calculations are done.
-    if (this.zoom === 2) {
-      sx += sWidth / this.zoom / 2;
-      sy += sHeight / this.zoom / 2;
+    // If zoom value is set to something more than 1 and is simulated, additional crop calculations are done.
+    // TODO: Link to documentation
+    if (this.zoomMethod.type === 'simulated' && this.zoom === 2) {
+      sx += scanningAreaWidth / this.zoom / 2;
+      sy += scanningAreaHeight / this.zoom / 2;
+      cropWidth /= this.zoom;
+      cropHeight /= this.zoom;
     } else if (this.zoom > 2) {
       throw new Error(
         `Encountered a zoom ${this.zoom} value which isn't supported.`
@@ -143,15 +151,15 @@ Regular offset from left-edge: ${bcr.x};
     console.group('Cropping');
     console.info('sx', sx);
     console.info('sy', sy);
-    console.info('draw: ', `${sWidth}x${sHeight}`);
+    console.info('draw: ', `${scanningAreaWidth}x${scanningAreaHeight}`);
     console.info('zoom', this.zoom);
     console.groupEnd();
 
     return await this.crop({
       sx,
       sy,
-      sWidth: sWidth / this.zoom,
-      sHeight: sHeight / this.zoom
+      sWidth: cropWidth,
+      sHeight: cropHeight
     });
   }
 

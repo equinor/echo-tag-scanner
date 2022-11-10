@@ -82,7 +82,11 @@ function getCameraPreferences(): MediaStreamConstraints {
     let maxHeightDev = cameraRequest.height.max;
     let minWidthDev = cameraRequest.width.min;
     let minHeightDev = cameraRequest.height.min;
-    const cameraId = '';
+
+    minWidthDev = 1920;
+    minHeightDev = 1080;
+    const cameraId =
+      'a874c50ce1a7f877e5d365c7ef7738d4881d76a22876cd61f0b708422936dc45';
     return {
       video: {
         width: { max: maxWidthDev, min: minWidthDev },
@@ -164,6 +168,8 @@ function getCameraPreferences(): MediaStreamConstraints {
       frameRate: {
         ideal: cameraRequest.fps
       },
+
+      aspectRatio: { exact: 16 / 9 },
 
       // Require a specific camera here.
       facingMode: { exact: 'environment' }

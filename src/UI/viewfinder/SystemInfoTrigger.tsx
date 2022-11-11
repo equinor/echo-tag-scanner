@@ -1,6 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import { getNotificationDispatcher as dispatchNotification } from '@utils';
+import {
+  getNotificationDispatcher as dispatchNotification,
+  isDevelopment,
+  isLocalDevelopment
+} from '@utils';
 
 interface SystemInfoTriggerProps {
   onDelayedTrigger: () => Promise<string>;
@@ -52,6 +56,9 @@ const InvisibleButton = styled.button`
   user-select: none;
   -webkit-user-select: none; /*Safari*/
   -moz-user-select: none; /*Firefox*/
+  outline: ${isLocalDevelopment || isDevelopment
+    ? '1px dotted var(--asBuilt)'
+    : 'inital'};
 `;
 
 export { SystemInfoTrigger };

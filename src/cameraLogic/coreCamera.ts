@@ -34,6 +34,10 @@ class CoreCamera {
     this._viewfinder.srcObject = props.mediaStream;
     this._zoom = 1;
 
+    // Test post-assigning viewfinder dimensions
+    this._viewfinder.width = this._viewfinder.videoWidth;
+    this._viewfinder.height = this._viewfinder.videoHeight;
+
     /** Currently holds a reference to the initial viewfinder dimensions.
      * Can be improved by moving these to an extended HTMLVideoElement
      */

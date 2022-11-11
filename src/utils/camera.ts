@@ -150,6 +150,7 @@ function getCameraPreferences(): MediaStreamConstraints {
         frameRate: {
           ideal: cameraRequest.fps
         },
+        aspectRatio: { exact: 16 / 9 },
 
         // The user is likely to have a facing type camera on their laptop.
         facingMode: { ideal: 'environment' }

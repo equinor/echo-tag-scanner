@@ -42,6 +42,7 @@ Camera resolution:
    ${this.viewfinder.videoWidth}x${this.viewfinder.videoHeight}@${
       this.videoTrack?.getSettings().frameRate
     }fps.
+Aspect ratio: ${this.viewfinder.videoWidth / this.viewfinder.videoHeight}
 
 Viewfinder resolution (in CSS pixels):
     ${this.viewfinder.width}x${this.viewfinder.height}.

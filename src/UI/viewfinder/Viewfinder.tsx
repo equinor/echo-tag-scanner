@@ -25,13 +25,13 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
       {(isQA || isLocalDevelopment || isDevelopment) && <VersionNumber />}
       <CameraFeed
         id="viewfinder"
-        width={props.dimensions.width}
-        height={props.dimensions.height}
         ref={(el: HTMLVideoElement) => props.setVideoRef(el)}
         playsInline // needed for the viewfinder to work in Safari
         autoPlay
         disablePictureInPicture
         controls={false}
+        width={props.dimensions.width}
+        height={props.dimensions.height}
       />
 
       <ScanningArea

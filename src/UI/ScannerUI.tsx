@@ -43,12 +43,6 @@ function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
   const tagSearch = useSetActiveTagNo();
   const echoIsSyncing = useEchoIsSyncing();
 
-  if (tagScanner) {
-    // Test post-assigning viewfinder dimensions
-    tagScanner.viewfinder.width = tagScanner.viewfinder.videoWidth;
-    tagScanner.viewfinder.height = tagScanner.viewfinder.videoHeight;
-  }
-
   return (
     <>
       <ControlPad id="control-pad" role="toolbar">

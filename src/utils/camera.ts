@@ -78,13 +78,12 @@ function getCameraPreferences(): MediaStreamConstraints {
 
   // Developer enviroment, use this for desktop.
   if (isLocalDevelopment && !isIos) {
+    console.info('Creating dev camera request');
     let maxWidthDev = cameraRequest.width.max;
     let maxHeightDev = cameraRequest.height.max;
     let minWidthDev = cameraRequest.width.min;
     let minHeightDev = cameraRequest.height.min;
 
-    minWidthDev = 1920;
-    minHeightDev = 1080;
     const cameraId =
       'a874c50ce1a7f877e5d365c7ef7738d4881d76a22876cd61f0b708422936dc45';
     return {
@@ -111,6 +110,7 @@ function getCameraPreferences(): MediaStreamConstraints {
 
   // Developer environment, but testing on iDevies.
   if (isLocalDevelopment && isIos) {
+    console.info('Creating iOS dev capture request.');
     let maxWidthDev = cameraRequest.width.max;
     let maxHeightDev = cameraRequest.height.max;
     let minWidthDev = cameraRequest.width.min;
@@ -138,6 +138,7 @@ function getCameraPreferences(): MediaStreamConstraints {
   // This one is for testers. They tend to be testing on laptops,
   // although we can't exactly query those environments.
   if (isQA || (isDevelopment && !isIos)) {
+    console.info('Creating QA camera request');
     return {
       video: {
         width: { max: cameraRequest.width.max, min: cameraRequest.width.min },
@@ -160,6 +161,7 @@ function getCameraPreferences(): MediaStreamConstraints {
   }
 
   // This is the default preferences, which is also used in production.
+  console.info('Creating production camera request.');
   return {
     video: {
       width: { max: cameraRequest.width.max, min: cameraRequest.width.min },

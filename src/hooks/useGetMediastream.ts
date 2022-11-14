@@ -24,9 +24,10 @@ export function useGetMediastream(): MediaStream | undefined {
         // This didn't quite work because browsers might "remember" the
         // denial and the results is that the users are instantly navigated back.
         //  !isDevelopment && globalThis.history.back();
+      } else if (error instanceof Error) {
+        throw new Error(error.toString());
       }
     }
   }, []);
-
   return stream;
 }

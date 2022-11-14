@@ -3,7 +3,8 @@ import {
   getNotificationDispatcher as dispatchNotification,
   isDevelopment,
   isLocalDevelopment,
-  isQA
+  isQA,
+  getOrientation
 } from '@utils';
 import { ZoomMethod } from '@types';
 import { cameraRequest } from '../const';
@@ -73,19 +74,59 @@ function determineZoomMethod(this: Camera): ZoomMethod {
   }
 }
 
+function isIosDevice() {}
+
 function getCameraPreferences(): MediaStreamConstraints {
   const isIos = EchoUtils.Utils.iOs.isIosDevice();
 
   // Developer enviroment, use this for desktop.
-  if (isLocalDevelopment && !isIos) {
+  if (isLocalDevelopment && !isIos && navigator.maxTouchPoints === 1) {
     console.info('Creating dev camera request');
     let maxWidthDev = cameraRequest.width.max;
     let maxHeightDev = cameraRequest.height.max;
     let minWidthDev = cameraRequest.width.min;
     let minHeightDev = cameraRequest.height.min;
 
-    const cameraId =
-      'a874c50ce1a7f877e5d365c7ef7738d4881d76a22876cd61f0b708422936dc45';
+    const cameraId = undefined;
+
+    const request = {
+      video: {
+        width: { max: maxWidthDev, min: minWidthDev },
+        height: {
+          max: maxHeightDev,
+          min: minHeightDev
+        },
+
+        // Higher FPS is good for a scanning operation.
+        frameRate: {
+          ideal: cameraRequest.fps
+        },
+
+        deviceId: {
+          exact: cameraId
+        }
+      },
+      audio: false
+    } as MediaStreamConstraints;
+
+    // Require a specific camera by its ID here.
+    if (cameraId && request.video) {
+      //@ts-ignore
+      request.video.deviceId = { exact: cameraId };
+      //@ts-ignore
+      request.video.facingMode = { exact: 'environment' };
+    }
+
+    return request;
+  }
+
+  // Developer environment, but testing on Android.
+  if (isLocalDevelopment && !isIos && navigator.maxTouchPoints >= 2) {
+    console.info('Creating android camera request');
+    let maxWidthDev = cameraRequest.width.max;
+    let maxHeightDev = cameraRequest.height.max;
+    let minWidthDev = cameraRequest.width.min;
+    let minHeightDev = cameraRequest.height.min;
     return {
       video: {
         width: { max: maxWidthDev, min: minWidthDev },
@@ -99,10 +140,8 @@ function getCameraPreferences(): MediaStreamConstraints {
           ideal: cameraRequest.fps
         },
 
-        // Require a specific camera by its ID here.
-        deviceId: {
-          exact: cameraId
-        }
+        // Require a specific camera here.
+        facingMode: { exact: 'environment' }
       },
       audio: false
     } as MediaStreamConstraints;

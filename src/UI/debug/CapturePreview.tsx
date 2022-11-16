@@ -1,28 +1,54 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Camera } from '@cameraLogic';
 import styled from 'styled-components';
 import { Button } from '@equinor/eds-core-react';
 import { isCustomEvent } from '@utils';
 import { zIndexes } from '@const';
+import EchoUtils from '@equinor/echo-utils';
 
 interface CapturePreviewProps {
   camera: Camera;
 }
 
+type PreviewDimensions = {
+  width: number;
+  height: number;
+};
+
+type Preview = {
+  url: string;
+  dimensions?: PreviewDimensions;
+  size: number;
+};
+
 export const CapturePreview = (
   props: CapturePreviewProps
 ): JSX.Element | null => {
-  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+  const [preview, setPreview] = useState<Preview | undefined>(undefined);
+  const imageElement = useRef<HTMLImageElement | null>(null);
+  console.log('%c⧭', 'color: #00ff88', preview);
 
-  useEffect(() => {
-    globalThis.addEventListener('ets-capture', (e) =>
-      updateImageUrlFromEvent(e)
+  EchoUtils.Hooks.useEffectAsync(async () => {
+    globalThis.addEventListener(
+      'ets-capture',
+      async (e) => await updateImageUrlFromEvent(e)
     );
 
-    function updateImageUrlFromEvent(event: Event) {
+    async function updateImageUrlFromEvent(event: Event) {
       // TODO: Type guard the Event.detail contents.
-      //@ts-ignore
-      setImageUrl(event.detail.url);
+      const previewDimensions: PreviewDimensions =
+        await getPreviewImageDimensions(
+          //@ts-ignore
+          event.detail.url
+        );
+
+      setPreview({
+        //@ts-ignore
+        url: event.detail.url,
+        //@ts-ignore
+        size: event.detail.size,
+        dimensions: previewDimensions
+      });
     }
     return globalThis.removeEventListener(
       'ets-capture',
@@ -34,17 +60,41 @@ export const CapturePreview = (
   // This components only runs in development.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function closePreview() {
-    if (imageUrl) {
-      URL.revokeObjectURL(imageUrl);
+    if (preview) {
+      URL.revokeObjectURL(preview.url);
     }
-    setImageUrl(undefined);
+    setPreview(undefined);
   }
 
-  if (imageUrl) {
+  function getPreviewImageDimensions(
+    imageUrl: string
+  ): Promise<PreviewDimensions> {
+    return new Promise((resolve) => {
+      const tmpImageEl = document.createElement('img');
+      tmpImageEl.src = imageUrl;
+      tmpImageEl.onload = () => {
+        console.log('img is ready');
+        resolve({
+          width: tmpImageEl.naturalWidth,
+          height: tmpImageEl.naturalHeight
+        });
+      };
+    });
+  }
+
+  if (preview?.dimensions) {
     return (
       <CapturePreviewContainer id="capture-preview">
-        <PreviewImage src={imageUrl} />
+        <PreviewImage ref={imageElement} src={preview.url} />
         <Button onClick={closePreview}>Close</Button>
+        <div>
+          Dimensions:{' '}
+          <output>
+            {preview.dimensions.width}x{preview.dimensions.height}.
+          </output>
+          <br />
+          Size: <output>{preview.size / 1000} kilobytes.</output>
+        </div>
       </CapturePreviewContainer>
     );
   } else return null;

@@ -159,6 +159,13 @@ Regular offset from left-edge: ${bcr.x};
     console.info('sy', sy);
     console.info('draw: ', `${scanningAreaWidth}x${scanningAreaHeight}`);
     console.info('zoom', this.zoom);
+    console.info(
+      'viewfinder',
+      this.viewfinder.videoWidth + 'x' + this.viewfinder.videoHeight
+    );
+    console.info('outer height', globalThis.outerHeight);
+    console.info('inner height', globalThis.innerHeight);
+    console.info('vV', globalThis.visualViewport);
     console.groupEnd();
 
     return await this.crop({
@@ -176,18 +183,18 @@ Regular offset from left-edge: ${bcr.x};
       if (scanningArea) {
         this.prepareNewScan();
         let capture = await this.capturePhoto();
-        capture = await this.performCropping();
-        const { width, height } = this._scanningArea.getBoundingClientRect();
-        capture = await this._canvasHandler.getCanvasContentAsBlob({
-          sWidth: width / this.zoom,
-          sHeight: height / this.zoom
-        });
+        //capture = await this.performCropping();
+        // const { width, height } = this._scanningArea.getBoundingClientRect();
+        // capture = await this._canvasHandler.getCanvasContentAsBlob({
+        //   sWidth: width / this.zoom,
+        //   sHeight: height / this.zoom
+        // });
 
         this.notifyNewCapture(capture);
       }
     }
     logger.log('EchoDevelopment', () => {
-      console.log(
+      console.info(
         'Camera resolution -> ',
         this.viewfinder.videoWidth +
           'x' +
@@ -196,9 +203,13 @@ Regular offset from left-edge: ${bcr.x};
           this.videoTrack?.getSettings().frameRate +
           'fps'
       );
-      console.log(
-        'Viewport (CSS pixel) resolution -> ',
+      console.info(
+        'Viewfinder (Element) resolution -> ',
         this.viewfinder.width + 'x' + this.viewfinder.height
+      );
+      console.info(
+        'Viewfinder (CSS) resolution -> ',
+        this.viewfinder.style.width + 'x' + this.viewfinder.style.height
       );
     });
   }

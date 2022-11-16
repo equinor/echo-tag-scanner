@@ -70,10 +70,6 @@ class Postprocessor extends CoreCamera {
       dWidth: settings.sWidth
     };
 
-    this._canvasHandler.resizeCanvas({
-      width: settings.sWidth,
-      height: settings.sHeight
-    });
     return await this._canvasHandler.draw(bitmap, params);
   }
 

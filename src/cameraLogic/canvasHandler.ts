@@ -54,11 +54,7 @@ class CanvasHandler {
         'Could not draw image onto a canvas with zero height or width'
       );
     }
-    // Before drawing, set the canvas dimensions to be equal to whatever is being drawn..
-    this._canvas.width = params.dWidth;
-    this._canvas.height = params.dHeight;
-
-    // ..and blank the canvas.
+    // .Blank the canvas before a draw.
     this.clearCanvas();
 
     if (image instanceof ImageData) {

@@ -88,7 +88,7 @@ function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
 const ControlPad = styled.section`
   display: grid;
   align-items: center;
-  position: fixed;
+  position: absolute;
 
   // The offset should be so that the users thumb is naturally resting when the device is being held.
   bottom: var(--control-pad-bottom-offset);

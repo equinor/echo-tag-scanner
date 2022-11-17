@@ -78,7 +78,7 @@ function getCameraPreferences(): MediaStreamConstraints {
   const isIos = EchoUtils.Utils.iOs.isIosDevice();
 
   // Developer enviroment, use this for desktop.
-  if (isLocalDevelopment && !isIos && navigator.maxTouchPoints === 0) {
+  if (isLocalDevelopment && !isIos && navigator.maxTouchPoints <= 1) {
     console.info('Creating dev camera request');
     let maxWidthDev = cameraRequest.width.max;
     let maxHeightDev = cameraRequest.height.max;

@@ -22,6 +22,7 @@ const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
       const newOrientation = getOrientation();
 
       if (newOrientation !== currentOrientation) {
+        setOrientation(newOrientation);
         if (newOrientation === 'portrait') {
           setSADimensions({ width: 720, height: 1280 });
         } else {

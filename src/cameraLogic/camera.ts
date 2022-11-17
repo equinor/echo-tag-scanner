@@ -142,48 +142,41 @@ class Camera extends Postprocessor {
   }
   /**
    * Performs a simulated or native digital zoom.
-   * @param {ZoomSteps} newZoomLevel The new zoom value.
+   * @param {ZoomSteps} newZoomFactor The new zoom value.
    * @returns {CameraResolution} Information about the new viewfinder resolution or undefined if no zooming took place.
    */
   public alterZoom(
-    newZoomLevel: ZoomSteps
+    newZoomFactor: ZoomSteps
   ): Promise<CameraResolution | undefined> {
     return new Promise((resolve) => {
       if (this._zoomMethod.type === 'native') {
         if (
-          newZoomLevel >= this._zoomMethod.min &&
-          newZoomLevel <= this._zoomMethod.max
+          newZoomFactor >= this._zoomMethod.min &&
+          newZoomFactor <= this._zoomMethod.max
         ) {
           this.videoTrack
-            ?.applyConstraints({ advanced: [{ zoom: newZoomLevel }] })
+            ?.applyConstraints({ advanced: [{ zoom: newZoomFactor }] })
             .then(() => {
-              this.zoom = newZoomLevel;
+              this.zoom = newZoomFactor;
               resolve({
                 width: this.baseResolution.width,
                 height: this.baseResolution.height,
-                zoomLevel: newZoomLevel
+                zoomLevel: newZoomFactor
               });
             })
             .catch(onZoomRejection);
         } else onZoomRejection('invalid range');
       } else if (this._zoomMethod.type === 'simulated') {
         if (
-          newZoomLevel >= this._zoomMethod.min &&
-          newZoomLevel <= this._zoomMethod.max
+          newZoomFactor >= this._zoomMethod.min &&
+          newZoomFactor <= this._zoomMethod.max
         ) {
-          if (this.baseResolution?.width && this.baseResolution?.height) {
-            const simulatedZoom = {
-              width: this.baseResolution.width * newZoomLevel,
-              height: this.baseResolution.height * newZoomLevel,
-              zoomLevel: newZoomLevel
-            };
+          this.zoom = newZoomFactor;
 
-            if (simulatedZoom?.zoomLevel) this.zoom = newZoomLevel;
-            if (simulatedZoom?.width && simulatedZoom?.height) {
-              this.viewfinder.width = simulatedZoom.width;
-              this.viewfinder.height = simulatedZoom.height;
-            }
-          }
+          const simulatedZoomEvent = new CustomEvent('ets-simulated-zoom', {
+            detail: { zoomFactor: newZoomFactor }
+          });
+          globalThis.dispatchEvent(simulatedZoomEvent);
         }
       }
     });
@@ -222,6 +215,7 @@ class Camera extends Postprocessor {
     return await this._canvasHandler.draw(this.viewfinder, params);
   }
 
+  // TODO: Consider moving events to a seperate event handler class.
   /**
    * Accepts a new capture, creates an object URL from it and dispatches an event containing the new object URL.
    */

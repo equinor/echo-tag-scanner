@@ -1,7 +1,7 @@
-import React, { SetStateAction, Dispatch } from 'react';
+import React, { SetStateAction, Dispatch, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { isLocalDevelopment, isDevelopment, isQA } from '@utils';
-import { ViewfinderDimensions } from '@types';
+import { isLocalDevelopment, isDevelopment, isQA, isCustomEvent } from '@utils';
+import { ViewfinderDimensions, ZoomSteps } from '@types';
 import { zIndexes } from '@const';
 import { ScanningArea } from './ScanningArea';
 import { VersionNumber, Backdrop } from '@ui';
@@ -14,11 +14,42 @@ interface ViewfinderProps {
   dimensions: ViewfinderDimensions;
 }
 
+type ZoomBehavior = {
+  /** Specifies the scale value.*/
+  zoomFactor: ZoomSteps;
+
+  /**
+   * The offset adjustment for a scaled viewfinder.
+   * If the viewfinder is scaled up, this offset will ensure it remains in the center of viewport.
+   */
+  translateOffset: number;
+};
+
 /**
  * This component represents a viewfinder which we find on modern cameras.
  * Everything in this component should be read-only (or maybe view-only), no interaction like buttons or gestures are allowed.
  */
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
+  const [zoomBehaviour, setZoomBehaviour] = useState<ZoomBehavior>({
+    zoomFactor: 1,
+    translateOffset: 50
+  });
+
+  useEffect(function mountSimulatedZoomEventListener() {
+    globalThis.addEventListener('ets-simulated-zoom', (event) => {
+      if (isCustomEvent(event)) {
+        let offset = 50;
+        //@ts-ignore
+        if (event.detail.zoomFactor !== 1) offset /= event.detail.zoomFactor;
+        setZoomBehaviour({
+          //@ts-ignore
+          zoomFactor: event.detail.zoomFactor,
+          translateOffset: offset
+        });
+      }
+    });
+  }, []);
+
   return (
     <>
       <Backdrop />
@@ -30,8 +61,8 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         autoPlay
         disablePictureInPicture
         controls={false}
-        width={props.dimensions.width}
-        height={props.dimensions.height}
+        zoomFactor={zoomBehaviour.zoomFactor}
+        translateOffset={zoomBehaviour.translateOffset}
       />
 
       <ScanningArea
@@ -43,19 +74,28 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   );
 };
 
-const CameraFeed = styled.video`
+const CameraFeed = styled.video<{
+  zoomFactor: number;
+  translateOffset: number;
+}>`
   // Centering of absolutely placed elements
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  //-------//
+
   background-color: var(--black);
   transition: all 0.3s ease;
   z-index: ${zIndexes.viewfinder};
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
+
+  //--Zoom behavior--//
+  transform: translate(
+    -${(props) => String(props.translateOffset)}%,
+    -${(props) => String(props.translateOffset)}%
+  );
+  scale: ${(props) => String(props.zoomFactor)};
 `;
 
 export { Viewfinder };

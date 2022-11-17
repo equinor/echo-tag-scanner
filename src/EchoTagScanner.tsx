@@ -73,6 +73,9 @@ const EchoCamera = () => {
 };
 
 const Main = styled.main`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: relative;
   touch-action: none;
   height: 100%;

@@ -57,6 +57,9 @@ class CanvasHandler {
     // .Blank the canvas before a draw.
     this.clearCanvas();
 
+    this.canvas.width = params.dWidth;
+    this.canvas.height = params.dHeight;
+
     if (image instanceof ImageData) {
       this._canvasContext?.putImageData(image, params.dx, params.dy);
     } else {

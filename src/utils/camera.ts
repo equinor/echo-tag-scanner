@@ -74,20 +74,19 @@ function determineZoomMethod(this: Camera): ZoomMethod {
   }
 }
 
-function isIosDevice() {}
-
 function getCameraPreferences(): MediaStreamConstraints {
   const isIos = EchoUtils.Utils.iOs.isIosDevice();
 
   // Developer enviroment, use this for desktop.
-  if (isLocalDevelopment && !isIos && navigator.maxTouchPoints === 1) {
+  if (isLocalDevelopment && !isIos && navigator.maxTouchPoints === 0) {
     console.info('Creating dev camera request');
     let maxWidthDev = cameraRequest.width.max;
     let maxHeightDev = cameraRequest.height.max;
     let minWidthDev = cameraRequest.width.min;
     let minHeightDev = cameraRequest.height.min;
 
-    const cameraId = undefined;
+    const cameraId =
+      '883c79d936715fb3d0f70390c627a7bcb9ff395f6835fdf2b068373a35764ec2';
 
     const request = {
       video: {
@@ -108,14 +107,6 @@ function getCameraPreferences(): MediaStreamConstraints {
       },
       audio: false
     } as MediaStreamConstraints;
-
-    // Require a specific camera by its ID here.
-    if (cameraId && request.video) {
-      //@ts-ignore
-      request.video.deviceId = { exact: cameraId };
-      //@ts-ignore
-      request.video.facingMode = { exact: 'environment' };
-    }
 
     return request;
   }

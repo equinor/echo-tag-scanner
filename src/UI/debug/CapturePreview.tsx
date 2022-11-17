@@ -26,7 +26,6 @@ export const CapturePreview = (
 ): JSX.Element | null => {
   const [preview, setPreview] = useState<Preview | undefined>(undefined);
   const imageElement = useRef<HTMLImageElement | null>(null);
-  console.log('%c⧭', 'color: #00ff88', preview);
 
   EchoUtils.Hooks.useEffectAsync(async () => {
     globalThis.addEventListener(
@@ -73,7 +72,6 @@ export const CapturePreview = (
       const tmpImageEl = document.createElement('img');
       tmpImageEl.src = imageUrl;
       tmpImageEl.onload = () => {
-        console.log('img is ready');
         resolve({
           width: tmpImageEl.naturalWidth,
           height: tmpImageEl.naturalHeight

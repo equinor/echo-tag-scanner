@@ -153,20 +153,21 @@ Regular offset from left-edge: ${bcr.x};
         `Encountered a zoom ${this.zoom} value which isn't supported.`
       );
     }
-
-    console.group('Cropping');
-    console.info('sx', sx);
-    console.info('sy', sy);
-    console.info('draw: ', `${scanningAreaWidth}x${scanningAreaHeight}`);
-    console.info('zoom', this.zoom);
-    console.info(
-      'viewfinder',
-      this.viewfinder.videoWidth + 'x' + this.viewfinder.videoHeight
-    );
-    console.info('outer height', globalThis.outerHeight);
-    console.info('inner height', globalThis.innerHeight);
-    console.info('vV', globalThis.visualViewport);
-    console.groupEnd();
+    logger.log('EchoDevelopment', () => {
+      console.group('Cropping');
+      console.info('sx', sx);
+      console.info('sy', sy);
+      console.info('draw: ', `${cropWidth}x${cropHeight}`);
+      console.info('zoom', this.zoom);
+      console.info(
+        'viewfinder',
+        this.viewfinder.videoWidth + 'x' + this.viewfinder.videoHeight
+      );
+      console.info('outer height', globalThis.outerHeight);
+      console.info('inner height', globalThis.innerHeight);
+      console.info('vV', globalThis.visualViewport);
+      console.groupEnd();
+    });
 
     return await this.crop({
       sx,
@@ -176,6 +177,7 @@ Regular offset from left-edge: ${bcr.x};
     });
   }
 
+  // TODO: Extract debug stuff to own class.
   public async debugAll(previewCapture = false) {
     if (previewCapture) {
       const scanningArea = document.getElementById('scanning-area');
@@ -183,12 +185,20 @@ Regular offset from left-edge: ${bcr.x};
       if (scanningArea) {
         this.prepareNewScan();
         let capture = await this.capturePhoto();
-        //capture = await this.performCropping();
-        // const { width, height } = this._scanningArea.getBoundingClientRect();
-        // capture = await this._canvasHandler.getCanvasContentAsBlob({
-        //   sWidth: width / this.zoom,
-        //   sHeight: height / this.zoom
-        // });
+        capture = await this.performCropping();
+        const { width, height } = this._scanningArea.getBoundingClientRect();
+
+        if (this.zoomMethod.type === 'simulated') {
+          capture = await this._canvasHandler.getCanvasContentAsBlob({
+            sWidth: width / this.zoom,
+            sHeight: height / this.zoom
+          });
+        } else {
+          capture = await this._canvasHandler.getCanvasContentAsBlob({
+            sWidth: width,
+            sHeight: height
+          });
+        }
 
         this.notifyNewCapture(capture);
       }
@@ -228,8 +238,13 @@ Regular offset from left-edge: ${bcr.x};
   public async scan(): Promise<Blob[]> {
     return new Promise((finishScanning) => {
       const { width, height } = this._scanningArea.getBoundingClientRect();
-      const extractWidth = width / this.zoom;
-      const extractHeight = height / this.zoom;
+      let extractWidth = width;
+      let extractHeight = height;
+
+      if (this.zoomMethod.type === 'simulated') {
+        extractWidth /= this.zoom;
+        extractHeight /= this.zoom;
+      }
 
       const scans: Blob[] = [];
       /** Determines the delay between captures in milliseconds. */
@@ -248,7 +263,6 @@ Regular offset from left-edge: ${bcr.x};
           sWidth: extractWidth,
           sHeight: extractHeight
         });
-        // if (capture.size > 50000) capture = await this.scale(0.5);
         scans.push(capture);
 
         // Log some image stats and a blob preview in network tab.

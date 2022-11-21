@@ -95,7 +95,7 @@ My general recommendation would be to continue working on improving the hit rate
 *Recommended actions in order to adress the pain points while we wait for Shape Detection API:*
 - Consider implementing *Parallel Captures* to speed up slower devices. (This will make the scanner faster)
 - Implement *Post-capture analysis* to avoid relaying several captures. (Will make the scanner faster)
-- Improve *Capture Recolouring* to reduce the sizes of the captures. (While increase the hit rate and make the scanner faster)
+- Improve *Capture Recolouring* to reduce the sizes of the captures. (Will increase the hit rate and make the scanner faster)
 - Do *Improved UX*
 - Implement Computer Vision API 4.0 (This may increase our hit rate slightly)
 

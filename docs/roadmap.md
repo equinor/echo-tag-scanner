@@ -98,3 +98,5 @@ My general recommendation would be to continue working on improving the hit rate
 - Improve *Capture Recolouring* to reduce the sizes of the captures. (While increase the hit rate and make the scanner faster)
 - Do *Improved UX*
 - Implement Computer Vision API 4.0 (This may increase our hit rate slightly)
+
+Without having done any analysis on the actual feasibility of these actions, if we assume everything is possible to implement today, we are looking at development until autumn 2023 before the tag scanner is close to being a 100% optimized for field work.

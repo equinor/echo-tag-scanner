@@ -88,7 +88,7 @@ The implementation today can recolour captures to grayscale (different shades of
 As mentioned under On-device OCR heading, the use of On-device OCR completely eliminates pain point #1 and introduces offline scanning as a side effect.
 There is however a problem of, not only implementing it which may take several sprints to complete and will introduce several new bugs, but one has to also provide an OCR model alongside the OCR code itself.
 
-A silver bullet to this problem would be the (Text Detector API)[https://developer.chrome.com/articles/shape-detection/], which is an OCR-service built straight into the browser in which the tag scanner is running on. This service will use the models that are included in modern operating systems like iOS and Android. The Shape Detection API is currently only available behind a flag in Chrome.
+A silver bullet to this problem would be the [Text Detector API](https://developer.chrome.com/articles/shape-detection/), which is an OCR-service built straight into the browser in which the tag scanner is running on. This service will use the models that are included in modern operating systems like iOS and Android. The Shape Detection API is currently only available behind a flag in Chrome.
 
 My general recommendation would be to continue working on improving the hit rate today using Azure Computer Vision. In a longer-term perspective, the OCR-provider can be switched from Computer Vision to Shape Detection API. It is possible today to start the implementation of Shape Detection API so that it runs alongside Computer Vision. If a user's browser does support Shape Detection, they will automatically use it over Computer Vision.
 

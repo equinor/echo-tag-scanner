@@ -1,4 +1,10 @@
-import { analytics, AnalyticsEvent, AnalyticsModule } from '@equinor/echo-core';
+import {
+  analytics,
+  analyticsConfiguration,
+  AnalyticsEvent,
+  AnalyticsModule,
+  EchoSettings
+} from '@equinor/echo-core';
 import echomodule from '../../echoModule.config.json';
 
 export enum ObjectName {
@@ -154,6 +160,9 @@ class EchoTagScannerLogger extends BaseLogger {
     super(baseProps);
     this._moduleName = moduleName;
     this._moduleShortName = moduleShortName;
+    analyticsConfiguration.setInstCode(
+      EchoSettings.getSettings().plantSettings.instCode
+    );
   }
 
   public trackEvent<

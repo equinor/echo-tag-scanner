@@ -2,8 +2,7 @@ import { BackendError } from '@equinor/echo-base';
 import {
   ComputerVisionResponse,
   OCRPayload,
-  ParsedComputerVisionResponse,
-  ScanAttemptLogEntryCallback
+  ParsedComputerVisionResponse
 } from '@types';
 import { handleError, logger, logScanningAttempt } from '@utils';
 import { ErrorRegistry } from '@const';

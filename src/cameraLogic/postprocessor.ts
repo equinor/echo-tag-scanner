@@ -1,9 +1,4 @@
-import {
-  CameraProps,
-  CanvasDimensions,
-  CropSettings,
-  DrawImageParameters
-} from '@types';
+import { CameraProps, CropSettings, DrawImageParameters } from '@types';
 import { CanvasHandler } from './canvasHandler';
 import { CoreCamera } from './coreCamera';
 

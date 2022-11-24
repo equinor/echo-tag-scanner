@@ -1,16 +1,5 @@
-import {
-  CameraProps,
-  OCRPayload,
-  ZoomSteps,
-  ScanAttempt,
-  ScanAttemptLogEntryCallback
-} from '@types';
-import {
-  getOrientation,
-  isDevelopment,
-  logger,
-  logScanningAttempt
-} from '@utils';
+import { CameraProps, ZoomSteps } from '@types';
+import { isDevelopment, logger } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { Camera, OCR } from '.';
 

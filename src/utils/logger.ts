@@ -206,7 +206,19 @@ function logScanningAttempt(
     deviceOrientation: getOrientation()
   };
   logger.scanAttempt(entry);
-  console.info('LOGENTRY', entry);
+
+  // (console) log the entry up to QA environments.
+  logger.log('QA', () => {
+    if (entry.isSuccess) {
+      console.group('A successfull log entry was created.');
+      console.info(entry);
+      console.groupEnd();
+    } else {
+      console.group('A failed log entry was created.');
+      console.info(entry);
+      console.groupEnd();
+    }
+  });
   return entry;
 }
 

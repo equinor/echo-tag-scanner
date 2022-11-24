@@ -103,9 +103,6 @@ export class OCR {
           validatedText: validationResult.value.validatedTagSummary.tagNo
         };
         logScanningAttempt.call(this._tagScannerRef, partialLogEntry);
-        logger.log('QA', () =>
-          console.info('A successful OCR was logged: ', partialLogEntry)
-        );
 
         // Record the fetched tag summary for use later in presentation.
         validatedTags.push(validationResult.value.validatedTagSummary);
@@ -121,9 +118,6 @@ export class OCR {
             readText: (validationResult.reason as FailedTagValidation).testValue
           };
           logScanningAttempt.call(this._tagScannerRef, failedPartialLogEntry);
-          logger.log('QA', () =>
-            console.info('A failed OCR was logged: ', failedPartialLogEntry)
-          );
         }
       }
     });

@@ -6,7 +6,7 @@ export interface CameraProps {
   canvas: HTMLCanvasElement;
   additionalCaptureOptions?: DisplayMediaStreamConstraints;
   scanningArea: HTMLElement;
-  deviceInformation?: DeviceInformation;
+  deviceInformation: DeviceInformation;
 }
 
 export type CameraResolution = {

@@ -6,7 +6,7 @@ import {
   DeviceInformation
 } from '@utils';
 import { ErrorRegistry } from '@const';
-import { CameraProps, CameraResolution, ZoomMethod, ZoomSteps } from '@types';
+import { CameraProps, CameraResolution, ZoomSteps } from '@types';
 
 /**
  * This object is concerned with the core features of a camera.
@@ -25,7 +25,7 @@ class CoreCamera {
   private _baseResolution: CameraResolution;
 
   /** Holds information about the users system. */
-  private _deviceInformation: DeviceInformation | undefined;
+  private _deviceInformation: DeviceInformation;
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;

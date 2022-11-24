@@ -1,8 +1,7 @@
 import { analytics, AnalyticsEvent, AnalyticsModule } from '@equinor/echo-core';
 import echomodule from '../../echoModule.config.json';
-import { OCRPayload, ScanAttempt } from '@types';
+import { OCRPayload, ScanAttemptLogEntry } from '@types';
 import { TagScanner } from '@cameraLogic';
-import { deviceInformationAgent } from '@utils';
 
 export enum ObjectName {
   Module = 'Module',
@@ -38,8 +37,6 @@ export type DeviceInformation = {
   webBrowser: string;
   deviceModel: string;
 };
-
-type ScanAttemptLogEntry = ScanAttempt & DeviceInformation;
 
 enum LogLevel {
   Invalid = 0,
@@ -175,12 +172,7 @@ class EchoTagScannerLogger extends BaseLogger {
     });
   }
 
-  public scanAttempt(scanAttempt: ScanAttempt) {
-    const logPayload: ScanAttemptLogEntry = {
-      ...scanAttempt,
-      ...deviceInformationAgent.deviceInformation
-    };
-
+  public scanAttempt(logPayload: ScanAttemptLogEntry) {
     this.trackEvent(ObjectName.ScanAttempt, 'ScanAttempt', logPayload);
   }
 }
@@ -203,9 +195,10 @@ const logger = new EchoTagScannerLogger({
 function logScanningAttempt(
   this: TagScanner,
   ocrResult: OCRPayload
-): ScanAttempt {
-  let entry: ScanAttempt = {
+): ScanAttemptLogEntry {
+  let entry: ScanAttemptLogEntry = {
     ...ocrResult,
+    ...this.deviceInformation,
     cameraResolution: `${this.videoTrackSettings?.width}x${this.videoTrackSettings?.height}@${this.videoTrackSettings?.frameRate}`,
     zoomMethod: this.zoomMethod.type,
     zoomValue: this.zoom,

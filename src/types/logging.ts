@@ -1,14 +1,4 @@
-export type OCRPayload = Pick<
-  ScanAttempt,
-  'id' | 'isSuccess' | 'readText' | 'validatedText'
->;
-
-export type DeviceUsage = Pick<
-  ScanAttempt,
-  'cameraResolution' | 'deviceOrientation' | 'zoomValue' | 'zoomMethod'
->;
-
-export type ScanAttempt = {
+export type OCRPayload = {
   /** The ID of a single scan attempt */
   id: string;
 
@@ -18,11 +8,20 @@ export type ScanAttempt = {
   /** The validated tag number */
   validatedText?: string;
 
-  /** The current zoom value as the scanning attempt happened. */
-  zoomValue: number;
-
   isSuccess: boolean;
+};
+
+export type DeviceUsage = {
   cameraResolution: string;
   deviceOrientation: 'portrait' | 'landscape';
   zoomMethod: 'native' | 'simulated';
+  zoomValue: number;
 };
+
+export type DeviceInformation = {
+  operatingSystem: string;
+  webBrowser: string;
+  deviceModel: string;
+};
+
+export type ScanAttemptLogEntry = OCRPayload & DeviceUsage & DeviceInformation;

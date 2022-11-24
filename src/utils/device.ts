@@ -7,7 +7,8 @@ interface DeviceInformationProps {
   uaParser: UAParser;
 }
 
-/** This object is concerned with gathering and holding information about the users device.
+/** 
+ * This object is concerned with gathering and holding information about the users device.
  * This object will be read-only after initialization and should as a rule throw errors if the
  * deviceInformation property is altered after intialization.
  */
@@ -26,6 +27,7 @@ class DeviceInformationAgent {
   private readonly _uaDataValues: UADataValues | undefined | null = undefined;
 
   /** Holds the current device information and should be the single source of truth.
+   *
    * It can be undefined because we have to asynchronously fetch underlying system information.
    */
   private readonly _deviceInformation: DeviceInformation | undefined =
@@ -54,7 +56,7 @@ class DeviceInformationAgent {
   }
 
   /** Asyncronously constructs the agent and returns it.  */
-  public static async initialize() {
+  public static async initialize(): Promise<DeviceInformationAgent> {
     // Assign essentially an alias for readability.
     const DIA = DeviceInformationAgent;
 
@@ -66,7 +68,8 @@ class DeviceInformationAgent {
         'platformVersion',
         'uaFullVersion',
         'fullVersionList'
-      ])) ?? null;
+      ])) ?? null; // We reassign to a null to make a distinction between "not yet initialized" or "not available".
+
     const uaParser = new UAParser(navigator.userAgent);
     let deviceInformation: DeviceInformation | undefined;
 
@@ -96,7 +99,6 @@ class DeviceInformationAgent {
       operatingSystem = DIA.getOperatingSystem(uaParser);
 
     let deviceModel = DIA.getDeviceModel(uaDataValues);
-    console.log('%c⧭', 'color: #731d6d', deviceModel);
     if (deviceModel.length === 0) deviceModel = DIA.getDeviceModel(uaParser);
 
     deviceInformation = {

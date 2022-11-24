@@ -2,6 +2,7 @@ import { analytics, AnalyticsEvent, AnalyticsModule } from '@equinor/echo-core';
 import echomodule from '../../echoModule.config.json';
 import { OCRPayload, ScanAttemptLogEntry } from '@types';
 import { TagScanner } from '@cameraLogic';
+import { getOrientation } from '@utils';
 
 export enum ObjectName {
   Module = 'Module',
@@ -202,7 +203,7 @@ function logScanningAttempt(
     cameraResolution: `${this.videoTrackSettings?.width}x${this.videoTrackSettings?.height}@${this.videoTrackSettings?.frameRate}`,
     zoomMethod: this.zoomMethod.type,
     zoomValue: this.zoom,
-    deviceOrientation: this.currentOrientation
+    deviceOrientation: getOrientation()
   };
   logger.scanAttempt(entry);
   console.info('LOGENTRY', entry);

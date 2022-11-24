@@ -17,7 +17,7 @@ class CoreCamera {
   private _videoTrack?: MediaStreamTrack;
   private _videoTrackSettings?: MediaTrackSettings;
   private _capabilities?: MediaTrackCapabilities = undefined;
-  private _currentOrientation: 'portrait' | 'landscape';
+  private _currentOrientation: 'portrait' | 'landscape'; //TODO: Make sure this is refreshed when the device orients.
   private _activeCamera?: string;
   private _zoom: ZoomSteps;
 

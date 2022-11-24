@@ -1,7 +1,7 @@
 {
   "include": ["src"],
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2017",
     "lib": ["esnext", "dom", "dom.iterable"],
     "allowJs": true,
     "sourceMap": true,
@@ -19,7 +19,8 @@
       "@equinor/echo-scripts",
       "@types/webpack-env",
       "@types/node",
-      "@types/w3c-image-capture"
+      "@types/w3c-image-capture",
+      "./node_modules/user-agent-data-types"
     ],
     "baseUrl": ".",
     "paths": {

@@ -1,9 +1,12 @@
+import { DeviceInformation } from '@utils';
+
 export interface CameraProps {
   mediaStream: MediaStream;
   viewfinder: HTMLVideoElement;
   canvas: HTMLCanvasElement;
   additionalCaptureOptions?: DisplayMediaStreamConstraints;
   scanningArea: HTMLElement;
+  deviceInformation?: DeviceInformation;
 }
 
 export type CameraResolution = {

@@ -2,7 +2,8 @@ import {
   handleError,
   getOrientation,
   logger,
-  getCameraPreferences
+  getCameraPreferences,
+  DeviceInformation
 } from '@utils';
 import { ErrorRegistry } from '@const';
 import { CameraProps, CameraResolution, ZoomMethod, ZoomSteps } from '@types';
@@ -23,6 +24,9 @@ class CoreCamera {
   /** Records the base camera resolution before any simulated zoom has taken place. */
   private _baseResolution: CameraResolution;
 
+  /** Holds information about the users system. */
+  private _deviceInformation: DeviceInformation | undefined;
+
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
     this._mediaStream = props.mediaStream;
@@ -42,6 +46,7 @@ class CoreCamera {
       height: this._viewfinder.height,
       zoomLevel: 1
     };
+    this._deviceInformation = props.deviceInformation;
   }
 
   public get videoTrack(): MediaStreamTrack | undefined {
@@ -106,6 +111,14 @@ class CoreCamera {
 
   public set zoom(zoomValue: ZoomSteps) {
     this._zoom = zoomValue;
+  }
+
+  public get deviceInformation() {
+    return this._deviceInformation;
+  }
+
+  public set deviceInformation(deviceInfo) {
+    this._deviceInformation = deviceInfo;
   }
 
   /**

@@ -1,14 +1,30 @@
 import { BackendError } from '@equinor/echo-base';
-import { ComputerVisionResponse, ParsedComputerVisionResponse } from '@types';
-import { handleError, logger } from '@utils';
+import {
+  ComputerVisionResponse,
+  OCRPayload,
+  ParsedComputerVisionResponse,
+  ScanAttemptLogEntryCallback
+} from '@types';
+import { handleError, logger, logScanningAttempt } from '@utils';
 import { ErrorRegistry } from '@const';
 import { baseApiClient } from '../services/api/base/base';
 import { getComputerVisionOcrResources } from '../services/api/resources/resources';
 import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { randomBytes } from 'crypto';
+import { TagScanner } from '@cameraLogic';
+
+interface OCRProps {
+  tagScanner: TagScanner;
+}
 
 export class OCR {
-  private _attemptId?: string = undefined;
+  private _attemptId?: string;
+  private _tagScannerRef: TagScanner;
+
+  constructor(props: OCRProps) {
+    this._attemptId = undefined;
+    this._tagScannerRef = props.tagScanner;
+  }
 
   /** Generates a pseudorandom sequence of 16 bytes and returns them hex encoded. */
   public get attemptId(): string {
@@ -81,15 +97,15 @@ export class OCR {
         throw new Error('A pseudoranom log entry ID has not been established.');
       // Log the successfull OCR.
       if (validationResult.status === 'fulfilled') {
-        const logEntry = {
+        const partialLogEntry: OCRPayload = {
           id: this._attemptId,
           isSuccess: true,
           readText: validationResult.value.testValue,
           validatedText: validationResult.value.validatedTagSummary.tagNo
         };
-        logger.scanAttempt(logEntry);
+        logScanningAttempt.call(this._tagScannerRef, partialLogEntry);
         logger.log('QA', () =>
-          console.info('A successful OCR was logged: ', logEntry)
+          console.info('A successful OCR was logged: ', partialLogEntry)
         );
 
         // Record the fetched tag summary for use later in presentation.
@@ -99,15 +115,15 @@ export class OCR {
           // TODO: Handle or log Echo search errors here
         } else {
           // Log the failed OCR.
-          const failedLogEntry = {
+          const failedPartialLogEntry: OCRPayload = {
             id: this._attemptId,
             isSuccess: false,
             validatedText: undefined,
             readText: (validationResult.reason as FailedTagValidation).testValue
           };
-          logger.scanAttempt(failedLogEntry);
+          logScanningAttempt.call(this._tagScannerRef, failedPartialLogEntry);
           logger.log('QA', () =>
-            console.info('A failed OCR was logged: ', failedLogEntry)
+            console.info('A failed OCR was logged: ', failedPartialLogEntry)
           );
         }
       }

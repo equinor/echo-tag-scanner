@@ -1,10 +1,13 @@
 import { analytics, AnalyticsEvent, AnalyticsModule } from '@equinor/echo-core';
 import echomodule from '../../echoModule.config.json';
+import { OCRPayload, ScanAttempt } from '@types';
+import { TagScanner } from '@cameraLogic';
+import { deviceInformationAgent } from '@utils';
 
 export enum ObjectName {
   Module = 'Module',
   DoneScanning = 'Scanner',
-  ScanAttempt = 'ScanAttempt'
+  ScanAttempt = 'Scan'
 }
 
 type ActionNames = {
@@ -16,7 +19,7 @@ type ActionNames = {
 type ActionProperties = {
   [ObjectName.Module]: ModuleActionProperties;
   [ObjectName.DoneScanning]: ScannerActionsProperties;
-  [ObjectName.ScanAttempt]: ScanAttempt;
+  [ObjectName.ScanAttempt]: ScanAttemptLogEntry;
 };
 
 type ModuleActions = 'Started';
@@ -30,18 +33,13 @@ type ScannerActionsProperties = {
   found: number;
 };
 
-export type ScanAttempt = {
-  /** The ID of a single scan attempt */
-  id: string;
-
-  /** The tag number which was returned from OCR after filtering */
-  readText: string;
-
-  /** The validated tag number */
-  validatedText?: string;
-
-  isSuccess: boolean;
+export type DeviceInformation = {
+  operatingSystem: string;
+  webBrowser: string;
+  deviceModel: string;
 };
+
+type ScanAttemptLogEntry = ScanAttempt & DeviceInformation;
 
 enum LogLevel {
   Invalid = 0,
@@ -177,8 +175,13 @@ class EchoTagScannerLogger extends BaseLogger {
     });
   }
 
-  public scanAttempt(props: ScanAttempt) {
-    this.trackEvent(ObjectName.ScanAttempt, 'ScanAttempt', props);
+  public scanAttempt(scanAttempt: ScanAttempt) {
+    const logPayload: ScanAttemptLogEntry = {
+      ...scanAttempt,
+      ...deviceInformationAgent.deviceInformation
+    };
+
+    this.trackEvent(ObjectName.ScanAttempt, 'ScanAttempt', logPayload);
   }
 }
 
@@ -193,4 +196,24 @@ const logger = new EchoTagScannerLogger({
   logLevelOverride: overrideLogLevel ? Number(overrideLogLevel) : undefined
 });
 
-export { logger };
+/**
+ * Accepts a result from the OCR step and merges it to a ScanAttempt log entry alongside information about the scanning session
+ *  before relaying to AppInsights.
+ */
+function logScanningAttempt(
+  this: TagScanner,
+  ocrResult: OCRPayload
+): ScanAttempt {
+  let entry: ScanAttempt = {
+    ...ocrResult,
+    cameraResolution: `${this.videoTrackSettings?.width}x${this.videoTrackSettings?.height}@${this.videoTrackSettings?.frameRate}`,
+    zoomMethod: this.zoomMethod.type,
+    zoomValue: this.zoom,
+    deviceOrientation: this.currentOrientation
+  };
+  logger.scanAttempt(entry);
+  console.info('LOGENTRY', entry);
+  return entry;
+}
+
+export { logger, logScanningAttempt };

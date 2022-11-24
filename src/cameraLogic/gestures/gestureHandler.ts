@@ -38,10 +38,10 @@ class ZoomGestureHandler {
     const minZoom: ZoomSteps = this._tagScanner.zoomMethod.min;
 
     if (this._tagScanner.zoomMethod.type === 'native') {
-      if (nextZoom >= minZoom && nextZoom < maxZoom) {
+      if (nextZoom >= minZoom && nextZoom <= maxZoom) {
         this._tagScanner.alterZoom(nextZoom);
         this._currentZoom = nextZoom;
-      } else if (nextZoom === maxZoom) {
+      } else if (nextZoom > maxZoom) {
         this._tagScanner.alterZoom(minZoom);
         this._currentZoom = minZoom;
       }

@@ -80,14 +80,15 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
 const SafeAreaCover = styled.div`
   position: fixed;
   bottom: 0;
-  width: 100%;
+  width: 100vw;
   height: env(safe-area-inset-bottom, 0);
   z-index ${zIndexes.overlays};
+  background-color: white;
   
   @media screen and (orientation: landscape) {
     bottom: unset;
     left: 0;
-    height: 100%;
+    height: 100vh;
     width: env(safe-area-inset-left, 0);
   }
 `;

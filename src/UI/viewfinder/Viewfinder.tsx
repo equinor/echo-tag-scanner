@@ -65,6 +65,8 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         translateOffset={zoomBehaviour.translateOffset}
       />
 
+      <SafeAreaCover id="safe-area-cover" />
+
       <ScanningArea
         scanningAreaRef={props.setScanningAreaRef}
         setCanvasRef={props.setCanvasRef}
@@ -73,6 +75,22 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
     </>
   );
 };
+
+// This element covers over the real estate beneath the echo-bars because we cannot resize the video element itself.
+const SafeAreaCover = styled.div`
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: env(safe-area-inset-bottom, 0);
+  z-index ${zIndexes.overlays};
+  
+  @media screen and (orientation: landscape) {
+    bottom: unset;
+    left: 0;
+    height: 100%;
+    width: env(safe-area-inset-left, 0);
+  }
+`;
 
 const CameraFeed = styled.video<{
   zoomFactor: number;

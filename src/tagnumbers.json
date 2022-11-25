@@ -62,6 +62,18 @@
             "instCode": "MET"
         },
         {
+            "value": "(75-DG-1143)",
+            "instCode": "MET"
+        },
+        {
+            "value": "-75-DG-1143",
+            "instCode": "MET"
+        },
+        {
+            "value": "75-DG-1143=",
+            "instCode": "MET"
+        },
+        {
             "value": "R-29JC201",
             "instCode": "JSV"
         },

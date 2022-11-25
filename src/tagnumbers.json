@@ -1,5 +1,5 @@
 {
-    "fails": [
+    "withoutInstCode": [
         "11-76-SE0130",
         "R-27PSVO19",
         "1191-52TT1109",
@@ -24,7 +24,7 @@
         "Manual",
         "PROSEss"
     ],
-    "successes": [
+    "withInstCode": [
         {
             "value": "TB-65-0102",
             "instCode": "VIS"
@@ -85,6 +85,22 @@
         },
         {
             "value": "22-KA-231(M)-ACH2",
+            "instCode": "KAA"
+        },
+        {
+            "value": "22-KA-231 (M) -ACH2",
+            "instCode": "KAA"
+        },
+        {
+            "value": "22-KA-231  (M)",
+            "instCode": "KAA"
+        },
+        {
+            "value": "22_KA_231(M)-ACH2",
+            "instCode": "KAA"
+        },
+        {
+            "value": "22-Ka/231(M)-ACH2",
             "instCode": "KAA"
         }
     ]

@@ -28,6 +28,7 @@ export class TagScanner extends Camera {
         this.videoTrack?.dispatchEvent(new Event('ended'));
       };
       globalThis.simZoom = (newZoom: ZoomSteps) => this.alterZoom(newZoom);
+      globalThis.testFiltering = this._OCR.testFiltration();
     }
   }
 

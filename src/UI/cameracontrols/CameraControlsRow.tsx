@@ -23,43 +23,31 @@ interface CameraControlsProps {
  * @param {callback} - The scanning action
  * @param {callback} - The torch action. If undefined, the torch button is disabled.
  */
-const CaptureAndTorch = (props: CameraControlsProps): JSX.Element => {
+const CameraControlsRow = (props: CameraControlsProps): JSX.Element => {
   return (
-    <CaptureAndTorchWrapper>
-      <CaptureAndTorchGrid>
-        {props.supportedFeatures.torch && (
-          <TorchButton name="lightbulb" onClick={props.onToggleTorch} />
-        )}
-        <ScannerButton
-          id="capture-button"
-          onClick={props.onScanning}
-          isDisabled={props.isDisabled}
-          isScanning={props.isScanning}
-          echoIsSyncing={props.echoIsSyncing}
-        />
-        {isDevelopment && (
-          <DebugButton
-            id="developer-button"
-            variant="ghost"
-            onClick={props.onDebug}
-          >
-            <Icon data={info_circle} color="white" />
-          </DebugButton>
-        )}
-      </CaptureAndTorchGrid>
-    </CaptureAndTorchWrapper>
+    <RowGrid role="toolbar">
+      {props.supportedFeatures.torch && (
+        <TorchButton name="lightbulb" onClick={props.onToggleTorch} />
+      )}
+      <ScannerButton
+        id="capture-button"
+        onClick={props.onScanning}
+        isDisabled={props.isDisabled}
+        isScanning={props.isScanning}
+        echoIsSyncing={props.echoIsSyncing}
+      />
+      {isDevelopment && (
+        <DebugButton
+          id="developer-button"
+          variant="ghost"
+          onClick={props.onDebug}
+        >
+          <Icon data={info_circle} color="white" />
+        </DebugButton>
+      )}
+    </RowGrid>
   );
 };
-
-const CaptureAndTorchWrapper = styled.div`
-  width: 100%;
-  height: 100%;
-
-  @media screen and (orientation: landscape) {
-    height: 100%;
-    padding-bottom: 16px;
-  }
-`;
 
 const DebugButton = styled(Button)`
   grid-area: debug;
@@ -90,22 +78,22 @@ const DebugButton = styled(Button)`
   }
 `;
 
-const CaptureAndTorchGrid = styled.div`
+const RowGrid = styled.div`
+  border: 1px solid hotpink;
   display: grid;
-  grid-template-columns: [torch]1fr [shutter]1fr [debug]1fr;
+  grid-template-columns: [torch]1fr [camerabutton]1fr [debug]1fr;
   justify-items: center;
   align-items: center;
   width: 100%;
-  label {
-    margin-right: 1.5em;
-  }
+  height: 100%;
 
   @media screen and (orientation: landscape) {
+    grid-template-columns: 1fr;
+    grid-template-rows: [debug]1fr [camerabutton]1fr [torch]1fr;
     width: auto;
     height: 100%;
-    grid-template-columns: 1fr;
-    grid-template-rows: [empty-cell]1fr [shutter]1fr [torch]1fr;
+    padding-bottom: 16px;
   }
 `;
 
-export { CaptureAndTorch };
+export { CameraControlsRow };

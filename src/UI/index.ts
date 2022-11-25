@@ -9,7 +9,7 @@ export { ScanningIndicator } from './progress/ScanningLoading';
 export { OverconstrainedAlert } from './error/OverconstrainedAlert';
 
 export { GestureArea } from './cameracontrols/GestureArea';
-export { CaptureAndTorch } from './cameracontrols/captureAndTorch';
+export { CameraControlsRow } from './cameracontrols/CameraControlsRow';
 
 export { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 export { Viewfinder } from './viewfinder/Viewfinder';

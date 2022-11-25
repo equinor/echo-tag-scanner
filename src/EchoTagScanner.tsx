@@ -14,7 +14,8 @@ import { ViewfinderDimensions } from '@types';
  * - Once the refs and media stream is ready, it will render the rest of the UI hierarchy.
  */
 const EchoCamera = () => {
-  useEffect(() => {
+  useEffect(function onLoadTagScanner() {
+    // Tag Scanner module is being logged as started.
     logger.moduleStarted();
   }, []);
   var viewFinderDimensions: ViewfinderDimensions | undefined = undefined;

@@ -2,10 +2,11 @@ import {
   handleError,
   getOrientation,
   logger,
-  getCameraPreferences
+  getCameraPreferences,
+  DeviceInformation
 } from '@utils';
 import { ErrorRegistry } from '@const';
-import { CameraProps, CameraResolution, ZoomMethod, ZoomSteps } from '@types';
+import { CameraProps, CameraResolution, ZoomSteps } from '@types';
 
 /**
  * This object is concerned with the core features of a camera.
@@ -16,12 +17,15 @@ class CoreCamera {
   private _videoTrack?: MediaStreamTrack;
   private _videoTrackSettings?: MediaTrackSettings;
   private _capabilities?: MediaTrackCapabilities = undefined;
-  private _currentOrientation: 'portrait' | 'landscape';
+  private _currentOrientation: 'portrait' | 'landscape'; //TODO: Make sure this is refreshed when the device orients.
   private _activeCamera?: string;
   private _zoom: ZoomSteps;
 
   /** Records the base camera resolution before any simulated zoom has taken place. */
   private _baseResolution: CameraResolution;
+
+  /** Holds information about the users system. */
+  private _deviceInformation: DeviceInformation;
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
@@ -42,6 +46,7 @@ class CoreCamera {
       height: this._viewfinder.height,
       zoomLevel: 1
     };
+    this._deviceInformation = props.deviceInformation;
   }
 
   public get videoTrack(): MediaStreamTrack | undefined {
@@ -106,6 +111,14 @@ class CoreCamera {
 
   public set zoom(zoomValue: ZoomSteps) {
     this._zoom = zoomValue;
+  }
+
+  public get deviceInformation() {
+    return this._deviceInformation;
+  }
+
+  public set deviceInformation(deviceInfo) {
+    this._deviceInformation = deviceInfo;
   }
 
   /**

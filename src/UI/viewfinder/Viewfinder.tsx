@@ -77,6 +77,7 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
 };
 
 // This element covers over the real estate beneath the echo-bars because we cannot resize the video element itself.
+// Unfortunately, there is at the present no way to prevent this element from inhabiting the DOM when its not needed.
 const SafeAreaCover = styled.div`
   position: fixed;
   bottom: 0;
@@ -89,7 +90,10 @@ const SafeAreaCover = styled.div`
     bottom: unset;
     left: 0;
     height: 100vh;
-    width: env(safe-area-inset-left, 0);
+
+    // Apologies for the ugliness. The width of this will be minimum the width of the echo-bar.
+    // It was not possible to declare a 0 width whenever the safe-area-cover element is not needed.
+    width: calc(env(safe-area-inset-left, 0) + var(--echo-sidebar-width));
   }
 `;
 

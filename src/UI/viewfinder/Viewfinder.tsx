@@ -89,7 +89,9 @@ const SafeAreaCover = styled.div`
   @media screen and (orientation: landscape) {
     bottom: unset;
     left: 0;
-    height: 100vh;
+
+    // The safe areas turns out to not be part of viewport.
+    height: calc(100vh + env(safe-area-inset-bottom));
 
     // Apologies for the ugliness. The width of this will be minimum the width of the echo-bar.
     // It was not possible to declare a 0 width whenever the safe-area-cover element is not needed.

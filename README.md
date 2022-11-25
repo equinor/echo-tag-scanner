@@ -9,34 +9,16 @@ https://github.com/equinor/echo-camera-web/blob/dev/docs/index.md
 
 1. Clone the repo
 2. ```npm install```
-3. ```npm run predev``` -> get your self-signed certificates
 4. ```npm start``` -> a webpack dev server instance is available at https://localhost:3000
 
 ## Coding rules
-
--   Strive for **clean code** (and what to look for in code reviews/PRs)
-    - Use well defined function/variable names. (A well defined name is much better than comments, which often quickly get outdated/obsolete)
-    - Function names should tell what a function does. Bad: OnClick()/HandleOnClick() **Good: OpenTag()**
-    - Avoid negative names. **Good: IsActive IsEnabled**. Bad IsInActive/IsDeactivated IsDisabled. If(IsEnabled) is eaier to read than if(!isDisabled) <- (double not)
-    - Single Responsibility - A Function/Class should only do one thing. Split into sub functions.
-    - Use **PURE** functions to Avoid hidden side effects. It also makes it a lot easier to add Unit Tests
-    - **Avoid Code smells** like: Code duplication, Long method, Long class, Long parameter list. etc
-    - **No Magic numbers** or strings! Bad: const time = 600000; **Good: const millisecondsInTenMinutes = 10 * 60 * 1000;**
-    - Write code in a way that the compiler finds the BUGS! **Avoid ANY**. Define variables as optional/nullable in interfaces.
-    - Try to split UI and Logic in different files. Ideally the UI shouldn't contain any logic. Logic also wants to get unit tested.
-    - Favor functional programming over imperative programming: Use map, filter, find, etc instead of loops/ifs
-    - Prefer **immutable** objects/interfaces
-    - Avoid premature optimization - benchmark first.
-    - Prefer undefined over null
--   **Fix** all **eslint warnings and errors** in your files.
--   Always checkin the code in better shape than you found it, fix/cleanup smaller things as you edit a file.
-
+This project has no contrived coding rules or best practices. 
+You are a professional, which means you code whichever way you want and you can defend your ways when someone challenges you.
 ##  VS Code Extensions
 
 ### Must-have
 
 - ESLint
-- Prettier
 
 ### Suggested
 

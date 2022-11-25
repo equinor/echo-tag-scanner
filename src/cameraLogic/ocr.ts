@@ -7,9 +7,6 @@ import { getComputerVisionOcrResources } from '../services/api/resources/resourc
 import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { randomBytes } from 'crypto';
 
-import tagNumbers from '../tagnumbers.json';
-console.log('%c⧭', 'color: #997326', tagNumbers);
-
 export class OCR {
   private _attemptId?: string = undefined;
 
@@ -61,6 +58,8 @@ export class OCR {
       region.lines.forEach((line) =>
         line.words.forEach((word) => {
           let nextWord = word.text.trim();
+          nextWord = filterer.filterLeadingChar(nextWord);
+          nextWord = filterer.filterTrailingChar(nextWord);
           if (
             nextWord &&
             filterer.hasEnoughCharacters(nextWord) &&
@@ -75,50 +74,6 @@ export class OCR {
     );
 
     return possibleTagNumbers;
-  }
-
-  public testFiltration() {
-    const { withoutInstCode, withInstCode, motors } = tagNumbers;
-    console.group('Testing fails');
-    withoutInstCode.forEach((tag) => {
-      if (
-        tag &&
-        filterer.hasEnoughCharacters(tag) &&
-        (filterer.lettersAreValid(tag) || filterer.isMotorTag(tag)) &&
-        filterer.hasTwoIntegers(tag)
-      ) {
-        console.info(tag + ' was validated.');
-      } else console.info(tag + ' was NOT validated');
-    });
-    console.groupEnd();
-
-    console.group('Testing succeeds');
-    withInstCode.forEach((tag) => {
-      if (
-        tag &&
-        filterer.hasEnoughCharacters(tag.value) &&
-        (filterer.lettersAreValid(tag.value) ||
-          filterer.isMotorTag(tag.value)) &&
-        filterer.hasTwoIntegers(tag.value)
-      ) {
-        console.info(tag.value + ' was validated.');
-      } else console.info(tag.value + ' was NOT validated');
-    });
-    console.groupEnd();
-
-    console.group('Testing motors');
-    motors.forEach((motor) => {
-      if (
-        motor &&
-        filterer.hasEnoughCharacters(motor.value) &&
-        (filterer.lettersAreValid(motor.value) ||
-          filterer.isMotorTag(motor.value)) &&
-        filterer.hasTwoIntegers(motor.value)
-      ) {
-        console.info(motor.value + ' was validated.');
-      } else console.info(motor.value + ' was NOT validated');
-    });
-    console.groupEnd();
   }
 
   public async handleValidation(

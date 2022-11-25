@@ -4,6 +4,10 @@ interface OCRFilterer {
   /** Matches characters on letters A-Z, 0-9 and the special chars "_", "-". */
   lettersAreValid: (word: string) => boolean;
   isMotorTag: (word: string) => boolean;
+  /** Strips out the leading character in the word if it isn't an uppercase A-Z or a number 0-9. */
+  filterLeadingChar: (word: string) => string;
+  /** Strips out the trailing character in the word if it isn't an uppercase A-Z or a number 0-9. */
+  filterTrailingChar: (word: string) => string;
 }
 const filterer: OCRFilterer = Object.create(null);
 
@@ -37,6 +41,17 @@ filterer.lettersAreValid = function hasValidLettering(word: string): boolean {
 
 filterer.isMotorTag = function isMotorTag(word: string) {
   return word.match(/(\(M)\)/g)?.join('') === '(M)';
+};
+
+filterer.filterLeadingChar = function stripLeadingChars(word: string) {
+  if (word.charAt(0).match(/[^A-Z ^0-9]/g)) return word.substring(1);
+  else return word;
+};
+
+filterer.filterTrailingChar = function stripTrailingChars(word: string) {
+  if (word.charAt(word.length - 1).match(/[^A-Z ^0-9]/g))
+    return word.substring(0, word.length - 1);
+  else return word;
 };
 
 export { filterer };

@@ -13,10 +13,10 @@ export type CameraResolution = {
   width?: number;
   height?: number;
   fps?: number;
-  zoomLevel?: ZoomSteps;
+  zoomFactor?: number;
 };
 
-export type CameraResolutionRequest = {
+export type CameraSettingsRequest = {
   width: { min: number; max: number };
   height: { min: number; max: number };
   fps?: number;

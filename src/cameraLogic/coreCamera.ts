@@ -6,7 +6,12 @@ import {
   DeviceInformation
 } from '@utils';
 import { ErrorRegistry } from '@const';
-import { CameraProps, CameraResolution, ZoomSteps } from '@types';
+import {
+  CameraProps,
+  CameraResolution,
+  CameraSettingsRequest,
+  ZoomSteps
+} from '@types';
 
 /**
  * This object is concerned with the core features of a camera.
@@ -44,7 +49,7 @@ class CoreCamera {
     this._baseResolution = {
       width: this._viewfinder.width,
       height: this._viewfinder.height,
-      zoomLevel: 1
+      zoomFactor: 1
     };
     this._deviceInformation = props.deviceInformation;
   }
@@ -124,9 +129,30 @@ class CoreCamera {
   /**
    * Asks the user for permission to use the device camera and resolves a MediaStream object.
    */
-  static async getMediastream(): Promise<MediaStream> {
-    const cameraPreferences = getCameraPreferences();
-    return await navigator.mediaDevices.getUserMedia(cameraPreferences);
+  static async getMediastream(
+    cameraSettingsOverrides?: Partial<CameraSettingsRequest>
+  ): Promise<MediaStream> {
+    console.log('%c⧭', 'color: #514080', cameraSettingsOverrides);
+    const cameraPreferences = getCameraPreferences(cameraSettingsOverrides);
+    return await navigator.mediaDevices
+      .getUserMedia(cameraPreferences)
+      .catch((error) => {
+        if (error instanceof OverconstrainedError) {
+          if (error.constraint === 'width' || error.constraint === 'height') {
+            handleResolutionOverconstrain(error);
+          }
+        }
+        throw error;
+      });
+
+    function handleResolutionOverconstrain(error: OverconstrainedError) {
+      console.warn(
+        `The camera property ${error?.constraint} is overconstrained.`
+      );
+      console.warn(
+        'This error is being gracefully handled. Operation of camera should continue as normal, but with a lower resolution.'
+      );
+    }
   }
 
   protected torch(toggled: boolean): void {

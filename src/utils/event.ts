@@ -1,4 +1,8 @@
-import { CustomNotificationDetail } from '@types';
+import {
+  CameraResolution,
+  CustomNotificationDetail,
+  ZoomEventDetail
+} from '@types';
 
 /**
  * Returns a dispatch closure for sending notifications to the user.
@@ -28,6 +32,20 @@ function getNotificationDispatcher(
       );
     }
   };
+}
+
+export function dispatchCameraResolutionEvent(payload: CameraResolution) {
+  console.log('%c⧭', 'color: #cc0036', payload);
+  const resolutionEvent = new CustomEvent('camera-resolution', {
+    detail: payload
+  });
+  globalThis.dispatchEvent(resolutionEvent);
+}
+export function dispatchZoomEvent(payload: ZoomEventDetail) {
+  const simulatedZoomEvent = new CustomEvent('camera-zoom', {
+    detail: payload
+  });
+  globalThis.dispatchEvent(simulatedZoomEvent);
 }
 
 export { getNotificationDispatcher };

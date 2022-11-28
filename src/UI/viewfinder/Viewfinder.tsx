@@ -1,6 +1,12 @@
 import React, { SetStateAction, Dispatch, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { isLocalDevelopment, isDevelopment, isQA, isCustomEvent } from '@utils';
+import {
+  isLocalDevelopment,
+  isDevelopment,
+  isQA,
+  isCustomEvent,
+  isCustomZoomEvent
+} from '@utils';
 import { ViewfinderDimensions, ZoomSteps } from '@types';
 import { zIndexes } from '@const';
 import { ScanningArea } from './ScanningArea';
@@ -16,7 +22,7 @@ interface ViewfinderProps {
 
 type ZoomBehavior = {
   /** Specifies the scale value.*/
-  zoomFactor: ZoomSteps;
+  zoomFactor: number;
 
   /**
    * The offset adjustment for a scaled viewfinder.
@@ -36,13 +42,11 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   });
 
   useEffect(function mountSimulatedZoomEventListener() {
-    globalThis.addEventListener('ets-simulated-zoom', (event) => {
-      if (isCustomEvent(event)) {
+    globalThis.addEventListener('camera-zoom', (event) => {
+      if (isCustomZoomEvent(event)) {
         let offset = 50;
-        //@ts-ignore
         if (event.detail.zoomFactor !== 1) offset /= event.detail.zoomFactor;
         setZoomBehaviour({
-          //@ts-ignore
           zoomFactor: event.detail.zoomFactor,
           translateOffset: offset
         });

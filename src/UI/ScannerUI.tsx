@@ -5,7 +5,8 @@ import {
   SearchResults,
   GestureArea,
   CapturePreview,
-  NotificationHandler
+  NotificationHandler,
+  DebugInfoOverlay
 } from '@ui';
 import {
   useEchoIsSyncing,
@@ -48,6 +49,12 @@ function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
       <ControlPad id="control-pad" role="toolbar">
         {tagScanner && (
           <>
+            {tagScanner && (
+              <DebugInfoOverlay
+                tagScanner={tagScanner}
+                viewfinder={viewfinder}
+              />
+            )}
             <SystemInfoTrigger
               onDelayedTrigger={tagScanner.clipboardThis.bind(tagScanner)}
             />

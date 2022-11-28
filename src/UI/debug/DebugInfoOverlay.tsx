@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { CameraResolution, ViewfinderDimensions } from '@types';
-import { TagScanner } from '../../cameraLogic';
+import {
+  CameraResolution,
+  ViewfinderDimensions,
+  ZoomEventDetail
+} from '@types';
+import { TagScanner } from '@cameraLogic';
+import { zIndexes } from '@const';
+import { isCustomResolutionEvent, isCustomZoomEvent } from '@utils';
 
 type DebugInfo = {
   viewfinder: ViewfinderDimensions;
   cameraFeed: CameraResolution;
   viewport: ViewfinderDimensions;
+  zoomFactor: string;
+  frameRate: string;
 };
 
 interface DebugInfoOverlayProps {
@@ -26,65 +34,76 @@ export const DebugInfoOverlay = (props: DebugInfoOverlayProps): JSX.Element => {
     viewport: {
       width: globalThis.visualViewport?.width,
       height: globalThis.visualViewport?.height
-    }
+    },
+    zoomFactor: '1',
+    frameRate: String(props.tagScanner.videoTrackSettings?.frameRate) ?? 'n/a'
   });
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    function getFreshDebugInfo() {
-      return {
-        viewfinder: {
-          width: props.viewfinder.width,
-          height: props.viewfinder.height
-        },
-        cameraFeed: {
-          width: props.tagScanner?.videoTrackSettings?.width,
-          height: props.tagScanner?.videoTrackSettings?.height
-        },
-        viewport: {
-          width: globalThis.visualViewport?.width,
-          height: globalThis.visualViewport?.height
-        }
-      };
-    }
-    setDebugInfo(getFreshDebugInfo());
-  }, [
-    props.viewfinder.width,
-    props.viewfinder.height,
-    props.tagScanner?.videoTrackSettings?.width,
-    props.tagScanner?.videoTrackSettings?.height
-  ]);
 
-  if (props.viewfinder instanceof HTMLVideoElement) {
-    props.viewfinder.addEventListener('loadeddata', () => {
-      setDebugInfo(getFreshDebugInfo());
+  useEffect(function updateDebugInfo() {
+    globalThis.addEventListener('camera-zoom', (event) => {
+      if (isCustomZoomEvent(event)) {
+        setDebugInfo(
+          getFreshDebugInfo({ zoomFactor: event.detail.zoomFactor })
+        );
+      }
     });
-  }
 
-  function getFreshDebugInfo() {
-    return {
+    globalThis.addEventListener('camera-resolution', (event) => {
+      if (isCustomResolutionEvent(event)) {
+        setDebugInfo(
+          getFreshDebugInfo({
+            width: event.detail.width,
+            height: event.detail.height,
+            zoomFactor: event.detail.zoomFactor
+          })
+        );
+      }
+    });
+  }, []);
+
+  function getFreshDebugInfo(
+    info?: Partial<ZoomEventDetail> | Partial<CameraResolution>
+  ): DebugInfo {
+    const debugInfo = {
       viewfinder: {
         width: props.viewfinder.width,
         height: props.viewfinder.height
       },
       cameraFeed: {
-        width: props.tagScanner?.videoTrackSettings?.width,
-        height: props.tagScanner?.videoTrackSettings?.height
+        width:
+          (info && Reflect.get(info, 'width')) ||
+          props.tagScanner?.videoTrackSettings?.width,
+        height:
+          (info && Reflect.get(info, 'height')) ||
+          props.tagScanner?.videoTrackSettings?.height
       },
       viewport: {
         width: globalThis.visualViewport?.width,
         height: globalThis.visualViewport?.height
-      }
+      },
+      zoomFactor: String(info?.zoomFactor),
+      frameRate: '60'
     };
+
+    if (info && 'fps' in info) {
+      debugInfo.frameRate = String(info?.fps || 'n/a');
+    }
+    return debugInfo;
   }
 
   return (
     <output
-      style={{ position: 'absolute', top: '20%', left: '20%', zIndex: 10 }}
+      style={{
+        position: 'fixed',
+        top: '0',
+        right: '0',
+        zIndex: zIndexes.overlays
+      }}
     >
       {debugInfo.cameraFeed && (
         <mark style={{ backgroundColor: 'hotpink' }}>
           Camera feed: {debugInfo.cameraFeed.width}x
-          {debugInfo.cameraFeed.height}
+          {debugInfo.cameraFeed.height}@{debugInfo.frameRate}fps
         </mark>
       )}
       <br />
@@ -92,11 +111,9 @@ export const DebugInfoOverlay = (props: DebugInfoOverlayProps): JSX.Element => {
         Viewport: {debugInfo.viewport?.width}x{debugInfo.viewport?.height}
       </mark>
       <br />
-      {props.viewfinder && (
-        <mark style={{ backgroundColor: 'green' }}>
-          Viewfinder: {debugInfo.viewfinder.width}x{debugInfo.viewfinder.height}
-        </mark>
-      )}
+      <mark style={{ backgroundColor: 'lightgreen' }}>
+        Zoom: {debugInfo.zoomFactor}x
+      </mark>
     </output>
   );
 };

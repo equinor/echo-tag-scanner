@@ -24,6 +24,8 @@ Having looked through the logs for the failed scanning sessions, I see a lot of 
 
 *Therefore, considering the amount of false positives in the logs, I can with confidence increase the hit rate to 70% while still remaining conservative in my estimates.*
 
+*This hit rate may however drop somewhat when the zooming feature is made available because we do not do any upscaling of the video feed. Tags farther away will always be harder to read. The latest version (2.1.2) will include the zoom factor in the log entries, allowing us to independently measure the hit rate for when the camera is zoomed in.*
+
 
 ## An outline of improvements and features
 Below follows an outline of suggested improvements and features that contributes towards solving the pain points.
@@ -84,6 +86,11 @@ This feature is partly implemented today and it is a process of recolouring an i
 
 The implementation today can recolour captures to grayscale (different shades of gray) or black&white. The problem we have been facing is that these postprocesses can have a tendency of sacrificing too much clarity from the captures. They have however shown significant savings in the image sizes, which is very valuable in difficult field conditions.
 
+### Upscale camera feed on zooming
+Today (as of 2.1.2), the users will have a camera feed of 720p, ie 1280x720 pixels. The choice of resolution comes down to the general support amongst the different camera hardware and a conservative approach to how large a capture can be in bytes. The magic upper limit of a single capture is 50 kilobytes because if the user is on a very slow internet connection, they should not have to wait more than roughly 2 seconds to have that one capture be relayed to Azure Computer Vision for OCR. With up to 5 captures, this will then equal about 10 seconds of waiting in the most extreme cases.
+
+If we upscale the camera feed, this will negatively impact the sizes of the captures. This will in turn make the tag scanner not feasible for the users that operate in an environment which has some of the slower internet connections.
+
 ## A recommendation as of 18th of November, 2022
 As mentioned under On-device OCR heading, the use of On-device OCR completely eliminates pain point #1 and introduces offline scanning as a side effect.
 There is however a problem of, not only implementing it which may take several sprints to complete and will introduce several new bugs, but one has to also provide an OCR model alongside the OCR code itself.
@@ -98,5 +105,6 @@ My general recommendation would be to continue working on improving the hit rate
 - Improve *Capture Recolouring* to reduce the sizes of the captures. (Will increase the hit rate and make the scanner faster)
 - Do *Improved UX*
 - Implement Computer Vision API 4.0 (This may increase our hit rate slightly)
+- If hit rate is low when the zoom value is above 1, do *Upscale camera feed on zooming*
 
 Without having done any analysis on the actual feasibility of these actions, if we assume everything is possible to implement today, we are looking at development until autumn 2023 before the tag scanner is close to being a 100% optimized for field work.

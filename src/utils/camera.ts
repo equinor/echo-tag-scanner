@@ -79,8 +79,7 @@ function getCameraPreferences(
 ): MediaStreamConstraints {
   const isIos = EchoUtils.Utils.iOs.isIosDevice();
   const cameraSettingsRequest = {
-    ...fixedCameraSettingsRequest,
-    ...cameraSettingsOverrides
+    ...fixedCameraSettingsRequest
   };
   // Developer enviroment, use this for desktop.
   if (isLocalDevelopment && !isIos && navigator.maxTouchPoints <= 1) {
@@ -90,8 +89,7 @@ function getCameraPreferences(
     let minWidthDev = cameraSettingsRequest.width.min;
     let minHeightDev = cameraSettingsRequest.height.min;
 
-    const cameraId =
-      'a874c50ce1a7f877e5d365c7ef7738d4881d76a22876cd61f0b708422936dc45';
+    const cameraId = undefined;
 
     const request = {
       video: {
@@ -102,9 +100,7 @@ function getCameraPreferences(
         },
 
         // Higher FPS is good for a scanning operation.
-        frameRate: {
-          ideal: cameraSettingsRequest.fps
-        },
+        frameRate: cameraSettingsRequest.fps,
 
         deviceId: {
           exact: cameraId

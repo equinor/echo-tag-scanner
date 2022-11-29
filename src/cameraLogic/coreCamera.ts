@@ -132,7 +132,6 @@ class CoreCamera {
   static async getMediastream(
     cameraSettingsOverrides?: Partial<CameraSettingsRequest>
   ): Promise<MediaStream> {
-    console.log('%c⧭', 'color: #514080', cameraSettingsOverrides);
     const cameraPreferences = getCameraPreferences(cameraSettingsOverrides);
     return await navigator.mediaDevices
       .getUserMedia(cameraPreferences)

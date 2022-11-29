@@ -73,10 +73,11 @@ class Camera extends Postprocessor {
     try {
       const overrides =
         this.zoom >= 2
-          ? {
-              width: { min: 1281, max: 1920 },
-              height: { min: 721, max: 1080 }
-            } //TODO: Use "exact" over min and max.
+          ? //TODO: Use "exact" over min and max.
+            ({
+              width: { min: 1920, max: 1920 },
+              height: { min: 1080, max: 1080 }
+            } as CameraSettingsRequest)
           : undefined;
       const newMediastream = await CoreCamera.getMediastream(overrides);
 
@@ -176,7 +177,6 @@ class Camera extends Postprocessor {
               zoomEventPayload.type = 'native';
               dispatchZoomEvent(zoomEventPayload);
 
-              this.refreshStream();
               resolve({
                 width: this.baseResolution.width,
                 height: this.baseResolution.height,
@@ -193,8 +193,6 @@ class Camera extends Postprocessor {
           this.zoom = newZoomFactor;
           zoomEventPayload.type = 'simulated';
           dispatchZoomEvent(zoomEventPayload);
-
-          this.refreshStream();
         }
       }
     });

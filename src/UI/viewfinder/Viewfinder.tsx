@@ -112,6 +112,7 @@ const CameraFeed = styled.video<{
   top: 50%;
   left: 50%;
 
+
   background-color: var(--black);
   transition: all 0.3s ease;
   z-index: ${zIndexes.viewfinder};

@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { zIndexes } from '@const';
 import { ViewfinderDimensions } from '@types';
-import { getOrientation, isDevelopment, isLocalDevelopment } from '@utils';
+import { getOrientation } from '@utils';
 
 interface ScanningAreaProps {
   scanningAreaRef: React.Dispatch<SetStateAction<HTMLElement | undefined>>;

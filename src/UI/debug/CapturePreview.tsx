@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Camera } from '@cameraLogic';
 import styled from 'styled-components';
 import { Button } from '@equinor/eds-core-react';
-import { isCustomEvent } from '@utils';
 import { zIndexes } from '@const';
 import EchoUtils from '@equinor/echo-utils';
 

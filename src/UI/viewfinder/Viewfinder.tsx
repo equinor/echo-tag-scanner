@@ -4,10 +4,9 @@ import {
   isLocalDevelopment,
   isDevelopment,
   isQA,
-  isCustomEvent,
   isCustomZoomEvent
 } from '@utils';
-import { ViewfinderDimensions, ZoomSteps } from '@types';
+import { ViewfinderDimensions } from '@types';
 import { zIndexes } from '@const';
 import { ScanningArea } from './ScanningArea';
 import { VersionNumber, Backdrop } from '@ui';

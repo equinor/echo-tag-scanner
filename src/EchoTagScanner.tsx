@@ -38,14 +38,6 @@ const EchoCamera = () => {
     return null;
   }
 
-  const videoTracks = mediaStream.getVideoTracks();
-  if (videoTracks.length > 0) {
-    viewFinderDimensions = {
-      width: mediaStream.getVideoTracks()[0].getSettings().width,
-      height: mediaStream.getVideoTracks()[0].getSettings().height
-    };
-  }
-
   return (
     <ErrorBoundary stackTraceEnabled>
       <Main>

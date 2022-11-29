@@ -45,8 +45,8 @@ const SystemInfoTrigger = (props: SystemInfoTriggerProps) => {
 };
 
 const InvisibleButton = styled.button`
-  position: absolute;
-  left: 0;
+  position: fixed;
+  right: 0;
   top: 0;
   background-color: rgba(0, 0, 0, 0, 1);
   z-index: 2;

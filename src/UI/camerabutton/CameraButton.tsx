@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 import { Icon } from '@equinor/eds-core-react';
 
@@ -11,8 +11,27 @@ interface TorchButtonProps {
  * Returns a button for toggling the torch feature.
  */
 const TorchButton = (props: TorchButtonProps): JSX.Element => {
+  const torchButtonRef = useRef<HTMLButtonElement>(null);
+
+  function handleTorchToggling() {
+    if (typeof props?.onClick === 'function') {
+      torchButtonRef.current?.setAttribute(
+        'aria-pressed',
+        torchButtonRef.current?.getAttribute('aria-pressed') === 'true'
+          ? 'false'
+          : 'true'
+      );
+      props.onClick();
+    }
+  }
+
   return (
-    <StyledTorchButton id="torch-button" onClick={props.onClick}>
+    <StyledTorchButton
+      ref={torchButtonRef}
+      aria-pressed="false"
+      id="torch-button"
+      onClick={handleTorchToggling}
+    >
       <Icon name={'lightbulb'} color="white" />
     </StyledTorchButton>
   );
@@ -49,7 +68,7 @@ const StyledScannerButton = styled.button`
   width: 75px;
   height: 75px;
   background-color: var(--white);
-  grid-area: shutter;
+  grid-area: camerabutton;
 `;
 
 const EchoIsSyncingButton = styled(StyledScannerButton)`
@@ -100,6 +119,10 @@ const StyledTorchButton = styled.button`
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
+
+  &[aria-pressed='true'] {
+    background: var(--hoverIcon);
+  }
 
   &:active {
     background-color: var(--equiBlue1);

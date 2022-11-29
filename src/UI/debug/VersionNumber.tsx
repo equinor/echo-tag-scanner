@@ -20,7 +20,7 @@ export const VersionNumber = (): JSX.Element => {
 };
 const Mark = styled.mark`
   position: absolute;
-  top: 64px; // Give some space for the echo buttons.
+  top: 0;
   left: 0;
   z-index: ${zIndexes.versionNumber};
   user-select: none;
@@ -28,6 +28,7 @@ const Mark = styled.mark`
   -moz-user-select: none;
 
   @media screen and (orientation: landscape) {
+    top: 0;
     left: var(--echo-sidebar-width);
   }
 `;

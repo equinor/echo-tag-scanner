@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import {
-  CaptureAndTorch,
+  CameraControlsRow,
   SearchResults,
   GestureArea,
   CapturePreview,
@@ -59,7 +59,7 @@ function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
             <SystemInfoTrigger
               onDelayedTrigger={tagScanner.clipboardThis.bind(tagScanner)}
             />
-            <CaptureAndTorch
+            <CameraControlsRow
               onToggleTorch={getTorchToggleProvider(tagScanner)}
               onScanning={onTagScan}
               isDisabled={false /* Use this for when Echo fails to sync tags */}

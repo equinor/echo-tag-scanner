@@ -12,5 +12,6 @@ const rootpath = path.resolve(__dirname, "../");
  * https://webpack.js.org/configuration/
  */
 module.exports = {
-  resolve: defineResolves(rootpath)
+  resolve: defineResolves(rootpath),
+  experiments: { topLevelAwait: true }
 };

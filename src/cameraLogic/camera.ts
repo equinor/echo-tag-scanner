@@ -3,7 +3,9 @@ import {
   CameraResolution,
   DrawImageParameters,
   ZoomSteps,
-  ZoomMethod
+  ZoomMethod,
+  ZoomEventDetail,
+  CameraSettingsRequest
 } from '@types';
 import {
   logger,
@@ -11,7 +13,9 @@ import {
   reportVideoTrack,
   getOrientation,
   determineZoomMethod,
-  handleError
+  handleError,
+  dispatchCameraResolutionEvent,
+  dispatchZoomEvent
 } from '@utils';
 import { CoreCamera } from './coreCamera';
 import { Postprocessor } from './postprocessor';
@@ -63,12 +67,19 @@ class Camera extends Postprocessor {
 
   /**
    * Performs a complete refresh of the camera stream by requesting a new mediastream object.
-   * @param {number} requestedResolution Override the requested resolution.
    * @returns {CameraResolution} Returns the new camera dimensions and framerate.
    */
   public async refreshStream(): Promise<CameraResolution> {
     try {
-      const newMediastream = await CoreCamera.getMediastream();
+      const overrides =
+        this.zoom >= 2
+          ? //TODO: Use "exact" over min and max.
+            ({
+              width: { min: 1920, max: 1920 },
+              height: { min: 1080, max: 1080 }
+            } as CameraSettingsRequest)
+          : undefined;
+      const newMediastream = await CoreCamera.getMediastream(overrides);
 
       const newTrack = newMediastream.getVideoTracks()[0];
       newTrack.addEventListener('ended', this.refreshStream.bind(this));
@@ -81,21 +92,18 @@ class Camera extends Postprocessor {
       this.currentOrientation = getOrientation();
       this._zoomMethod = determineZoomMethod.call(this);
 
-      logger.log('EchoDevelopment', () => {
-        console.group('The media stream was refreshed');
-        console.info('The mediastream ->', newMediastream);
-        console.info(
-          'The new camera constraints -> ',
-          newTrack.getConstraints()
-        );
-        console.info('The new video track -> ', newTrack);
-        console.groupEnd();
+      dispatchCameraResolutionEvent({
+        width: this.videoTrackSettings.width,
+        height: this.videoTrackSettings.height,
+        zoomFactor: this.zoom,
+        fps: this.videoTrackSettings.frameRate
       });
 
       return {
         width: this.videoTrackSettings.width,
         height: this.videoTrackSettings.height,
-        fps: this.videoTrackSettings.frameRate
+        fps: this.videoTrackSettings.frameRate,
+        zoomFactor: this.zoom
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -149,6 +157,11 @@ class Camera extends Postprocessor {
     newZoomFactor: ZoomSteps
   ): Promise<CameraResolution | undefined> {
     return new Promise((resolve) => {
+      const zoomEventPayload: ZoomEventDetail = {
+        zoomFactor: newZoomFactor,
+        type: undefined
+      };
+
       if (this._zoomMethod.type === 'native') {
         if (
           newZoomFactor >= this._zoomMethod.min &&
@@ -158,30 +171,30 @@ class Camera extends Postprocessor {
             ?.applyConstraints({ advanced: [{ zoom: newZoomFactor }] })
             .then(() => {
               this.zoom = newZoomFactor;
+              zoomEventPayload.type = 'native';
+              dispatchZoomEvent(zoomEventPayload);
+
               resolve({
                 width: this.baseResolution.width,
                 height: this.baseResolution.height,
-                zoomLevel: newZoomFactor
+                zoomFactor: newZoomFactor
               });
             })
-            .catch(onZoomRejection);
-        } else onZoomRejection('invalid range');
+            .catch(rejectZoom);
+        } else rejectZoom('invalid range');
       } else if (this._zoomMethod.type === 'simulated') {
         if (
           newZoomFactor >= this._zoomMethod.min &&
           newZoomFactor <= this._zoomMethod.max
         ) {
           this.zoom = newZoomFactor;
-
-          const simulatedZoomEvent = new CustomEvent('ets-simulated-zoom', {
-            detail: { zoomFactor: newZoomFactor }
-          });
-          globalThis.dispatchEvent(simulatedZoomEvent);
+          zoomEventPayload.type = 'simulated';
+          dispatchZoomEvent(zoomEventPayload);
         }
       }
     });
 
-    function onZoomRejection(reason: MediaStreamError | 'invalid range') {
+    function rejectZoom(reason: MediaStreamError | 'invalid range') {
       logger.log('QA', () => {
         console.error(
           'Encountered an error while performing native zoom. -> ',

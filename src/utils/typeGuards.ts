@@ -1,4 +1,8 @@
-import { CameraResolution, CustomNotificationDetail } from '@types';
+import {
+  CameraResolution,
+  CustomNotificationDetail,
+  ZoomEventDetail
+} from '@types';
 
 /** CustomEvent cannot be type inferred from Event. This will instead type guard it. */
 export function isCustomEvent<T>(event: Event): event is CustomEvent<T> {
@@ -30,5 +34,22 @@ export function isCustomNotificationDetail(
       Reflect.has(detail, 'message') && Reflect.has(detail, 'autohideDuration')
     );
   }
+  return false;
+}
+
+export function isCustomZoomEvent(
+  event: Event
+): event is CustomEvent<ZoomEventDetail> {
+  if (
+    isCustomEvent(event) &&
+    event.detail != null &&
+    typeof event.detail === 'object'
+  ) {
+    return (
+      Reflect.has(event.detail, 'zoomFactor') &&
+      Reflect.has(event.detail, 'type')
+    );
+  }
+
   return false;
 }

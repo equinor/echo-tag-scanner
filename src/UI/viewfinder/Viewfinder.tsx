@@ -1,6 +1,12 @@
 import React, { SetStateAction, Dispatch, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { isLocalDevelopment, isDevelopment, isQA, isCustomEvent } from '@utils';
+import {
+  isLocalDevelopment,
+  isDevelopment,
+  isQA,
+  isCustomEvent,
+  isCustomZoomEvent
+} from '@utils';
 import { ViewfinderDimensions, ZoomSteps } from '@types';
 import { zIndexes } from '@const';
 import { ScanningArea } from './ScanningArea';
@@ -16,7 +22,7 @@ interface ViewfinderProps {
 
 type ZoomBehavior = {
   /** Specifies the scale value.*/
-  zoomFactor: ZoomSteps;
+  zoomFactor: number;
 
   /**
    * The offset adjustment for a scaled viewfinder.
@@ -36,13 +42,11 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   });
 
   useEffect(function mountSimulatedZoomEventListener() {
-    globalThis.addEventListener('ets-simulated-zoom', (event) => {
-      if (isCustomEvent(event)) {
+    globalThis.addEventListener('camera-zoom', (event) => {
+      if (isCustomZoomEvent(event)) {
         let offset = 50;
-        //@ts-ignore
         if (event.detail.zoomFactor !== 1) offset /= event.detail.zoomFactor;
         setZoomBehaviour({
-          //@ts-ignore
           zoomFactor: event.detail.zoomFactor,
           translateOffset: offset
         });
@@ -65,6 +69,8 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         translateOffset={zoomBehaviour.translateOffset}
       />
 
+      <SafeAreaCover id="safe-area-cover" />
+
       <ScanningArea
         scanningAreaRef={props.setScanningAreaRef}
         setCanvasRef={props.setCanvasRef}
@@ -74,6 +80,29 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   );
 };
 
+// This element covers over the real estate beneath the echo-bars because we cannot resize the video element itself.
+// Unfortunately, there is at the present no way to prevent this element from inhabiting the DOM when its not needed.
+const SafeAreaCover = styled.div`
+  position: fixed;
+  bottom: 0;
+  width: 100vw;
+  height: env(safe-area-inset-bottom, 0);
+  z-index ${zIndexes.overlays};
+  background-color: white;
+  
+  @media screen and (orientation: landscape) {
+    bottom: unset;
+    left: 0;
+
+    // The safe areas turns out to not be part of viewport.
+    height: calc(100vh + env(safe-area-inset-bottom));
+
+    // Apologies for the ugliness. The width of this will be minimum the width of the echo-bar.
+    // It was not possible to declare a 0 width whenever the safe-area-cover element is not needed.
+    width: calc(env(safe-area-inset-left, 0) + var(--echo-sidebar-width));
+  }
+`;
+
 const CameraFeed = styled.video<{
   zoomFactor: number;
   translateOffset: number;
@@ -82,6 +111,7 @@ const CameraFeed = styled.video<{
   position: absolute;
   top: 50%;
   left: 50%;
+
 
   background-color: var(--black);
   transition: all 0.3s ease;

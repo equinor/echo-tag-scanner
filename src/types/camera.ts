@@ -1,19 +1,22 @@
+import { DeviceInformation } from '@utils';
+
 export interface CameraProps {
   mediaStream: MediaStream;
   viewfinder: HTMLVideoElement;
   canvas: HTMLCanvasElement;
   additionalCaptureOptions?: DisplayMediaStreamConstraints;
   scanningArea: HTMLElement;
+  deviceInformation: DeviceInformation;
 }
 
 export type CameraResolution = {
   width?: number;
   height?: number;
   fps?: number;
-  zoomLevel?: ZoomSteps;
+  zoomFactor?: number;
 };
 
-export type CameraResolutionRequest = {
+export type CameraSettingsRequest = {
   width: { min: number; max: number };
   height: { min: number; max: number };
   fps?: number;

@@ -9,7 +9,7 @@ import { Camera, OCR } from '.';
 export class TagScanner extends Camera {
   private _scanRetries = 5;
   private _scanDuration = 2; //seconds
-  private _OCR = new OCR();
+  private _OCR = new OCR({ tagScanner: this });
   private _scanningArea: HTMLElement;
 
   constructor(props: CameraProps) {

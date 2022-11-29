@@ -5,7 +5,8 @@ import {
   SearchResults,
   GestureArea,
   CapturePreview,
-  NotificationHandler
+  NotificationHandler,
+  DebugInfoOverlay
 } from '@ui';
 import {
   useEchoIsSyncing,
@@ -16,7 +17,8 @@ import {
 import {
   getTorchToggleProvider,
   isDevelopment,
-  isLocalDevelopment
+  isLocalDevelopment,
+  isQA
 } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 import { zIndexes } from '@const';
@@ -48,6 +50,12 @@ function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
       <ControlPad id="control-pad" role="toolbar">
         {tagScanner && (
           <>
+            {tagScanner && (isLocalDevelopment || isDevelopment || isQA) && (
+              <DebugInfoOverlay
+                tagScanner={tagScanner}
+                viewfinder={viewfinder}
+              />
+            )}
             <SystemInfoTrigger
               onDelayedTrigger={tagScanner.clipboardThis.bind(tagScanner)}
             />

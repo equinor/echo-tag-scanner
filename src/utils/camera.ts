@@ -6,8 +6,8 @@ import {
   isQA,
   getOrientation
 } from '@utils';
-import { ZoomMethod } from '@types';
-import { cameraRequest } from '../const';
+import { CameraSettingsRequest, ZoomMethod } from '@types';
+import { fixedCameraSettingsRequest } from '@const';
 import EchoUtils from '@equinor/echo-utils';
 
 function assignZoomSettings(
@@ -74,19 +74,22 @@ function determineZoomMethod(this: Camera): ZoomMethod {
   }
 }
 
-function getCameraPreferences(): MediaStreamConstraints {
+function getCameraPreferences(
+  cameraSettingsOverrides?: Partial<CameraSettingsRequest>
+): MediaStreamConstraints {
   const isIos = EchoUtils.Utils.iOs.isIosDevice();
-
+  const cameraSettingsRequest = {
+    ...fixedCameraSettingsRequest
+  };
   // Developer enviroment, use this for desktop.
   if (isLocalDevelopment && !isIos && navigator.maxTouchPoints <= 1) {
     console.info('Creating dev camera request');
-    let maxWidthDev = cameraRequest.width.max;
-    let maxHeightDev = cameraRequest.height.max;
-    let minWidthDev = cameraRequest.width.min;
-    let minHeightDev = cameraRequest.height.min;
+    let maxWidthDev = cameraSettingsRequest.width.max;
+    let maxHeightDev = cameraSettingsRequest.height.max;
+    let minWidthDev = cameraSettingsRequest.width.min;
+    let minHeightDev = cameraSettingsRequest.height.min;
 
-    const cameraId =
-      '883c79d936715fb3d0f70390c627a7bcb9ff395f6835fdf2b068373a35764ec2';
+    const cameraId = undefined;
 
     const request = {
       video: {
@@ -97,9 +100,7 @@ function getCameraPreferences(): MediaStreamConstraints {
         },
 
         // Higher FPS is good for a scanning operation.
-        frameRate: {
-          ideal: cameraRequest.fps
-        },
+        frameRate: cameraSettingsRequest.fps,
 
         deviceId: {
           exact: cameraId
@@ -114,10 +115,10 @@ function getCameraPreferences(): MediaStreamConstraints {
   // Developer environment, but testing on Android.
   if (isLocalDevelopment && !isIos && navigator.maxTouchPoints >= 2) {
     console.info('Creating android camera request');
-    let maxWidthDev = cameraRequest.width.max;
-    let maxHeightDev = cameraRequest.height.max;
-    let minWidthDev = cameraRequest.width.min;
-    let minHeightDev = cameraRequest.height.min;
+    let maxWidthDev = cameraSettingsRequest.width.max;
+    let maxHeightDev = cameraSettingsRequest.height.max;
+    let minWidthDev = cameraSettingsRequest.width.min;
+    let minHeightDev = cameraSettingsRequest.height.min;
     return {
       video: {
         width: { max: maxWidthDev, min: minWidthDev },
@@ -128,7 +129,7 @@ function getCameraPreferences(): MediaStreamConstraints {
 
         // Higher FPS is good for a scanning operation.
         frameRate: {
-          ideal: cameraRequest.fps
+          ideal: cameraSettingsRequest.fps
         },
 
         // Require a specific camera here.
@@ -141,10 +142,10 @@ function getCameraPreferences(): MediaStreamConstraints {
   // Developer environment, but testing on iDevies.
   if (isLocalDevelopment && isIos) {
     console.info('Creating iOS dev capture request.');
-    let maxWidthDev = cameraRequest.width.max;
-    let maxHeightDev = cameraRequest.height.max;
-    let minWidthDev = cameraRequest.width.min;
-    let minHeightDev = cameraRequest.height.min;
+    let maxWidthDev = cameraSettingsRequest.width.max;
+    let maxHeightDev = cameraSettingsRequest.height.max;
+    let minWidthDev = cameraSettingsRequest.width.min;
+    let minHeightDev = cameraSettingsRequest.height.min;
     return {
       video: {
         width: { max: maxWidthDev, min: minWidthDev },
@@ -155,7 +156,7 @@ function getCameraPreferences(): MediaStreamConstraints {
 
         // Higher FPS is good for a scanning operation.
         frameRate: {
-          ideal: cameraRequest.fps
+          ideal: cameraSettingsRequest.fps
         },
 
         // Require a specific camera here.
@@ -171,15 +172,18 @@ function getCameraPreferences(): MediaStreamConstraints {
     console.info('Creating QA camera request');
     return {
       video: {
-        width: { max: cameraRequest.width.max, min: cameraRequest.width.min },
+        width: {
+          max: cameraSettingsRequest.width.max,
+          min: cameraSettingsRequest.width.min
+        },
         height: {
-          max: cameraRequest.height.max,
-          min: cameraRequest.height.min
+          max: cameraSettingsRequest.height.max,
+          min: cameraSettingsRequest.height.min
         },
 
         // Higher FPS is good for a scanning operation.
         frameRate: {
-          ideal: cameraRequest.fps
+          ideal: cameraSettingsRequest.fps
         },
         aspectRatio: { exact: 16 / 9 },
 
@@ -194,12 +198,18 @@ function getCameraPreferences(): MediaStreamConstraints {
   console.info('Creating production camera request.');
   return {
     video: {
-      width: { max: cameraRequest.width.max, min: cameraRequest.width.min },
-      height: { max: cameraRequest.height.max, min: cameraRequest.height.min },
+      width: {
+        max: cameraSettingsRequest.width.max,
+        min: cameraSettingsRequest.width.min
+      },
+      height: {
+        max: cameraSettingsRequest.height.max,
+        min: cameraSettingsRequest.height.min
+      },
 
       // Higher FPS is good for a scanning operation.
       frameRate: {
-        ideal: cameraRequest.fps
+        ideal: cameraSettingsRequest.fps
       },
 
       aspectRatio: { exact: 16 / 9 },

@@ -35,7 +35,6 @@ function getNotificationDispatcher(
 }
 
 export function dispatchCameraResolutionEvent(payload: CameraResolution) {
-  console.log('%c⧭', 'color: #cc0036', payload);
   const resolutionEvent = new CustomEvent('camera-resolution', {
     detail: payload
   });

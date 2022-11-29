@@ -107,10 +107,7 @@ class Camera extends Postprocessor {
       };
     } catch (error) {
       if (error instanceof Error) {
-        console.log('%c⧭', 'color: #8c0038', error);
         logger.trackError(error);
-
-        if (error.name === 'OverconstrainedError') console.log('ERROR');
       }
       throw error;
     }

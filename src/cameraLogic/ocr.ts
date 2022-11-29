@@ -1,6 +1,6 @@
 import { BackendError } from '@equinor/echo-base';
 import { ComputerVisionResponse, ParsedComputerVisionResponse } from '@types';
-import { handleError, logger, filterer } from '@utils';
+import { handleError, logger, ocrFilterer } from '@utils';
 import { ErrorRegistry } from '@const';
 import { baseApiClient } from '../services/api/base/base';
 import { getComputerVisionOcrResources } from '../services/api/resources/resources';
@@ -58,14 +58,14 @@ export class OCR {
       region.lines.forEach((line) =>
         line.words.forEach((word) => {
           let nextWord = word.text.trim();
-          nextWord = filterer.filterLeadingChar(nextWord);
-          nextWord = filterer.filterTrailingChar(nextWord);
+          nextWord = ocrFilterer.filterLeadingChar(nextWord);
+          nextWord = ocrFilterer.filterTrailingChar(nextWord);
           if (
             nextWord &&
-            filterer.hasEnoughCharacters(nextWord) &&
-            (filterer.lettersAreValid(nextWord) ||
-              filterer.isMotorTag(nextWord)) &&
-            filterer.hasTwoIntegers(nextWord)
+            ocrFilterer.hasEnoughCharacters(nextWord) &&
+            (ocrFilterer.lettersAreValid(nextWord) ||
+              ocrFilterer.isMotorTag(nextWord)) &&
+            ocrFilterer.hasTwoIntegers(nextWord)
           ) {
             possibleTagNumbers.push(nextWord);
           }

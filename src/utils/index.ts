@@ -10,4 +10,5 @@ export * from './developer';
 export * from './debug';
 export * from './typeGuards';
 export * from './localstorage';
+export * from './filtering';
 export * from './device';

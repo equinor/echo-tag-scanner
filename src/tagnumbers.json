@@ -1,0 +1,119 @@
+{
+    "withoutInstCode": [
+        "11-76-SE0130",
+        "R-27PSVO19",
+        "1191-52TT1109",
+        "ZCG.24-0101",
+        "05-plT-240140",
+        "--ECS--24100",
+        "ISG-HV",
+        "TAS-272J",
+        ".1Nr;",
+        "GUDWI02R",
+        ".)30PSV;0501",
+        "A752@CL1143",
+        "24.00KW",
+        "1230-JB-73-0202B",
+        "__-21-510",
+        "R85E*",
+        "PI-MD-4557",
+        "Jozgrt9*1",
+        "-89R0000305",
+        "3777/75678",
+        "ALARM",
+        "Manual",
+        "PROSEss"
+    ],
+    "withInstCode": [
+        {
+            "value": "TB-65-0102",
+            "instCode": "VIS"
+        },
+        {
+            "value": "88-EX-631",
+            "instCode": "TROA"
+        },
+        {
+            "value": "0050-20H-04-0017-LC2-00",
+            "instCode": "TROB"
+        },
+        {
+            "value": "SI-940",
+            "instCode": "TROA"
+        },
+        {
+            "value": "S009",
+            "instCode": "SNB"
+        },
+        {
+            "value": "V21208",
+            "instCode": "PLAB"
+        },
+        {
+            "value": "XV15019",
+            "instCode": "OSC"
+        },
+        {
+            "value": "B0-70-2101CAR",
+            "instCode": "OSS"
+        },
+        {
+            "value": "75-DG-1143",
+            "instCode": "MET"
+        },
+        {
+            "value": "(75-DG-1143)",
+            "instCode": "MET"
+        },
+        {
+            "value": "-75-DG-1143",
+            "instCode": "MET"
+        },
+        {
+            "value": "75-DG-1143=",
+            "instCode": "MET"
+        },
+        {
+            "value": "R-29JC201",
+            "instCode": "JSV"
+        },
+        {
+            "value": "0017",
+            "instCode": "ASGA"
+        },
+        {
+            "value": "VALVE",
+            "instCode": "ASGA"
+        }
+    ],
+    "motors": [
+        {
+            "value": "15-GP-201(M)",
+            "instCode": "KAA"
+        },
+        {
+            "value": "20-SS-14A(M)-ACH",
+            "instCode": "KAA"
+        },
+        {
+            "value": "22-KA-231(M)-ACH2",
+            "instCode": "KAA"
+        },
+        {
+            "value": "22-KA-231 (M) -ACH2",
+            "instCode": "KAA"
+        },
+        {
+            "value": "22-KA-231  (M)",
+            "instCode": "KAA"
+        },
+        {
+            "value": "22_KA_231(M)-ACH2",
+            "instCode": "KAA"
+        },
+        {
+            "value": "22-Ka/231(M)-ACH2",
+            "instCode": "KAA"
+        }
+    ]
+}

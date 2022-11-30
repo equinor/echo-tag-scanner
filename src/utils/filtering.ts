@@ -31,7 +31,7 @@ ocrFilterer.hasEnoughCharacters = function (word: string) {
 };
 // TODO: Add period as accepted special character.
 ocrFilterer.lettersAreValid = function (word: string): boolean {
-  return stripEscapees(word).match(/[A-Z0-9\_\-]/g)?.length === word.length;
+  return stripEscapees(word).match(/[A-Z0-9\_\-\"\.]/g)?.length === word.length;
 
   //TODO: Handle other types of escapes besides the general forwardslash.
   /** Strips escape characters from the word. */

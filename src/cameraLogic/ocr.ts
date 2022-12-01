@@ -26,7 +26,6 @@ export class OCR {
     return randomBytes(16).toString('hex');
   }
 
-  //TODO: Handle possible errors on randomBytes call.
   public refreshAttemptId(): string {
     const newId = randomBytes(16).toString('hex');
     this._attemptId = newId;

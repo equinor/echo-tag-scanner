@@ -42,7 +42,7 @@ The framerate can be anything between 15 and 60 frames per second, and as the us
 
 The resolution has a pitfall in that we obviously cannot request a resolution which is higher than what the device is capable of, but we also have no idea what the maximum resolution is. One strategy would be to let the MediaCapture API set the highest possible resolution, but another pitfall here is that the resolution could be unnecessarily large and the postprocessor would have to do more downscale operations later.
 
-The preferred strategy then is a middle-road approach. We set the minimum resolution to be close or equal to the [viewport](https://developer.mozilla.org/en-US/docs/Glossary/Viewport) dimensions (the dimensions are expressed in [CSS Pixels](https://hacks.mozilla.org/2013/09/css-length-explained/)). We also use this as the ideal resolution. (__subject to change__). 
+Through testing and experimenting, we have found 720p to be a good compromise between size and clarity if the user can get up close to the tag sign. If the user is on a particularly slow network, a downgrade to 480p would be a good idea. Unfortunately, we do not have a way of knowing the users connection quality at the present time.
 
 When we have obtained permission from the users, we can then construct a MediaStream object which is then used to construct our classes. The class structure aims to emulate a physical digital camera, with the last class (Scanner), calling the parents in a repetable manner which in turn emulates a scanning operation.
 
@@ -80,7 +80,7 @@ The goal of the filtering step is to take whatever textual content we got from O
 - The string should be at least 4 characters.
 - The string is all uppercased.
 - It cannot contain a leading or trailing special character.
-- It can contain one or more of the following special characters: -_.
+- It can contain one or more of the following special characters: -_."
   - An exception to this rule are the motor tags which contain the sequence (M) somewhere in the tag body.
   - TODO: Document the '1"' pattern.
 
@@ -90,7 +90,7 @@ After the rough filtering step, we run a more expensive validation step to filte
 The UI is built using React and we have strived to keep it seperate from the capture logic. The UX and design choices are largely inherited from the native app.
 
 ## How to get reliable scanning results
-The fundamental goal of the scanner is to get as many positive results as possible. The end-users have a general understanding of the challenge, but with the prevalent OCR implementations, they have high expectations in speed and accuracy.
+The fundamental goal of the scanner is to get as many positive results as possible. The end-users have a general understanding of the challenge, but with the familiarity that users have of this technology these days, for example for translating a restaurant menu abroad, they have high expectations in speed and accuracy.
 The scanner is faced with challenges, some of which we can mitigate and some which are left to mercy.
 
 ### The user has a slow connection
@@ -101,9 +101,7 @@ The solution to this problem is to then make the captures as small as possible t
 ### The user is in a challenging environment
 A challenging environment is an environment where the user is not able to get an optimized view of the tag sign. This could be factors like bad lighting (not enough lighting or too much lighting), the tag sign could be far away or the user is required to scan in challenging angles.
 
-The camera ships with torch and zoom functionality, albeit this is not supported in Safari browsers. In practice, this means torch and zoom is not available on iOS devices because all web browsers on iOS uses the WebKit engine.
-
-Users with an iOS device will have to be instructed to bring a seperate light source if neccessary. It is not possible to turn on the torch in the phone settings and simultanously use the scanner.
+The camera ships with torch and zoom functionality, albeit this is not supported in Safari browsers. In practice, this means torch is not available on iOS devices because all web browsers on iOS uses the WebKit engine. Users with an iOS device will have to be instructed to bring a seperate light source if neccessary. It is not possible to turn on the torch in the phone settings and simultanously use the scanner.
 
 As for zoom, while this is helpful for the users, it is a digital zoom. A digital zoom is essentially a process where you crop a section of the image, upscale it to match the original dimensions and present it. This gives you the illusion of an optical enlargement, but it sacrifices clarity.
 
@@ -111,37 +109,39 @@ As for zoom, while this is helpful for the users, it is a digital zoom. A digita
 The scanner employs a "try-again" approach where we initially take a select number of captures over a certain time period, effectively mimicking a scanning operation. With these captures, we can employ different postprocessing techniques and relay for OCR. 
 
 ## Future improvements
-
-### Capturing
-The users expect everything to happen fast. Even though the scanning is pretty fast in its current state, improvements can be made. The capture process, or rather the scanning process where we do multiple captures, can be improved by running the capture processes in paralell, rather than in sequence. 
-
-We already have a static "scanning period" set, and we fundamentally can't expedite this. All the captures may however not be done within this timeframe, depending on the device. If the scanning period is set to 2 seconds, a slower device may not be actually done before 3 seconds have passed. 
-
-Even though this will improve things, it will complicate the code base. This improvement therefore, has diminishing returns.
-
-### Capture analysis
-Currently, we take a series of captures, run them through postprocessing and finally relay for OCR. What if we could look at our selection of captures and determine which one is "the best?". If we can determine "the best", then we can relay that to OCR. The defintion of "the best" can be left for later, but we have previously looked into different blur detection techniques. (list links)
-
-### On-device OCR
-On-device OCR allow us to run the entire process on the device itself, which in turn allow for offline usage. This will effectively rid us of the slow connection problem, leaving us with just the device itself as a factor. In addition, one could also employ a third-party OCR provider as a fallback if the device itself is not able to.
-
-
-### Determine connection quality
-In production, the scanner will run in an environment with differing connection qualities. Some users will use it onshore with good bandwidth, and some users will use it offshore with a concested internet connection or a weak 4G signal. The signal may be so weak that the real-world bandwidth dips into Edge/3G territory.
-Knowing about the users connection quality would be invaluable information.
-
-### Barcode scanning
-New installations like Wisting might futureproof their installations by using barcodes in addition to tag numbers. Barcodes are, by design, relatively easy to read.
+[This document](https://github.com/equinor/echo-tag-scanner/blob/main/docs/roadmap.md) outlines a set of future improvements.
 
 ## Logging
-The scanner is connected to Azure App Insights where it can perform logging operations. At the time of writing, there are 2 instances of App Insights; [shared](https://portal.azure.com/#@StatoilSRM.onmicrosoft.com/resource/subscriptions/f9892073-3b09-40b7-8f33-1e0320e683c8/resourceGroups/Echopedia/providers/microsoft.insights/components/ai-dt-echopedia-shared/overview) and [prod](https://portal.azure.com/#@StatoilSRM.onmicrosoft.com/resource/subscriptions/f9892073-3b09-40b7-8f33-1e0320e683c8/resourceGroups/Echopedia-prod/providers/microsoft.insights/components/ai-dt-echopedia-prod/overview). Log operations from QA, test and dev environments wind up in the shared instance.
-The scanner is configured to log when the user start ETS and it will log all scanning attempts; be it successful or unsuccessfull hits.
 
 ### How to see number of users per month.
 ![image](https://user-images.githubusercontent.com/10920843/189661348-705f11d6-dbe9-47d8-b213-e8cc7fd3b0d4.png)
 
 ### How to see scanning logs
-__TODO: document this once its ready in production
+The tag scanner logs all scanning attempts. Provided under are KQL query that can be run in the shared or prod App Insights query designer.
+
+```kql
+// Displays a single row showing the number of failed scanning sessions the last 60 days.
+customEvents
+| where timestamp > now() - 60d
+| where name == "ep_ets.Scan.ScanAttempt"
+| project scanAttempt = customDimensions, scanId = tostring(customDimensions["id"])
+| where scanAttempt["isSuccess"] == "false"
+| distinct scanId
+| summarize count()
+
+// Displays a single row showing the number of successful scanning sessions the last 60 days.
+customEvents
+| where timestamp > now() - 60d
+| where name == "ep_ets.Scan.ScanAttempt"
+| project scanAttempt = customDimensions, scanId = tostring(customDimensions["id"])
+| where scanAttempt["isSuccess"] == "true"
+| distinct scanId
+| summarize count()
+
+// Get a list of scan sessions for a given period (defaults to 24 hours)
+customEvents
+| where name == "ep_ets.Scan.ScanAttempt"
+```
 
 ## Logging tools
 The scanner comes with logging tools that can be utilized by developers and testers. ETS can do log operations to the console depending on which environment it is running on. The current environments are LocalDevelopment, EchoDevelopment, QA and Prod. The difference between LocalDevelopment and EchoDevelopment is that in EchoDevelopment, the code is running in EchopediaDev. In LocalDevelopment, the code is running locally on the developers computer.

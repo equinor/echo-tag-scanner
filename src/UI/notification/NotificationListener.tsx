@@ -21,7 +21,6 @@ const NotificationHandler: FC = () => {
       globalThis.removeEventListener('notification', updateToastMessage);
 
     function updateToastMessage(event: Event) {
-      //TODO: improve this by checking the event.detail for the required properties.
       if (isCustomEvent<CustomNotificationDetail>(event)) {
         if (event.detail) {
           setCurrentEvent(event.detail);

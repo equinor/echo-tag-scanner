@@ -73,8 +73,7 @@ class Camera extends Postprocessor {
     try {
       const overrides =
         this.zoom >= 2
-          ? //TODO: Use "exact" over min and max.
-            ({
+          ? ({
               width: { min: 1920, max: 1920 },
               height: { min: 1080, max: 1080 }
             } as CameraSettingsRequest)
@@ -228,7 +227,6 @@ class Camera extends Postprocessor {
     return await this._canvasHandler.draw(this.viewfinder, params);
   }
 
-  // TODO: Consider moving events to a seperate event handler class.
   /**
    * Accepts a new capture, creates an object URL from it and dispatches an event containing the new object URL.
    */

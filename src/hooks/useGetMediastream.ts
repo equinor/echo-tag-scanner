@@ -6,7 +6,6 @@ import { logger } from '@utils';
 export function useGetMediastream(): MediaStream | undefined {
   const [stream, setStream] = useState<MediaStream | undefined>();
 
-  // TODO: Move this to an external hook
   EchoUtils.Hooks.useEffectAsync(async () => {
     try {
       const mediaStream = await TagScanner.getMediastream();

@@ -177,7 +177,6 @@ Regular offset from left-edge: ${bcr.x};
     });
   }
 
-  // TODO: Extract debug stuff to own class.
   public async debugAll(previewCapture = false) {
     if (previewCapture) {
       const scanningArea = document.getElementById('scanning-area');

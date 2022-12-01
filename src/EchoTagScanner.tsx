@@ -52,7 +52,7 @@ const EchoCamera = () => {
         )}
 
         {viewfinder && canvas && scanningArea && (
-          <ScannerUI //TODO: Extract this component into ControlPad, Dialogues and DeveloperTools.
+          <ScannerUI
             stream={mediaStream}
             viewfinder={viewfinder}
             canvas={canvas}

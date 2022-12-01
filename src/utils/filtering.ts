@@ -29,11 +29,9 @@ ocrFilterer.hasTwoIntegers = function (word: string) {
 ocrFilterer.hasEnoughCharacters = function (word: string) {
   return word.length >= minLetters;
 };
-// TODO: Add period as accepted special character.
 ocrFilterer.lettersAreValid = function (word: string): boolean {
   return stripEscapees(word).match(/[A-Z0-9\_\-\"\.]/g)?.length === word.length;
 
-  //TODO: Handle other types of escapes besides the general forwardslash.
   /** Strips escape characters from the word. */
   function stripEscapees(unescapedWord: string) {
     return Array.from(unescapedWord)

@@ -33,7 +33,6 @@ export const CapturePreview = (
     );
 
     async function updateImageUrlFromEvent(event: Event) {
-      // TODO: Type guard the Event.detail contents.
       const previewDimensions: PreviewDimensions =
         await getPreviewImageDimensions(
           //@ts-ignore

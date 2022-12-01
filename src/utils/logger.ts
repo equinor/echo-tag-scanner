@@ -212,7 +212,7 @@ function logScanningAttempt(
     cameraResolution: `${this.videoTrackSettings?.width}x${this.videoTrackSettings?.height}@${this.videoTrackSettings?.frameRate}`,
     zoomMethod: this.zoomMethod.type,
     zoomValue: this.zoom,
-    deviceOrientation: getOrientation()
+    deviceOrientation: getOrientation() // NOTE: Should be this.currentOrientation
   };
   logger.scanAttempt(entry);
 

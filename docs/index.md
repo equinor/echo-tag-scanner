@@ -31,7 +31,7 @@ The scanner is available for all Echo users on all installations. A sizeable gro
 
 
 ### Scanner setup
-This is the stage where we load up the UI, gain access to the device scanner and construct the scanner classes(linkto). 
+This is the stage where we load up the UI, gain access to the device scanner and construct the scanner classes. 
 
 The users will during their first visit be prompted to give access to their scanner device, which in turn gives us the opportunity to construct the classes. If the users clear their browser cache, visit with another browser or perhaps use a new device, they will be prompted again for permission.
 If the user denies the request, we simply navigate them back to Echo. __(Subject to change)__
@@ -64,7 +64,7 @@ The goal of the postprocessing steps is to reduce the initial capture sizes to b
 - Lossy compression
 - Recolouring (grayscale or black&white)
 
-While recolouring is good for an even more efficient compression, they can also detriment the capture qualities to the point where the text becomes unreadable. This is especially true for black&white. The fundamental goal is to optimize the clarity of the textual content, meaning in practice, the text is coloured black and everything around has a significantly different coloyr, like white or gray.
+While recolouring is good for an even more efficient compression, they can also detriment the capture qualities to the point where the text becomes unreadable. This is especially true for black&white. The fundamental goal is to optimize the clarity of the textual content, meaning in practice, the text is coloured black and everything around has a significantly different colour, like white or gray.
 
 In practice though, parts of the text can wind up being whitened or grayscaled because of a challenging environment.
 
@@ -76,11 +76,15 @@ Currently, the OCR-step happens in the cloud, but there is alternatively the opt
 ### Filtering and validation
 The goal of the filtering step is to take whatever textual content we got from OCR, and filter away the things which we roughly do not perceive as tag numbers. The ruleset is as followed:
 
-- The first two characters is a number
-- The string should be at least 4 characters
-- It should contain alphanumeric characters and/or one or more hyphens (-)
+- The string contains at least two numbers.
+- The string should be at least 4 characters.
+- The string is all uppercased.
+- It cannot contain a leading or trailing special character.
+- It can contain one or more of the following special characters: -_.
+  - An exception to this rule are the motor tags which contain the sequence (M) somewhere in the tag body.
+  - TODO: Document the '1"' pattern.
 
-After the rough filtering step, we run a more expensive validation step to filter out or correct false positives. This step is handled by Echo-Search __(link)__.
+After the rough filtering step, we run a more expensive validation step to filter out or correct false positives. This step is handled by [Echo-Search])(https://github.com/equinor/EchoSearch).
 
 ### Result presentation
 The UI is built using React and we have strived to keep it seperate from the capture logic. The UX and design choices are largely inherited from the native app.
@@ -151,5 +155,3 @@ logger.log('EchoDevelopment', () => {
   }); 
   ```
 As the log entry suggests, the console log will be invoked in both EchoDevelopment and LocalDevelopment because LocalDevelopment is "below".
-
-

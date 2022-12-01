@@ -24,7 +24,6 @@ export interface TagScan {
 }
 
 export function useTagScanStatus(): TagScan {
-  // TODO: Clean up unused statuses.
   const [tagScanStatus, setTagScanStatus] = useState<TagScanStatus>({
     finished: false,
     uploading: false,

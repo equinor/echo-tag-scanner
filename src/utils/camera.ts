@@ -185,7 +185,6 @@ function getCameraPreferences(
         frameRate: {
           ideal: cameraSettingsRequest.fps
         },
-        aspectRatio: { exact: 16 / 9 },
 
         // The user is likely to have a facing type camera on their laptop.
         facingMode: { ideal: 'environment' }

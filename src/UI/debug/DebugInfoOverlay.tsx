@@ -97,23 +97,24 @@ export const DebugInfoOverlay = (props: DebugInfoOverlayProps): JSX.Element => {
         position: 'fixed',
         top: '0',
         right: '0',
-        zIndex: zIndexes.overlays
+        zIndex: zIndexes.overlays,
+        userSelect: 'none'
       }}
     >
       {debugInfo.cameraFeed && (
-        <mark style={{ backgroundColor: 'hotpink' }}>
+        <mark style={{ backgroundColor: 'hotpink', userSelect: 'none' }}>
           Camera feed: {Math.round(debugInfo.cameraFeed.width ?? 0)}x
           {Math.round(debugInfo.cameraFeed.height ?? 0)}@
           {Math.round(Number(debugInfo.frameRate))}fps
         </mark>
       )}
       <br />
-      <mark style={{ backgroundColor: 'lightblue' }}>
+      <mark style={{ backgroundColor: 'lightblue', userSelect: 'none' }}>
         Viewport: {Math.round(debugInfo.viewport?.width ?? 0)}x
         {Math.round(debugInfo.viewport?.height ?? 0)}
       </mark>
       <br />
-      <mark style={{ backgroundColor: 'lightgreen' }}>
+      <mark style={{ backgroundColor: 'lightgreen', userSelect: 'none' }}>
         Zoom: {debugInfo.zoomFactor}x
       </mark>
     </output>

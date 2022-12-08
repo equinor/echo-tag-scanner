@@ -127,7 +127,6 @@ const ScanningAreaContainer = styled.section`
   box-sizing: content-box;
   border-color: rgba(0, 0, 0, 0.48);
   border-style: solid;
-  border-radius: 10%;
 
   border-top-width: calc((100vh - var(--scanning-area-height-portrait)) / 2);
   border-bottom-width: calc(

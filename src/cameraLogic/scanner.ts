@@ -115,24 +115,23 @@ ${getScanningAreaInfo.call(this)}
         );
         return undefined;
       }
-      const bcr = captureArea.getBoundingClientRect();
-      const sx = this.viewfinder.videoWidth / 2 - bcr.width / 2;
-      const sy = this.viewfinder.videoHeight / 2 - bcr.height / 2;
+      const scanningAreaWidth = captureArea.clientWidth;
+      const scanningAreaHeight = captureArea.clientHeight;
+      const sx = this.viewfinder.videoWidth / 2 - scanningAreaWidth / 2;
+      const sy = this.viewfinder.videoHeight / 2 - scanningAreaHeight / 2;
 
       return `
-Dimensions: ${bcr.width}x${bcr.height}
+Dimensions: ${scanningAreaWidth}x${scanningAreaHeight}
 Intrinsic offset from top: ${sy}.
 Intrinsic offset from left-edge: ${sx}.
-Regular offset from top: ${bcr.y};
-Regular offset from left-edge: ${bcr.x};
 `;
     }
   }
 
   public async performCropping(): Promise<Blob> {
-    const scanningAreaWidth = this._scanningArea.getBoundingClientRect().width;
-    const scanningAreaHeight =
-      this._scanningArea.getBoundingClientRect().height;
+    // clientWidth and clientHeight is used to get the dimensions without the border.
+    const scanningAreaWidth = this._scanningArea.clientWidth;
+    const scanningAreaHeight = this._scanningArea.clientHeight;
 
     // Find the (x,y) position of the scanning area on the viewfinder.
     // TODO: Link to documentation
@@ -185,17 +184,18 @@ Regular offset from left-edge: ${bcr.x};
         this.prepareNewScan();
         let capture = await this.capturePhoto();
         capture = await this.performCropping();
-        const { width, height } = this._scanningArea.getBoundingClientRect();
+        const scanningAreaWidth = this._scanningArea.clientWidth;
+        const scanningAreaHeight = this._scanningArea.clientHeight;
 
         if (this.zoomMethod.type === 'simulated') {
           capture = await this._canvasHandler.getCanvasContentAsBlob({
-            sWidth: width / this.zoom,
-            sHeight: height / this.zoom
+            sWidth: scanningAreaWidth / this.zoom,
+            sHeight: scanningAreaHeight / this.zoom
           });
         } else {
           capture = await this._canvasHandler.getCanvasContentAsBlob({
-            sWidth: width,
-            sHeight: height
+            sWidth: scanningAreaWidth,
+            sHeight: scanningAreaHeight
           });
         }
 
@@ -236,9 +236,8 @@ Regular offset from left-edge: ${bcr.x};
    */
   public async scan(): Promise<Blob[]> {
     return new Promise((finishScanning) => {
-      const { width, height } = this._scanningArea.getBoundingClientRect();
-      let extractWidth = width;
-      let extractHeight = height;
+      let extractWidth = this._scanningArea.clientWidth;
+      let extractHeight = this._scanningArea.clientHeight;
 
       if (this.zoomMethod.type === 'simulated') {
         extractWidth /= this.zoom;

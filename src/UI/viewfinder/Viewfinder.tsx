@@ -16,7 +16,6 @@ interface ViewfinderProps {
   setVideoRef: Dispatch<SetStateAction<HTMLVideoElement | undefined>>;
   setScanningAreaRef: Dispatch<SetStateAction<HTMLElement | undefined>>;
   videoRef?: HTMLVideoElement;
-  dimensions: ViewfinderDimensions;
 }
 
 type ZoomBehavior = {
@@ -73,7 +72,6 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
       <ScanningArea
         scanningAreaRef={props.setScanningAreaRef}
         setCanvasRef={props.setCanvasRef}
-        dimensions={props.dimensions}
       />
     </>
   );

@@ -20,12 +20,10 @@ export function useGetMediastream(): MediaStream | undefined {
               ' is not blacklisted and that you are running with HTTPS.'
           );
         });
-        // This didn't quite work because browsers might "remember" the
-        // denial and the results is that the users are instantly navigated back.
-        //  !isDevelopment && globalThis.history.back();
       } else if (error instanceof Error) {
         throw new Error(error.toString());
       }
+      console.log(error);
     }
   }, []);
   return stream;

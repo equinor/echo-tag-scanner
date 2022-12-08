@@ -7,14 +7,14 @@ import { getOrientation } from '@utils';
 interface ScanningAreaProps {
   scanningAreaRef: React.Dispatch<SetStateAction<HTMLElement | undefined>>;
   setCanvasRef: Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
-  dimensions: ViewfinderDimensions;
 }
 
 const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
   const [currentOrientation, setOrientation] = useState(getOrientation());
-  const [saDimensions, setSADimensions] = useState<ViewfinderDimensions>(
-    props.dimensions
-  );
+  const [saDimensions, setSADimensions] = useState<ViewfinderDimensions>({
+    width: undefined,
+    height: undefined
+  });
 
   // TODO: Refine this
   useEffect(() => {

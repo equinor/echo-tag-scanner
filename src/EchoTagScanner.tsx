@@ -18,7 +18,6 @@ const EchoCamera = () => {
     // Tag Scanner module is being logged as started.
     logger.moduleStarted();
   }, []);
-  var viewFinderDimensions: ViewfinderDimensions | undefined = undefined;
 
   // The camera feed.
   const mediaStream = useGetMediastream();
@@ -41,15 +40,12 @@ const EchoCamera = () => {
   return (
     <ErrorBoundary stackTraceEnabled>
       <Main>
-        {viewFinderDimensions && (
-          <Viewfinder
-            setCanvasRef={setCanvas}
-            setVideoRef={setViewfinder}
-            setScanningAreaRef={setScanningArea}
-            videoRef={viewfinder}
-            dimensions={viewFinderDimensions}
-          />
-        )}
+        <Viewfinder
+          setCanvasRef={setCanvas}
+          setVideoRef={setViewfinder}
+          setScanningAreaRef={setScanningArea}
+          videoRef={viewfinder}
+        />
 
         {viewfinder && canvas && scanningArea && (
           <ScannerUI

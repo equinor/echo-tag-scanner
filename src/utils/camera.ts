@@ -81,15 +81,17 @@ function getCameraPreferences(
   const cameraSettingsRequest = {
     ...fixedCameraSettingsRequest
   };
-  // Developer enviroment, use this for desktop.
-  if (isLocalDevelopment && !isIos && navigator.maxTouchPoints <= 1) {
+
+  // Developer enviroment on desktop. maxTouchPoints can be 1 with touch emulation.
+  if (isLocalDevelopment && navigator.maxTouchPoints <= 1) {
     console.info('Creating dev camera request');
     let maxWidthDev = cameraSettingsRequest.width.max;
     let maxHeightDev = cameraSettingsRequest.height.max;
     let minWidthDev = cameraSettingsRequest.width.min;
     let minHeightDev = cameraSettingsRequest.height.min;
 
-    const cameraId = undefined;
+    const cameraId =
+      'a874c50ce1a7f877e5d365c7ef7738d4881d76a22876cd61f0b708422936dc45';
 
     const request = {
       video: {
@@ -112,35 +114,8 @@ function getCameraPreferences(
     return request;
   }
 
-  // Developer environment, but testing on Android.
-  if (isLocalDevelopment && !isIos && navigator.maxTouchPoints >= 2) {
-    console.info('Creating android camera request');
-    let maxWidthDev = cameraSettingsRequest.width.max;
-    let maxHeightDev = cameraSettingsRequest.height.max;
-    let minWidthDev = cameraSettingsRequest.width.min;
-    let minHeightDev = cameraSettingsRequest.height.min;
-    return {
-      video: {
-        width: { max: maxWidthDev, min: minWidthDev },
-        height: {
-          max: maxHeightDev,
-          min: minHeightDev
-        },
-
-        // Higher FPS is good for a scanning operation.
-        frameRate: {
-          ideal: cameraSettingsRequest.fps
-        },
-
-        // Require a specific camera here.
-        facingMode: { exact: 'environment' }
-      },
-      audio: false
-    } as MediaStreamConstraints;
-  }
-
-  // Developer environment, but testing on iDevies.
-  if (isLocalDevelopment && isIos) {
+  // Developer environment on a mobile device.
+  if (isLocalDevelopment && navigator.maxTouchPoints > 1) {
     console.info('Creating iOS dev capture request.');
     let maxWidthDev = cameraSettingsRequest.width.max;
     let maxHeightDev = cameraSettingsRequest.height.max;
@@ -159,42 +134,13 @@ function getCameraPreferences(
           ideal: cameraSettingsRequest.fps
         },
 
-        // Require a specific camera here.
         facingMode: { exact: 'environment' }
       },
       audio: false
     } as MediaStreamConstraints;
   }
 
-  // This one is for testers. They tend to be testing on laptops,
-  // although we can't exactly query those environments.
-  if (isQA || (isDevelopment && !isIos)) {
-    console.info('Creating QA camera request');
-    return {
-      video: {
-        width: {
-          max: cameraSettingsRequest.width.max,
-          min: cameraSettingsRequest.width.min
-        },
-        height: {
-          max: cameraSettingsRequest.height.max,
-          min: cameraSettingsRequest.height.min
-        },
-
-        // Higher FPS is good for a scanning operation.
-        frameRate: {
-          ideal: cameraSettingsRequest.fps
-        },
-
-        // The user is likely to have a facing type camera on their laptop.
-        facingMode: { ideal: 'environment' }
-      },
-      audio: false
-    } as MediaStreamConstraints;
-  }
-
   // This is the default preferences, which is also used in production.
-  console.info('Creating production camera request.');
   return {
     video: {
       width: {
@@ -211,10 +157,8 @@ function getCameraPreferences(
         ideal: cameraSettingsRequest.fps
       },
 
-      aspectRatio: { exact: 16 / 9 },
-
       // Require a specific camera here.
-      facingMode: { exact: 'environment' }
+      facingMode: { ideal: 'environment' }
     },
     audio: false
   } as MediaStreamConstraints;

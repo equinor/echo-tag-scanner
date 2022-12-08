@@ -4,7 +4,8 @@
 
     --control-pad-height: 85px;
     --control-pad-width-landscape: 85px;
-    --control-pad-bottom-offset: 46px;
+    --control-pad-bottom-offset: 30px;
+        --control-pad-right-offset: 10px;
     
     --scanning-area-height-portrait: 300px;
     --scanning-area-width-landscape: 466px;

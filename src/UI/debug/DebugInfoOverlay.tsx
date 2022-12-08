@@ -102,13 +102,15 @@ export const DebugInfoOverlay = (props: DebugInfoOverlayProps): JSX.Element => {
     >
       {debugInfo.cameraFeed && (
         <mark style={{ backgroundColor: 'hotpink' }}>
-          Camera feed: {debugInfo.cameraFeed.width}x
-          {debugInfo.cameraFeed.height}@{debugInfo.frameRate}fps
+          Camera feed: {Math.round(debugInfo.cameraFeed.width ?? 0)}x
+          {Math.round(debugInfo.cameraFeed.height ?? 0)}@
+          {Math.round(Number(debugInfo.frameRate))}fps
         </mark>
       )}
       <br />
       <mark style={{ backgroundColor: 'lightblue' }}>
-        Viewport: {debugInfo.viewport?.width}x{debugInfo.viewport?.height}
+        Viewport: {Math.round(debugInfo.viewport?.width ?? 0)}x
+        {Math.round(debugInfo.viewport?.height ?? 0)}
       </mark>
       <br />
       <mark style={{ backgroundColor: 'lightgreen' }}>

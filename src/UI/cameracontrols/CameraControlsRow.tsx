@@ -79,7 +79,6 @@ const DebugButton = styled(Button)`
 `;
 
 const RowGrid = styled.div`
-  border: 1px solid hotpink;
   display: grid;
   grid-template-columns: [torch]1fr [camerabutton]1fr [debug]1fr;
   justify-items: center;

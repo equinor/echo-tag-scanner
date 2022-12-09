@@ -3,7 +3,7 @@ import {
   getNotificationDispatcher as dispatchNotification,
   isLocalDevelopment
 } from '@utils';
-import { CameraSettingsRequest, ZoomMethod } from '@types';
+import { ZoomMethod } from '@types';
 import { fixedCameraSettingsRequest } from '@const';
 
 function assignZoomSettings(

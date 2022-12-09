@@ -4,8 +4,7 @@ import {
   DrawImageParameters,
   ZoomSteps,
   ZoomMethod,
-  ZoomEventDetail,
-  CameraSettingsRequest
+  ZoomEventDetail
 } from '@types';
 import {
   logger,

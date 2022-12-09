@@ -108,7 +108,7 @@ const ControlPad = styled.section`
   // Move the control pad to the right;
   @media screen and (orientation: landscape) {
     display: flex;
-    right: 20px;
+    right: var(--control-pad-right-offset);
     top: 0;
     bottom: unset;
     height: 100%;

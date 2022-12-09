@@ -20,7 +20,7 @@ class CanvasHandler {
         'Could not construct CanvasHandler. The canvas element reference is missing.'
       );
     this._canvas = props.canvas;
-    const context = this._canvas.getContext('2d');
+    const context = this._canvas.getContext('2d', { willReadFrequently: true });
 
     if (context) {
       this._canvasContext = context;

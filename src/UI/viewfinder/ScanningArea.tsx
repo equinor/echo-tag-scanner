@@ -38,6 +38,15 @@ const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
         id="scanning-area"
         ref={(el: HTMLElement) => props.scanningAreaRef(el)}
       >
+        <HorizontalNotch top={'-5px'} left={'0'} />
+        <HorizontalNotch top={'-5px'} right={'0'} />
+        <HorizontalNotch bottom={'-5px'} left={'0'} />
+        <HorizontalNotch bottom={'-5px'} right={'0'} />
+        <VerticalNotch top={'-5px'} left={'-5px'} />
+        <VerticalNotch bottom={'-5px'} left={'-5px'} />
+        <VerticalNotch top={'-5px'} right={'-5px'} />
+        <VerticalNotch bottom={'-5px'} right={'-5px'} />
+
         <PostprocessingCanvas
           ref={(el: HTMLCanvasElement) => props.setCanvasRef(el)}
           width={saDimensions.width}
@@ -60,6 +69,46 @@ const PostprocessingCanvas = styled.canvas`
   z-index: ${zIndexes.canvas};
 `;
 
+type NotchPositioning = {
+  top?: string;
+  right?: string;
+  bottom?: string;
+  left?: string;
+};
+
+const HorizontalNotch = styled.div<NotchPositioning>`
+  position: absolute;
+  top: ${(props) => (props.top ? props.top : 'initial')};
+  right: ${(props) => (props.right ? props.right : 'initial')};
+  bottom: ${(props) => (props.bottom ? props.bottom : 'initial')};
+  left: ${(props) => (props.left ? props.left : 'initial')};
+  width: 40px;
+  height: 5px;
+  background-color: white;
+
+  @media screen and (orientation: landscape) {
+    width: 20px;
+    height: 5px;
+  }
+`;
+
+const VerticalNotch = styled.div<NotchPositioning>`
+  position: absolute;
+  top: ${(props) => (props.top ? props.top : 'initial')};
+  right: ${(props) => (props.right ? props.right : 'initial')};
+  bottom: ${(props) => (props.bottom ? props.bottom : 'initial')};
+  left: ${(props) => (props.left ? props.left : 'initial')};
+  border-radius: 10%;
+  width: 5px;
+  height: 45px;
+  background-color: white;
+
+  @media screen and (orientation: landscape) {
+    height: 20px;
+    width: 5px;
+  }
+`;
+
 const ScanningAreaContainer = styled.section`
   // Centering of absolutely placed elements
   position: absolute;
@@ -70,15 +119,39 @@ const ScanningAreaContainer = styled.section`
 
   width: var(--scanning-area-width-portrait);
   height: var(--scanning-area-height-portrait);
-  border: 3px dotted var(--outOfService);
+  /* border: 3px dotted var(--outOfService); */
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   z-index: ${zIndexes.scanningArea};
+  box-sizing: content-box;
+  border-color: rgba(0, 0, 0, 0.48);
+  border-style: solid;
 
+  border-top-width: calc((100vh - var(--scanning-area-height-portrait)) / 2);
+  border-bottom-width: calc(
+    (100vh - var(--scanning-area-height-portrait)) / 2 -
+      var(--echo-bottom-bar-height)
+  );
+  border-right-width: calc((100vw - var(--scanning-area-width-portrait)) / 2);
+  border-left-width: calc((100vw - var(--scanning-area-width-portrait)) / 2);
+
+  // Landscape
   @media screen and (orientation: landscape) {
     width: var(--scanning-area-width-landscape);
     height: var(--scanning-area-height-landscape);
+
+    border-top-width: calc((100vh - var(--scanning-area-height-landscape)) / 2);
+    border-bottom-width: calc(
+      (100vh - var(--scanning-area-height-landscape)) / 2
+    );
+    border-right-width: calc(
+      (100vw - var(--scanning-area-width-landscape)) / 2
+    );
+    border-left-width: calc(
+      (100vw - var(--scanning-area-width-landscape)) / 2 -
+        var(--echo-sidebar-width)
+    );
   }
 `;
 

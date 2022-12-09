@@ -23,7 +23,6 @@ export function useGetMediastream(): MediaStream | undefined {
       } else if (error instanceof Error) {
         throw new Error(error.toString());
       }
-      console.log(error);
     }
   }, []);
   return stream;

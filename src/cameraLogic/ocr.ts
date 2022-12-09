@@ -1,12 +1,26 @@
 import { BackendError } from '@equinor/echo-base';
-import { ComputerVisionResponse, OCRPayload, ParsedComputerVisionResponse } from '@types';
-import { handleError, logger, ocrFilterer, logScanningAttempt } from '@utils';
+import {
+  ComputerVisionResponse,
+  FailedTagValidation,
+  OCRPayload,
+  ParsedComputerVisionResponse,
+  TagValidationResult,
+  ValidationStats
+} from '@types';
+import {
+  handleError,
+  logger,
+  ocrFilterer,
+  logScanningAttempt,
+  isProduction
+} from '@utils';
 import { ErrorRegistry } from '@const';
 import { baseApiClient } from '../services/api/base/base';
 import { getComputerVisionOcrResources } from '../services/api/resources/resources';
 import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { randomBytes } from 'crypto';
 import { TagScanner } from '@cameraLogic';
+import { Debugger } from './debugger';
 
 interface OCRProps {
   tagScanner: TagScanner;
@@ -64,6 +78,7 @@ export class OCR {
     response: ComputerVisionResponse
   ): ParsedComputerVisionResponse {
     const possibleTagNumbers: string[] = [];
+    const filteredWords: string[] = [];
     response.regions.forEach((region) =>
       region.lines.forEach((line) =>
         line.words.forEach((word) => {
@@ -78,11 +93,14 @@ export class OCR {
             ocrFilterer.hasTwoIntegers(nextWord)
           ) {
             possibleTagNumbers.push(nextWord);
+          } else {
+            filteredWords.push(nextWord);
           }
         })
       )
     );
-
+    !isProduction &&
+      Debugger.reportFiltration(filteredWords, possibleTagNumbers);
     return possibleTagNumbers;
   }
 
@@ -96,6 +114,8 @@ export class OCR {
       ...tagValidationTasks
     ]);
     const validatedTags: TagSummaryDto[] = [];
+    const validationStats: ValidationStats[] = [];
+
     tagValidationResults.forEach((validationResult) => {
       if (!this._attemptId)
         throw new Error('A pseudoranom log entry ID has not been established.');
@@ -111,6 +131,11 @@ export class OCR {
 
         // Record the fetched tag summary for use later in presentation.
         validatedTags.push(validationResult.value.validatedTagSummary);
+        validationStats.push({
+          isSuccess: true,
+          testValue: validationResult.value.testValue,
+          correction: validationResult.value.validatedTagSummary.tagNo
+        });
       } else if (validationResult.status === 'rejected') {
         if ((validationResult.reason as FailedTagValidation).EchoSearchError) {
           // TODO: Handle or log Echo search errors here
@@ -123,10 +148,15 @@ export class OCR {
             readText: (validationResult.reason as FailedTagValidation).testValue
           };
           logScanningAttempt.call(this._tagScannerRef, failedPartialLogEntry);
+          validationStats.push({
+            isSuccess: false,
+            testValue: failedPartialLogEntry.readText
+          });
         }
       }
     });
 
+    !isProduction && Debugger.reportValidation(validationStats);
     return validatedTags;
 
     /**
@@ -136,19 +166,15 @@ export class OCR {
       const result = await Search.Tags.closestTagAsync(possibleTagNumber);
       if (result.isSuccess) {
         logger.log('QA', () => {
-          console.group('Running validation for ', possibleTagNumber);
           console.info(possibleTagNumber + ' corrected to ' + result.value);
-          console.groupEnd();
         });
         return result.value;
       } else {
         logger.log('QA', () => {
-          console.group('Running validation for ', possibleTagNumber);
           console.info(
             'Echo Search could not establish a close match to ' +
               possibleTagNumber
           );
-          console.groupEnd();
         });
       }
     }
@@ -170,15 +196,6 @@ export class OCR {
       });
     }
 
-    type TagValidationResult = {
-      validatedTagSummary: TagSummaryDto;
-      testValue: string;
-    };
-
-    type FailedTagValidation = {
-      EchoSearchError?: unknown;
-      testValue: string;
-    };
     /**
      * Returns a promise to validate a string as a tag number.
      * @fulfill {TagValidationResult} The {TagSummaryDto} and the test value.
@@ -191,9 +208,9 @@ export class OCR {
         findClosestTag(testValue).then((closestTagMatch) => {
           if (closestTagMatch) {
             getTagSummary(closestTagMatch)
-              .then((res) =>
+              .then((tagSummary) =>
                 resolve({
-                  validatedTagSummary: res,
+                  validatedTagSummary: tagSummary,
                   testValue: testValue
                 } as TagValidationResult)
               )

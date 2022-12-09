@@ -3,10 +3,11 @@ import {
   getOrientation,
   logger,
   getCameraPreferences,
-  DeviceInformation
+  DeviceInformation,
+  determineZoomMethod
 } from '@utils';
 import { ErrorRegistry } from '@const';
-import { CameraProps, CameraResolution, ZoomSteps } from '@types';
+import { CameraProps, CameraResolution, ZoomMethod, ZoomSteps } from '@types';
 
 /**
  * This object is concerned with the core features of a camera.
@@ -26,6 +27,13 @@ class CoreCamera {
 
   /** Holds information about the users system. */
   private _deviceInformation: DeviceInformation;
+
+  /** The method of zooming the viewfinder
+   * - undefined: Zooming is not enabled.
+   * - simulated: Manipulates the camera feed scale in order to simulate digital zoom.
+   * - native: Uses MediaStream API to apply digital zoom.
+   */
+  private _zoomMethod: ZoomMethod;
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
@@ -47,6 +55,7 @@ class CoreCamera {
       zoomFactor: 1
     };
     this._deviceInformation = props.deviceInformation;
+    this._zoomMethod = determineZoomMethod.call(this);
   }
 
   public get videoTrack(): MediaStreamTrack | undefined {
@@ -121,12 +130,19 @@ class CoreCamera {
     this._deviceInformation = deviceInfo;
   }
 
+  public get zoomMethod() {
+    return this._zoomMethod;
+  }
+
+  public set zoomMethod(newMethod: ZoomMethod) {
+    this._zoomMethod = newMethod;
+  }
+
   /**
    * Asks the user for permission to use the device camera and resolves a MediaStream object.
    */
   static async getMediastream(): Promise<MediaStream> {
     const cameraPreferences = getCameraPreferences();
-    console.log('%c⧭', 'color: #f27999', cameraPreferences);
     return await navigator.mediaDevices
       .getUserMedia(cameraPreferences)
       .catch((error) => {

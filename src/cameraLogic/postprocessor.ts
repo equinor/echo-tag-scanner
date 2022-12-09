@@ -8,7 +8,7 @@ import { CoreCamera } from './coreCamera';
 class Postprocessor extends CoreCamera {
   protected _capture?: Blob;
   protected _canvas: HTMLCanvasElement;
-  protected _canvasHandler: CanvasHandler;
+  public _canvasHandler: CanvasHandler;
 
   constructor(props: CameraProps) {
     super(props);
@@ -30,7 +30,7 @@ class Postprocessor extends CoreCamera {
     this._capture = capture;
   }
 
-  protected get canvasHandler() {
+  public get canvasHandler() {
     return this._canvasHandler;
   }
 
@@ -171,31 +171,6 @@ class Postprocessor extends CoreCamera {
     });
 
     return grayscaleImgBlob;
-  }
-
-  /**
-   * Logs image statistics to the console.
-   */
-  protected logImageStats(target: Blob | File, logDescription?: string) {
-    if (target) {
-      const image = new Image();
-      image.src = URL.createObjectURL(target);
-      image.onload = () => {
-        console.group(logDescription);
-        console.info('Photo size in bytes: ', target.size);
-        console.info('Media type: ', target.type);
-        console.info(
-          'Dimensions: ' +
-            'Width: ' +
-            image.width +
-            ' ' +
-            'Height: ' +
-            image.height
-        );
-        console.groupEnd();
-        URL.revokeObjectURL(image.src);
-      };
-    }
   }
 }
 

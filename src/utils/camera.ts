@@ -1,4 +1,4 @@
-import { Camera } from '@cameraLogic';
+import { Camera, CoreCamera } from '@cameraLogic';
 import {
   getNotificationDispatcher as dispatchNotification,
   isLocalDevelopment
@@ -48,7 +48,7 @@ function getTorchToggleProvider(camera: Camera) {
   };
 }
 
-function determineZoomMethod(this: Camera): ZoomMethod {
+function determineZoomMethod(this: CoreCamera): ZoomMethod {
   // Device has native support.
   if (this.capabilities?.zoom) {
     // Ensure the max zoom is not above 3.

@@ -1,5 +1,5 @@
-//@ts-nocheck
-// Typescript does not currently play nicely when one wants to type guard the object CustomEvent.detail.
+// @ts-nocheck
+// Typescript does not currently play nicely when one wants to type guard the object CustomEvent.d
 
 import {
   CameraResolution,

@@ -1,6 +1,6 @@
 {
     "name": "@equinor/echo-camera-web",
-    "version": "2.1.2",
+    "version": "2.2.0",
     "private": false,
     "main": "build/index.js",
     "source": "src/index.ts",

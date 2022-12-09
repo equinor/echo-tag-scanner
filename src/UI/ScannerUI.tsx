@@ -22,6 +22,7 @@ import {
 } from '@utils';
 import { SystemInfoTrigger } from './viewfinder/SystemInfoTrigger';
 import { zIndexes } from '@const';
+import { Debugger } from '../cameraLogic/debugger';
 
 interface ScannerProps {
   stream: MediaStream;
@@ -56,9 +57,7 @@ function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
                 viewfinder={viewfinder}
               />
             )}
-            <SystemInfoTrigger
-              onDelayedTrigger={tagScanner.clipboardThis.bind(tagScanner)}
-            />
+
             <CameraControlsRow
               onToggleTorch={getTorchToggleProvider(tagScanner)}
               onScanning={onTagScan}
@@ -68,11 +67,16 @@ function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
               supportedFeatures={{
                 torch: Boolean(tagScanner?.capabilities?.torch)
               }}
-              onDebug={tagScanner.debugAll.bind(tagScanner, true)}
+              onDebug={() => Debugger.debugAll(true, tagScanner)}
             />
           </>
         )}
       </ControlPad>
+      {tagScanner && (
+        <SystemInfoTrigger
+          getContentsForClipboard={() => Debugger.clipboardThis(tagScanner)}
+        />
+      )}
       <NotificationHandler />
       <DialogueWrapper id="dialogues">
         {validatedTags && (

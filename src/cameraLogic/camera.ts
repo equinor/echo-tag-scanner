@@ -3,9 +3,7 @@ import {
   CameraResolution,
   DrawImageParameters,
   ZoomSteps,
-  ZoomMethod,
-  ZoomEventDetail,
-  CameraSettingsRequest
+  ZoomEventDetail
 } from '@types';
 import {
   logger,
@@ -30,16 +28,8 @@ class Camera extends Postprocessor {
   private _torchState = false;
   private _captureUrl: string | undefined;
 
-  /** The method of zooming the viewfinder
-   * - undefined: Zooming is not enabled.
-   * - simulated: Manipulates the camera feed scale in order to simulate digital zoom.
-   * - native: Uses MediaStream API to apply digital zoom.
-   */
-  private _zoomMethod: ZoomMethod;
-
   constructor(props: CameraProps) {
     super(props);
-    this._zoomMethod = determineZoomMethod.call(this);
 
     if (this.videoTrack) {
       this.videoTrack.addEventListener('ended', this.refreshStream.bind(this));
@@ -50,13 +40,6 @@ class Camera extends Postprocessor {
     MediaStream.prototype.toString = reportMediaStream;
   }
 
-  public get zoomMethod(): ZoomMethod {
-    return this._zoomMethod;
-  }
-
-  public set zoomMethod(newMethod: ZoomMethod) {
-    this._zoomMethod = newMethod;
-  }
   public get captureUrl(): string | undefined {
     return this._captureUrl;
   }
@@ -71,14 +54,7 @@ class Camera extends Postprocessor {
    */
   public async refreshStream(): Promise<CameraResolution> {
     try {
-      const overrides =
-        this.zoom >= 2
-          ? ({
-              width: { min: 1920, max: 1920 },
-              height: { min: 1080, max: 1080 }
-            } as CameraSettingsRequest)
-          : undefined;
-      const newMediastream = await CoreCamera.getMediastream(overrides);
+      const newMediastream = await CoreCamera.getMediastream();
 
       const newTrack = newMediastream.getVideoTracks()[0];
       newTrack.addEventListener('ended', this.refreshStream.bind(this));
@@ -89,7 +65,7 @@ class Camera extends Postprocessor {
       this.capabilities = newTrack.getCapabilities();
       this.activeCamera = this.videoTrackSettings.facingMode;
       this.currentOrientation = getOrientation();
-      this._zoomMethod = determineZoomMethod.call(this);
+      this.zoomMethod = determineZoomMethod.call(this);
 
       dispatchCameraResolutionEvent({
         width: this.videoTrackSettings.width,
@@ -161,10 +137,10 @@ class Camera extends Postprocessor {
         type: undefined
       };
 
-      if (this._zoomMethod.type === 'native') {
+      if (this.zoomMethod.type === 'native') {
         if (
-          newZoomFactor >= this._zoomMethod.min &&
-          newZoomFactor <= this._zoomMethod.max
+          newZoomFactor >= this.zoomMethod.min &&
+          newZoomFactor <= this.zoomMethod.max
         ) {
           this.videoTrack
             ?.applyConstraints({ advanced: [{ zoom: newZoomFactor }] })
@@ -181,10 +157,10 @@ class Camera extends Postprocessor {
             })
             .catch(rejectZoom);
         } else rejectZoom('invalid range');
-      } else if (this._zoomMethod.type === 'simulated') {
+      } else if (this.zoomMethod.type === 'simulated') {
         if (
-          newZoomFactor >= this._zoomMethod.min &&
-          newZoomFactor <= this._zoomMethod.max
+          newZoomFactor >= this.zoomMethod.min &&
+          newZoomFactor <= this.zoomMethod.max
         ) {
           this.zoom = newZoomFactor;
           zoomEventPayload.type = 'simulated';
@@ -210,7 +186,7 @@ class Camera extends Postprocessor {
   /**
    * Captures a photo using the entire video feed, and stores it as a drawing on the postprocessing canvas.
    */
-  protected async capturePhoto(): Promise<Blob> {
+  public async capturePhoto(): Promise<Blob> {
     this.canvasHandler.clearCanvas();
 
     const params: DrawImageParameters = {
@@ -230,7 +206,7 @@ class Camera extends Postprocessor {
   /**
    * Accepts a new capture, creates an object URL from it and dispatches an event containing the new object URL.
    */
-  protected notifyNewCapture(newCapture: Blob) {
+  public notifyNewCapture(newCapture: Blob) {
     // Revoke the previous object URL if it exists.
     if (this._captureUrl) URL.revokeObjectURL(this._captureUrl);
 
@@ -240,31 +216,6 @@ class Camera extends Postprocessor {
         detail: { url: this._captureUrl, size: newCapture.size }
       })
     );
-  }
-
-  public reportCameraFeatures() {
-    logger.log('QA', () => {
-      console.group('Starting camera');
-      console.info(
-        'Camera resolution -> ',
-        this.viewfinder.videoWidth,
-        this.viewfinder.videoHeight
-      );
-      console.info(
-        'Viewfinder dimensions -> ',
-        this.viewfinder.width,
-        this.viewfinder.height
-      );
-      console.info(
-        'Camera is capable of zooming: ',
-        Boolean(this.capabilities?.zoom)
-      );
-      console.info(
-        'Camera is capable of using the torch: ',
-        Boolean(this.capabilities?.torch)
-      );
-      console.groupEnd();
-    });
   }
 }
 

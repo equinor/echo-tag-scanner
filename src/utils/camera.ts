@@ -1,14 +1,10 @@
 import { Camera } from '@cameraLogic';
 import {
   getNotificationDispatcher as dispatchNotification,
-  isDevelopment,
-  isLocalDevelopment,
-  isQA,
-  getOrientation
+  isLocalDevelopment
 } from '@utils';
 import { CameraSettingsRequest, ZoomMethod } from '@types';
 import { fixedCameraSettingsRequest } from '@const';
-import EchoUtils from '@equinor/echo-utils';
 
 function assignZoomSettings(
   type: 'min' | 'max' | 'step' | 'value',
@@ -74,10 +70,7 @@ function determineZoomMethod(this: Camera): ZoomMethod {
   }
 }
 
-function getCameraPreferences(
-  cameraSettingsOverrides?: Partial<CameraSettingsRequest>
-): MediaStreamConstraints {
-  const isIos = EchoUtils.Utils.iOs.isIosDevice();
+function getCameraPreferences(): MediaStreamConstraints {
   const cameraSettingsRequest = {
     ...fixedCameraSettingsRequest
   };
@@ -85,24 +78,21 @@ function getCameraPreferences(
   // Developer enviroment on desktop. maxTouchPoints can be 1 with touch emulation.
   if (isLocalDevelopment && navigator.maxTouchPoints <= 1) {
     console.info('Creating dev camera request');
-    let maxWidthDev = cameraSettingsRequest.width.max;
-    let maxHeightDev = cameraSettingsRequest.height.max;
-    let minWidthDev = cameraSettingsRequest.width.min;
-    let minHeightDev = cameraSettingsRequest.height.min;
+    let overrideWidthDev = cameraSettingsRequest.width.exact;
+    let overrideHeightDev = cameraSettingsRequest.height.exact;
 
     const cameraId =
       'a874c50ce1a7f877e5d365c7ef7738d4881d76a22876cd61f0b708422936dc45';
 
     const request = {
       video: {
-        width: { max: maxWidthDev, min: minWidthDev },
+        width: { exact: overrideWidthDev },
         height: {
-          max: maxHeightDev,
-          min: minHeightDev
+          exact: overrideHeightDev
         },
 
         // Higher FPS is good for a scanning operation.
-        frameRate: cameraSettingsRequest.fps,
+        frameRate: { ideal: cameraSettingsRequest.fps?.ideal },
 
         deviceId: {
           exact: cameraId
@@ -116,24 +106,21 @@ function getCameraPreferences(
 
   // Developer environment on a mobile device.
   if (isLocalDevelopment && navigator.maxTouchPoints > 1) {
-    console.info('Creating iOS dev capture request.');
-    let maxWidthDev = cameraSettingsRequest.width.max;
-    let maxHeightDev = cameraSettingsRequest.height.max;
-    let minWidthDev = cameraSettingsRequest.width.min;
-    let minHeightDev = cameraSettingsRequest.height.min;
+    console.info('Creating mobile dev capture request.');
+    let overrideWidthDev = cameraSettingsRequest.width.exact;
+    let overrideHeightDev = cameraSettingsRequest.height.exact;
+
     return {
       video: {
-        width: { max: maxWidthDev, min: minWidthDev },
+        width: { exact: overrideWidthDev },
         height: {
-          max: maxHeightDev,
-          min: minHeightDev
+          exact: overrideHeightDev
         },
 
         // Higher FPS is good for a scanning operation.
-        frameRate: {
-          ideal: cameraSettingsRequest.fps
-        },
+        frameRate: { ideal: cameraSettingsRequest.fps?.ideal },
 
+        // Ensures the rear-facing camera is used.
         facingMode: { exact: 'environment' }
       },
       audio: false
@@ -144,20 +131,17 @@ function getCameraPreferences(
   return {
     video: {
       width: {
-        max: cameraSettingsRequest.width.max,
-        min: cameraSettingsRequest.width.min
+        exact: cameraSettingsRequest.width.exact
       },
       height: {
-        max: cameraSettingsRequest.height.max,
-        min: cameraSettingsRequest.height.min
+        exact: cameraSettingsRequest.height.exact
       },
 
       // Higher FPS is good for a scanning operation.
       frameRate: {
-        ideal: cameraSettingsRequest.fps
+        ideal: cameraSettingsRequest.fps?.ideal
       },
 
-      // Require a specific camera here.
       facingMode: { ideal: 'environment' }
     },
     audio: false

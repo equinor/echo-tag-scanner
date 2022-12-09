@@ -129,10 +129,9 @@ class CoreCamera {
   /**
    * Asks the user for permission to use the device camera and resolves a MediaStream object.
    */
-  static async getMediastream(
-    cameraSettingsOverrides?: Partial<CameraSettingsRequest>
-  ): Promise<MediaStream> {
-    const cameraPreferences = getCameraPreferences(cameraSettingsOverrides);
+  static async getMediastream(): Promise<MediaStream> {
+    const cameraPreferences = getCameraPreferences();
+    console.log('%c⧭', 'color: #f27999', cameraPreferences);
     return await navigator.mediaDevices
       .getUserMedia(cameraPreferences)
       .catch((error) => {

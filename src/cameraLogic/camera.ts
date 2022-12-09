@@ -71,14 +71,7 @@ class Camera extends Postprocessor {
    */
   public async refreshStream(): Promise<CameraResolution> {
     try {
-      const overrides =
-        this.zoom >= 2
-          ? ({
-              width: { min: 1920, max: 1920 },
-              height: { min: 1080, max: 1080 }
-            } as CameraSettingsRequest)
-          : undefined;
-      const newMediastream = await CoreCamera.getMediastream(overrides);
+      const newMediastream = await CoreCamera.getMediastream();
 
       const newTrack = newMediastream.getVideoTracks()[0];
       newTrack.addEventListener('ended', this.refreshStream.bind(this));

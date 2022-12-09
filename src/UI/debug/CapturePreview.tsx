@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { Button } from '@equinor/eds-core-react';
 import { zIndexes } from '@const';
 import EchoUtils from '@equinor/echo-utils';
+import { isNewCaptureEvent } from '@utils';
 
 interface CapturePreviewProps {
   camera: Camera;
@@ -33,19 +34,16 @@ export const CapturePreview = (
     );
 
     async function updateImageUrlFromEvent(event: Event) {
-      const previewDimensions: PreviewDimensions =
-        await getPreviewImageDimensions(
-          //@ts-ignore
-          event.detail.url
-        );
+      if (isNewCaptureEvent(event)) {
+        const previewDimensions: PreviewDimensions =
+          await getPreviewImageDimensions(event.detail.url);
 
-      setPreview({
-        //@ts-ignore
-        url: event.detail.url,
-        //@ts-ignore
-        size: event.detail.size,
-        dimensions: previewDimensions
-      });
+        setPreview({
+          url: event.detail.url,
+          size: event.detail.size,
+          dimensions: previewDimensions
+        });
+      }
     }
     return globalThis.removeEventListener(
       'ets-capture',

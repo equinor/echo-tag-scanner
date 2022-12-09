@@ -1,7 +1,8 @@
-import { CameraProps, ZoomSteps } from '@types';
-import { isDevelopment, logger } from '@utils';
+import { CameraProps, CroppingStats } from '@types';
+import { isProduction, logger } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { Camera, OCR } from '.';
+import { Debugger } from './debugger';
 
 /**
  * This object implements tag scanning logic.
@@ -15,117 +16,10 @@ export class TagScanner extends Camera {
   constructor(props: CameraProps) {
     super(props);
     this._scanningArea = props.scanningArea;
-    if (isDevelopment) {
-      globalThis.setScanRetires = (r: number) => (this._scanRetries = r);
-      globalThis.setScanDuraction = (t: number) => (this._scanDuration = t);
-      globalThis.pause = () => this.pauseViewfinder();
-      globalThis.resume = () => this.resumeViewfinder();
-      globalThis.debugCamera = (preview) => this.debugAll(preview);
-      globalThis.refresh = () => this.refreshStream();
-      globalThis.toggleCamera = async () => await this.refreshStream();
-      globalThis.stopStream = () => {
-        this.videoTrack?.stop();
-        this.videoTrack?.dispatchEvent(new Event('ended'));
-      };
-      globalThis.simZoom = (newZoom: ZoomSteps) => this.alterZoom(newZoom);
-    }
   }
 
-  /**
-   * Returns a stringified short report of the users device and configuration.
-   */
-  public async clipboardThis() {
-    return `
-Camera software Information
-#################################
-Camera resolution:
-   ${this.viewfinder.videoWidth}x${this.viewfinder.videoHeight}@${
-      this.videoTrack?.getSettings().frameRate
-    }fps.
-Aspect ratio: ${this.viewfinder.videoWidth / this.viewfinder.videoHeight}
-
-Viewfinder resolution (in CSS pixels):
-    ${this.viewfinder.width}x${this.viewfinder.height}.
-
-Camera is torch capable:
-    ${Boolean(this.capabilities?.torch)}.
-
-Camera zoom: ${this.zoomMethod.type} at max ${this.zoomMethod.max}x zoom.
-
-MediaStream details:
-${this.mediaStream.toString()}
-
-Videotrack details:
-${this.videoTrack?.toString()}
-
-Camera hardware Information
-#################################
-All media devices:
-${await getHRDevices.call(this)}
-
-Current camera hardware:
-${getReadableVideotrackSettings.call(this)}
-
-Current orientation:
-${this.currentOrientation}
-
-Scanning Area
-#################################
-${getScanningAreaInfo.call(this)}
-
-
-`;
-
-    function getReadableVideotrackSettings(this: TagScanner) {
-      let text = '';
-      if (this.videoTrackSettings) {
-        Object.keys(this.videoTrackSettings).forEach((key) => {
-          //@ts-expect-error
-          text += `${key}: ${this.videoTrackSettings[key]}\n`;
-        });
-      } else {
-        text += 'Could not get video tracks';
-      }
-
-      return text;
-    }
-
-    function getHRDevices(this: TagScanner): Promise<string> {
-      return new Promise((resolve) => {
-        let text = '';
-        if (navigator.mediaDevices) {
-          navigator.mediaDevices.enumerateDevices().then((devices) => {
-            devices.forEach((device) => {
-              text += device.label + '\n';
-            });
-            resolve(text);
-          });
-        } else {
-          resolve('Could not enumerate media devices.');
-        }
-      });
-    }
-
-    function getScanningAreaInfo(this: TagScanner) {
-      const captureArea = document.getElementById('scanning-area');
-
-      if (!captureArea) {
-        logger.log('QA', () =>
-          console.warn('A reference to the capture area was not obtainable')
-        );
-        return undefined;
-      }
-      const scanningAreaWidth = captureArea.clientWidth;
-      const scanningAreaHeight = captureArea.clientHeight;
-      const sx = this.viewfinder.videoWidth / 2 - scanningAreaWidth / 2;
-      const sy = this.viewfinder.videoHeight / 2 - scanningAreaHeight / 2;
-
-      return `
-Dimensions: ${scanningAreaWidth}x${scanningAreaHeight}
-Intrinsic offset from top: ${sy}.
-Intrinsic offset from left-edge: ${sx}.
-`;
-    }
+  public get scanningArea(): HTMLElement {
+    return this._scanningArea;
   }
 
   public async performCropping(): Promise<Blob> {
@@ -152,74 +46,21 @@ Intrinsic offset from left-edge: ${sx}.
         `Encountered a zoom ${this.zoom} value which isn't supported.`
       );
     }
-    logger.log('EchoDevelopment', () => {
-      console.group('Cropping');
-      console.info('sx', sx);
-      console.info('sy', sy);
-      console.info('draw: ', `${cropWidth}x${cropHeight}`);
-      console.info('zoom', this.zoom);
-      console.info(
-        'viewfinder',
-        this.viewfinder.videoWidth + 'x' + this.viewfinder.videoHeight
-      );
-      console.info('outer height', globalThis.outerHeight);
-      console.info('inner height', globalThis.innerHeight);
-      console.info('vV', globalThis.visualViewport);
-      console.groupEnd();
-    });
+
+    const stats: CroppingStats = {
+      sx,
+      sy,
+      cropWidth,
+      cropHeight,
+      zoom: this.zoom
+    };
+    !isProduction && Debugger.reportCropping(stats, this);
 
     return await this.crop({
       sx,
       sy,
       sWidth: cropWidth,
       sHeight: cropHeight
-    });
-  }
-
-  public async debugAll(previewCapture = false) {
-    if (previewCapture) {
-      const scanningArea = document.getElementById('scanning-area');
-
-      if (scanningArea) {
-        this.prepareNewScan();
-        let capture = await this.capturePhoto();
-        capture = await this.performCropping();
-        const scanningAreaWidth = this._scanningArea.clientWidth;
-        const scanningAreaHeight = this._scanningArea.clientHeight;
-
-        if (this.zoomMethod.type === 'simulated') {
-          capture = await this._canvasHandler.getCanvasContentAsBlob({
-            sWidth: scanningAreaWidth / this.zoom,
-            sHeight: scanningAreaHeight / this.zoom
-          });
-        } else {
-          capture = await this._canvasHandler.getCanvasContentAsBlob({
-            sWidth: scanningAreaWidth,
-            sHeight: scanningAreaHeight
-          });
-        }
-
-        this.notifyNewCapture(capture);
-      }
-    }
-    logger.log('EchoDevelopment', () => {
-      console.info(
-        'Camera resolution -> ',
-        this.viewfinder.videoWidth +
-          'x' +
-          this.viewfinder.videoHeight +
-          '@' +
-          this.videoTrack?.getSettings().frameRate +
-          'fps'
-      );
-      console.info(
-        'Viewfinder (Element) resolution -> ',
-        this.viewfinder.width + 'x' + this.viewfinder.height
-      );
-      console.info(
-        'Viewfinder (CSS) resolution -> ',
-        this.viewfinder.style.width + 'x' + this.viewfinder.style.height
-      );
     });
   }
 
@@ -264,7 +105,8 @@ Intrinsic offset from left-edge: ${sx}.
         scans.push(capture);
 
         // Log some image stats and a blob preview in network tab.
-        this.logImageStats(capture, 'The postprocessed photo.');
+        !isProduction &&
+          Debugger.logImageStats(capture, 'The postprocessed photo.');
 
         if (scans.length === this._scanRetries) {
           // Scanning is finished.
@@ -283,22 +125,10 @@ Intrinsic offset from left-edge: ${sx}.
     for (let i = 0; i < scans.length; i++) {
       const filteredResponse = await this._OCR.runOCR(scans[i]);
       if (filteredResponse.length >= 1) {
-        var validation = await this._OCR.handleValidation(filteredResponse);
+        const validation = await this._OCR.handleValidation(filteredResponse);
         if (validation.length >= 1) {
           return validation;
-        } else {
-          logger.log('QA', () =>
-            console.info(
-              'OCR returned no results that was validated by Echo-Search.'
-            )
-          );
         }
-      } else {
-        logger.log('QA', () =>
-          console.info(
-            'OCR returned no results that made it through the filtering step.'
-          )
-        );
       }
     }
 

@@ -5,9 +5,10 @@ import {
   isDevelopment,
   isLocalDevelopment
 } from '@utils';
+import { zIndexes } from '../../const';
 
 interface SystemInfoTriggerProps {
-  onDelayedTrigger: () => Promise<string>;
+  getContentsForClipboard: () => Promise<string>;
 }
 
 const SystemInfoTrigger = (props: SystemInfoTriggerProps) => {
@@ -18,7 +19,7 @@ const SystemInfoTrigger = (props: SystemInfoTriggerProps) => {
         'text/plain':
           // Call this function to get the textual content.
           props
-            .onDelayedTrigger()
+            .getContentsForClipboard()
 
             // Then resolve a Blob construct with the text payload and of the same MIME type.
             .then((text) => new Blob([text], { type: 'text/plain' }))
@@ -49,7 +50,7 @@ const InvisibleButton = styled.button`
   right: 0;
   top: 0;
   background-color: rgba(0, 0, 0, 0, 1);
-  z-index: 2;
+  z-index: ${zIndexes.cameraControls};
   width: 50px;
   height: 50px;
   border: none;

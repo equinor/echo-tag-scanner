@@ -7,3 +7,8 @@ export type ZoomEventDetail = {
   zoomFactor: number;
   type?: 'simulated' | 'native';
 };
+
+export type NewCaptureEventDetail = {
+  url: string;
+  size: number;
+};

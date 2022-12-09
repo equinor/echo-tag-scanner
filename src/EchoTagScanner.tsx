@@ -5,7 +5,6 @@ import { ErrorBoundary } from '@services';
 import { useGetMediastream } from '@hooks';
 import styled from 'styled-components';
 import { zIndexes } from '@const';
-import { ViewfinderDimensions } from '@types';
 
 /**
  * This component will handle all of the initial React setup and renders before control is handed to the classes.

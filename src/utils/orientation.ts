@@ -29,7 +29,7 @@ export function defineOrientationChangeEvent(
 
   logger.log('QA', () =>
     console.warn(
-      'No method of altering the device orientation was found. The initial value will always be used.'
+      `No method of altering the device orientation was found. The initial of ${this.currentOrientation} will always be used.`
     )
   );
   return null;

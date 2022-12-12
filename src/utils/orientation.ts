@@ -39,7 +39,6 @@ export function defineOrientationChangeEvent(
     event: Event | MediaQueryListEvent,
     mql?: MediaQueryList
   ) {
-    console.log('event');
     if (event instanceof MediaQueryListEvent && mql) {
       if (mql.matches) {
         this.currentOrientation = 'landscape';
@@ -51,7 +50,6 @@ export function defineOrientationChangeEvent(
       } else this.currentOrientation = 'portrait';
     }
 
-    console.log('orientation changed: ', this.currentOrientation);
     return this.currentOrientation;
   }
 }

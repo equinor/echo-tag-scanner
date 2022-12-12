@@ -85,6 +85,7 @@ export class OCR {
           let nextWord = word.text.trim();
           nextWord = ocrFilterer.filterLeadingChar(nextWord);
           nextWord = ocrFilterer.filterTrailingChar(nextWord);
+          nextWord = nextWord.toUpperCase();
           if (
             nextWord &&
             ocrFilterer.hasEnoughCharacters(nextWord) &&

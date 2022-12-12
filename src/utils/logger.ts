@@ -8,7 +8,6 @@ import {
 import echomodule from '../../echoModule.config.json';
 import { OCRPayload, ScanAttemptLogEntry } from '@types';
 import { TagScanner } from '@cameraLogic';
-import { getOrientation } from '@utils';
 
 export enum ObjectName {
   Module = 'Module',
@@ -212,7 +211,7 @@ function logScanningAttempt(
     cameraResolution: `${this.videoTrackSettings?.width}x${this.videoTrackSettings?.height}@${this.videoTrackSettings?.frameRate}`,
     zoomMethod: this.zoomMethod.type,
     zoomValue: this.zoom,
-    deviceOrientation: getOrientation() // NOTE: Should be this.currentOrientation
+    deviceOrientation: this.currentOrientation
   };
   logger.scanAttempt(entry);
 

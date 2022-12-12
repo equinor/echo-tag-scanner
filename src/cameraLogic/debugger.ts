@@ -1,8 +1,24 @@
-import { logger } from '@utils';
+import { deviceInformationAgent, logger } from '@utils';
 import { CoreCamera, TagScanner } from '@cameraLogic';
-import { CroppingStats, TagValidationResult, ValidationStats } from '../types';
+import { CroppingStats, ValidationStats } from '../types';
 
 export class Debugger {
+  public static startupLogs(tagScanner: TagScanner) {
+    console.group('Starting up Echo Tag Scanner.');
+    console.info('Orientation -> ', tagScanner.currentOrientation);
+    console.info(
+      'Orientation handler -> ',
+      tagScanner.orientationChangeHandler || 'No orientation handler set.'
+    );
+    console.info(
+      'Using userAgentData -> ' + Boolean(deviceInformationAgent.uaDataValues)
+    );
+    console.info(
+      `Resolution -> ${tagScanner.videoTrackSettings?.width}x${tagScanner.videoTrackSettings?.height}@${tagScanner.videoTrackSettings?.frameRate}fps.`
+    );
+    console.table(deviceInformationAgent.deviceInformation);
+    console.groupEnd();
+  }
   /**
    * Logs image statistics to the console.
    */

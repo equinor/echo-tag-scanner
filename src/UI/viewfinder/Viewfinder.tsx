@@ -6,7 +6,6 @@ import {
   isQA,
   isCustomZoomEvent
 } from '@utils';
-import { ViewfinderDimensions } from '@types';
 import { zIndexes } from '@const';
 import { ScanningArea } from './ScanningArea';
 import { VersionNumber, Backdrop } from '@ui';
@@ -108,7 +107,6 @@ const CameraFeed = styled.video<{
   position: absolute;
   top: 50%;
   left: 50%;
-
 
   background-color: var(--black);
   transition: all 0.3s ease;

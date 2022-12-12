@@ -1,8 +1,6 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import styled from 'styled-components';
 import { zIndexes } from '@const';
-import { ViewfinderDimensions } from '@types';
-import { getOrientation } from '@utils';
 
 interface ScanningAreaProps {
   scanningAreaRef: React.Dispatch<SetStateAction<HTMLElement | undefined>>;
@@ -10,28 +8,6 @@ interface ScanningAreaProps {
 }
 
 const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
-  const [currentOrientation, setOrientation] = useState(getOrientation());
-  const [saDimensions, setSADimensions] = useState<ViewfinderDimensions>({
-    width: undefined,
-    height: undefined
-  });
-
-  // TODO: Refine this
-  useEffect(() => {
-    globalThis.addEventListener('resize', () => {
-      const newOrientation = getOrientation();
-
-      if (newOrientation !== currentOrientation) {
-        setOrientation(newOrientation);
-        if (newOrientation === 'portrait') {
-          setSADimensions({ width: 720, height: 1280 });
-        } else {
-          setSADimensions({ width: 1280, height: 720 });
-        }
-      }
-    });
-  }, []);
-
   return (
     <>
       <ScanningAreaContainer
@@ -49,8 +25,6 @@ const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
 
         <PostprocessingCanvas
           ref={(el: HTMLCanvasElement) => props.setCanvasRef(el)}
-          width={saDimensions.width}
-          height={saDimensions.height}
           id="drawing-area"
         />
       </ScanningAreaContainer>

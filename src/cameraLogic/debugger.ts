@@ -1,6 +1,6 @@
 import { deviceInformationAgent, logger } from '@utils';
 import { CoreCamera, TagScanner } from '@cameraLogic';
-import { CroppingStats, TagValidationResult, ValidationStats } from '../types';
+import { CroppingStats, ValidationStats } from '../types';
 
 export class Debugger {
   public static startupLogs(tagScanner: TagScanner) {

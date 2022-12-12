@@ -1,5 +1,5 @@
 import { CameraProps, CroppingStats } from '@types';
-import { isProduction, logger } from '@utils';
+import { isProduction } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { Camera, OCR } from '.';
 import { Debugger } from './debugger';

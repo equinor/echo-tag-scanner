@@ -3,6 +3,7 @@ import EchoUtils from '@equinor/echo-utils';
 import { TagScanner } from '../cameraLogic/scanner';
 import { CameraProps } from '@types';
 import { deviceInformationAgent, logger } from '@utils';
+import { Debugger } from '../cameraLogic/debugger';
 
 type CameraInfrastructure = {
   tagScanner?: TagScanner;
@@ -30,16 +31,7 @@ export function useMountScanner(
 
     if (!signal.aborted) {
       setCamera(camera);
-
-      logger.log('QA', () => {
-        console.group('Expand for device information.');
-        console.info(
-          'Using userAgentData?: ' +
-            Boolean(deviceInformationAgent.uaDataValues)
-        );
-        console.table(deviceInformationAgent.deviceInformation);
-        console.groupEnd();
-      });
+      Debugger.startupLogs(camera);
     }
 
     return () => {

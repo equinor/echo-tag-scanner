@@ -8,7 +8,6 @@ import {
 import echomodule from '../../echoModule.config.json';
 import { OCRPayload, ScanAttemptLogEntry } from '@types';
 import { TagScanner } from '@cameraLogic';
-import { getOrientation } from '@utils';
 
 export enum ObjectName {
   Module = 'Module',

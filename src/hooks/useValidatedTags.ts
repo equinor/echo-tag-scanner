@@ -4,8 +4,11 @@ import { useState } from 'react';
 import { TagScanner } from '@cameraLogic';
 import { useTagScanStatus } from '@services';
 import { getNotificationDispatcher as dispatchNotification } from '@utils';
+import { ValidatedTagsHandling } from '@types';
 
-export function useValidatedTags(tagScanner?: TagScanner) {
+export function useValidatedTags(
+  tagScanner?: TagScanner
+): ValidatedTagsHandling {
   const [validatedTags, setValidatedTags] = useState<
     TagSummaryDto[] | undefined
   >(undefined);
@@ -15,7 +18,8 @@ export function useValidatedTags(tagScanner?: TagScanner) {
   // Accepts a list of validated tags and sets them in memory for presentation.
   function presentValidatedTags(tags: TagSummaryDto[]) {
     if (Array.isArray(tags) && tags.length > 0) {
-      // We got more than 1 validated tag. Set them into state and rerender to present search results.
+      // We got more than 1 validated tag.
+      // Set them into state and rerender to present search results.
       setValidatedTags(tags);
     } else {
       // We got no validated tags.

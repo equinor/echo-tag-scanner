@@ -4,7 +4,7 @@ import { Syncer } from '@equinor/echo-search';
 /**
  * Returns a boolean indicating if echo is syncing the tags in IndexedDB.
  */
-function useEchoIsSyncing() {
+function useEchoIsSyncing(): boolean {
   const [echoIsSyncing, setEchoIsSyncing] = useState(
     Syncer.syncStates
       .getSyncStateBy(Syncer.OfflineSystem.Tags)

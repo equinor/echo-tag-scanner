@@ -4,10 +4,11 @@ import { TorchButton, ScannerButton } from '@ui';
 import { Button, Icon } from '@equinor/eds-core-react';
 import { isDevelopment } from '@utils';
 import { info_circle } from '@equinor/eds-icons';
+import { ValidatedTagsHandling } from '@types';
 
 interface CameraControlsProps {
   /* Scanning callback */
-  onScanning: () => void;
+  onScanning: () => Awaited<Promise<void>>;
   /* Torch callback. If undefined, the torch is not supported. */
   onToggleTorch?: () => void;
   onDebug?: () => void;

@@ -6,3 +6,4 @@ export { Postprocessor } from './postprocessor';
 export { TagScanner } from './scanner';
 export { ZoomGestureHandler } from './gestures/gestureHandler';
 export { PinchGestureHandler } from './gestures/pinchGestureHandler';
+export { Debugger } from './debugger';

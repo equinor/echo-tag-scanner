@@ -13,7 +13,8 @@ import {
   determineZoomMethod,
   handleError,
   dispatchCameraResolutionEvent,
-  dispatchZoomEvent
+  dispatchZoomEvent,
+  defineOrientationChangeEvent
 } from '@utils';
 import { CoreCamera } from './coreCamera';
 import { Postprocessor } from './postprocessor';
@@ -27,6 +28,10 @@ class Camera extends Postprocessor {
   /** Is the torch turned on or not. */
   private _torchState = false;
   private _captureUrl: string | undefined;
+  private _orientationChangeHandler:
+    | 'DeviceOrientationAPI'
+    | 'MatchMedia'
+    | null;
 
   constructor(props: CameraProps) {
     super(props);
@@ -34,6 +39,7 @@ class Camera extends Postprocessor {
     if (this.videoTrack) {
       this.videoTrack.addEventListener('ended', this.refreshStream.bind(this));
     }
+    this._orientationChangeHandler = defineOrientationChangeEvent.call(this);
 
     // For debugging purposes.
     MediaStreamTrack.prototype.toString = reportVideoTrack;
@@ -46,6 +52,10 @@ class Camera extends Postprocessor {
 
   public set captureUrl(newUrl: string | undefined) {
     this._captureUrl = newUrl;
+  }
+
+  public get orientationChangeHandler() {
+    return this._orientationChangeHandler;
   }
 
   /**

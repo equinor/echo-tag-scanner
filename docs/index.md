@@ -111,6 +111,46 @@ The scanner employs a "try-again" approach where we initially take a select numb
 ## Future improvements
 [This document](https://github.com/equinor/echo-tag-scanner/blob/main/docs/roadmap.md) outlines a set of future improvements.
 
+## How the cropping works
+As an attempt to minimize capture sizes, the scanner has a defined "scanning area". This area defines a region of the viewfinder which will be cropped before being further processed. A basic graph is in order here to explain how it works.
+
+![image](https://user-images.githubusercontent.com/10920843/207258606-0122942b-4c01-493e-b388-3ccd5da3ac86.png)
+
+- The __camera feed__ is as suggested the video feed which is streamed from a camera device to a video element. The camera feed is configured to run in 720p resolutions.
+- The __viewfinder__ represents the part of the camera feed which is visible to the user.
+- The __scanning area__, as mentioned, is a region of the viewfinder which will be cropped before further processing.
+- The __viewport__ is the users visible area of a web page. As of v2.2.1, the __viewfinder__ makes up most of the viewport with the exception of the Echo menubars.
+
+In order to perform a crop on the viewfinder, we must find a start point as plane coordinates (x, y), a crop width and a crop height.
+The crop height and crop width, ie crop dimensions, is found by querying the scanning area elements clientHeight and clientWidth which gives us the dimensions without padding and borders.
+
+The coordinates are found with a manual calculation (see graph above for formula). If the camera feed, viewfinder and scanning area are placed in a coordinate system, the origo of the system becomes the top left of the camera feed, and from there we find the (x, y).
+
+This approach does have some drawbacks:
+- The __scanning area__ must be centered vertically and horizontally in the __viewport__.
+- The __camera feed__ (ie the camera resolution) cannot be smaller than the __viewport__ (a possible problem on large tablets).
+
+## Zooming
+A requested feature is the ability to zoom the camera because some tag signs are situated farther away. The ability to digitally zoom a camera feed is currently known to be in Chromium. This ability is however not present in the [W3 Image Capture spec](https://www.w3.org/TR/mediacapture-streams/#def-constraint-sampleSize), so not all browsers are supporting this.
+
+In order to give users cross-platform zoom capability, the tag scanner operates with a __native__ and a __simulated__ procedure.
+
+## Native zoom
+A native zoom is performed by refreshing the running video track with a [constraint value](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints) for zoom. This built in behavior is likely cropping the camera frames before they are streamed to the video element, giving the users the illusion of a zoomed camera. It appears no built-in postprocessing is done here.
+
+## Simulated zoom
+In order to support zooming on browsers which haven't implemented zoom constraints, the tag scanner has the ability to do this manually. This is in principle very simple as we want to achieve what the native zoom is doing, giving the users the illusion of a zoomed viewfinder. Since the viewfinder is a video-element, we can leverage the CSS scale transform to "blow up" the element size while staying performant.
+
+However, the scale transform will not alter the video element's intrinsic dimensions, which is expressed in __videoWidth__ and __videoHeight__. These dimensions is what is used with the cropping behaviour (recommened reading beforehand). 
+
+Essentially, for a 2x simulated zoom, half of the viewfinder is now outside the viewport and as a result, we have to recalculate the starting point and the crop dimensions. Since the viewfinder in this example is zoomed 2x, the cropping dimensions then becomes half of what they are at 1x because we do not scale down the scanning area element itself. The cropping coordinates will also shift along the x and y-axis since the viewfinder is scaled up.
+
+The diagram below shows the calculations. It is important to consider that the viewfinder has been __visually__ scaled up from the users perspective, but its instrinsic dimensions are always the same. The crop dimensions simply becomes half of the scanning area width and height.
+
+![image](https://user-images.githubusercontent.com/10920843/207294106-3070ce9b-3810-4109-8715-0d7d7ac01546.png)
+
+
+
 ## Logging
 
 ### How to see number of users per month.

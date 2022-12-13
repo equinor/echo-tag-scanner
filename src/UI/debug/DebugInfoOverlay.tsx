@@ -7,6 +7,7 @@ import {
 import { TagScanner } from '@cameraLogic';
 import { zIndexes } from '@const';
 import { isCustomResolutionEvent, isCustomZoomEvent } from '@utils';
+import styled from 'styled-components';
 
 type DebugInfo = {
   viewfinder: ViewfinderDimensions;
@@ -92,15 +93,7 @@ export const DebugInfoOverlay = (props: DebugInfoOverlayProps): JSX.Element => {
   }
 
   return (
-    <output
-      style={{
-        position: 'fixed',
-        top: '0',
-        right: '0',
-        zIndex: zIndexes.overlays,
-        userSelect: 'none'
-      }}
-    >
+    <DebugOutput>
       {debugInfo.cameraFeed && (
         <mark style={{ backgroundColor: 'hotpink', userSelect: 'none' }}>
           Camera feed: {Math.round(debugInfo.cameraFeed.width ?? 0)}x
@@ -117,6 +110,21 @@ export const DebugInfoOverlay = (props: DebugInfoOverlayProps): JSX.Element => {
       <mark style={{ backgroundColor: 'lightgreen', userSelect: 'none' }}>
         Zoom: {debugInfo.zoomFactor}x
       </mark>
-    </output>
+    </DebugOutput>
   );
 };
+
+const DebugOutput = styled.output`
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: ${zIndexes.overlays};
+  user-select: none;
+
+  @media screen and (orientation: landscape) {
+    top: unset;
+    right: unset;
+    bottom: 0;
+    left: 10%;
+  }
+`;

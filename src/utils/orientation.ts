@@ -10,7 +10,7 @@ export function defineOrientationChangeEvent(
   this: Camera
 ): OrientationHandlerMethods | null {
   // Use Screen Orientation API if available.
-  if (screen.orientation.onchange) {
+  if (screen?.orientation?.onchange) {
     screen.orientation.addEventListener(
       'change',
       handleOrientationChange.bind(this)

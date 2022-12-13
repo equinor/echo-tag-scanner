@@ -31,9 +31,9 @@ export function useMountScanner(
 
     if (!signal.aborted) {
       setCamera(camera);
-      {
+      
         !isProduction && Debugger.startupLogs(camera);
-      }
+      
     }
 
     return () => {

@@ -10,7 +10,7 @@
         "start": "echo-build -s -d",
         "build": "echo-build -c && bash ./env.sh",
         "analyze": "echo-build -b",
-        "start-tunnel": "npx localtunnel --subdomain echoscanner --port 3000 --local-https --allow-invalid-cert --local-host localhost"
+        "tunnel": "npx localtunnel --subdomain echoscanner --port 3000 --local-https --allow-invalid-cert --local-host localhost"
     },
     "devDependencies": {
         "@equinor/echo-base": "^0.6.21",

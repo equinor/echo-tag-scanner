@@ -3,19 +3,9 @@ import { TagScanner } from '@cameraLogic';
 import styled from 'styled-components';
 import { zIndexes } from '@const';
 import { Debugger } from '@cameraLogic';
-import {
-  isLocalDevelopment,
-  isDevelopment,
-  isQA,
-  getTorchToggleProvider
-} from '@utils';
-import {
-  CameraControlsRow,
-  SystemInfoTrigger,
-  DebugInfoOverlay,
-  GestureArea
-} from '@ui';
-import { TagScanStatus, ValidatedTagsHandling } from '@types';
+import { getTorchToggleProvider } from '@utils';
+import { CameraControlsRow, GestureArea, LabelAndClose } from '@ui';
+import { TagScanStatus } from '@types';
 
 interface ControlPadProps {
   tagScanner: TagScanner;
@@ -25,18 +15,11 @@ interface ControlPadProps {
   onTagScan: () => Awaited<Promise<void>>;
 }
 
-export const ControlPad = (props: ControlPadProps) => {
+export const CameraControls = (props: ControlPadProps) => {
   return (
     <>
       <ControlPadWrapper id="control-pad" role="toolbar">
         <>
-          {(isLocalDevelopment || isDevelopment || isQA) && (
-            <DebugInfoOverlay
-              tagScanner={props.tagScanner}
-              viewfinder={props.viewfinder}
-            />
-          )}
-
           <CameraControlsRow
             onToggleTorch={getTorchToggleProvider(props.tagScanner)}
             onScanning={props.onTagScan}
@@ -50,11 +33,8 @@ export const ControlPad = (props: ControlPadProps) => {
           />
         </>
       </ControlPadWrapper>
-      <SystemInfoTrigger
-        getContentsForClipboard={() => Debugger.clipboardThis(props.tagScanner)}
-      />
-
       <GestureArea tagScanner={props.tagScanner} />
+      <LabelAndClose />
     </>
   );
 };
@@ -81,3 +61,4 @@ const ControlPadWrapper = styled.section`
     width: var(--control-pad-width-landscape);
   }
 `;
+

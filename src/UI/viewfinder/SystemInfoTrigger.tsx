@@ -47,10 +47,10 @@ const SystemInfoTrigger = (props: SystemInfoTriggerProps) => {
 
 const InvisibleButton = styled.button`
   position: fixed;
-  right: 0;
-  top: 0;
+  left: 0;
+  top: 10%;
   background-color: rgba(0, 0, 0, 0, 1);
-  z-index: ${zIndexes.cameraControls};
+  z-index: ${zIndexes.overlays};
   width: 50px;
   height: 50px;
   border: none;
@@ -60,6 +60,13 @@ const InvisibleButton = styled.button`
   outline: ${isLocalDevelopment || isDevelopment
     ? '1px dotted var(--asBuilt)'
     : 'inital'};
+
+  @media screen and (orientation: landscape) {
+    top: unset;
+    right: unset;
+    bottom: 0;
+    left: calc(var(--echo-sidebar-width) + env(safe-area-inset-left));
+  }
 `;
 
 export { SystemInfoTrigger };

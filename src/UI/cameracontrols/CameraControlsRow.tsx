@@ -4,7 +4,6 @@ import { TorchButton, ScannerButton } from '@ui';
 import { Button, Icon } from '@equinor/eds-core-react';
 import { isDevelopment } from '@utils';
 import { info_circle } from '@equinor/eds-icons';
-import { ValidatedTagsHandling } from '@types';
 
 interface CameraControlsProps {
   /* Scanning callback */
@@ -89,7 +88,7 @@ const RowGrid = styled.div`
 
   @media screen and (orientation: landscape) {
     grid-template-columns: 1fr;
-    grid-template-rows: [debug]1fr [camerabutton]1fr [torch]1fr;
+    grid-template-rows: [torch]1fr [camerabutton]1fr [debug]1fr;
     width: auto;
     height: 100%;
     padding-bottom: 16px;

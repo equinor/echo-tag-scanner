@@ -2,9 +2,8 @@ import { SetActiveTagNo } from '@equinor/echo-framework';
 import { TagSummaryDto } from '@equinor/echo-search';
 import React from 'react';
 import { TagScanner } from '@cameraLogic';
-import { CapturePreview, SearchResults } from '@ui';
+import { SearchResults } from '@ui';
 import styled from 'styled-components';
-import { isDevelopment, isLocalDevelopment } from '@utils';
 
 interface DialogueWrapperProps {
   validatedTags?: TagSummaryDto[];
@@ -27,10 +26,6 @@ export const Dialogues = (props: DialogueWrapperProps) => {
           />
         )}
       </DialogueWrapper>
-
-      {(isLocalDevelopment || isDevelopment) && (
-        <CapturePreview camera={props.tagScanner} />
-      )}
     </>
   );
 };

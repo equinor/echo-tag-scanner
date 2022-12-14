@@ -83,9 +83,11 @@ export class OCR {
       region.lines.forEach((line) =>
         line.words.forEach((word) => {
           let nextWord = word.text.trim();
-          nextWord = ocrFilterer.filterLeadingChar(nextWord);
-          nextWord = ocrFilterer.filterTrailingChar(nextWord);
           nextWord = nextWord.toUpperCase();
+          if (!ocrFilterer.isMotorTag(nextWord)) {
+            nextWord = ocrFilterer.filterLeadingChar(nextWord);
+            nextWord = ocrFilterer.filterTrailingChar(nextWord);
+          }
           if (
             nextWord &&
             ocrFilterer.hasEnoughCharacters(nextWord) &&

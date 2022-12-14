@@ -1,14 +1,9 @@
 import React, { SetStateAction, Dispatch, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import {
-  isLocalDevelopment,
-  isDevelopment,
-  isQA,
-  isCustomZoomEvent
-} from '@utils';
+import { isCustomZoomEvent } from '@utils';
 import { zIndexes } from '@const';
 import { ScanningArea } from './ScanningArea';
-import { VersionNumber, Backdrop } from '@ui';
+import { Backdrop } from '@ui';
 
 interface ViewfinderProps {
   setCanvasRef: Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
@@ -54,7 +49,6 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   return (
     <>
       <Backdrop />
-      {(isQA || isLocalDevelopment || isDevelopment) && <VersionNumber />}
       <CameraFeed
         id="viewfinder"
         ref={(el: HTMLVideoElement) => props.setVideoRef(el)}

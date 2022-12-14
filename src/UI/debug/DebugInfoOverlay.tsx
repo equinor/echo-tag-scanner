@@ -95,7 +95,7 @@ export const DebugInfoOverlay = (props: DebugInfoOverlayProps): JSX.Element => {
   return (
     <DebugOutput>
       {debugInfo.cameraFeed && (
-        <mark style={{ backgroundColor: 'hotpink', userSelect: 'none' }}>
+        <mark style={{ backgroundColor: 'lightpink', userSelect: 'none' }}>
           Camera feed: {Math.round(debugInfo.cameraFeed.width ?? 0)}x
           {Math.round(debugInfo.cameraFeed.height ?? 0)}@
           {Math.round(Number(debugInfo.frameRate))}fps
@@ -116,8 +116,8 @@ export const DebugInfoOverlay = (props: DebugInfoOverlayProps): JSX.Element => {
 
 const DebugOutput = styled.output`
   position: fixed;
-  top: 0;
-  right: 0;
+  top: 10%;
+  left: 0;
   z-index: ${zIndexes.overlays};
   user-select: none;
 
@@ -125,6 +125,6 @@ const DebugOutput = styled.output`
     top: unset;
     right: unset;
     bottom: 0;
-    left: 10%;
+    left: calc(var(--echo-sidebar-width) + env(safe-area-inset-left));
   }
 `;

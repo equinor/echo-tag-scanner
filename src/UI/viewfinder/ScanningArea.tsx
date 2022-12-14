@@ -72,7 +72,6 @@ const VerticalNotch = styled.div<NotchPositioning>`
   right: ${(props) => (props.right ? props.right : 'initial')};
   bottom: ${(props) => (props.bottom ? props.bottom : 'initial')};
   left: ${(props) => (props.left ? props.left : 'initial')};
-  border-radius: 10%;
   width: 5px;
   height: 45px;
   background-color: white;

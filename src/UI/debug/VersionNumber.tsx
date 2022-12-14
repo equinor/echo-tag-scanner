@@ -19,16 +19,8 @@ export const VersionNumber = (): JSX.Element => {
   );
 };
 const Mark = styled.mark`
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: ${zIndexes.versionNumber};
+  display: inline;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
-
-  @media screen and (orientation: landscape) {
-    top: 0;
-    left: var(--echo-sidebar-width);
-  }
 `;

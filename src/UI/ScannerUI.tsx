@@ -1,11 +1,17 @@
 import React from 'react';
-import { NotificationHandler, ControlPad, Dialogues } from '@ui';
+import {
+  NotificationHandler,
+  CameraControls,
+  Dialogues,
+  DeveloperTools
+} from '@ui';
 import {
   useEchoIsSyncing,
   useMountScanner,
   useSetActiveTagNo,
   useValidatedTags
 } from '@hooks';
+import { isProduction } from '@utils';
 
 interface ScannerProps {
   stream: MediaStream;
@@ -33,7 +39,7 @@ function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
 
   return (
     <>
-      <ControlPad
+      <CameraControls
         tagScanner={tagScanner}
         viewfinder={viewfinder}
         echoIsSyncing={echoIsSyncing}
@@ -51,6 +57,10 @@ function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
           tagScanner?.prepareNewScan().then(resetValidatedTags);
         }}
       />
+
+      {!isProduction && (
+        <DeveloperTools tagScanner={tagScanner} viewfinder={viewfinder} />
+      )}
     </>
   );
 }

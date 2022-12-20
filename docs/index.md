@@ -73,16 +73,49 @@ In this step, we use an OCR technology to extract textual content from the captu
 
 Currently, the OCR-step happens in the cloud, but there is alternatively the option of deploying an on-prem version. The scanner does not however have significant latency-oriented issues.
 
-### Filtering and validation
-The goal of the filtering step is to take whatever textual content we got from OCR, and filter away the things which we roughly do not perceive as tag numbers. The ruleset is as followed:
+### OCR post-processing
+This step is aiming to analyze the OCR-result and optionally do various sub-steps in the form of corrections and filters to letters, words and lines of words. There is a ruleset defined known as __tag format rules__:
 
-- The string contains at least two numbers.
-- The string should be at least 4 characters.
-- The string is all uppercased.
-- It cannot contain a leading or trailing special character.
-- It can contain one or more of the following special characters: -_."
-  - An exception to this rule are the motor tags which contain the sequence (M) somewhere in the tag body.
-  - TODO: Document the '1"' pattern.
+- The string can contain the Latin letters A-Z, all uppercased and the numbers 0-9.
+- The string must contain at least two numbers.
+- The string must be at least 4 characters.
+- The string must be uppercased.
+- The string cannot contain a leading or trailing special character.
+- The string can contain one or more of the following special characters: -_."
+- The string can be of the following special types:
+  - A motor tag, meaning it must obey the tag format rules, but also contains one and only one sequence of "(M)" somewhere inside the word.
+  - A "C-tag", the same as motor tag, but with the sequence "(C)" instead.
+
+### Homoglyph substitution
+In typography, a homoglyph is "one of two or more graphemes, characters, or glyphs with shapes that appear identical or very similar".
+The most common example are the characters "0" (numeric zero) and "O" (uppercased Latin O).
+
+In this step, we can look at the characters in the words and identify particular characters which we can confidentally replace with another character.
+For example, we cannot replace an instance of "0" (numeric zero) with an uppercased "O" because they are both accepted characters in the tag format ruleset. We can however replace an instance of "$" (the dollar currency symbol) with an uppercased S because the dollar symbol is not amongst the accepted characters.
+
+Furthermore, we can make some assumptions on the nature of the OCR-service. Our OCR service is a document reader configured to read Latin english. Therefore, we can assume it will not commonly return letters outside the english alphabet, it will return Arabic numerals 0-9 and a set of alphanumeric characters that usually appears in western word processing.
+
+#### Homoglyph substitutions
+The table below shows a set of alphanumeric characters in the left column and a singular substitution character. 
+
+_Updated 20-12/2022_
+| Homoglyphs | Substitution |
+|------------|--------------|
+| ฿          | B            |
+| < © €      | C            |
+| [ ] ! \|   | I            |
+| }] )       | J            |
+| £          | L            |
+| ₽          | P            |
+| Ⓡ &       | R            |
+| ? § ¿ $    | S            |
+| ±          | T            |
+| µ          | U            |
+| ¥          | Y            |
+| \| !       | 1            |
+| ?          | 2            |
+| >          | 7            |
+
 
 After the rough filtering step, we run a more expensive validation step to filter out or correct false positives. This step is handled by [Echo-Search])(https://github.com/equinor/EchoSearch).
 

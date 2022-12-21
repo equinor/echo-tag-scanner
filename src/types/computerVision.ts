@@ -7,19 +7,22 @@ type ComputerVisionResponse = {
 };
 
 type Region = {
-  boundingBox: BoundingBox;
+  boundingBox?: BoundingBox;
   lines: Lines[];
 };
 
-type Lines = {
-  boundingBox: BoundingBox;
+export type Lines = {
+  boundingBox?: BoundingBox;
   words: Word[];
 };
 
-type Word = {
-  boundingBox: BoundingBox;
+export type Word = {
+  boundingBox?: BoundingBox;
   text: string;
 };
+
+export type MockWord = Pick<Word, 'text'>;
+
 
 /**
  * example: "462,379,497,258"

@@ -15,7 +15,8 @@ import {
   logger,
   ocrFilterer,
   logScanningAttempt,
-  isProduction
+  isProduction,
+  uniqueStringArray
 } from '@utils';
 import { ErrorRegistry, homoglyphPairs } from '@const';
 import { baseApiClient } from '../services/api/base/base';
@@ -76,7 +77,7 @@ export class OCR {
           )
         );
 
-        return stringifiedWords;
+        return uniqueStringArray(stringifiedWords);
       }
     } catch (error) {
       if (error instanceof BackendError && error.httpStatusCode === 429) {
@@ -97,18 +98,27 @@ export class OCR {
 
   private handlePostOCR(response: ComputerVisionResponse) {
     this.resetTagCandidates();
-    response.regions.forEach((region) =>
-      region.lines.forEach((line) => {
-        // Does the line contain a special case candidate?
-        const isSpecialCase = line.words.some((word) =>
+
+    const clonedResponse = structuredClone(response);
+    clonedResponse.regions.forEach((region, regionIndex) =>
+      region.lines.forEach((line, lineIndex) => {
+        const specialCases = line.words.filter((word) =>
           this.wordIsSpecialCase(word.text)
         );
 
-        if (isSpecialCase) {
-          line.words = this.handleSpecialTagCandidates(line.words);
-        } else {
-          line.words = this.handleOrdinaryTagCandidates(line.words);
-        }
+        const ordinaryCases = line.words.filter(
+          (word) => !this.wordIsSpecialCase(word.text)
+        );
+
+        clonedResponse.regions[regionIndex].lines[lineIndex].words = [];
+        if (specialCases.length > 0)
+          clonedResponse.regions[regionIndex].lines[lineIndex].words.push(
+            ...this.handleSpecialTagCandidates(specialCases)
+          );
+        if (ordinaryCases.length > 0)
+          clonedResponse.regions[regionIndex].lines[lineIndex].words.push(
+            ...this.handleOrdinaryTagCandidates(ordinaryCases)
+          );
 
         !isProduction &&
           Debugger.reportFiltration(
@@ -118,7 +128,7 @@ export class OCR {
       })
     );
 
-    return response;
+    return clonedResponse;
   }
 
   public testPostOCR(words: MockWord[]) {
@@ -184,17 +194,23 @@ export class OCR {
       // TODO: Handle reassembly.
     }
 
+    const candidates: Word[] = [];
+    const noncandidates: Word[] = [];
     words.forEach((word: Word) => {
       if (
         ocrFilterer.hasEnoughCharacters(word.text) &&
         ocrFilterer.lettersAreValid(word.text) &&
         ocrFilterer.hasTwoIntegers(word.text)
       ) {
+        candidates.push(word);
         this._tagCandidates.push(word);
-      } else this._tagNoncandidates.push(word);
+      } else noncandidates.push(word);
     });
 
-    return this._tagCandidates;
+    //TODO: Handle possible duplicates.
+    this._tagCandidates.push(...candidates);
+    this._tagNoncandidates.push(...noncandidates);
+    return candidates;
   }
 
   private resetTagCandidates() {

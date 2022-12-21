@@ -16,6 +16,7 @@ export class TagScanner extends Camera {
   constructor(props: CameraProps) {
     super(props);
     this._scanningArea = props.scanningArea;
+    globalThis.testPostOCR = this._OCR.testPostOCR.bind(this._OCR);
   }
 
   public get scanningArea(): HTMLElement {

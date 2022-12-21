@@ -31,4 +31,9 @@ function removeFromArray<T>(
   }
 }
 
-export { removeFromArray };
+/** Accepts an array of strings and returns a new array without duplicates. */
+function uniqueStringArray(strings: string[]) {
+  return Array.from(new Set(strings));
+}
+
+export { removeFromArray, uniqueStringArray };

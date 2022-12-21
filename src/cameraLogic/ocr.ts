@@ -2,10 +2,13 @@ import { BackendError } from '@equinor/echo-base';
 import {
   ComputerVisionResponse,
   FailedTagValidation,
+  Lines,
+  MockWord,
   OCRPayload,
   ParsedComputerVisionResponse,
   TagValidationResult,
-  ValidationStats
+  ValidationStats,
+  Word
 } from '@types';
 import {
   handleError,
@@ -14,7 +17,7 @@ import {
   logScanningAttempt,
   isProduction
 } from '@utils';
-import { ErrorRegistry } from '@const';
+import { ErrorRegistry, homoglyphPairs } from '@const';
 import { baseApiClient } from '../services/api/base/base';
 import { getComputerVisionOcrResources } from '../services/api/resources/resources';
 import { Search, TagSummaryDto } from '@equinor/echo-search';
@@ -29,6 +32,8 @@ interface OCRProps {
 export class OCR {
   private _attemptId?: string;
   private _tagScannerRef: TagScanner;
+  private _tagCandidates: Word[] = [];
+  private _tagNoncandidates: Word[] = [];
 
   constructor(props: OCRProps) {
     this._attemptId = undefined;
@@ -55,8 +60,24 @@ export class OCR {
         init
       );
 
-      const parsedResponse = this.handleFiltration(response.data);
-      return parsedResponse;
+      const postProcessedResponse = this.handlePostOCR(response.data);
+      return parseResponse(postProcessedResponse);
+
+      /**
+       * Maps each postprocessed Word's text property into a simple array of strings.
+       */
+      function parseResponse(
+        response: ComputerVisionResponse
+      ): ParsedComputerVisionResponse {
+        const stringifiedWords: ParsedComputerVisionResponse = [];
+        response.regions.forEach((region) =>
+          region.lines.forEach((line) =>
+            line.words.forEach((word) => stringifiedWords.push(word.text))
+          )
+        );
+
+        return stringifiedWords;
+      }
     } catch (error) {
       if (error instanceof BackendError && error.httpStatusCode === 429) {
         // Here we handle the event where users might go over the Computer vision usage quota.
@@ -74,37 +95,151 @@ export class OCR {
     }
   }
 
-  private handleFiltration(
-    response: ComputerVisionResponse
-  ): ParsedComputerVisionResponse {
-    const possibleTagNumbers: string[] = [];
-    const filteredWords: string[] = [];
+  private handlePostOCR(response: ComputerVisionResponse) {
+    this.resetTagCandidates();
     response.regions.forEach((region) =>
-      region.lines.forEach((line) =>
-        line.words.forEach((word) => {
-          let nextWord = word.text.trim();
-          nextWord = nextWord.toUpperCase();
-          if (!ocrFilterer.isMotorTag(nextWord)) {
-            nextWord = ocrFilterer.filterLeadingChar(nextWord);
-            nextWord = ocrFilterer.filterTrailingChar(nextWord);
-          }
-          if (
-            nextWord &&
-            ocrFilterer.hasEnoughCharacters(nextWord) &&
-            (ocrFilterer.lettersAreValid(nextWord) ||
-              ocrFilterer.isMotorTag(nextWord)) &&
-            ocrFilterer.hasTwoIntegers(nextWord)
-          ) {
-            possibleTagNumbers.push(nextWord);
-          } else {
-            filteredWords.push(nextWord);
-          }
-        })
-      )
+      region.lines.forEach((line) => {
+        // Does the line contain a special case candidate?
+        const isSpecialCase = line.words.some((word) =>
+          this.wordIsSpecialCase(word.text)
+        );
+
+        if (isSpecialCase) {
+          line.words = this.handleSpecialTagCandidates(line.words);
+        } else {
+          line.words = this.handleOrdinaryTagCandidates(line.words);
+        }
+
+        !isProduction &&
+          Debugger.reportFiltration(
+            this._tagNoncandidates.map((candidate) => candidate.text),
+            this._tagCandidates.map((candidate) => candidate.text)
+          );
+      })
     );
+
+    return response;
+  }
+
+  public testPostOCR(words: MockWord[]) {
+    if (!argumentIsMockWords(words)) {
+      console.info('The data should have the following format: ');
+      console.info(
+        '[{text: "tag number candiate"}, {text: "another tag number candidate"}]'
+      );
+      return;
+    }
+    this.resetTagCandidates();
+
+    const specialCases = words.filter((word) =>
+      this.wordIsSpecialCase(word.text)
+    );
+
+    const ordinaryCases = words.filter(
+      (word) => !this.wordIsSpecialCase(word.text)
+    );
+
+    if (specialCases.length > 0) this.handleSpecialTagCandidates(specialCases);
+    if (ordinaryCases.length > 0)
+      this.handleOrdinaryTagCandidates(ordinaryCases);
+
     !isProduction &&
-      Debugger.reportFiltration(filteredWords, possibleTagNumbers);
-    return possibleTagNumbers;
+      Debugger.reportFiltration(
+        this._tagNoncandidates.map((candidate) => candidate.text),
+        this._tagCandidates.map((candidate) => candidate.text)
+      );
+
+    function argumentIsMockWords(argument: unknown): argument is MockWord[] {
+      if (Array.isArray(argument)) {
+        return argument.every((arg) => Reflect.has(arg, 'text'));
+      }
+
+      return false;
+    }
+  }
+
+  private handleSpecialTagCandidates(words: Word[]): Word[] {
+    for (let i = 0; i < words.length; i++) {
+      words[i].text = this.sanitize(words[i].text, true);
+    }
+
+    if (words.length > 1) {
+      // TODO: Handle reassembly.
+    }
+
+    this._tagCandidates.push(...words);
+    return words;
+  }
+
+  /**
+   * Handles the filtering of ordinary tag candidates.
+   */
+  private handleOrdinaryTagCandidates(words: Word[]) {
+    for (let i = 0; i < words.length; i++) {
+      words[i].text = this.sanitize(words[i].text);
+      words[i] = this.handleHomoglyphing(words[i]);
+    }
+
+    if (words.length > 1) {
+      // TODO: Handle reassembly.
+    }
+
+    words.forEach((word: Word) => {
+      if (
+        ocrFilterer.hasEnoughCharacters(word.text) &&
+        ocrFilterer.lettersAreValid(word.text) &&
+        ocrFilterer.hasTwoIntegers(word.text)
+      ) {
+        this._tagCandidates.push(word);
+      } else this._tagNoncandidates.push(word);
+    });
+
+    return this._tagCandidates;
+  }
+
+  private resetTagCandidates() {
+    this._tagCandidates = [];
+    this._tagNoncandidates = [];
+  }
+
+  /** Returns true if the supplied word is a possible special case tag number. */
+  private wordIsSpecialCase(word: string) {
+    return ocrFilterer.isMotorTag(word);
+    // TODO: Handle "C-tags" and Line tags.
+  }
+  /**
+   * Accepts a string, trims whitespace, and removes trailing and leading alphanumeric characters before returning it.
+   */
+  private sanitize(word: string, specialCase?: boolean) {
+    word = word.trim();
+    word = word.toUpperCase();
+    if (!specialCase) {
+      word = ocrFilterer.filterTrailingAndLeadingChars(word);
+    }
+    return word;
+  }
+
+  /** Handles the homoglyphing substitution on the word level. */
+  private handleHomoglyphing(word: Word): Word {
+    const rawWord = word.text;
+    word.text = Array.from(rawWord)
+      .map((char) => getHomoglyphSubstitute(char))
+      .join('');
+
+    return word;
+
+    /**
+     * Accepts a character and returns a homoglyph substitution if it exists. Otherwise, it returns the original character.
+     */
+    function getHomoglyphSubstitute(char: string): string {
+      const foundHomoglyphIndex = homoglyphPairs.findIndex(
+        (pair) => pair.homoglyph === char
+      );
+
+      if (foundHomoglyphIndex !== -1)
+        return homoglyphPairs[foundHomoglyphIndex].substitution;
+      return char;
+    }
   }
 
   public async handleValidation(
@@ -232,3 +367,4 @@ export class OCR {
     }
   }
 }
+

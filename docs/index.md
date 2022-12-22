@@ -98,12 +98,12 @@ Furthermore, we can make some assumptions on the nature of the OCR-service. Our 
 #### Homoglyph substitutions
 The table below shows a set of alphanumeric characters in the left column and a singular substitution character. 
 
-_Updated 20-12/2022_
+_Updated 22-12/2022_
 | Homoglyphs | Substitution |
 |------------|--------------|
 | ฿          | B            |
 | < © €      | C            |
-| [ ] ! \|   | I            |
+| [          |  I            |
 | }] )       | J            |
 | £          | L            |
 | ₽          | P            |
@@ -112,7 +112,7 @@ _Updated 20-12/2022_
 | ±          | T            |
 | µ          | U            |
 | ¥          | Y            |
-| \| !       | 1            |
+| | !        | 1            |
 | ?          | 2            |
 | >          | 7            |
 

@@ -8,6 +8,7 @@ It runs as a module under [EchopediaWeb](https://github.com/equinor/EchopediaWeb
 ETS was created as a replacement for the native app version. Because of new app store policies from Apple, it was no longer possible to host Echopedia and its native tag scanner by extension on App Store. Therefore, Echo Tag Scanner is built as a web app and bundled alongside EchopediaWeb.
 
 ## Minimum system requirements
+TODO: Revise the minimum versions
 The techincal requirements are twofold. It is based on the users device and the browser which runs on that device.
 
 For browsers, we have established a rough minimum requirement based on the support of the [Media Streams API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Streams_API).

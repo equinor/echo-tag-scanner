@@ -112,12 +112,16 @@ _Updated 22-12/2022_
 | ±          | T            |
 | µ          | U            |
 | ¥          | Y            |
-| | !        | 1            |
+| ! \|       | 1            |
 | ?          | 2            |
 | >          | 7            |
 
 
-After the rough filtering step, we run a more expensive validation step to filter out or correct false positives. This step is handled by [Echo-Search])(https://github.com/equinor/EchoSearch).
+### Validation
+Lastly in the OCR postprocess, we take the tag candidates and run them through an alogorithm which will look in the tags IndexedDB and find the closest match to a given tag candidate. In this step, we can also determine and substitute the more subtle homoglyphs like "I" and "1".
+
+Finally, once we have a confirmed tag number, we fetch a summary of the tag number (which happens locally) and we log a successful scan to AppInsights.
+This step is mostly handled by [Echo-Search])(https://github.com/equinor/EchoSearch).
 
 ### Result presentation
 The UI is built using React and we have strived to keep it seperate from the capture logic. The UX and design choices are largely inherited from the native app.

@@ -2,7 +2,6 @@ import { BackendError } from '@equinor/echo-base';
 import {
   ComputerVisionResponse,
   FailedTagValidation,
-  Lines,
   MockWord,
   OCRPayload,
   ParsedComputerVisionResponse,
@@ -16,7 +15,10 @@ import {
   ocrFilterer,
   logScanningAttempt,
   isProduction,
-  uniqueStringArray
+  uniqueStringArray,
+  reassembleSpecialTagCandidates,
+  reassembleOrdinaryTagCandidates,
+  filterBy
 } from '@utils';
 import { ErrorRegistry, homoglyphPairs } from '@const';
 import { baseApiClient } from '../services/api/base/base';
@@ -34,7 +36,6 @@ export class OCR {
   private _attemptId?: string;
   private _tagScannerRef: TagScanner;
   private _tagCandidates: Word[] = [];
-  private _tagNoncandidates: Word[] = [];
 
   constructor(props: OCRProps) {
     this._attemptId = undefined;
@@ -102,60 +103,61 @@ export class OCR {
     const clonedResponse = structuredClone(response);
     clonedResponse.regions.forEach((region, regionIndex) =>
       region.lines.forEach((line, lineIndex) => {
-        const specialCases = line.words.filter((word) =>
-          this.wordIsSpecialCase(word.text)
+        const allWordsOnLine = line.words;
+        for (let i = 0; i < allWordsOnLine.length; i++) {
+          if (this.wordIsSpecialCase(allWordsOnLine[i].text)) {
+            this.sanitize(allWordsOnLine[i].text, '()');
+          } else {
+            allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
+            allWordsOnLine[i] = this.handleHomoglyphing(allWordsOnLine[i]);
+          }
+        }
+
+        const specialCases = reassembleSpecialTagCandidates(
+          allWordsOnLine,
+          '(M)'
         );
+        const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
+        this._tagCandidates.push(...specialCases);
+        this._tagCandidates.push(...ordinaryCases);
 
-        const ordinaryCases = line.words.filter(
-          (word) => !this.wordIsSpecialCase(word.text)
-        );
-
-        clonedResponse.regions[regionIndex].lines[lineIndex].words = [];
-        if (specialCases.length > 0)
-          clonedResponse.regions[regionIndex].lines[lineIndex].words.push(
-            ...this.handleSpecialTagCandidates(specialCases)
-          );
-        if (ordinaryCases.length > 0)
-          clonedResponse.regions[regionIndex].lines[lineIndex].words.push(
-            ...this.handleOrdinaryTagCandidates(ordinaryCases)
-          );
-
-        !isProduction &&
-          Debugger.reportFiltration(
-            this._tagNoncandidates.map((candidate) => candidate.text),
-            this._tagCandidates.map((candidate) => candidate.text)
-          );
+        clonedResponse.regions[regionIndex].lines[lineIndex].words =
+          this._tagCandidates;
       })
     );
 
+    !isProduction &&
+      Debugger.reportFiltration(
+        this._tagCandidates.map((candidate) => candidate.text)
+      );
     return clonedResponse;
   }
 
-  public testPostOCR(words: MockWord[]) {
-    if (!argumentIsMockWords(words)) {
+  public testPostOCR(allWordsOnLine: MockWord[]) {
+    if (!argumentIsMockWords(allWordsOnLine)) {
       console.info('The data should have the following format: ');
       console.info(
         '[{text: "tag number candiate"}, {text: "another tag number candidate"}]'
       );
       return;
     }
+
+    for (let i = 0; i < allWordsOnLine.length; i++) {
+      if (allWordsOnLine[i].text.includes('(M)')) {
+        this.sanitize(allWordsOnLine[i].text, '()');
+      } else {
+        allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
+        allWordsOnLine[i] = this.handleHomoglyphing(allWordsOnLine[i]);
+      }
+    }
     this.resetTagCandidates();
 
-    const specialCases = words.filter((word) =>
-      this.wordIsSpecialCase(word.text)
-    );
-
-    const ordinaryCases = words.filter(
-      (word) => !this.wordIsSpecialCase(word.text)
-    );
-
-    if (specialCases.length > 0) this.handleSpecialTagCandidates(specialCases);
-    if (ordinaryCases.length > 0)
-      this.handleOrdinaryTagCandidates(ordinaryCases);
+    const specialCases = reassembleSpecialTagCandidates(allWordsOnLine, '(M)');
+    const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
+    this._tagCandidates = [...specialCases, ...ordinaryCases];
 
     !isProduction &&
       Debugger.reportFiltration(
-        this._tagNoncandidates.map((candidate) => candidate.text),
         this._tagCandidates.map((candidate) => candidate.text)
       );
 
@@ -168,54 +170,8 @@ export class OCR {
     }
   }
 
-  private handleSpecialTagCandidates(words: Word[]): Word[] {
-    for (let i = 0; i < words.length; i++) {
-      words[i].text = this.sanitize(words[i].text, true);
-    }
-
-    if (words.length > 1) {
-      // TODO: Handle reassembly.
-    }
-
-    this._tagCandidates.push(...words);
-    return words;
-  }
-
-  /**
-   * Handles the filtering of ordinary tag candidates.
-   */
-  private handleOrdinaryTagCandidates(words: Word[]) {
-    for (let i = 0; i < words.length; i++) {
-      words[i].text = this.sanitize(words[i].text);
-      words[i] = this.handleHomoglyphing(words[i]);
-    }
-
-    if (words.length > 1) {
-      // TODO: Handle reassembly.
-    }
-
-    const candidates: Word[] = [];
-    const noncandidates: Word[] = [];
-    words.forEach((word: Word) => {
-      if (
-        ocrFilterer.hasEnoughCharacters(word.text) &&
-        ocrFilterer.lettersAreValid(word.text) &&
-        ocrFilterer.hasTwoIntegers(word.text)
-      ) {
-        candidates.push(word);
-        this._tagCandidates.push(word);
-      } else noncandidates.push(word);
-    });
-
-    //TODO: Handle possible duplicates.
-    this._tagCandidates.push(...candidates);
-    this._tagNoncandidates.push(...noncandidates);
-    return candidates;
-  }
-
   private resetTagCandidates() {
     this._tagCandidates = [];
-    this._tagNoncandidates = [];
   }
 
   /** Returns true if the supplied word is a possible special case tag number. */
@@ -226,12 +182,10 @@ export class OCR {
   /**
    * Accepts a string, trims whitespace, and removes trailing and leading alphanumeric characters before returning it.
    */
-  private sanitize(word: string, specialCase?: boolean) {
+  private sanitize(word: string, exceptions?: string) {
     word = word.trim();
     word = word.toUpperCase();
-    if (!specialCase) {
-      word = ocrFilterer.filterTrailingAndLeadingChars(word);
-    }
+    word = ocrFilterer.filterTrailingAndLeadingChars(word, exceptions);
     return word;
   }
 
@@ -311,7 +265,7 @@ export class OCR {
     });
 
     !isProduction && Debugger.reportValidation(validationStats);
-    return validatedTags;
+    return filterBy<TagSummaryDto>('tagNo', validatedTags);
 
     /**
      * Accepts a possible tag number as string value and runs it through Echo Search for validation.
@@ -383,4 +337,3 @@ export class OCR {
     }
   }
 }
-

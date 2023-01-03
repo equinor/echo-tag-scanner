@@ -64,7 +64,6 @@ ocrFilterer.filterTrailingAndLeadingChars = function (
   exceptions?: string
 ) {
   const regexp = new RegExp(`[^A-Z ^0-9 ^${exceptions ? exceptions : ''}]`);
-
   let filteredWord = word;
 
   // Conditionally remove leading character.

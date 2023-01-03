@@ -55,7 +55,6 @@ export class TagScanner extends Camera {
       cropHeight,
       zoom: this.zoom
     };
-    !isProduction && Debugger.reportCropping(stats, this);
 
     return await this.crop({
       sx,
@@ -105,13 +104,14 @@ export class TagScanner extends Camera {
         });
         scans.push(capture);
 
-        // Log some image stats and a blob preview in network tab.
-        !isProduction &&
-          Debugger.logImageStats(capture, 'The postprocessed photo.');
-
         if (scans.length === this._scanRetries) {
           // Scanning is finished.
           clearInterval(intervalId);
+
+          // Log some image stats and a blob preview in network tab.
+          !isProduction &&
+            Debugger.logImageStats(scans, 'The postprocessed photo.');
+
           finishScanning(scans);
         }
       }

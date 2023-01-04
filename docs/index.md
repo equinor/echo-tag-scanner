@@ -1,4 +1,5 @@
 # Echo Tag Scanner - ETS
+Developed by Erlend Andreas Hall with great help from Atle Wee Førre, Ove Byberg, Knut Olaf Lien and Torbjørn Høiland.
 
 ## What is it
 Echo Tag Scanner is a tool for scanning tag signs in the field. This makes it more convenient to look up information. 
@@ -72,8 +73,6 @@ In practice though, parts of the text can wind up being whitened or grayscaled b
 ### OCR
 In this step, we use an OCR technology to extract textual content from the captures into strings. Azure Computer Vision handles this step. Azure CI currently uses a general-purpose recognition model. This model is in reality trained on reading documents where you will typically find traditional fonts and clear distinctions between the foreground and background, but an average tag sign should have similar levels of clarity and have standardized fonts. This might change in the future. (see # future improvements)
 
-Currently, the OCR-step happens in the cloud, but there is alternatively the option of deploying an on-prem version. The scanner does not however have significant latency-oriented issues.
-
 ### OCR post-processing
 This step is aiming to analyze the OCR-result and optionally do various sub-steps in the form of corrections and filters to letters, words and lines of words. There is a ruleset defined known as __tag format rules__:
 
@@ -96,7 +95,9 @@ For example, we cannot replace an instance of "0" (numeric zero) with an upperca
 
 Furthermore, we can make some assumptions on the nature of the OCR-service. Our OCR service is a document reader configured to read Latin english. Therefore, we can assume it will not commonly return letters outside the english alphabet, it will return Arabic numerals 0-9 and a set of alphanumeric characters that usually appears in western word processing.
 
-#### Homoglyph substitutions
+The rationale for these substitutions is that the later validation step, which uses the Levensthein distance algoritm in order to fully validate a tag candidate. The algoritm has a ceiling for how many glyphs it is able to substitute, and therefore, we can perform some of these obvious substitutions in order to optimize the output of the later validation step.
+
+#### Homoglyph substitution table
 The table below shows a set of alphanumeric characters in the left column and a singular substitution character. 
 
 _Updated 22-12/2022_
@@ -117,12 +118,37 @@ _Updated 22-12/2022_
 | ?          | 2            |
 | >          | 7            |
 
+### Word reassembly
+Sometimes, the OCR service can inadvertantly split words up into fragments on a line, so there is a potential that a tag candidate is split up, resulting in it not being compliant to the tag format rules; and even if the fragment is compliant, the validation step may still not be able to find a match.
+The resassembly works by a series of string concatenations where it builds up an array of tag candidates.
+
+Consider the fictional tag number 55RT-67FG. The OCR service inadvertantly splits this tag number into 3 fragments: "55RT", "-" and "67FG". The final list of tag candidates here will be "55RT", "67FG" and "55RT-67FG". The fragments are both valid tag candidates, so we have no choice but to include them.
+
+Now consider an extreme case where a tag sign contains two tag numbers on the same line: 55RT-67FG and 55RT-67FG(M), and that the OCR service splits these into several fragments: ["55RT-", "67FG", "55", "RT-", "6", "7FG", "(M)", "O"]. The last character (0) we can pretend is an anomaly on the tag sign like a screw hole or perhaps some rust. 
+
+The final list will be as follows:
+- 55RT
+- 67FG
+- 55RT-67FG
+- 55RT-67FG55
+- 55RT-67FG55RT
+- 55RT-67FG5RT-6
+- 55RT-67FG5RT-67FG
+- 55RT-67FG5RT-67FGO
+- 67FG(M)
+- RT-67FG(M)
+- 55RT-67FG(M)
+- 67FG55RT-67FG(M)
+- 55RT-67FG55RT-67FG(M)
+
+This is an extreme case, albeit plausible. The consequence is increased client-side processing during the scan where the next Validation step in some cases have to validate a lot more tag candidates. If this becomes a problem, one could possibly optimize by eliminating approximate duplicates. For example, the list above has a lot of tag candidates that has the fragments "55-RT-67...". One could also consider in these circumtances to eliminate the shortest candidates as they are likely to be fragments in the first place.
 
 ### Validation
 Lastly in the OCR postprocess, we take the tag candidates and run them through an alogorithm which will look in the tags IndexedDB and find the closest match to a given tag candidate. In this step, we can also determine and substitute the more subtle homoglyphs like "I" and "1".
+This step uses the [Levenshtein_distance algorithm](https://en.wikipedia.org/wiki/Levenshtein_distance).
 
 Finally, once we have a confirmed tag number, we fetch a summary of the tag number (which happens locally) and we log a successful scan to AppInsights.
-This step is mostly handled by [Echo-Search])(https://github.com/equinor/EchoSearch).
+This step is mostly handled by [Echo-Search])(https://github.com/equinor/EchoSearch) which was developed by Ove Byberg, with the Levensthein implementation originally developed by Atle Wee Førre.
 
 ### Result presentation
 The UI is built using React and we have strived to keep it seperate from the capture logic. The UX and design choices are largely inherited from the native app.

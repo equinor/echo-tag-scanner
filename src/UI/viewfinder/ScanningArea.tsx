@@ -89,7 +89,6 @@ const ScanningAreaContainer = styled.section`
   left: 50%;
   transform: translate(-50%, -50%);
   //-------//
-  outline: 1px solid hotpink;
   width: var(--scanning-area-width-portrait);
   height: var(--scanning-area-height-portrait);
   /* border: 3px dotted var(--outOfService); */
@@ -120,7 +119,6 @@ const ScanningAreaContainer = styled.section`
     );
     border-left-width: calc((100vw - var(--scanning-area-width-landscape)) / 2);
   }
-
 `;
 
 export { ScanningArea };

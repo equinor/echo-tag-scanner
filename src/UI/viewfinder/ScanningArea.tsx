@@ -89,7 +89,7 @@ const ScanningAreaContainer = styled.section`
   left: 50%;
   transform: translate(-50%, -50%);
   //-------//
-
+  outline: 1px solid hotpink;
   width: var(--scanning-area-width-portrait);
   height: var(--scanning-area-height-portrait);
   /* border: 3px dotted var(--outOfService); */
@@ -102,10 +102,7 @@ const ScanningAreaContainer = styled.section`
   border-style: solid;
 
   border-top-width: calc((100vh - var(--scanning-area-height-portrait)) / 2);
-  border-bottom-width: calc(
-    (100vh - var(--scanning-area-height-portrait)) / 2 -
-      var(--echo-bottom-bar-height)
-  );
+  border-bottom-width: calc((100vh - var(--scanning-area-height-portrait)) / 2);
   border-right-width: calc((100vw - var(--scanning-area-width-portrait)) / 2);
   border-left-width: calc((100vw - var(--scanning-area-width-portrait)) / 2);
 
@@ -121,11 +118,10 @@ const ScanningAreaContainer = styled.section`
     border-right-width: calc(
       (100vw - var(--scanning-area-width-landscape)) / 2
     );
-    border-left-width: calc(
-      (100vw - var(--scanning-area-width-landscape)) / 2 -
-        var(--echo-sidebar-width)
-    );
+    border-left-width: calc((100vw - var(--scanning-area-width-landscape)) / 2);
   }
+
+  @media screen and (orientation: landscape) and (max);
 `;
 
 export { ScanningArea };

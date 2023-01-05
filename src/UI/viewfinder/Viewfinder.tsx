@@ -79,17 +79,22 @@ const SafeAreaCover = styled.div`
   height: env(safe-area-inset-bottom, 0);
   z-index ${zIndexes.overlays};
   background-color: white;
+
   
   @media screen and (orientation: landscape) {
     bottom: unset;
     left: 0;
-
+    
     // The safe areas turns out to not be part of viewport.
     height: calc(100vh + env(safe-area-inset-bottom));
 
     // Apologies for the ugliness. The width of this will be minimum the width of the echo-bar.
     // It was not possible to declare a 0 width whenever the safe-area-cover element is not needed.
     width: calc(env(safe-area-inset-left, 0) + var(--echo-sidebar-width));
+  }
+  
+  @media screen and (min-width: 928px) {
+    width: 0;
   }
 `;
 

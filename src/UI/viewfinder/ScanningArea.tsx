@@ -121,7 +121,6 @@ const ScanningAreaContainer = styled.section`
     border-left-width: calc((100vw - var(--scanning-area-width-landscape)) / 2);
   }
 
-  @media screen and (orientation: landscape) and (max);
 `;
 
 export { ScanningArea };

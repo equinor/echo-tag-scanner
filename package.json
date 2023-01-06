@@ -61,6 +61,7 @@
         "styled-components": "^5.3.3"
     },
     "dependencies": {
+        "lodash.clonedeep": "^4.5.0",
         "ua-parser-js": "^1.0.32"
     }
 }

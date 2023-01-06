@@ -1,4 +1,4 @@
-import { DeviceInformation } from '@utils';
+import { DeviceInformation } from '@types';
 
 export interface CameraProps {
   mediaStream: MediaStream;

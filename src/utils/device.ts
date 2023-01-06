@@ -1,4 +1,4 @@
-import { DeviceInformation } from './logger';
+import { DeviceInformation } from '@types';
 import UAParser from 'ua-parser-js';
 
 interface DeviceInformationProps {
@@ -7,7 +7,7 @@ interface DeviceInformationProps {
   uaParser: UAParser;
 }
 
-/** 
+/**
  * This object is concerned with gathering and holding information about the users device.
  * This object will be read-only after initialization and should as a rule throw errors if the
  * deviceInformation property is altered after intialization.

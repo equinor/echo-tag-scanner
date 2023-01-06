@@ -24,6 +24,7 @@ import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { randomBytes } from 'crypto';
 import { TagScanner } from '@cameraLogic';
 import { Debugger } from './debugger';
+import cloneDeep from 'lodash.clonedeep';
 
 interface OCRProps {
   tagScanner: TagScanner;
@@ -112,8 +113,15 @@ export class OCR {
 
   private handlePostOCR(response: ComputerVisionResponse) {
     this.resetTagCandidates();
+    let clonedResponse: ComputerVisionResponse;
 
-    const clonedResponse = structuredClone(response);
+    if ('structuredClone' in globalThis) {
+      clonedResponse = structuredClone(response);
+    } else {
+      // Fallback to lodash.cloneDeep.
+      clonedResponse = cloneDeep(response);
+    }
+
     clonedResponse.regions.forEach((region, regionIndex) =>
       region.lines.forEach((line, lineIndex) => {
         const specialCases = line.words.filter((word) =>

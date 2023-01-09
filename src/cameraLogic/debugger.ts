@@ -22,25 +22,22 @@ export class Debugger {
   /**
    * Logs image statistics to the console.
    */
-  public static logImageStats(target: Blob | File, logDescription?: string) {
-    if (target) {
-      const image = new Image();
-      image.src = URL.createObjectURL(target);
-      image.onload = () => {
-        console.group(logDescription);
-        console.info('Photo size in bytes -> ', target.size);
-        console.info('Media type -> ', target.type);
-        console.info(
-          'Dimensions: ' +
-            'Width: ' +
-            image.width +
-            ' ' +
-            'Height: ' +
-            image.height
-        );
-        console.groupEnd();
-        URL.revokeObjectURL(image.src);
-      };
+  public static logImageStats(
+    captures: Array<Blob | File>,
+    logDescription?: string
+  ) {
+    if (captures.length > 0) {
+      const averageSize =
+        captures.reduce(
+          (accTotalSize, nextBlob) => accTotalSize + nextBlob.size,
+          0
+        ) / captures.length;
+
+      console.group(logDescription);
+      console.info('Number of captures -> ', captures.length);
+      console.info('Average size in bytes -> ', averageSize);
+      console.info('Media type -> ', captures[0].type);
+      console.groupEnd();
     }
   }
 
@@ -204,23 +201,13 @@ Intrinsic offset from left-edge: ${sx}.
     });
   }
 
-  public static reportFiltration(
-    filteredWords: string[],
-    possibleTagNumbers: string[]
-  ) {
-    console.group('Filtration results.');
+  public static reportFiltration(possibleTagNumbers: string[]) {
     if (possibleTagNumbers.length > 0) {
-      console.group('The following strings are possible tag numbers:');
+      console.group('Filtration results.');
+      console.info('The following strings are possible tag numbers:');
       possibleTagNumbers.forEach((possTag) => console.info(possTag));
       console.groupEnd();
     }
-
-    if (filteredWords.length > 0) {
-      console.group('The following strings has been filtered away:');
-      filteredWords.forEach((filtered) => console.info(filtered));
-      console.groupEnd();
-    }
-    console.groupEnd();
   }
 
   public static reportValidation(validations: ValidationStats[]) {

@@ -12,4 +12,4 @@ export * from './localstorage';
 export * from './filtering';
 export * from './device';
 export * from './orientation';
-export * from './indexeddb';
+export * from './reassembly';

@@ -31,9 +31,22 @@ function removeFromArray<T>(
   }
 }
 
+/**
+ * Accepts an array of objects, an identifier and returns a new array
+ * where objects are unique based on duplicate props as identified by the identifier.
+ */
+function filterBy<T>(identifier: string, array: T[]) {
+  return array.reduce((accumulator: T[], nextValue: T) => {
+    if (!accumulator.some((el) => el[identifier] === nextValue[identifier])) {
+      accumulator.push(nextValue);
+    }
+    return accumulator;
+  }, [] as T[]);
+}
+
 /** Accepts an array of strings and returns a new array without duplicates. */
 function uniqueStringArray(strings: string[]) {
   return Array.from(new Set(strings));
 }
 
-export { removeFromArray, uniqueStringArray };
+export { removeFromArray, uniqueStringArray, filterBy };

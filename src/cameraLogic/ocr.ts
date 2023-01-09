@@ -120,11 +120,11 @@ export class OCR {
             ...this.handleOrdinaryTagCandidates(ordinaryCases)
           );
 
-        !isProduction &&
-          Debugger.reportFiltration(
-            this._tagNoncandidates.map((candidate) => candidate.text),
-            this._tagCandidates.map((candidate) => candidate.text)
-          );
+        // !isProduction &&
+        //   Debugger.reportFiltration(
+        //     this._tagNoncandidates.map((candidate) => candidate.text),
+        //     this._tagCandidates.map((candidate) => candidate.text)
+        //   );
       })
     );
 
@@ -153,11 +153,11 @@ export class OCR {
     if (ordinaryCases.length > 0)
       this.handleOrdinaryTagCandidates(ordinaryCases);
 
-    !isProduction &&
-      Debugger.reportFiltration(
-        this._tagNoncandidates.map((candidate) => candidate.text),
-        this._tagCandidates.map((candidate) => candidate.text)
-      );
+    // !isProduction &&
+    //   Debugger.reportFiltration(
+    //     this._tagNoncandidates.map((candidate) => candidate.text),
+    //     this._tagCandidates.map((candidate) => candidate.text)
+    //   );
 
     function argumentIsMockWords(argument: unknown): argument is MockWord[] {
       if (Array.isArray(argument)) {
@@ -227,20 +227,32 @@ export class OCR {
    * Accepts a string, trims whitespace, and removes trailing and leading alphanumeric characters before returning it.
    */
   private sanitize(word: string, specialCase?: boolean) {
+    let original = word;
     word = word.trim();
-    word = word.toUpperCase();
+    word = Array.from(word)
+      .map((char) => {
+        if (char.match(/[a-z0-9]/g)) return char.toUpperCase();
+        else return char;
+      })
+      .join('');
     if (!specialCase) {
       word = ocrFilterer.filterTrailingAndLeadingChars(word);
     }
+
     return word;
   }
 
   /** Handles the homoglyphing substitution on the word level. */
   private handleHomoglyphing(word: Word): Word {
-    const rawWord = word.text;
-    word.text = Array.from(rawWord)
+    const original = word.text;
+    word.text = Array.from(original)
       .map((char) => getHomoglyphSubstitute(char))
       .join('');
+    const altered = word.text;
+
+    if (original !== word.text) {
+      Debugger.reportHomoglypSubstitution(original, altered);
+    }
 
     return word;
 
@@ -319,17 +331,7 @@ export class OCR {
     async function findClosestTag(possibleTagNumber: string) {
       const result = await Search.Tags.closestTagAsync(possibleTagNumber);
       if (result.isSuccess) {
-        logger.log('QA', () => {
-          console.info(possibleTagNumber + ' corrected to ' + result.value);
-        });
         return result.value;
-      } else {
-        logger.log('QA', () => {
-          console.info(
-            'Echo Search could not establish a close match to ' +
-              possibleTagNumber
-          );
-        });
       }
     }
 
@@ -383,4 +385,3 @@ export class OCR {
     }
   }
 }
-

@@ -184,6 +184,14 @@ Intrinsic offset from left-edge: ${sx}.
     });
   }
 
+  public static reportHomoglypSubstitution(original: string, altered: string) {
+    logger.log('QA', () => {
+      console.info(
+        `After homoglyph substitution, the string ${original} was changed to ${altered}`
+      );
+    });
+  }
+
   public static reportCropping(stats: CroppingStats, tagScanner: TagScanner) {
     logger.log('EchoDevelopment', () => {
       console.group('Cropping');
@@ -208,9 +216,11 @@ Intrinsic offset from left-edge: ${sx}.
     filteredWords: string[],
     possibleTagNumbers: string[]
   ) {
-    console.group('Filtration results.');
+    console.group('Post-OCR results.');
     if (possibleTagNumbers.length > 0) {
-      console.group('The following strings are possible tag numbers:');
+      console.group(
+        'The following strings are possible tag numbers and will be validated:'
+      );
       possibleTagNumbers.forEach((possTag) => console.info(possTag));
       console.groupEnd();
     }
@@ -224,7 +234,7 @@ Intrinsic offset from left-edge: ${sx}.
   }
 
   public static reportValidation(validations: ValidationStats[]) {
-    console.group('Validation results.');
+    console.group('Echo-Search validation results.');
     if (validations.length > 0) {
       console.group('The following tag numbers have been validated:');
 

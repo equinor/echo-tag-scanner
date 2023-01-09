@@ -1,7 +1,8 @@
-import { CameraProps, CroppingStats } from '@types';
-import { isProduction } from '@utils';
+import { CameraProps, CroppingStats, Timers } from '@types';
+import { isProduction, logScanningAttempt } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
-import { Camera, OCR } from '.';
+import { Camera } from './camera';
+import { OCR } from './ocr';
 import { Debugger } from './debugger';
 
 /**
@@ -123,12 +124,36 @@ export class TagScanner extends Camera {
    */
   public async ocr(scans: Blob[]): Promise<TagSummaryDto[]> {
     this._OCR.refreshAttemptId();
+
+    const timers: Timers = {
+      networkRequestTimeTaken: 0,
+      OCRPostprocessingTimeTaken: 0,
+      validationTimeTaken: 0
+    };
+
     for (let i = 0; i < scans.length; i++) {
-      const filteredResponse = await this._OCR.runOCR(scans[i]);
-      if (filteredResponse.length >= 1) {
-        const validation = await this._OCR.handleValidation(filteredResponse);
-        if (validation.length >= 1) {
-          return validation;
+      const ocrResult = await this._OCR.runOCR(scans[i]);
+
+      // A null value indicates the Computer Vision usage quota was exceeded.
+      if (ocrResult !== null) {
+        const { ocrResponse, networkRequestTimeTaken, postOCRTimeTaken } =
+          ocrResult;
+        timers.networkRequestTimeTaken += networkRequestTimeTaken;
+        timers.OCRPostprocessingTimeTaken += postOCRTimeTaken;
+
+        if (ocrResponse.length >= 1) {
+          const { validatedTags, validationLogEntry } =
+            await this._OCR.handleValidation(ocrResponse);
+          timers.validationTimeTaken += validationLogEntry?.timeTaken ?? 0;
+
+          if (validatedTags.length >= 1) {
+            timers.validationTimeTaken = validationLogEntry?.timeTaken ?? 0;
+            logScanningAttempt.call(this, validationLogEntry, timers);
+
+            return validatedTags;
+          } else {
+            logScanningAttempt.call(this, validationLogEntry, timers);
+          }
         }
       }
     }

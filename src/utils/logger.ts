@@ -6,8 +6,13 @@ import {
   EchoSettings
 } from '@equinor/echo-core';
 import echomodule from '../../echoModule.config.json';
-import { OCRPayload, ScanAttemptLogEntry } from '@types';
-import { TagScanner } from '@cameraLogic';
+import {
+  FlatScanAttemptLogEntry,
+  OCRPayload,
+  ScanAttemptLogEntry,
+  Timers
+} from '@types';
+import { Debugger, TagScanner } from '@cameraLogic';
 
 export enum ObjectName {
   Module = 'Module',
@@ -24,7 +29,7 @@ type ActionNames = {
 type ActionProperties = {
   [ObjectName.Module]: ModuleActionProperties;
   [ObjectName.DoneScanning]: ScannerActionsProperties;
-  [ObjectName.ScanAttempt]: ScanAttemptLogEntry;
+  [ObjectName.ScanAttempt]: FlatScanAttemptLogEntry;
 };
 
 type ModuleActions = 'Started';
@@ -36,12 +41,6 @@ type ScannerActions = 'DoneScanning' | 'ScanAttempt';
 type ScannerActionsProperties = {
   seconds: number;
   found: number;
-};
-
-export type DeviceInformation = {
-  operatingSystem: string;
-  webBrowser: string;
-  deviceModel: string;
 };
 
 enum LogLevel {
@@ -182,7 +181,14 @@ class EchoTagScannerLogger extends BaseLogger {
   }
 
   public scanAttempt(logPayload: ScanAttemptLogEntry) {
-    this.trackEvent(ObjectName.ScanAttempt, 'ScanAttempt', logPayload);
+    const flattenedLogEntry = {
+      ...logPayload.deviceInformation,
+      ...logPayload.deviceUsage,
+      ...logPayload.ocrPayload,
+      ...logPayload.timers
+    } as FlatScanAttemptLogEntry;
+    Debugger.reportLogEntry(flattenedLogEntry);
+    this.trackEvent(ObjectName.ScanAttempt, 'ScanAttempt', flattenedLogEntry);
   }
 }
 
@@ -203,31 +209,26 @@ const logger = new EchoTagScannerLogger({
  */
 function logScanningAttempt(
   this: TagScanner,
-  ocrResult: OCRPayload
+  ocrResult?: OCRPayload,
+  timers?: Timers
 ): ScanAttemptLogEntry {
-  let entry: ScanAttemptLogEntry = {
-    ...ocrResult,
-    ...this.deviceInformation,
-    cameraResolution: `${this.videoTrackSettings?.width}x${this.videoTrackSettings?.height}@${this.videoTrackSettings?.frameRate}`,
-    zoomMethod: this.zoomMethod.type,
-    zoomValue: this.zoom,
-    deviceOrientation: this.currentOrientation
-  };
-  logger.scanAttempt(entry);
-
-  // (console) log the entry up to QA environments.
-  logger.log('QA', () => {
-    if (entry.isSuccess) {
-      console.group('A successfull log entry was created.');
-      console.info(entry);
-      console.groupEnd();
-    } else {
-      console.group('A failed log entry was created.');
-      console.info(entry);
-      console.groupEnd();
+  let logEntry: ScanAttemptLogEntry = {
+    timers: timers,
+    ocrPayload: ocrResult,
+    deviceInformation: this.deviceInformation,
+    deviceUsage: {
+      cameraResolution: `${this.videoTrackSettings?.width}x${this.videoTrackSettings?.height}@${this.videoTrackSettings?.frameRate}`,
+      zoomMethod: this.zoomMethod.type,
+      zoomValue: this.zoom,
+      deviceOrientation: this.currentOrientation
     }
-  });
-  return entry;
+  };
+  if (logEntry?.ocrPayload) {
+    Reflect.deleteProperty(logEntry.ocrPayload, 'timeTaken');
+  }
+  logger.scanAttempt(logEntry);
+
+  return logEntry;
 }
 
 export { logger, logScanningAttempt };

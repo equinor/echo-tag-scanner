@@ -1,6 +1,10 @@
 import { deviceInformationAgent, logger } from '@utils';
 import { CoreCamera, TagScanner } from '@cameraLogic';
-import { CroppingStats, ValidationStats } from '../types';
+import {
+  CroppingStats,
+  FlatScanAttemptLogEntry,
+  ValidationStats
+} from '@types';
 
 export class Debugger {
   public static startupLogs(tagScanner: TagScanner) {
@@ -233,5 +237,19 @@ Intrinsic offset from left-edge: ${sx}.
       console.info('No validation results to display.');
     }
     console.groupEnd();
+  }
+
+  public static reportLogEntry(logEntry: FlatScanAttemptLogEntry) {
+    logger.log('QA', () => {
+      if ('isSuccess' in logEntry && logEntry.isSuccess) {
+        console.group('A successfull log entry was created.');
+        console.info(logEntry);
+        console.groupEnd();
+      } else {
+        console.group('A failed log entry was created.');
+        console.info(logEntry);
+        console.groupEnd();
+      }
+    });
   }
 }

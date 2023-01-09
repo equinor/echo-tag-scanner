@@ -8,6 +8,9 @@ export type OCRPayload = {
   /** The validated tag number */
   validatedText?: string;
 
+  /** The time validation took in milliseconds. */
+  timeTaken: number;
+
   isSuccess: boolean;
 };
 
@@ -24,4 +27,21 @@ export type DeviceInformation = {
   deviceModel: string;
 };
 
-export type ScanAttemptLogEntry = OCRPayload & DeviceUsage & DeviceInformation;
+export type Timers = {
+  networkRequestTimeTaken: number;
+  OCRPostprocessingTimeTaken: number;
+  validationTimeTaken: number;
+};
+
+export type ScanAttemptLogEntry = {
+  deviceUsage: DeviceUsage;
+  deviceInformation: DeviceInformation;
+  ocrPayload?: OCRPayload;
+  timers?: Timers;
+};
+
+/** Represents a "flattened" ScanAttemptLogEntry. */
+export type FlatScanAttemptLogEntry =
+  | (DeviceUsage & DeviceInformation)
+  | OCRPayload
+  | Timers;

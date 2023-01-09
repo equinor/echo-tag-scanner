@@ -3,11 +3,16 @@ import {
   getOrientation,
   logger,
   getCameraPreferences,
-  DeviceInformation,
   determineZoomMethod
 } from '@utils';
 import { ErrorRegistry } from '@const';
-import { CameraProps, CameraResolution, ZoomMethod, ZoomSteps } from '@types';
+import {
+  DeviceInformation,
+  CameraProps,
+  CameraResolution,
+  ZoomMethod,
+  ZoomSteps
+} from '@types';
 
 /**
  * This object is concerned with the core features of a camera.

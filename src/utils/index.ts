@@ -13,3 +13,4 @@ export * from './filtering';
 export * from './device';
 export * from './orientation';
 export * from './reassembly';
+export * from './timer/timer';

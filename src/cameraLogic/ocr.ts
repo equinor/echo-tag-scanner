@@ -13,12 +13,12 @@ import {
   handleError,
   logger,
   ocrFilterer,
-  logScanningAttempt,
   isProduction,
   uniqueStringArray,
   reassembleSpecialTagCandidates,
   reassembleOrdinaryTagCandidates,
-  filterBy
+  filterBy,
+  Timer
 } from '@utils';
 import { ErrorRegistry, homoglyphPairs } from '@const';
 import { baseApiClient } from '../services/api/base/base';
@@ -27,6 +27,7 @@ import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { randomBytes } from 'crypto';
 import { TagScanner } from '@cameraLogic';
 import { Debugger } from './debugger';
+import cloneDeep from 'lodash.clonedeep';
 
 interface OCRProps {
   tagScanner: TagScanner;
@@ -53,33 +54,32 @@ export class OCR {
     return newId;
   }
 
-  public async runOCR(scan: Blob): Promise<ParsedComputerVisionResponse> {
+  public async runOCR(scan: Blob): Promise<{
+    ocrResponse: ParsedComputerVisionResponse;
+    networkRequestTimeTaken: number;
+    postOCRTimeTaken: number;
+  } | null> {
     const [url, body, init] = getComputerVisionOcrResources(scan);
     try {
+      const networkRequestTimer = new Timer();
+      networkRequestTimer.start();
       const response = await baseApiClient.postAsync<ComputerVisionResponse>(
         url,
         body,
         init
       );
+      const networkRequestTimeTaken = networkRequestTimer.stop();
 
+      const postOCRTimer = new Timer();
+      postOCRTimer.start();
       const postProcessedResponse = this.handlePostOCR(response.data);
-      return parseResponse(postProcessedResponse);
+      const postOCRTimeTaken = postOCRTimer.stop();
 
-      /**
-       * Maps each postprocessed Word's text property into a simple array of strings.
-       */
-      function parseResponse(
-        response: ComputerVisionResponse
-      ): ParsedComputerVisionResponse {
-        const stringifiedWords: ParsedComputerVisionResponse = [];
-        response.regions.forEach((region) =>
-          region.lines.forEach((line) =>
-            line.words.forEach((word) => stringifiedWords.push(word.text))
-          )
-        );
-
-        return uniqueStringArray(stringifiedWords);
-      }
+      return {
+        ocrResponse: parseResponse(postProcessedResponse),
+        networkRequestTimeTaken: networkRequestTimeTaken,
+        postOCRTimeTaken: postOCRTimeTaken
+      };
     } catch (error) {
       if (error instanceof BackendError && error.httpStatusCode === 429) {
         // Here we handle the event where users might go over the Computer vision usage quota.
@@ -89,18 +89,41 @@ export class OCR {
             'The scan operation resulted in an overload in the usage quota for Computer Vision. This is normally not a problem and we simply return empty results to the users. This will prompt them to try again.'
           )
         );
-        return [];
+        return null;
       } else {
         logger.log('QA', () => console.error('API Error -> ', error));
         throw handleError(ErrorRegistry.ocrError, error as Error);
       }
     }
+
+    /**
+     * Maps each postprocessed Word's text property into a simple array of strings.
+     */
+    function parseResponse(
+      response: ComputerVisionResponse
+    ): ParsedComputerVisionResponse {
+      const stringifiedWords: ParsedComputerVisionResponse = [];
+      response.regions.forEach((region) =>
+        region.lines.forEach((line) =>
+          line.words.forEach((word) => stringifiedWords.push(word.text))
+        )
+      );
+
+      return uniqueStringArray(stringifiedWords);
+    }
   }
 
   private handlePostOCR(response: ComputerVisionResponse) {
     this.resetTagCandidates();
+    let clonedResponse: ComputerVisionResponse;
 
-    const clonedResponse = structuredClone(response);
+    if ('structuredClone' in globalThis) {
+      clonedResponse = structuredClone(response);
+    } else {
+      // Fallback to lodash.cloneDeep.
+      clonedResponse = cloneDeep(response);
+    }
+
     clonedResponse.regions.forEach((region, regionIndex) =>
       region.lines.forEach((line, lineIndex) => {
         const allWordsOnLine = line.words;
@@ -214,7 +237,10 @@ export class OCR {
 
   public async handleValidation(
     unvalidatedTags: ParsedComputerVisionResponse
-  ): Promise<TagSummaryDto[]> {
+  ): Promise<{
+    validatedTags: TagSummaryDto[];
+    validationLogEntry?: OCRPayload;
+  }> {
     const tagValidationTasks = unvalidatedTags.map((funcLocation) =>
       createTagValidator(funcLocation)
     );
@@ -223,19 +249,20 @@ export class OCR {
     ]);
     const validatedTags: TagSummaryDto[] = [];
     const validationStats: ValidationStats[] = [];
+    let logEntry: OCRPayload | undefined;
 
     tagValidationResults.forEach((validationResult) => {
       if (!this._attemptId)
         throw new Error('A pseudoranom log entry ID has not been established.');
       // Log the successfull OCR.
       if (validationResult.status === 'fulfilled') {
-        const partialLogEntry: OCRPayload = {
+        logEntry = {
           id: this._attemptId,
           isSuccess: true,
           readText: validationResult.value.testValue,
-          validatedText: validationResult.value.validatedTagSummary.tagNo
+          validatedText: validationResult.value.validatedTagSummary.tagNo,
+          timeTaken: validationResult.value.timeTaken
         };
-        logScanningAttempt.call(this._tagScannerRef, partialLogEntry);
 
         // Record the fetched tag summary for use later in presentation.
         validatedTags.push(validationResult.value.validatedTagSummary);
@@ -246,26 +273,31 @@ export class OCR {
         });
       } else if (validationResult.status === 'rejected') {
         if ((validationResult.reason as FailedTagValidation).EchoSearchError) {
+          throw new Error(validationResult.reason);
           // TODO: Handle or log Echo search errors here
         } else {
           // Log the failed OCR.
-          const failedPartialLogEntry: OCRPayload = {
+          logEntry = {
             id: this._attemptId,
             isSuccess: false,
             validatedText: undefined,
-            readText: (validationResult.reason as FailedTagValidation).testValue
+            readText: (validationResult.reason as FailedTagValidation)
+              .testValue,
+            timeTaken: validationResult.reason.timeTaken
           };
-          logScanningAttempt.call(this._tagScannerRef, failedPartialLogEntry);
           validationStats.push({
             isSuccess: false,
-            testValue: failedPartialLogEntry.readText
+            testValue: logEntry.readText
           });
         }
       }
     });
 
     !isProduction && Debugger.reportValidation(validationStats);
-    return filterBy<TagSummaryDto>('tagNo', validatedTags);
+    return {
+      validatedTags: filterBy<TagSummaryDto>('tagNo', validatedTags),
+      validationLogEntry: logEntry
+    };
 
     /**
      * Accepts a possible tag number as string value and runs it through Echo Search for validation.
@@ -313,24 +345,31 @@ export class OCR {
       testValue: string
     ): Promise<TagValidationResult> {
       return new Promise((resolve, reject) => {
+        const validationTimer = new Timer();
+        validationTimer.start();
         findClosestTag(testValue).then((closestTagMatch) => {
           if (closestTagMatch) {
             getTagSummary(closestTagMatch)
               .then((tagSummary) =>
                 resolve({
                   validatedTagSummary: tagSummary,
-                  testValue: testValue
+                  testValue: testValue,
+                  timeTaken: validationTimer.stop()
                 } as TagValidationResult)
               )
               // An error was caught from Echo-search
               .catch((reason) => {
                 reject({
                   EchoSearchError: reason,
-                  testValue: testValue
+                  testValue: testValue,
+                  timeTaken: validationTimer.stop()
                 } as FailedTagValidation);
               });
           } else {
-            reject({ testValue: testValue } as FailedTagValidation);
+            reject({
+              testValue: testValue,
+              timeTaken: validationTimer.stop()
+            } as FailedTagValidation);
           }
         });
       });

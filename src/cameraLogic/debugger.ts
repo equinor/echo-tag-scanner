@@ -185,6 +185,14 @@ Intrinsic offset from left-edge: ${sx}.
     });
   }
 
+  public static reportHomoglypSubstitution(original: string, altered: string) {
+    logger.log('QA', () => {
+      console.info(
+        `After homoglyph substitution, the string ${original} was changed to ${altered}`
+      );
+    });
+  }
+
   public static reportCropping(stats: CroppingStats, tagScanner: TagScanner) {
     logger.log('EchoDevelopment', () => {
       console.group('Cropping');
@@ -215,7 +223,7 @@ Intrinsic offset from left-edge: ${sx}.
   }
 
   public static reportValidation(validations: ValidationStats[]) {
-    console.group('Validation results.');
+    console.group('Echo-Search validation results.');
     if (validations.length > 0) {
       console.group('The following tag numbers have been validated:');
 

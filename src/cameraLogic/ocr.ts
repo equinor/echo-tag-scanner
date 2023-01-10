@@ -129,7 +129,10 @@ export class OCR {
         const allWordsOnLine = line.words;
         for (let i = 0; i < allWordsOnLine.length; i++) {
           if (this.wordIsSpecialCase(allWordsOnLine[i].text)) {
-            this.sanitize(allWordsOnLine[i].text, '()');
+            allWordsOnLine[i].text = this.sanitize(
+              allWordsOnLine[i].text,
+              '()'
+            );
           } else {
             allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
             allWordsOnLine[i] = this.handleHomoglyphing(allWordsOnLine[i]);
@@ -207,17 +210,27 @@ export class OCR {
    */
   private sanitize(word: string, exceptions?: string) {
     word = word.trim();
-    word = word.toUpperCase();
+    word = Array.from(word)
+      .map((char) => {
+        if (char.match(/[a-z0-9]/g)) return char.toUpperCase();
+        else return char;
+      })
+      .join('');
     word = ocrFilterer.filterTrailingAndLeadingChars(word, exceptions);
     return word;
   }
 
   /** Handles the homoglyphing substitution on the word level. */
   private handleHomoglyphing(word: Word): Word {
-    const rawWord = word.text;
-    word.text = Array.from(rawWord)
+    const original = word.text;
+    word.text = Array.from(original)
       .map((char) => getHomoglyphSubstitute(char))
       .join('');
+    const altered = word.text;
+
+    if (original !== word.text) {
+      Debugger.reportHomoglypSubstitution(original, altered);
+    }
 
     return word;
 
@@ -305,17 +318,7 @@ export class OCR {
     async function findClosestTag(possibleTagNumber: string) {
       const result = await Search.Tags.closestTagAsync(possibleTagNumber);
       if (result.isSuccess) {
-        logger.log('QA', () => {
-          console.info(possibleTagNumber + ' corrected to ' + result.value);
-        });
         return result.value;
-      } else {
-        logger.log('QA', () => {
-          console.info(
-            'Echo Search could not establish a close match to ' +
-              possibleTagNumber
-          );
-        });
       }
     }
 

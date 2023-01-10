@@ -39,8 +39,11 @@ ocrFilterer.hasTwoIntegers = function (word: string) {
   return (
     Array.from(word).filter(
       (letter) =>
-        letter !== ' ' && //Whitespaces will be coerced to a zero.
-        Number.isInteger(Number(letter))
+        (letter !== ' ' && //Whitespaces will be coerced to a zero.
+          Number.isInteger(Number(letter))) ||
+        letter === 'O' ||
+        letter === 'I' ||
+        letter === 'l'
     ).length >= numberOfIntegersLowerThreshold
   );
 };

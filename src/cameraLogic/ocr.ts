@@ -45,7 +45,11 @@ export class OCR {
 
   /** Generates a pseudorandom sequence of 16 bytes and returns them hex encoded. */
   public get attemptId(): string {
-    return randomBytes(16).toString('hex');
+    if (!this._attemptId)
+      throw new ReferenceError(
+        'Attempted to access generated scanId, but it was undefined.'
+      );
+    return this._attemptId;
   }
 
   public refreshAttemptId(): Promise<string> {
@@ -60,6 +64,7 @@ export class OCR {
         }
 
         const newId = bufferContents.toString('hex');
+        console.log('%c⧭', 'color: #994d75', newId);
         this._attemptId = newId;
         resolve(newId);
       });

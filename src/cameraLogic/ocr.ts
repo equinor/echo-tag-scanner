@@ -45,13 +45,30 @@ export class OCR {
 
   /** Generates a pseudorandom sequence of 16 bytes and returns them hex encoded. */
   public get attemptId(): string {
-    return randomBytes(16).toString('hex');
+    if (!this._attemptId)
+      throw new ReferenceError(
+        'Attempted to access generated scanId, but it was undefined.'
+      );
+    return this._attemptId;
   }
 
-  public refreshAttemptId(): string {
-    const newId = randomBytes(16).toString('hex');
-    this._attemptId = newId;
-    return newId;
+  public refreshAttemptId(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      randomBytes(16, (hashError, bufferContents) => {
+        if (hashError) {
+          reject('The random ID generation failed.');
+          logger.log('Prod', () => console.error(hashError));
+
+          // Error is thrown here for now to spare the one call site from using an ugly try catch block
+          throw new Error(hashError.message);
+        }
+
+        const newId = bufferContents.toString('hex');
+        console.log('%c⧭', 'color: #994d75', newId);
+        this._attemptId = newId;
+        resolve(newId);
+      });
+    });
   }
 
   public async runOCR(scan: Blob): Promise<{

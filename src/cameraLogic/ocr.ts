@@ -48,10 +48,22 @@ export class OCR {
     return randomBytes(16).toString('hex');
   }
 
-  public refreshAttemptId(): string {
-    const newId = randomBytes(16).toString('hex');
-    this._attemptId = newId;
-    return newId;
+  public refreshAttemptId(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      randomBytes(16, (hashError, bufferContents) => {
+        if (hashError) {
+          reject('The random ID generation failed.');
+          logger.log('Prod', () => console.error(hashError));
+
+          // Error is thrown here for now to spare the one call site from using an ugly try catch block
+          throw new Error(hashError.message);
+        }
+
+        const newId = bufferContents.toString('hex');
+        this._attemptId = newId;
+        resolve(newId);
+      });
+    });
   }
 
   public async runOCR(scan: Blob): Promise<{

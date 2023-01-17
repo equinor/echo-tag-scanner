@@ -50,5 +50,3 @@ export class Timer {
     return Math.floor(this._timeElapsed);
   }
 }
-
-globalThis.timer = new Timer();

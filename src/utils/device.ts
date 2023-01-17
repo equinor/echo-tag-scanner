@@ -216,5 +216,3 @@ class DeviceInformationAgent {
 }
 
 export const deviceInformationAgent = await DeviceInformationAgent.initialize();
-globalThis.getDevice = () =>
-  console.log(deviceInformationAgent.deviceInformation);

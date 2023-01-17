@@ -1,4 +1,4 @@
-import { DeviceInformation } from '@types';
+import { DeviceInformation, WorkingPlatforms } from '@types';
 import UAParser from 'ua-parser-js';
 
 interface DeviceInformationProps {
@@ -55,6 +55,25 @@ class DeviceInformationAgent {
     return this._uaParser;
   }
 
+  /** Returns the current viewing medium.
+   * @param {string} deviceFallback In the event that the viewing medium cannot be established,
+   * one can optionally provide a fallback value. For example, if the UI is constructed mobile-first,
+   * one can provide mobile as the fallback.
+   */
+  public getViewingMedium(
+    deviceFallback?: 'mobile' | 'tablet' | 'desktop'
+  ): 'mobile' | 'tablet' | 'desktop' {
+    // Find iPhones
+    if (this.deviceInformation.deviceModel === 'iPad Apple') return 'tablet';
+
+    // Find iPads
+    if (this.deviceInformation.deviceModel === 'iPhone Apple') return 'mobile';
+
+    // Find desktop
+
+    return deviceFallback ?? 'desktop';
+  }
+
   /** Asyncronously constructs the agent and returns it.  */
   public static async initialize(): Promise<DeviceInformationAgent> {
     // Assign essentially an alias for readability.
@@ -79,7 +98,8 @@ class DeviceInformationAgent {
         deviceModel: DIA.getDeviceModel(uaParser) ?? 'Device model not found.',
         operatingSystem:
           DIA.getOperatingSystem(uaParser) ?? 'Operating system not found.',
-        webBrowser: DIA.getWebBrowser(uaParser) ?? 'Web browser not found'
+        webBrowser: DIA.getWebBrowser(uaParser) ?? 'Web browser not found',
+        platform: DIA.getPlatform(uaParser)
       };
 
       // Call constructor and return the thin-air object.
@@ -101,10 +121,14 @@ class DeviceInformationAgent {
     let deviceModel = DIA.getDeviceModel(uaDataValues);
     if (deviceModel.length === 0) deviceModel = DIA.getDeviceModel(uaParser);
 
+    let platform = DIA.getPlatform(uaDataValues);
+    if (!platform) platform = DIA.getPlatform(uaParser);
+
     deviceInformation = {
       webBrowser: webBrowser || 'Web browser not found.',
       operatingSystem: operatingSystem || 'Operating system not found.',
-      deviceModel: deviceModel || 'Device model not found.'
+      deviceModel: deviceModel || 'Device model not found.',
+      platform: platform
     } as DeviceInformation;
 
     // Call constructor and return the thin-air object.
@@ -113,6 +137,37 @@ class DeviceInformationAgent {
       uaDataValues: uaDataValues,
       uaParser: uaParser
     });
+  }
+
+  private static getPlatform(
+    dataOrigin: UAParser | UADataValues
+  ): WorkingPlatforms | undefined {
+    if (dataOrigin instanceof UAParser) {
+      const platform = dataOrigin.getBrowser().name;
+      if (platform && isWorkingPlatform(platform)) return platform;
+      else return undefined;
+    }
+
+    const platform = dataOrigin.platform;
+    if (platform && isWorkingPlatform(platform)) {
+      return platform;
+    }
+
+    return undefined;
+
+    function isWorkingPlatform(target: string): target is WorkingPlatforms {
+      switch (target.toLowerCase()) {
+        case 'android':
+        case 'linux':
+        case 'macos':
+        case 'ios':
+        case 'windows':
+        case 'ipados':
+          return true;
+        default:
+          return false;
+      }
+    }
   }
 
   private static getWebBrowser(dataOrigin: UAParser | UADataValues): string {
@@ -161,3 +216,5 @@ class DeviceInformationAgent {
 }
 
 export const deviceInformationAgent = await DeviceInformationAgent.initialize();
+globalThis.getDevice = () =>
+  console.log(deviceInformationAgent.deviceInformation);

@@ -20,11 +20,19 @@ export type DeviceUsage = {
   zoomMethod: 'native' | 'simulated';
   zoomValue: number;
 };
+export type WorkingPlatforms =
+  | 'Android'
+  | 'Linux'
+  | 'MacOs'
+  | 'iOS'
+  | 'iPadOS'
+  | 'Windows';
 
 export type DeviceInformation = {
   operatingSystem: string;
   webBrowser: string;
   deviceModel: string;
+  platform?: WorkingPlatforms;
 };
 
 export type Timers = {

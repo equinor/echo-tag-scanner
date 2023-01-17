@@ -61,7 +61,7 @@ export function reassembleSpecialTagCandidates(
   const relevantWords = clonedWords.slice(0, identifierIndex + 1);
 
   let assembledSpecialCandidate: string = '';
-  const identifierWord = relevantWords[identifierIndex];
+  const identifierWord: Word = relevantWords[identifierIndex];
   /**
    * Here we do a series of string concats while looping backwards in the word array.
    * ["foo", "bar", "(M)", "baz", "(M)"] <-- We start from the first occurence of (M) and concat backwards.
@@ -72,7 +72,7 @@ export function reassembleSpecialTagCandidates(
         relevantWords[i - 1].text + assembledSpecialCandidate;
       if (isValidSpecialTagCandidate(assembledSpecialCandidate)) {
         const clonedIdentifier = objectClone<Word>(identifierWord);
-        clonedIdentifier.text = assembledSpecialCandidate + identifier;
+        clonedIdentifier.text = assembledSpecialCandidate + identifierWord.text;
         specialTagCandidates.push(clonedIdentifier);
       }
 

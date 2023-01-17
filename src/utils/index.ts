@@ -15,3 +15,4 @@ export * from './orientation';
 export * from './reassembly';
 export * from './timer/timer';
 export * from './deviceSummary';
+export * from './object';

@@ -18,7 +18,8 @@ import {
   reassembleSpecialTagCandidates,
   reassembleOrdinaryTagCandidates,
   filterBy,
-  Timer
+  Timer,
+  objectClone
 } from '@utils';
 import { ErrorRegistry, homoglyphPairs } from '@const';
 import { baseApiClient } from '../services/api/base/base';
@@ -27,7 +28,6 @@ import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { randomBytes } from 'crypto';
 import { TagScanner } from '@cameraLogic';
 import { Debugger } from './debugger';
-import cloneDeep from 'lodash.clonedeep';
 
 interface OCRProps {
   tagScanner: TagScanner;
@@ -132,14 +132,7 @@ export class OCR {
 
   private handlePostOCR(response: ComputerVisionResponse) {
     this.resetTagCandidates();
-    let clonedResponse: ComputerVisionResponse;
-
-    if ('structuredClone' in globalThis) {
-      clonedResponse = structuredClone(response);
-    } else {
-      // Fallback to lodash.cloneDeep.
-      clonedResponse = cloneDeep(response);
-    }
+    let clonedResponse = objectClone<ComputerVisionResponse>(response);
 
     clonedResponse.regions.forEach((region, regionIndex) =>
       region.lines.forEach((line, lineIndex) => {

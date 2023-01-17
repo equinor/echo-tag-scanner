@@ -1,8 +1,9 @@
 import { Word } from '../types';
 import { ocrFilterer } from './filtering';
+import { objectClone } from './object';
 
 export function reassembleOrdinaryTagCandidates(words: Word[]): Word[] {
-  let clonedWords = structuredClone(words);
+  let clonedWords = objectClone<Word[]>(words);
   clonedWords = clonedWords.filter((w) => w.text);
 
   let reassembledTagCandidates: Word[] = [];
@@ -44,7 +45,7 @@ export function reassembleSpecialTagCandidates(
   words: Word[],
   identifier: string
 ): Word[] {
-  const clonedWords = structuredClone(words);
+  const clonedWords = objectClone<Word[]>(words);
   const identifierIndex = clonedWords.findIndex((w) =>
     w.text.includes(identifier)
   );
@@ -70,7 +71,7 @@ export function reassembleSpecialTagCandidates(
       assembledSpecialCandidate =
         relevantWords[i - 1].text + assembledSpecialCandidate;
       if (isValidSpecialTagCandidate(assembledSpecialCandidate)) {
-        const clonedIdentifier = structuredClone(identifierWord);
+        const clonedIdentifier = objectClone<Word>(identifierWord);
         clonedIdentifier.text = assembledSpecialCandidate + identifier;
         specialTagCandidates.push(clonedIdentifier);
       }

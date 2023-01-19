@@ -64,7 +64,6 @@ export class OCR {
         }
 
         const newId = bufferContents.toString('hex');
-        console.log('%c⧭', 'color: #994d75', newId);
         this._attemptId = newId;
         resolve(newId);
       });
@@ -179,7 +178,7 @@ export class OCR {
     }
 
     for (let i = 0; i < allWordsOnLine.length; i++) {
-      if (allWordsOnLine[i].text.includes('(M)')) {
+      if (this.wordIsSpecialCase(allWordsOnLine[i].text)) {
         this.sanitize(allWordsOnLine[i].text, '()');
       } else {
         allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
@@ -189,6 +188,8 @@ export class OCR {
     this.resetTagCandidates();
 
     const specialCases = reassembleSpecialTagCandidates(allWordsOnLine, '(M)');
+    specialCases.push(...reassembleSpecialTagCandidates(allWordsOnLine, '(C)'));
+
     const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
     this._tagCandidates = [...specialCases, ...ordinaryCases];
 

@@ -64,7 +64,6 @@ export class OCR {
         }
 
         const newId = bufferContents.toString('hex');
-        console.log('%c⧭', 'color: #994d75', newId);
         this._attemptId = newId;
         resolve(newId);
       });

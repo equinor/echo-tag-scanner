@@ -85,7 +85,6 @@ ocrFilterer.filterTrailingAndLeadingChars = function (
 };
 
 ocrFilterer.isMotorTag = function (word: string) {
-  console.log('%c⧭', 'color: #607339', word);
   // Capture the sequence (M) or (C).
   return sequenceMatch('(M)') || sequenceMatch('(C)');
 

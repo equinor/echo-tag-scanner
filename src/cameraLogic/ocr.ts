@@ -152,6 +152,10 @@ export class OCR {
           allWordsOnLine,
           '(M)'
         );
+        specialCases.push(
+          ...reassembleSpecialTagCandidates(allWordsOnLine, '(C)')
+        );
+
         const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
         this._tagCandidates.push(...specialCases);
         this._tagCandidates.push(...ordinaryCases);

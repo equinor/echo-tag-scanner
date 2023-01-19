@@ -52,7 +52,9 @@ ocrFilterer.hasEnoughCharacters = function (word: string) {
   return word.length >= minLetters;
 };
 ocrFilterer.lettersAreValid = function (word: string): boolean {
-  return stripEscapees(word).match(/[A-Z0-9\_\-\"\.]/g)?.length === word.length;
+  return (
+    stripEscapees(word).match(/[A-Z0-9\_\-\"\.\+]/g)?.length === word.length
+  );
 
   /** Strips escape characters from the word. */
   function stripEscapees(unescapedWord: string) {
@@ -83,7 +85,13 @@ ocrFilterer.filterTrailingAndLeadingChars = function (
 };
 
 ocrFilterer.isMotorTag = function (word: string) {
-  return word.match(/(\(M)\)/g)?.join('') === '(M)';
+  console.log('%c⧭', 'color: #607339', word);
+  // Capture the sequence (M) or (C).
+  return sequenceMatch('(M)') || sequenceMatch('(C)');
+
+  function sequenceMatch(sequence: '(M)' | '(C)') {
+    return word.match(/(\(M\))|(\(C\))/g)?.join('') === sequence;
+  }
 };
 
 export { ocrFilterer };

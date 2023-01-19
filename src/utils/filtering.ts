@@ -41,9 +41,12 @@ ocrFilterer.hasTwoIntegers = function (word: string) {
       (letter) =>
         (letter !== ' ' && //Whitespaces will be coerced to a zero.
           Number.isInteger(Number(letter))) ||
-        letter === 'O' ||
-        letter === 'I' ||
-        letter === 'l'
+        letter === 'B' || // 8
+        letter === 'G' || // 6
+        letter === 'I' || // 1
+        letter === 'J' || // 1
+        letter === 'l' || // 1
+        letter === 'O' // 0
     ).length >= numberOfIntegersLowerThreshold
   );
 };
@@ -52,7 +55,9 @@ ocrFilterer.hasEnoughCharacters = function (word: string) {
   return word.length >= minLetters;
 };
 ocrFilterer.lettersAreValid = function (word: string): boolean {
-  return stripEscapees(word).match(/[A-Z0-9\_\-\"\.]/g)?.length === word.length;
+  return (
+    stripEscapees(word).match(/[A-Z0-9\_\-\"\.\+]/g)?.length === word.length
+  );
 
   /** Strips escape characters from the word. */
   function stripEscapees(unescapedWord: string) {
@@ -83,7 +88,12 @@ ocrFilterer.filterTrailingAndLeadingChars = function (
 };
 
 ocrFilterer.isMotorTag = function (word: string) {
-  return word.match(/(\(M)\)/g)?.join('') === '(M)';
+  // Capture the sequence (M) or (C).
+  return sequenceMatch('(M)') || sequenceMatch('(C)');
+
+  function sequenceMatch(sequence: '(M)' | '(C)') {
+    return word.match(/(\(M\))|(\(C\))/g)?.join('') === sequence;
+  }
 };
 
 export { ocrFilterer };

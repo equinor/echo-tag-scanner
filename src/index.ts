@@ -10,6 +10,8 @@ async function findClosestTag(testers: string) {
     .then((res) => {
       if (res.isNotFound) console.warn('Could not find match for ' + testers);
       else console.info(`${testers} corrected to ${res.value}`);
+
+      console.table(res);
     })
     .catch((reason) => console.error(reason));
 }

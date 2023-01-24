@@ -1,6 +1,7 @@
 import { EchoModuleApi } from '@equinor/echo-core';
 import { Search } from '@equinor/echo-search';
 import { App } from './App';
+import { isProduction } from '@utils';
 
 /**
  * Accepts a possible tag number as string value and runs it through Echo Search for validation.
@@ -16,7 +17,8 @@ async function findClosestTag(testers: string) {
     .catch((reason) => console.error(reason));
 }
 
-globalThis.echoSearch = findClosestTag;
+// Enable Echo-Search validation isolated test.
+if (!isProduction) globalThis.echoSearch = findClosestTag;
 
 export function setup(api: EchoModuleApi): void {
   api.registerApp(App, { homeScreen: true, exactPath: false });

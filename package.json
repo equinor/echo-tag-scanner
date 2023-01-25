@@ -63,6 +63,6 @@
     },
     "dependencies": {
         "lodash.clonedeep": "^4.5.0",
-        "ua-parser-js": "^1.0.32"
+        "ua-parser-js": "^1.0.33"
     }
 }

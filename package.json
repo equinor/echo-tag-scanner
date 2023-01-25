@@ -13,11 +13,11 @@
         "tunnel": "npx localtunnel --subdomain echoscanner --port 3000 --local-https --allow-invalid-cert --local-host localhost"
     },
     "devDependencies": {
-        "@equinor/echo-base": "^0.6.21",
-        "@equinor/echo-cli": "^0.5.20",
-        "@equinor/echo-components": "^0.5.10",
-        "@equinor/echo-core": "^0.7.0",
-        "@equinor/echo-framework": "^0.10.12",
+        "@equinor/echo-base": "^0.6.22",
+        "@equinor/echo-cli": "^0.5.25",
+        "@equinor/echo-components": "^0.5.16",
+        "@equinor/echo-core": "^0.7.3",
+        "@equinor/echo-framework": "^0.10.18",
         "@equinor/echo-scripts": "^0.1.5",
         "@equinor/echo-search": "^0.13.11",
         "@equinor/echo-utils": "^0.2.12",
@@ -49,10 +49,10 @@
         "webpack-merge": "^5.8.0"
     },
     "peerDependencies": {
-        "@equinor/echo-base": "^0.6.21",
-        "@equinor/echo-components": "^0.5.10",
-        "@equinor/echo-core": "^0.7.0",
-        "@equinor/echo-framework": "^0.10.12",
+        "@equinor/echo-base": "^0.6.22",
+        "@equinor/echo-components": "^0.5.16",
+        "@equinor/echo-core": "^0.7.3",
+        "@equinor/echo-framework": "^0.10.18",
         "@equinor/echo-search": "^0.13.11",
         "@equinor/echo-utils": "^0.2.12",
         "@equinor/eds-core-react": "^0.25.0",

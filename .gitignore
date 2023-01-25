@@ -38,5 +38,6 @@ src/test/testdoc.pdf
 
 /.vs
 debug.log
-
+.yalc
+yalc.lock
 

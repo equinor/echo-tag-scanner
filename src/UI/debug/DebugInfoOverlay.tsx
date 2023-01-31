@@ -116,8 +116,8 @@ export const DebugInfoOverlay = (props: DebugInfoOverlayProps): JSX.Element => {
 
 const DebugOutput = styled.output`
   position: fixed;
-  top: 10%;
-  left: 0;
+  top: 12%;
+  left: 64px;
   z-index: ${zIndexes.overlays};
   user-select: none;
 
@@ -125,6 +125,6 @@ const DebugOutput = styled.output`
     top: unset;
     right: unset;
     bottom: 0;
-    left: calc(var(--echo-sidebar-width) + env(safe-area-inset-left));
+    left: calc(var(--echo-sidebar-width) + env(safe-area-inset-left) + 32px);
   }
 `;

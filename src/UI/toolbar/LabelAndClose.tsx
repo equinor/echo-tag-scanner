@@ -37,8 +37,4 @@ const StyledLabelAndClose = styled.section`
   width: 100%;
   padding: 0 var(--medium);
   margin-top: var(--medium);
-
-  @media screen and (min-width: 766px) {
-    padding: 0 75px; //Give some padding here until echo-bars are available on tablets.
-  }
 `;

@@ -29,6 +29,10 @@ interface OCRFilterer {
    * @param {string} exceptions Any characters that should be excempted, for example "()/".
    */
   filterTrailingAndLeadingChars: (word: string, exceptions?: string) => string;
+  /**
+   * Accepts a word and determines if it could be from a line tag sign.
+   */
+  isLineTag: (sequence: string) => boolean;
 }
 
 const ocrFilterer: OCRFilterer = Object.create(null);
@@ -94,6 +98,10 @@ ocrFilterer.isMotorTag = function (word: string) {
   function sequenceMatch(sequence: '(M)' | '(C)') {
     return word.match(/(\(M\))|(\(C\))/g)?.join('') === sequence;
   }
+};
+
+ocrFilterer.isLineTag = function isLineTag(word: string) {
+  return word.substring(0, 5).includes('"');
 };
 
 export { ocrFilterer };

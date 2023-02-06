@@ -237,10 +237,20 @@ export class OCR {
 
   /** Handles the homoglyphing substitution on the word level. */
   private handleHomoglyphing(word: Word): Word {
-    const original = word.text;
-    word.text = Array.from(original)
+    let original = word.text;
+    let alteredOriginal: string | undefined = undefined;
+    let lineTagIdentifier = '';
+
+    if (ocrFilterer.isLineTag(original)) {
+      const i = word.text.indexOf('"');
+      lineTagIdentifier = word.text.substring(0, i);
+      alteredOriginal = word.text.substring(i);
+    }
+
+    word.text = Array.from(alteredOriginal ?? original)
       .map((char) => getHomoglyphSubstitute(char))
       .join('');
+    word.text = lineTagIdentifier + word.text;
     const altered = word.text;
 
     if (original !== word.text) {

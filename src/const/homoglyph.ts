@@ -28,7 +28,8 @@ const homoglyphPairs: HomoglyphPair[] = [
   { homoglyph: '|', substitution: '1' },
   { homoglyph: '!', substitution: '1' },
   { homoglyph: '?', substitution: '2' },
-  { homoglyph: '>', substitution: '7' }
+  { homoglyph: '>', substitution: '7' },
+  { homoglyph: '.', substitution: '-' }
 ];
 Object.preventExtensions(homoglyphPairs);
 

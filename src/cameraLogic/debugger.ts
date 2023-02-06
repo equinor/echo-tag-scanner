@@ -28,7 +28,8 @@ export class Debugger {
    */
   public static logImageStats(
     captures: Array<Blob | File>,
-    logDescription?: string
+    logDescription?: string,
+    captureTimeTaken?: number
   ) {
     if (captures.length > 0) {
       const averageSize =
@@ -41,6 +42,10 @@ export class Debugger {
       console.info('Number of captures -> ', captures.length);
       console.info('Average size in bytes -> ', averageSize);
       console.info('Media type -> ', captures[0].type);
+      console.info(
+        'Capture time taken -> ',
+        captureTimeTaken + ' milliseconds.'
+      );
       console.groupEnd();
     }
   }

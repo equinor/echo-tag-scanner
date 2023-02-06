@@ -1,5 +1,5 @@
 import { CameraProps, CroppingStats, Timers } from '@types';
-import { isProduction, logScanningAttempt } from '@utils';
+import { isProduction, logScanningAttempt, Timer } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { Camera } from './camera';
 import { OCR } from './ocr';
@@ -9,8 +9,8 @@ import { Debugger } from './debugger';
  * This object implements tag scanning logic.
  */
 export class TagScanner extends Camera {
-  private _scanRetries = 5;
-  private _scanDuration = 2; //seconds
+  private _scanRetries = 2;
+  private _scanDuration = 1000; //milliseconds
   private _OCR = new OCR({ tagScanner: this });
   private _scanningArea: HTMLElement;
 
@@ -49,14 +49,6 @@ export class TagScanner extends Camera {
       );
     }
 
-    const stats: CroppingStats = {
-      sx,
-      sy,
-      cropWidth,
-      cropHeight,
-      zoom: this.zoom
-    };
-
     return await this.crop({
       sx,
       sy,
@@ -77,7 +69,43 @@ export class TagScanner extends Camera {
    * @returns {Blob[]} A list of blobs.
    */
   public async scan(): Promise<Blob[]> {
-    return new Promise((finishScanning) => {
+    /** Determines the delay between captures in milliseconds. */
+    const rawCaptures = await handleGetFrames.call(this);
+    return await handlePostProcessing.call(this, rawCaptures);
+
+    async function handleGetFrames(this: TagScanner): Promise<Blob[]> {
+      const timer = new Timer({ maxTime: 3000 });
+      timer.start();
+
+      const scanInterval = this._scanDuration / this._scanRetries;
+      const scans: Blob[] = [];
+      return new Promise<Blob[]>((resolve) => {
+        const intervalId = setInterval(getFrame.bind(this), scanInterval);
+
+        async function getFrame(this: TagScanner) {
+          this.capturePhoto().then((capture) => {
+            scans.push(capture);
+
+            if (scans.length === this._scanRetries) {
+              // Scanning is finished.
+              clearInterval(intervalId);
+
+              // Log some image stats and a blob preview in network tab.
+              !isProduction &&
+                Debugger.logImageStats(
+                  scans,
+                  'The postprocessed photos.',
+                  timer.stop()
+                );
+
+              resolve(scans);
+            }
+          });
+        }
+      });
+    }
+
+    async function handlePostProcessing(this: TagScanner, captures: Blob[]) {
       let extractWidth = this._scanningArea.clientWidth;
       let extractHeight = this._scanningArea.clientHeight;
 
@@ -86,16 +114,7 @@ export class TagScanner extends Camera {
         extractHeight /= this.zoom;
       }
 
-      const scans: Blob[] = [];
-      /** Determines the delay between captures in milliseconds. */
-      const scanInterval = (this._scanRetries / this._scanDuration) * 100;
-      const intervalId = setInterval(
-        handleIntervalledCapture.bind(this),
-        scanInterval
-      );
-
-      async function handleIntervalledCapture(this: TagScanner) {
-        let capture = await this.capturePhoto();
+      captures.forEach(async (capture) => {
         capture = await this.performCropping();
         capture = await this._canvasHandler.getCanvasContentAsBlob({
           sx: 0,
@@ -103,20 +122,10 @@ export class TagScanner extends Camera {
           sWidth: extractWidth,
           sHeight: extractHeight
         });
-        scans.push(capture);
+      });
 
-        if (scans.length === this._scanRetries) {
-          // Scanning is finished.
-          clearInterval(intervalId);
-
-          // Log some image stats and a blob preview in network tab.
-          !isProduction &&
-            Debugger.logImageStats(scans, 'The postprocessed photo.');
-
-          finishScanning(scans);
-        }
-      }
-    });
+      return captures;
+    }
   }
 
   /**

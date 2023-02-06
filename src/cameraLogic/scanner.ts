@@ -10,7 +10,7 @@ import { Debugger } from './debugger';
  */
 export class TagScanner extends Camera {
   private _scanRetries = 2;
-  private _scanDuration = 1000; //seconds
+  private _scanDuration = 1000; //milliseconds
   private _OCR = new OCR({ tagScanner: this });
   private _scanningArea: HTMLElement;
 

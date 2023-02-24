@@ -119,10 +119,8 @@ export class OCR {
       response: ComputerVisionResponse
     ): ParsedComputerVisionResponse {
       const stringifiedWords: ParsedComputerVisionResponse = [];
-      response.regions.forEach((region) =>
-        region.lines.forEach((line) =>
-          line.words.forEach((word) => stringifiedWords.push(word.text))
-        )
+      response.readResults.lines.forEach((line) =>
+        line.words.forEach((word) => stringifiedWords.push(word.text))
       );
 
       return uniqueStringArray(stringifiedWords);
@@ -133,37 +131,31 @@ export class OCR {
     this.resetTagCandidates();
     let clonedResponse = objectClone<ComputerVisionResponse>(response);
 
-    clonedResponse.regions.forEach((region, regionIndex) =>
-      region.lines.forEach((line, lineIndex) => {
-        const allWordsOnLine = line.words;
-        for (let i = 0; i < allWordsOnLine.length; i++) {
-          if (this.wordIsSpecialCase(allWordsOnLine[i].text)) {
-            allWordsOnLine[i].text = this.sanitize(
-              allWordsOnLine[i].text,
-              '()'
-            );
-          } else {
-            allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
-            allWordsOnLine[i] = this.handleHomoglyphing(allWordsOnLine[i]);
-          }
+    clonedResponse.readResults.lines.forEach((line, lineIndex) => {
+      const allWordsOnLine = line.words;
+      for (let i = 0; i < allWordsOnLine.length; i++) {
+        if (this.wordIsSpecialCase(allWordsOnLine[i].text)) {
+          allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text, '()');
+        } else {
+          allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
+          allWordsOnLine[i] = this.handleHomoglyphing(allWordsOnLine[i]);
         }
+      }
 
-        const specialCases = reassembleSpecialTagCandidates(
-          allWordsOnLine,
-          '(M)'
-        );
-        specialCases.push(
-          ...reassembleSpecialTagCandidates(allWordsOnLine, '(C)')
-        );
+      const specialCases = reassembleSpecialTagCandidates(
+        allWordsOnLine,
+        '(M)'
+      );
+      specialCases.push(
+        ...reassembleSpecialTagCandidates(allWordsOnLine, '(C)')
+      );
 
-        const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
-        this._tagCandidates.push(...specialCases);
-        this._tagCandidates.push(...ordinaryCases);
+      const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
+      this._tagCandidates.push(...specialCases);
+      this._tagCandidates.push(...ordinaryCases);
 
-        clonedResponse.regions[regionIndex].lines[lineIndex].words =
-          this._tagCandidates;
-      })
-    );
+      clonedResponse.readResults.lines[lineIndex].words = this._tagCandidates;
+    });
 
     !isProduction &&
       Debugger.reportFiltration(

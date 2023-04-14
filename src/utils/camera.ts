@@ -1,20 +1,20 @@
-import { Camera, CoreCamera } from '@cameraLogic';
+import { Camera, CoreCamera } from "@cameraLogic";
 import {
   getNotificationDispatcher as dispatchNotification,
-  isLocalDevelopment
-} from '@utils';
-import { ZoomMethod } from '@types';
-import { fixedCameraSettingsRequest } from '@const';
+  isLocalDevelopment,
+} from "@utils";
+import { ZoomMethod } from "@types";
+import { fixedCameraSettingsRequest } from "@const";
 
 function assignZoomSettings(
-  type: 'min' | 'max' | 'step' | 'value',
-  camera: Camera
+  type: "min" | "max" | "step" | "value",
+  camera: Camera,
 ): string {
-  if (type === 'value') {
+  if (type === "value") {
     if (camera.videoTrackSettings?.zoom) {
       return String(camera.videoTrackSettings.zoom);
     } else {
-      return '1';
+      return "1";
     }
   }
   if (camera.capabilities?.zoom) {
@@ -24,7 +24,7 @@ function assignZoomSettings(
   }
   // If zoom capabilities does not exist, we need to return a stringified zero
   // to prevent a stringified undefined to be assigned to the zoom slider.
-  return '0';
+  return "0";
 }
 
 /**
@@ -37,7 +37,7 @@ function getTorchToggleProvider(camera: Camera) {
     };
 
     const onToggleUnsupportedTorch = () => {
-      dispatchNotification('The torch is not supported on this device.')();
+      dispatchNotification("The torch is not supported on this device.")();
     };
 
     if (camera.capabilities?.torch) {
@@ -52,105 +52,54 @@ function determineZoomMethod(this: CoreCamera): ZoomMethod {
   // Device has native support.
   if (this.capabilities?.zoom) {
     // Ensure the max zoom is not above 3.
-    const maxZoom =
-      this.capabilities?.zoom.max > 3 ? 3 : this.capabilities?.zoom.max;
+    const maxZoom = this.capabilities?.zoom.max > 3
+      ? 3
+      : this.capabilities?.zoom.max;
     return {
-      type: 'native',
+      type: "native",
       min: 1,
-      max: maxZoom
+      max: maxZoom,
     } as ZoomMethod;
 
     // Device does not have native support, fall back to simulated zoom.
   } else {
     return {
-      type: 'simulated',
+      type: "simulated",
       min: 1,
-      max: 2
+      max: 2,
     } as ZoomMethod;
   }
 }
 
 function getCameraPreferences(): MediaStreamConstraints {
   const cameraSettingsRequest = {
-    ...fixedCameraSettingsRequest
+    ...fixedCameraSettingsRequest,
   };
-
-  // Developer enviroment on desktop. maxTouchPoints can be 1 with touch emulation.
-  if (isLocalDevelopment && navigator.maxTouchPoints <= 1) {
-    console.info('Creating dev camera request');
-    let overrideWidthDev = cameraSettingsRequest.width.exact;
-    let overrideHeightDev = cameraSettingsRequest.height.exact;
-
-    const cameraId =
-      '883c79d936715fb3d0f70390c627a7bcb9ff395f6835fdf2b068373a35764ec2';
-
-    const request = {
-      video: {
-        width: { exact: overrideWidthDev },
-        height: {
-          exact: overrideHeightDev
-        },
-
-        // Higher FPS is good for a scanning operation.
-        frameRate: { ideal: cameraSettingsRequest.fps?.ideal },
-
-        deviceId: {
-          exact: cameraId
-        }
-      },
-      audio: false
-    } as MediaStreamConstraints;
-
-    return request;
-  }
-
-  // Developer environment on a mobile device.
-  if (isLocalDevelopment && navigator.maxTouchPoints > 1) {
-    console.info('Creating mobile dev capture request.');
-    let overrideWidthDev = cameraSettingsRequest.width.exact;
-    let overrideHeightDev = cameraSettingsRequest.height.exact;
-
-    return {
-      video: {
-        width: { exact: overrideWidthDev },
-        height: {
-          exact: overrideHeightDev
-        },
-
-        // Higher FPS is good for a scanning operation.
-        frameRate: { ideal: cameraSettingsRequest.fps?.ideal },
-
-        // Ensures the rear-facing camera is used.
-        facingMode: { exact: 'environment' }
-      },
-      audio: false
-    } as MediaStreamConstraints;
-  }
 
   // This is the default preferences, which is also used in production.
   return {
     video: {
       width: {
-        exact: cameraSettingsRequest.width.exact
+        exact: cameraSettingsRequest.width.exact,
       },
       height: {
-        exact: cameraSettingsRequest.height.exact
+        exact: cameraSettingsRequest.height.exact,
       },
 
       // Higher FPS is good for a scanning operation.
       frameRate: {
-        ideal: cameraSettingsRequest.fps?.ideal
+        ideal: cameraSettingsRequest.fps?.ideal,
       },
 
-      facingMode: { exact: 'environment' }
+      facingMode: { ideal: "environment" },
     },
-    audio: false
+    audio: false,
   } as MediaStreamConstraints;
 }
 
 export {
   assignZoomSettings,
-  getTorchToggleProvider,
   determineZoomMethod,
-  getCameraPreferences
+  getCameraPreferences,
+  getTorchToggleProvider,
 };

@@ -1,29 +1,34 @@
-import { useState } from 'react';
-import { TagScanner } from '@cameraLogic';
-import EchoUtils from '@equinor/echo-utils';
-import { logger } from '@utils';
+import { useState } from "react";
+import { TagScanner } from "@cameraLogic";
+import EchoUtils from "@equinor/echo-utils";
+import { logger } from "@utils";
 
-export function useGetMediastream(): MediaStream | undefined {
-  const [stream, setStream] = useState<MediaStream | undefined>();
+type RequestStatus = "requesting" | "not allowed" | "allowed";
+
+type Payload = {
+  mediaStream?: MediaStream;
+  mediaStreamRequestError?: Error;
+  requestStatus: RequestStatus;
+};
+
+export function useGetMediastream(): Payload {
+  const [mediaStream, setStream] = useState<MediaStream | undefined>();
+  const [mediaStreamRequestError, setError] = useState<
+    Error | undefined
+  >();
+  const [requestStatus, setRequestStatus] = useState<RequestStatus>(
+    "requesting",
+  );
 
   EchoUtils.Hooks.useEffectAsync(async () => {
     try {
       const mediaStream = await TagScanner.getMediastream();
       setStream(mediaStream);
+      setRequestStatus("allowed");
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'NotAllowedError') {
-        logger.log('QA', () => {
-          console.error('We do not have access to your camera.');
-          console.error(
-            'Check your browser settings that ' +
-              globalThis.location.href +
-              ' is not blacklisted and that you are running with HTTPS.'
-          );
-        });
-      } else if (error instanceof Error) {
-        throw new Error(error.toString());
-      }
+      setError(error as Error);
+      setRequestStatus("not allowed");
     }
   }, []);
-  return stream;
+  return { mediaStream, mediaStreamRequestError, requestStatus };
 }

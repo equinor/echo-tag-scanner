@@ -90,7 +90,7 @@ function getCameraPreferences(): MediaStreamConstraints {
         ideal: cameraSettingsRequest.fps?.ideal,
       },
 
-      facingMode: { ideal: "environment" },
+      facingMode: { exact: "environment" },
     },
     audio: false,
   } as MediaStreamConstraints;

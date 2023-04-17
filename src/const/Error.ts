@@ -10,6 +10,7 @@ export interface IErrorRegistry {
   zoomError: ErrorRecord;
   torchError: ErrorRecord;
   overconstrainedError: ErrorRecord;
+  autoplayFailed: ErrorRecord;
 }
 
 export enum ErrorKey {
@@ -60,5 +61,10 @@ export const ErrorRegistry: IErrorRegistry = {
     key: ErrorKey.EchoCameraRuntimeErrors,
     severity: 'high',
     userMessage: ErrorMessages.OverconstrainedError
+  },
+  autoplayFailed: {
+    key: ErrorKey.EchoCameraRuntimeErrors,
+    severity: "high",
+    userMessage: "The web browser did not allow us to autoplay the viewfinder."
   }
 } as const;

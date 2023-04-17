@@ -1,7 +1,6 @@
 import { Camera, CoreCamera } from "@cameraLogic";
 import {
   getNotificationDispatcher as dispatchNotification,
-  isLocalDevelopment,
 } from "@utils";
 import { ZoomMethod } from "@types";
 import { fixedCameraSettingsRequest } from "@const";

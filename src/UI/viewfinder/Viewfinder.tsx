@@ -1,9 +1,9 @@
-import React, { SetStateAction, Dispatch, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { isCustomZoomEvent } from '@utils';
-import { zIndexes } from '@const';
-import { ScanningArea } from './ScanningArea';
-import { Backdrop } from '@ui';
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import styled from "styled-components";
+import { isCustomZoomEvent } from "@utils";
+import { zIndexes } from "@const";
+import { ScanningArea } from "./ScanningArea";
+import { Backdrop } from "@ui";
 
 interface ViewfinderProps {
   setCanvasRef: Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
@@ -30,17 +30,17 @@ type ZoomBehavior = {
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   const [zoomBehaviour, setZoomBehaviour] = useState<ZoomBehavior>({
     zoomFactor: 1,
-    translateOffset: 50
+    translateOffset: 50,
   });
 
   useEffect(function mountSimulatedZoomEventListener() {
-    globalThis.addEventListener('camera-zoom', (event) => {
+    globalThis.addEventListener("camera-zoom", (event) => {
       if (isCustomZoomEvent(event)) {
         let offset = 50;
         if (event.detail.zoomFactor !== 1) offset /= event.detail.zoomFactor;
         setZoomBehaviour({
           zoomFactor: event.detail.zoomFactor,
-          translateOffset: offset
+          translateOffset: offset,
         });
       }
     });
@@ -54,6 +54,7 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         ref={(el: HTMLVideoElement) => props.setVideoRef(el)}
         playsInline // needed for the viewfinder to work in Safari
         autoPlay
+        muted
         disablePictureInPicture
         controls={false}
         zoomFactor={zoomBehaviour.zoomFactor}

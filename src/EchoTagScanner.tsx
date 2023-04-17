@@ -1,6 +1,12 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { logger } from '@utils';
-import { Viewfinder, Scanner as ScannerUI, ZoomTutorial } from '@ui';
+import {
+  CameraCouldNotBeStartedAlert,
+  Scanner as ScannerUI,
+  StartingCameraLoading,
+  Viewfinder,
+  ZoomTutorial
+} from '@ui';
 import { ErrorBoundary } from '@services';
 import { useGetMediastream } from '@hooks';
 import styled from 'styled-components';
@@ -19,7 +25,8 @@ const EchoCamera = () => {
   }, []);
 
   // The camera feed.
-  const mediaStream = useGetMediastream();
+  const { mediaStream, mediaStreamRequestError, requestStatus } =
+    useGetMediastream();
 
   // Represets the camera viewfinder.
   const [viewfinder, setViewfinder] = useState<HTMLVideoElement>();
@@ -29,6 +36,20 @@ const EchoCamera = () => {
 
   // Whatever is inside this area is what will be the OCR target.
   const [scanningArea, setScanningArea] = useState<HTMLElement>();
+
+  if (
+    mediaStreamRequestError instanceof OverconstrainedError ||
+    (mediaStreamRequestError instanceof Error &&
+      requestStatus === 'not allowed')
+  ) {
+    return (
+      <CameraCouldNotBeStartedAlert technicalInfo={mediaStreamRequestError} />
+    );
+  }
+
+  if (requestStatus === 'requesting') {
+    return <StartingCameraLoading />;
+  }
 
   // No need to render any kind of UI and long as we're waiting for the media stream.
   // This might be improved in the future by letting the user see some kind of camera shell.
@@ -46,6 +67,14 @@ const EchoCamera = () => {
           videoRef={viewfinder}
         />
 
+        <ManualPlay
+          onClick={() => {
+            viewfinder?.play();
+          }}
+        >
+          Play
+        </ManualPlay>
+
         {viewfinder && canvas && scanningArea && (
           <ScannerUI
             stream={mediaStream}
@@ -59,6 +88,15 @@ const EchoCamera = () => {
     </ErrorBoundary>
   );
 };
+
+const ManualPlay = styled.button`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background-color: hotpink;
+  z-index: 100;
+  padding: 2rem;
+`;
 
 const Main = styled.main`
   display: flex;

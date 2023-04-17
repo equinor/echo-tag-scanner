@@ -1,10 +1,16 @@
-import React, { memo, useEffect, useState } from 'react';
-import { logger } from '@utils';
-import { Viewfinder, Scanner as ScannerUI, ZoomTutorial } from '@ui';
-import { ErrorBoundary } from '@services';
-import { useGetMediastream } from '@hooks';
-import styled from 'styled-components';
-import { zIndexes } from '@const';
+import React, { memo, useEffect, useState } from "react";
+import { logger } from "@utils";
+import {
+  CameraCouldNotBeStartedAlert,
+  Scanner as ScannerUI,
+  StartingCameraLoading,
+  Viewfinder,
+  ZoomTutorial,
+} from "@ui";
+import { ErrorBoundary } from "@services";
+import { useGetMediastream } from "@hooks";
+import styled from "styled-components";
+import { zIndexes } from "@const";
 
 /**
  * This component will handle all of the initial React setup and renders before control is handed to the classes.
@@ -19,7 +25,8 @@ const EchoCamera = () => {
   }, []);
 
   // The camera feed.
-  const mediaStream = useGetMediastream();
+  const { mediaStream, mediaStreamRequestError, requestStatus } =
+    useGetMediastream();
 
   // Represets the camera viewfinder.
   const [viewfinder, setViewfinder] = useState<HTMLVideoElement>();
@@ -29,6 +36,19 @@ const EchoCamera = () => {
 
   // Whatever is inside this area is what will be the OCR target.
   const [scanningArea, setScanningArea] = useState<HTMLElement>();
+
+  if (
+    mediaStreamRequestError instanceof OverconstrainedError ||
+    mediaStreamRequestError instanceof Error && requestStatus === "not allowed"
+  ) {
+    return (
+      <CameraCouldNotBeStartedAlert technicalInfo={mediaStreamRequestError} />
+    );
+  }
+
+  if (requestStatus === "requesting") {
+    return <StartingCameraLoading />;
+  }
 
   // No need to render any kind of UI and long as we're waiting for the media stream.
   // This might be improved in the future by letting the user see some kind of camera shell.

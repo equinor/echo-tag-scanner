@@ -1,18 +1,18 @@
 import {
-  handleError,
-  getOrientation,
-  logger,
+  determineZoomMethod,
   getCameraPreferences,
-  determineZoomMethod
-} from '@utils';
-import { ErrorRegistry } from '@const';
+  getOrientation,
+  handleError,
+  logger,
+} from "@utils";
+import { ErrorRegistry } from "@const";
 import {
-  DeviceInformation,
   CameraProps,
   CameraResolution,
+  DeviceInformation,
   ZoomMethod,
-  ZoomSteps
-} from '@types';
+  ZoomSteps,
+} from "@types";
 
 /**
  * This object is concerned with the core features of a camera.
@@ -23,7 +23,7 @@ class CoreCamera {
   private _videoTrack?: MediaStreamTrack;
   private _videoTrackSettings?: MediaTrackSettings;
   private _capabilities?: MediaTrackCapabilities = undefined;
-  private _currentOrientation: 'portrait' | 'landscape';
+  private _currentOrientation: "portrait" | "landscape";
   private _activeCamera?: string;
   private _zoom: ZoomSteps;
 
@@ -57,7 +57,7 @@ class CoreCamera {
     this._baseResolution = {
       width: this._viewfinder.width,
       height: this._viewfinder.height,
-      zoomFactor: 1
+      zoomFactor: 1,
     };
     this._deviceInformation = props.deviceInformation;
     this._zoomMethod = determineZoomMethod.call(this);
@@ -149,24 +149,7 @@ class CoreCamera {
   static async getMediastream(): Promise<MediaStream> {
     const cameraPreferences = getCameraPreferences();
     return await navigator.mediaDevices
-      .getUserMedia(cameraPreferences)
-      .catch((error) => {
-        if (error instanceof OverconstrainedError) {
-          if (error.constraint === 'width' || error.constraint === 'height') {
-            handleResolutionOverconstrain(error);
-          }
-        }
-        throw error;
-      });
-
-    function handleResolutionOverconstrain(error: OverconstrainedError) {
-      console.warn(
-        `The camera property ${error?.constraint} is overconstrained.`
-      );
-      console.warn(
-        'This error is being gracefully handled. Operation of camera should continue as normal, but with a lower resolution.'
-      );
-    }
+      .getUserMedia(cameraPreferences);
   }
 
   protected torch(toggled: boolean): void {
@@ -175,13 +158,13 @@ class CoreCamera {
         ?.applyConstraints({ advanced: [{ torch: toggled }] })
         .catch(onTorchRejection);
     } else {
-      logger.log('QA', () => console.warn('Device does not support the torch'));
+      logger.log("QA", () => console.warn("Device does not support the torch"));
     }
 
     function onTorchRejection(reason: unknown) {
       throw handleError(
         ErrorRegistry.torchError,
-        new Error('The torch could not be toggled, more info: ' + reason)
+        new Error("The torch could not be toggled, more info: " + reason),
       );
     }
   }

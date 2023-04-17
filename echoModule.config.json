@@ -1,6 +1,6 @@
 {
   "bundler": "webpack",
-  "webpackConfigPath": "./webpack/webpack.config.js",
+  "webpackConfigPath": "./webpack.config.js",
   "manifest": {
     "name": "Echo Tag Scanner",
     "key": "echo-tag-scanner",

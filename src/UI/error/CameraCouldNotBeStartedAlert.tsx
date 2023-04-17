@@ -1,16 +1,20 @@
-import React from 'react';
-import styled from 'styled-components';
-import { Button } from '@equinor/eds-core-react';
+import React from "react";
+import styled from "styled-components";
+import { Button } from "@equinor/eds-core-react";
 
 type OverconstrainedAlertProps = {
-  technicalInfo: OverconstrainedError;
+  technicalInfo: Error;
 };
 
-const OverconstrainedAlert = (
-  props: OverconstrainedAlertProps
+const CameraCouldNotBeStartedAlert = (
+  props: OverconstrainedAlertProps,
 ): JSX.Element => {
   props.technicalInfo.toString = function () {
-    return this.constraint + ' , ' + this.message + ' , ' + this.name;
+    if (this instanceof OverconstrainedError) {
+      return this.constraint + " , " + this.message + " , " + this.name;
+    } else {
+      return this.message + " , " + this.name;
+    }
   };
   return (
     <AlertContainer>
@@ -18,19 +22,20 @@ const OverconstrainedAlert = (
         <Section>
           <ErrorHeader>We could not start your camera.</ErrorHeader>
           <p>
-            Unfortunately, an error occured while we tried to start your rear
-            camera. There could be a number of reasons for this:
+            Unfortunately, an error occured while we tried to start your{" "}
+            <u>
+              rear camera
+            </u>. There could be a number of reasons for this:
           </p>
           <ul>
-            <li> Another app or webpage might be using the camera.</li>
-            <li> There might be something wrong with the camera hardware.</li>
+            {getReasons(props.technicalInfo)}
           </ul>
 
           <p>
-            You can test your camera{' '}
+            You can test your camera{" "}
             <a href="https://webcamtests.com" target="_blank" rel="noreferrer">
               here
-            </a>{' '}
+            </a>{" "}
             (opens in a new tab)
           </p>
 
@@ -53,6 +58,37 @@ const OverconstrainedAlert = (
     </AlertContainer>
   );
 };
+
+function getReasons(technicalInfo: Error): JSX.Element | undefined {
+  if (technicalInfo instanceof OverconstrainedError) {
+    return (
+      <>
+        <li>Another app or webpage might be using the camera.</li>
+        <li>There might be something wrong with the camera hardware.</li>
+        <li>
+          There might be a technical constraint to the camera.{" "}
+          <u>Check the Technical info below.</u>
+        </li>
+      </>
+    );
+  } else if (
+    technicalInfo.name === "NotAllowedError"
+  ) {
+    return (
+      <>
+        <li>
+          We do not have permission to use your camera (did you see a prompt
+          that asked for camera access?). Check browser settings to see if the
+          browser is actively blocking camera access.
+        </li>
+        <li>
+          Some browsers can automatically block the camera if the user does not
+          allow access after a period of time.
+        </li>
+      </>
+    );
+  }
+}
 
 const ControlPanel = styled.fieldset`
   display: flex;
@@ -96,4 +132,4 @@ const Section = styled.section`
   margin: 0 var(--medium);
 `;
 
-export { OverconstrainedAlert };
+export { CameraCouldNotBeStartedAlert };

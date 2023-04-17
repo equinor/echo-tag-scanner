@@ -25,9 +25,12 @@ export function useGetMediastream(): Payload {
       const mediaStream = await TagScanner.getMediastream();
       setStream(mediaStream);
       setRequestStatus("allowed");
-    } catch (error) {
-      setError(error as Error);
-      setRequestStatus("not allowed");
+    } catch (cameraRequestError) {
+      if (cameraRequestError instanceof Error) {
+        setError(cameraRequestError);
+        setRequestStatus("not allowed");
+        logger.trackError(cameraRequestError);
+      }
     }
   }, []);
   return { mediaStream, mediaStreamRequestError, requestStatus };

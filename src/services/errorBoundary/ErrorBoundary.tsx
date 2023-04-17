@@ -31,7 +31,8 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
     severity: undefined
   };
 
-  private listenerCleanup?: () => void;
+  private apiErrorListener?: () => void;
+  private runtimeErrorListener?: () => void;
 
   componentDidCatch(error: unknown, info: unknown): void {
     if (error instanceof Error) {
@@ -45,16 +46,18 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, unknown> {
   }
 
   componentDidMount(): void {
-    this.listenerCleanup = eventHub.subscribe(
+    this.apiErrorListener = eventHub.subscribe(
       ErrorKey.EchoCameraApiError,
       (error: EchoCameraError) => this.errorListener(error)
     );
+    this.runtimeErrorListener = eventHub.subscribe(ErrorKey.EchoCameraRuntimeErrors, (error: EchoCameraError) => this.errorListener(error))
   }
 
   componentWillUnmount(): void {
-    if (this.listenerCleanup) {
-      this.listenerCleanup();
-    }
+    if (this.apiErrorListener)
+      this.apiErrorListener();
+    if (this.runtimeErrorListener) this.runtimeErrorListener();
+    
   }
 
   private getInnerError(error: BaseError) {

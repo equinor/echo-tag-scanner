@@ -14,11 +14,11 @@ import {
   handleError,
   dispatchCameraResolutionEvent,
   dispatchZoomEvent,
-  defineOrientationChangeEvent
+  defineOrientationChangeEvent,
 } from '@utils';
 import { CoreCamera } from './coreCamera';
 import { Postprocessor } from './postprocessor';
-import { ErrorRegistry } from '../const';
+import { ErrorRegistry } from '@const';
 
 /**
  * This object acts as a proxy towards CoreCamera.
@@ -40,6 +40,13 @@ class Camera extends Postprocessor {
       this.videoTrack.addEventListener('ended', this.refreshStream.bind(this));
     }
     this._orientationChangeHandler = defineOrientationChangeEvent.call(this);
+    this.viewfinder.addEventListener("play", () => {
+      if(this.viewfinder.paused && !this.viewfinder.autoplay) {
+        const error = new Error("The camera could not be started.", {cause: "The viewfinder video element did not accept autoplaying."});
+        logger.trackError(error);
+        handleError(ErrorRegistry.autoplayFailed, error);
+      }
+    }, {once: true})
 
     // For debugging purposes.
     MediaStreamTrack.prototype.toString = reportVideoTrack;

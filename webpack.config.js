@@ -1,5 +1,5 @@
-const path = require("path");
-const webpack = require("webpack");
+const path = require('path');
+const webpack = require('webpack');
 
 // Note: does not include a trailing slash.
 const rootPath = path.resolve(__dirname);
@@ -15,21 +15,20 @@ const rootPath = path.resolve(__dirname);
 module.exports = {
   resolve: {
     alias: {
-      "@hooks": path.join(rootPath, "/src/hooks/"),
-      "@types": path.join(rootPath, "/src/types/"),
-      "@services": path.join(rootPath, "/src/services/"),
-      "@utils": path.join(rootPath, "/src/utils/"),
-      "@cameraLogic": path.join(rootPath, "/src/cameraLogic/"),
-      "@ui": path.join(rootPath, "/src/UI/"),
-      "@const": path.join(rootPath, "/src/const/"),
-    },
+      '@hooks': path.join(rootPath, '/src/hooks/'),
+      '@types': path.join(rootPath, '/src/types/'),
+      '@services': path.join(rootPath, '/src/services/'),
+      '@utils': path.join(rootPath, '/src/utils/'),
+      '@cameraLogic': path.join(rootPath, '/src/cameraLogic/'),
+      '@ui': path.join(rootPath, '/src/UI/'),
+      '@const': path.join(rootPath, '/src/const/')
+    }
   },
   devServer: {
-    headers: {
-      "permissions-policy": "camera=self",
-    },
+    host: '0.0.0.0',
+
   },
   experiments: {
-    topLevelAwait: true,
-  },
+    topLevelAwait: true
+  }
 };

@@ -1,16 +1,16 @@
-import React, { memo, useEffect, useState } from "react";
-import { logger } from "@utils";
+import React, { memo, useEffect, useRef, useState } from 'react';
+import { logger } from '@utils';
 import {
   CameraCouldNotBeStartedAlert,
   Scanner as ScannerUI,
   StartingCameraLoading,
   Viewfinder,
-  ZoomTutorial,
-} from "@ui";
-import { ErrorBoundary } from "@services";
-import { useGetMediastream } from "@hooks";
-import styled from "styled-components";
-import { zIndexes } from "@const";
+  ZoomTutorial
+} from '@ui';
+import { ErrorBoundary } from '@services';
+import { useGetMediastream } from '@hooks';
+import styled from 'styled-components';
+import { zIndexes } from '@const';
 
 /**
  * This component will handle all of the initial React setup and renders before control is handed to the classes.
@@ -39,14 +39,15 @@ const EchoCamera = () => {
 
   if (
     mediaStreamRequestError instanceof OverconstrainedError ||
-    mediaStreamRequestError instanceof Error && requestStatus === "not allowed"
+    (mediaStreamRequestError instanceof Error &&
+      requestStatus === 'not allowed')
   ) {
     return (
       <CameraCouldNotBeStartedAlert technicalInfo={mediaStreamRequestError} />
     );
   }
 
-  if (requestStatus === "requesting") {
+  if (requestStatus === 'requesting') {
     return <StartingCameraLoading />;
   }
 
@@ -66,6 +67,14 @@ const EchoCamera = () => {
           videoRef={viewfinder}
         />
 
+        <ManualPlay
+          onClick={() => {
+            viewfinder?.play();
+          }}
+        >
+          Play
+        </ManualPlay>
+
         {viewfinder && canvas && scanningArea && (
           <ScannerUI
             stream={mediaStream}
@@ -79,6 +88,15 @@ const EchoCamera = () => {
     </ErrorBoundary>
   );
 };
+
+const ManualPlay = styled.button`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background-color: hotpink;
+  z-index: 100;
+  padding: 2rem;
+`;
 
 const Main = styled.main`
   display: flex;

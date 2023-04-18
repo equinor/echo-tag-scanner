@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-import { getCameraPreferences, isGrantedCameraAccess, logger } from '@utils';
+import { getCameraPreferences, logger } from '@utils';
 
 type RequestStatus = 'requesting' | 'not allowed' | 'allowed';
 

@@ -72,27 +72,27 @@ function determineZoomMethod(this: CoreCamera): ZoomMethod {
 
 function getCameraPreferences(): MediaStreamConstraints {
   const cameraSettingsRequest = {
-    ...fixedCameraSettingsRequest,
+    ...fixedCameraSettingsRequest
   };
 
   // This is the default preferences, which is also used in production.
   return {
     video: {
       width: {
-        exact: cameraSettingsRequest.width.exact,
+        exact: cameraSettingsRequest.width.exact
       },
       height: {
-        exact: cameraSettingsRequest.height.exact,
+        exact: cameraSettingsRequest.height.exact
       },
 
       // Higher FPS is good for a scanning operation.
       frameRate: {
-        ideal: cameraSettingsRequest.fps?.ideal,
+        ideal: cameraSettingsRequest.fps?.ideal
       },
 
-      facingMode: { exact: "environment" },
+      facingMode: { exact: 'environment' }
     },
-    audio: false,
+    audio: false
   } as MediaStreamConstraints;
 }
 

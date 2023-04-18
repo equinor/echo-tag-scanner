@@ -148,8 +148,13 @@ class CoreCamera {
    */
   static async getMediastream(): Promise<MediaStream> {
     const cameraPreferences = getCameraPreferences();
-    return await navigator.mediaDevices
-      .getUserMedia(cameraPreferences);
+    const stream = await navigator.mediaDevices
+      .getUserMedia(cameraPreferences)
+      .catch((error) => {
+        throw error;
+      });
+
+    return stream;
   }
 
   protected torch(toggled: boolean): void {

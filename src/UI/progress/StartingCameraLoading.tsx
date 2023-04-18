@@ -8,6 +8,7 @@ export const StartingCameraLoading = () => {
       <Progress.Star />
 
       <span>Starting the scanner.</span>
+      <small>You might be prompted for access to your camera.</small>
     </CameraLoadingContainer>
   );
 };

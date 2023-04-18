@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useState } from "react";
 import { logger } from '@utils';
 import {
   CameraCouldNotBeStartedAlert,
@@ -42,9 +42,7 @@ const EchoCamera = () => {
     (mediaStreamRequestError instanceof Error &&
       requestStatus === 'not allowed')
   ) {
-    return (
-      <CameraCouldNotBeStartedAlert technicalInfo={mediaStreamRequestError} />
-    );
+    return <CameraCouldNotBeStartedAlert error={mediaStreamRequestError} />;
   }
 
   if (requestStatus === 'requesting') {

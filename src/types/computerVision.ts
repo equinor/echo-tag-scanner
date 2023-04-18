@@ -1,15 +1,7 @@
-// type ComputerVisionResponse = {
-//   language: string;
-//   textAngle: number;
-//   orientation: 'Up' | 'Down' | 'Left' | 'Right';
-//   regions: Region[];
-//   modelVersion: string;
-// };
-
 export type ComputerVisionResponse = {
   version: string;
   modelVersion: string;
-  readResults: ReadResult;
+  readResults: ReadResult[];
 };
 
 export type ReadResult = {
@@ -30,20 +22,29 @@ export type Word = {
 };
 
 export type MockWord = Pick<Word, 'text'>;
-// type Region = {
-//   boundingBox?: BoundingBox;
-//   lines: Lines[];
-// };
 
-// export type Lines = {
-//   boundingBox?: BoundingBox;
-//   words: Word[];
-// };
+export type ComputerVisionResponseLegacy = {
+  language: string;
+  textAngle: number;
+  orientation: 'Up' | 'Down' | 'Left' | 'Right';
+  regions: RegionLegacy[];
+  modelVersion: string;
+};
 
-// export type Word = {
-//   boundingBox?: BoundingBox;
-//   text: string;
-// };
+export type RegionLegacy = {
+  boundingBox?: BoundingBox;
+  lines: LinesLegacy[];
+};
+
+export type LinesLegacy = {
+  boundingBox?: BoundingBox;
+  words: WordLegacy[];
+};
+
+export type WordLegacy = {
+  boundingBox?: BoundingBox;
+  text: string;
+};
 
 /**
 

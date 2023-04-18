@@ -5,7 +5,9 @@ import {
   CameraResolution,
   CustomNotificationDetail,
   ZoomEventDetail,
-  NewCaptureEventDetail
+  NewCaptureEventDetail,
+  ComputerVisionResponseLegacy,
+  ComputerVisionResponse
 } from '@types';
 
 /** CustomEvent cannot be type inferred from Event. This will instead type guard it. */
@@ -75,4 +77,10 @@ export function isNewCaptureEvent(
     }
   }
   return false;
+}
+
+export function isReadApiResponse(
+  response: ComputerVisionResponseLegacy | ComputerVisionResponse
+): response is ComputerVisionResponse {
+  return Object.hasOwn(response, 'readResults');
 }

@@ -4,6 +4,8 @@ export function getComputerVisionOcrResources(
   capture: Blob
 ): [url: string, body: Blob, requestInit: RequestInit] {
   let url = `${EchoEnv.env().REACT_APP_API_URL}/tag-scanner/scan-image`;
+  //let url = `https://localhost:5001/tag-scanner/scan-image`;
+
   const requestInit: RequestInit = {
     headers: {
       'Content-Type': 'application/octet-stream'

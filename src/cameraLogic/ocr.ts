@@ -1,6 +1,7 @@
 import { BackendError } from '@equinor/echo-base';
 import {
   ComputerVisionResponse,
+  ComputerVisionResponseLegacy,
   FailedTagValidation,
   MockWord,
   OCRPayload,
@@ -19,7 +20,8 @@ import {
   reassembleOrdinaryTagCandidates,
   filterBy,
   Timer,
-  objectClone
+  objectClone,
+  isReadApiResponse
 } from '@utils';
 import { ErrorRegistry, homoglyphPairs } from '@const';
 import { baseApiClient } from '../services/api/base/base';
@@ -76,26 +78,44 @@ export class OCR {
     postOCRTimeTaken: number;
   } | null> {
     const [url, body, init] = getComputerVisionOcrResources(scan);
+    console.log('body', body.size);
     try {
       const networkRequestTimer = new Timer();
       networkRequestTimer.start();
-      const response = await baseApiClient.postAsync<ComputerVisionResponse>(
-        url,
-        body,
-        init
-      );
+      const response = await baseApiClient.postAsync<
+        ComputerVisionResponse | ComputerVisionResponseLegacy
+      >(url, body, init);
+      console.log('%c⧭', 'color: #ff0000', response);
       const networkRequestTimeTaken = networkRequestTimer.stop();
 
       const postOCRTimer = new Timer();
       postOCRTimer.start();
-      const postProcessedResponse = this.handlePostOCR(response.data);
+
+      let postProcessedResponse:
+        | ComputerVisionResponse
+        | ComputerVisionResponseLegacy;
+      const isReadApi = isReadApiResponse(response.data);
+      console.log('%c⧭', 'color: #00a3cc', isReadApi);
+      if (isReadApiResponse(response.data))
+        postProcessedResponse = this.handlePostOCR(response.data);
+      else postProcessedResponse = this.handlePostOCRLegacy(response.data);
+
+      console.log('%c⧭', 'color: #00e600', postProcessedResponse);
       const postOCRTimeTaken = postOCRTimer.stop();
 
-      return {
-        ocrResponse: parseResponse(postProcessedResponse),
-        networkRequestTimeTaken: networkRequestTimeTaken,
-        postOCRTimeTaken: postOCRTimeTaken
-      };
+      if (isReadApiResponse(postProcessedResponse)) {
+        return {
+          ocrResponse: parseResponse(postProcessedResponse),
+          networkRequestTimeTaken: networkRequestTimeTaken,
+          postOCRTimeTaken: postOCRTimeTaken
+        };
+      } else {
+        return {
+          ocrResponse: parseResponseLegacy(postProcessedResponse),
+          networkRequestTimeTaken: networkRequestTimeTaken,
+          postOCRTimeTaken: postOCRTimeTaken
+        };
+      }
     } catch (error) {
       if (error instanceof BackendError && error.httpStatusCode === 429) {
         // Here we handle the event where users might go over the Computer vision usage quota.
@@ -119,9 +139,28 @@ export class OCR {
       response: ComputerVisionResponse
     ): ParsedComputerVisionResponse {
       const stringifiedWords: ParsedComputerVisionResponse = [];
-      response.readResults.lines.forEach((line) =>
-        line.words.forEach((word) => stringifiedWords.push(word.text))
-      );
+      response.readResults.forEach((readResult) => {
+        readResult.lines.forEach((line) =>
+          line.words.forEach((word) => stringifiedWords.push(word.text))
+        );
+      });
+
+      return uniqueStringArray(stringifiedWords);
+    }
+
+    /**
+     * Maps each postprocessed Word's text property into a simple array of strings.
+     * @deprecated use parseResponse instead.
+     */
+    function parseResponseLegacy(
+      response: ComputerVisionResponseLegacy
+    ): ParsedComputerVisionResponse {
+      const stringifiedWords: ParsedComputerVisionResponse = [];
+      response.regions.forEach((readResult) => {
+        readResult.lines.forEach((line) =>
+          line.words.forEach((word) => stringifiedWords.push(word.text))
+        );
+      });
 
       return uniqueStringArray(stringifiedWords);
     }
@@ -130,33 +169,82 @@ export class OCR {
   private handlePostOCR(response: ComputerVisionResponse) {
     this.resetTagCandidates();
     let clonedResponse = objectClone<ComputerVisionResponse>(response);
-
-    clonedResponse.readResults.lines.forEach((line, lineIndex) => {
-      const allWordsOnLine = line.words;
-      for (let i = 0; i < allWordsOnLine.length; i++) {
-        if (this.wordIsSpecialCase(allWordsOnLine[i].text)) {
-          allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text, '()');
-        } else {
-          allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
-          allWordsOnLine[i] = this.handleHomoglyphing(allWordsOnLine[i]);
+    clonedResponse.readResults.forEach((readResult, readResultIndex) => {
+      readResult.lines.forEach((line, lineIndex) => {
+        const allWordsOnLine = line.words;
+        for (let i = 0; i < allWordsOnLine.length; i++) {
+          if (this.wordIsSpecialCase(allWordsOnLine[i].text)) {
+            allWordsOnLine[i].text = this.sanitize(
+              allWordsOnLine[i].text,
+              '()'
+            );
+          } else {
+            allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
+            allWordsOnLine[i] = this.handleHomoglyphing(allWordsOnLine[i]);
+          }
         }
-      }
 
-      const specialCases = reassembleSpecialTagCandidates(
-        allWordsOnLine,
-        '(M)'
-      );
-      specialCases.push(
-        ...reassembleSpecialTagCandidates(allWordsOnLine, '(C)')
-      );
+        const specialCases = reassembleSpecialTagCandidates(
+          allWordsOnLine,
+          '(M)'
+        );
+        specialCases.push(
+          ...reassembleSpecialTagCandidates(allWordsOnLine, '(C)')
+        );
 
-      const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
-      this._tagCandidates.push(...specialCases);
-      this._tagCandidates.push(...ordinaryCases);
+        const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
+        this._tagCandidates.push(...specialCases);
+        this._tagCandidates.push(...ordinaryCases);
 
-      clonedResponse.readResults.lines[lineIndex].words = this._tagCandidates;
+        clonedResponse.readResults[readResultIndex].lines[lineIndex].words =
+          this._tagCandidates;
+      });
     });
+    !isProduction &&
+      Debugger.reportFiltration(
+        this._tagCandidates.map((candidate) => candidate.text)
+      );
+    return clonedResponse;
+  }
 
+  /**
+   * Handles additional processing of the OCR response. The response is mutably changed and returned.
+   * @deprecated use handlePostOCR instead.
+   */
+  private handlePostOCRLegacy(response: ComputerVisionResponseLegacy) {
+    this.resetTagCandidates();
+    let clonedResponse = objectClone<ComputerVisionResponseLegacy>(response);
+    clonedResponse.regions.forEach((readResult, readResultIndex) => {
+      readResult.lines.forEach((line, lineIndex) => {
+        const allWordsOnLine = line.words;
+        for (let i = 0; i < allWordsOnLine.length; i++) {
+          if (this.wordIsSpecialCase(allWordsOnLine[i].text)) {
+            allWordsOnLine[i].text = this.sanitize(
+              allWordsOnLine[i].text,
+              '()'
+            );
+          } else {
+            allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
+            allWordsOnLine[i] = this.handleHomoglyphing(allWordsOnLine[i]);
+          }
+        }
+
+        const specialCases = reassembleSpecialTagCandidates(
+          allWordsOnLine,
+          '(M)'
+        );
+        specialCases.push(
+          ...reassembleSpecialTagCandidates(allWordsOnLine, '(C)')
+        );
+
+        const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
+        this._tagCandidates.push(...specialCases);
+        this._tagCandidates.push(...ordinaryCases);
+
+        clonedResponse.regions[readResultIndex].lines[lineIndex].words =
+          this._tagCandidates;
+      });
+    });
     !isProduction &&
       Debugger.reportFiltration(
         this._tagCandidates.map((candidate) => candidate.text)

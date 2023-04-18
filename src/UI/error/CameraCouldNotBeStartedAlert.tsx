@@ -2,18 +2,18 @@ import React from "react";
 import styled from "styled-components";
 import { Button } from "@equinor/eds-core-react";
 
-type OverconstrainedAlertProps = {
-  technicalInfo: Error;
+type CameraCouldNotBeStartedAlertProps = {
+  error: Error;
 };
 
 const CameraCouldNotBeStartedAlert = (
-  props: OverconstrainedAlertProps,
+  props: CameraCouldNotBeStartedAlertProps
 ): JSX.Element => {
-  props.technicalInfo.toString = function () {
+  props.error.toString = function () {
     if (this instanceof OverconstrainedError) {
-      return this.constraint + " , " + this.message + " , " + this.name;
+      return this.constraint + ' , ' + this.message + ' , ' + this.name;
     } else {
-      return this.message + " , " + this.name;
+      return this.message + ' , ' + this.name + this.cause;
     }
   };
   return (
@@ -22,27 +22,26 @@ const CameraCouldNotBeStartedAlert = (
         <Section>
           <ErrorHeader>We could not start your camera.</ErrorHeader>
           <p>
-            Unfortunately, an error occured while we tried to start your{" "}
-            <u>
-              rear camera
-            </u>. There could be a number of reasons for this:
+            Unfortunately, an error occured while we tried to start your{' '}
+            <u>rear camera</u>. There could be a number of reasons for this.
           </p>
-          <ul>
-            {getReasons(props.technicalInfo)}
-          </ul>
+          <p>
+            There might be some more details under <u>Technical information</u>.
+          </p>
+          <ul>{getReasons(props.error)}</ul>
 
           <p>
-            You can test your camera{" "}
+            You can test your camera{' '}
             <a href="https://webcamtests.com" target="_blank" rel="noreferrer">
               here
-            </a>{" "}
+            </a>{' '}
             (opens in a new tab)
           </p>
 
           <p>Contact the Echo project if the issue seem to persist.</p>
 
           <TechnicalHeader>Technical information</TechnicalHeader>
-          <code>{props.technicalInfo.toString()}</code>
+          <code>{props.error.toString()}</code>
         </Section>
         <hr />
       </Article>
@@ -59,21 +58,19 @@ const CameraCouldNotBeStartedAlert = (
   );
 };
 
-function getReasons(technicalInfo: Error): JSX.Element | undefined {
-  if (technicalInfo instanceof OverconstrainedError) {
+function getReasons(error: Error): JSX.Element | undefined {
+  if (error instanceof OverconstrainedError) {
     return (
       <>
         <li>Another app or webpage might be using the camera.</li>
         <li>There might be something wrong with the camera hardware.</li>
         <li>
-          There might be a technical constraint to the camera.{" "}
+          There might be a technical constraint to the camera.{' '}
           <u>Check the Technical info below.</u>
         </li>
       </>
     );
-  } else if (
-    technicalInfo.name === "NotAllowedError"
-  ) {
+  } else if (error.name === 'NotAllowedError') {
     return (
       <>
         <li>

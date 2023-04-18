@@ -1,16 +1,16 @@
 import React, { memo, useEffect, useState } from "react";
-import { logger } from "@utils";
+import { logger } from '@utils';
 import {
   CameraCouldNotBeStartedAlert,
   Scanner as ScannerUI,
   StartingCameraLoading,
   Viewfinder,
-  ZoomTutorial,
-} from "@ui";
-import { ErrorBoundary } from "@services";
-import { useGetMediastream } from "@hooks";
-import styled from "styled-components";
-import { zIndexes } from "@const";
+  ZoomTutorial
+} from '@ui';
+import { ErrorBoundary } from '@services';
+import { useGetMediastream } from '@hooks';
+import styled from 'styled-components';
+import { zIndexes } from '@const';
 
 /**
  * This component will handle all of the initial React setup and renders before control is handed to the classes.
@@ -39,14 +39,13 @@ const EchoCamera = () => {
 
   if (
     mediaStreamRequestError instanceof OverconstrainedError ||
-    mediaStreamRequestError instanceof Error && requestStatus === "not allowed"
+    (mediaStreamRequestError instanceof Error &&
+      requestStatus === 'not allowed')
   ) {
-    return (
-      <CameraCouldNotBeStartedAlert technicalInfo={mediaStreamRequestError} />
-    );
+    return <CameraCouldNotBeStartedAlert error={mediaStreamRequestError} />;
   }
 
-  if (requestStatus === "requesting") {
+  if (requestStatus === 'requesting') {
     return <StartingCameraLoading />;
   }
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import EchoUtils from '@equinor/echo-utils';
-import { getCameraPreferences, isGrantedCameraAccess, logger } from '@utils';
+import { getCameraPreferences, logger } from '@utils';
 
 type RequestStatus = 'requesting' | 'not allowed' | 'allowed';
 
@@ -17,7 +17,6 @@ export function useGetMediastream(): Payload {
     useState<RequestStatus>('requesting');
 
   EchoUtils.Hooks.useEffectAsync(async () => {
-    const hasCameraAccess = await isGrantedCameraAccess();
     try {
       const cameraPreferences = getCameraPreferences();
       const stream = await navigator.mediaDevices.getUserMedia(

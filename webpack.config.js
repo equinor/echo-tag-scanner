@@ -25,9 +25,7 @@ module.exports = {
     },
   },
   devServer: {
-    headers: {
-      "permissions-policy": "camera=self",
-    },
+    host: "0.0.0.0"
   },
   experiments: {
     topLevelAwait: true,

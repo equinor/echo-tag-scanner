@@ -2,6 +2,14 @@ import React, { Suspense } from 'react';
 import { DialogGenerator } from '@equinor/echo-components';
 import { Dialog, Progress } from '@equinor/eds-core-react';
 import './vars.css';
+import {
+  DeviceInformation,
+  DetailedDeviceInformationProvider
+} from '@equinor/echo-framework';
+
+const ddi = DetailedDeviceInformationProvider.initialize();
+globalThis.ddi = ddi;
+globalThis.deviceInfo = new DeviceInformation({ detailedDeviceInfo: ddi });
 
 const FallbackLoading = (): JSX.Element => {
   return (

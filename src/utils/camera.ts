@@ -1,6 +1,6 @@
 import { Camera, CoreCamera } from "@cameraLogic";
 import {
-  getNotificationDispatcher as dispatchNotification,
+  getNotificationDispatcher as dispatchNotification, isLocalDevelopment,
 } from "@utils";
 import { ZoomMethod } from "@types";
 import { fixedCameraSettingsRequest } from "@const";
@@ -90,7 +90,7 @@ function getCameraPreferences(): MediaStreamConstraints {
         ideal: cameraSettingsRequest.fps?.ideal
       },
 
-      facingMode: { exact: 'environment' }
+      facingMode: isLocalDevelopment ? {ideal: "environment"} : { exact: 'environment' }
     },
     audio: false
   } as MediaStreamConstraints;

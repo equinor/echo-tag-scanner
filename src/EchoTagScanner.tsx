@@ -7,7 +7,6 @@ import {
   Viewfinder,
   ZoomTutorial
 } from '@ui';
-import { ErrorBoundary } from '@services';
 import { useGetMediastream } from '@hooks';
 import styled from 'styled-components';
 import { zIndexes } from '@const';
@@ -57,26 +56,24 @@ const EchoCamera = () => {
   }
 
   return (
-    <ErrorBoundary stackTraceEnabled>
-      <Main>
-        <Viewfinder
-          setCanvasRef={setCanvas}
-          setVideoRef={setViewfinder}
-          setScanningAreaRef={setScanningArea}
-          videoRef={viewfinder}
-        />
+    <Main>
+      <Viewfinder
+        setCanvasRef={setCanvas}
+        setVideoRef={setViewfinder}
+        setScanningAreaRef={setScanningArea}
+        videoRef={viewfinder}
+      />
 
-        {viewfinder && canvas && scanningArea && (
-          <ScannerUI
-            stream={mediaStream}
-            viewfinder={viewfinder}
-            canvas={canvas}
-            scanningArea={scanningArea}
-          />
-        )}
-        <ZoomTutorial />
-      </Main>
-    </ErrorBoundary>
+      {viewfinder && canvas && scanningArea && (
+        <ScannerUI
+          stream={mediaStream}
+          viewfinder={viewfinder}
+          canvas={canvas}
+          scanningArea={scanningArea}
+        />
+      )}
+      <ZoomTutorial />
+    </Main>
   );
 };
 
@@ -89,6 +86,7 @@ const Main = styled.main`
   height: 100%;
   width: 100%;
   z-index: ${zIndexes.viewfinder};
+  font-family: var(--eq-echo-font-family), Equinor, sans-serif;
 `;
 
 export default memo(EchoCamera);

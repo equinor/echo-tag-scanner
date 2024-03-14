@@ -19,7 +19,6 @@ import {
   reassembleOrdinaryTagCandidates,
   filterBy,
   Timer,
-  objectClone
 } from '@utils';
 import { ErrorRegistry, homoglyphPairs } from '@const';
 import { baseApiClient } from '../services/api/base/base';
@@ -131,7 +130,7 @@ export class OCR {
 
   private handlePostOCR(response: ComputerVisionResponse) {
     this.resetTagCandidates();
-    let clonedResponse = objectClone<ComputerVisionResponse>(response);
+    let clonedResponse = structuredClone<ComputerVisionResponse>(response);
 
     clonedResponse.regions.forEach((region, regionIndex) =>
       region.lines.forEach((line, lineIndex) => {

@@ -3,27 +3,43 @@ import {
   getCameraPreferences,
   getOrientation,
   handleError,
-  logger,
-} from "@utils";
-import { ErrorRegistry } from "@const";
+  logger
+} from '@utils';
+import { ErrorRegistry } from '@const';
 import {
   CameraProps,
   CameraResolution,
   DeviceInformation,
+  DrawImageParameters,
   ZoomMethod,
-  ZoomSteps,
-} from "@types";
+  ZoomSteps
+} from '@types';
+import { CanvasHandler } from './canvasHandler';
 
 /**
  * This object is concerned with the core features of a camera.
  */
 class CoreCamera {
+  /**
+   * Asks the user for permission to use the device camera and resolves a MediaStream object.
+   */
+  static async getMediastream(): Promise<MediaStream> {
+    const cameraPreferences = getCameraPreferences();
+    const stream = await navigator.mediaDevices
+      .getUserMedia(cameraPreferences)
+      .catch((error) => {
+        throw error;
+      });
+
+    return stream;
+  }
+
   private _mediaStream: MediaStream;
   private _viewfinder: HTMLVideoElement;
   private _videoTrack?: MediaStreamTrack;
   private _videoTrackSettings?: MediaTrackSettings;
   private _capabilities?: MediaTrackCapabilities = undefined;
-  private _currentOrientation: "portrait" | "landscape";
+  private _currentOrientation: 'portrait' | 'landscape';
   private _activeCamera?: string;
   private _zoom: ZoomSteps;
 
@@ -39,6 +55,12 @@ class CoreCamera {
    * - native: Uses MediaStream API to apply digital zoom.
    */
   private _zoomMethod: ZoomMethod;
+
+  /** Camera has its own canvas for capturing photos from media feed */
+  private _canvasHandler: CanvasHandler;
+  protected get canvasHandler() {
+    return this._canvasHandler;
+  }
 
   constructor(props: CameraProps) {
     this._viewfinder = props.viewfinder;
@@ -57,11 +79,37 @@ class CoreCamera {
     this._baseResolution = {
       width: this._viewfinder.width,
       height: this._viewfinder.height,
-      zoomFactor: 1,
+      zoomFactor: 1
     };
     this._deviceInformation = props.deviceInformation;
+
+    const canvas = new OffscreenCanvas(props.canvas.width, props.canvas.height);
+    this._canvasHandler = new CanvasHandler(canvas);
+
     this._zoomMethod = determineZoomMethod.call(this);
   }
+
+  /**
+   * Captures a photo using the entire video feed, and stores it as a drawing on the postprocessing canvas.
+   */
+  public async capturePhoto(): Promise<ImageData> {
+    this._canvasHandler.clearCanvas();
+
+    const params: DrawImageParameters = {
+      sx: 0,
+      sy: 0,
+      sWidth: this.viewfinder.videoWidth,
+      sHeight: this.viewfinder.videoHeight,
+      dx: 0,
+      dy: 0,
+      dWidth: this.viewfinder.videoWidth,
+      dHeight: this.viewfinder.videoHeight
+    };
+
+    return this._canvasHandler.draw(this.viewfinder, params);
+  }
+
+  // #region Getters and Setters
 
   public get videoTrack(): MediaStreamTrack | undefined {
     return this._videoTrack;
@@ -142,20 +190,7 @@ class CoreCamera {
   public set zoomMethod(newMethod: ZoomMethod) {
     this._zoomMethod = newMethod;
   }
-
-  /**
-   * Asks the user for permission to use the device camera and resolves a MediaStream object.
-   */
-  static async getMediastream(): Promise<MediaStream> {
-    const cameraPreferences = getCameraPreferences();
-    const stream = await navigator.mediaDevices
-      .getUserMedia(cameraPreferences)
-      .catch((error) => {
-        throw error;
-      });
-
-    return stream;
-  }
+  // #endregion
 
   protected torch(toggled: boolean): void {
     if (this._capabilities?.torch) {
@@ -163,13 +198,13 @@ class CoreCamera {
         ?.applyConstraints({ advanced: [{ torch: toggled }] })
         .catch(onTorchRejection);
     } else {
-      logger.log("QA", () => console.warn("Device does not support the torch"));
+      logger.log('QA', () => console.warn('Device does not support the torch'));
     }
 
     function onTorchRejection(reason: unknown) {
       throw handleError(
         ErrorRegistry.torchError,
-        new Error("The torch could not be toggled, more info: " + reason),
+        new Error('The torch could not be toggled, more info: ' + reason)
       );
     }
   }

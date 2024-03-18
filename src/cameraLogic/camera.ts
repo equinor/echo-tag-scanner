@@ -14,7 +14,7 @@ import {
   handleError,
   dispatchCameraResolutionEvent,
   dispatchZoomEvent,
-  defineOrientationChangeEvent,
+  defineOrientationChangeEvent
 } from '@utils';
 import { CoreCamera } from './coreCamera';
 import { Postprocessor } from './postprocessor';
@@ -24,7 +24,7 @@ import { ErrorRegistry } from '@const';
  * This object acts as a proxy towards CoreCamera.
  * From a user perspective, it is the viewfinder and camera controls.
  */
-class Camera extends Postprocessor {
+class Camera extends CoreCamera {
   /** Is the torch turned on or not. */
   private _torchState = false;
   private _captureUrl: string | undefined;
@@ -40,17 +40,54 @@ class Camera extends Postprocessor {
       this.videoTrack.addEventListener('ended', this.refreshStream.bind(this));
     }
     this._orientationChangeHandler = defineOrientationChangeEvent.call(this);
-    this.viewfinder.addEventListener("play", () => {
-      if(this.viewfinder.paused && !this.viewfinder.autoplay) {
-        const error = new Error("The camera could not be started.", {cause: "The viewfinder video element did not accept autoplaying."});
-        logger.trackError(error);
-        handleError(ErrorRegistry.autoplayFailed, error);
-      }
-    }, {once: true})
+    this.viewfinder.addEventListener(
+      'play',
+      () => {
+        if (this.viewfinder.paused && !this.viewfinder.autoplay) {
+          const error = new Error('The camera could not be started.', {
+            cause: 'The viewfinder video element did not accept autoplaying.'
+          });
+          logger.trackError(error);
+          handleError(ErrorRegistry.autoplayFailed, error);
+        }
+      },
+      { once: true }
+    );
 
     // For debugging purposes.
     MediaStreamTrack.prototype.toString = reportVideoTrack;
     MediaStream.prototype.toString = reportMediaStream;
+  }
+
+  private _intervalId?: NodeJS.Timeout;
+  /**
+   * Determines an interval based on amount of wanted photos and duration to run and returns these.
+   * @param amount The amount of captures wanted.
+   * @param duration The total duration in which the photos should be captured.
+   * @returns A Promise with list of captures.
+   */
+  public async burstCapturePhoto(
+    amount: number,
+    duration: number
+  ): Promise<ImageData[]> {
+    const interval = duration / amount;
+    const bursts: Array<Promise<ImageData>> = [];
+
+    this._intervalId = setInterval(() => {
+      bursts.push(this.capturePhoto());
+
+      if (bursts.length === amount) {
+        clearInterval(this._intervalId);
+      }
+    }, interval);
+
+    try {
+      const settledBursts = await Promise.all(bursts);
+      return settledBursts;
+    } catch (error) {
+      clearInterval(this._intervalId);
+      throw new Error('Failed to burst capture photos.');
+    }
   }
 
   public get captureUrl(): string | undefined {
@@ -198,26 +235,6 @@ class Camera extends Postprocessor {
         new Error('A zoom action failed, more info: ' + reason)
       );
     }
-  }
-
-  /**
-   * Captures a photo using the entire video feed, and stores it as a drawing on the postprocessing canvas.
-   */
-  public async capturePhoto(): Promise<Blob> {
-    this.canvasHandler.clearCanvas();
-
-    const params: DrawImageParameters = {
-      sx: 0,
-      sy: 0,
-      sWidth: this.viewfinder.videoWidth,
-      sHeight: this.viewfinder.videoHeight,
-      dx: 0,
-      dy: 0,
-      dWidth: this.viewfinder.videoWidth,
-      dHeight: this.viewfinder.videoHeight
-    };
-
-    return await this._canvasHandler.draw(this.viewfinder, params);
   }
 
   /**

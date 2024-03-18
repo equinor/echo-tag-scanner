@@ -59,8 +59,8 @@ Camera software Information
 #################################
 Camera resolution:
    ${tagScanner.viewfinder.videoWidth}x${tagScanner.viewfinder.videoHeight}@${
-      tagScanner.videoTrack?.getSettings().frameRate
-    }fps.
+     tagScanner.videoTrack?.getSettings().frameRate
+   }fps.
 Aspect ratio: ${
       tagScanner.viewfinder.videoWidth / tagScanner.viewfinder.videoHeight
     }
@@ -155,27 +155,28 @@ Intrinsic offset from left-edge: ${sx}.
     if (previewCapture) {
       const scanningArea = document.getElementById('scanning-area');
 
-      if (scanningArea) {
-        tagScanner.prepareNewScan();
-        let capture = await tagScanner.capturePhoto();
-        capture = await tagScanner.performCropping();
-        const scanningAreaWidth = tagScanner.scanningArea.clientWidth;
-        const scanningAreaHeight = tagScanner.scanningArea.clientHeight;
+      // FIXME
+      // if (scanningArea) {
+      //   tagScanner.prepareNewScan();
+      //   let capture = await tagScanner.capturePhoto();
+      //   capture = await tagScanner.performCropping();
+      //   const scanningAreaWidth = tagScanner.scanningArea.clientWidth;
+      //   const scanningAreaHeight = tagScanner.scanningArea.clientHeight;
 
-        if (tagScanner.zoomMethod.type === 'simulated') {
-          capture = await tagScanner.canvasHandler.getCanvasContentAsBlob({
-            sWidth: scanningAreaWidth / tagScanner.zoom,
-            sHeight: scanningAreaHeight / tagScanner.zoom
-          });
-        } else {
-          capture = await tagScanner._canvasHandler.getCanvasContentAsBlob({
-            sWidth: scanningAreaWidth,
-            sHeight: scanningAreaHeight
-          });
-        }
+      //   if (tagScanner.zoomMethod.type === 'simulated') {
+      //     capture = await tagScanner.canvasHandler.getCanvasContentAsBlob({
+      //       sWidth: scanningAreaWidth / tagScanner.zoom,
+      //       sHeight: scanningAreaHeight / tagScanner.zoom
+      //     });
+      //   } else {
+      //     capture = await tagScanner._canvasHandler.getCanvasContentAsBlob({
+      //       sWidth: scanningAreaWidth,
+      //       sHeight: scanningAreaHeight
+      //     });
+      //   }
 
-        tagScanner.notifyNewCapture(capture);
-      }
+      //   tagScanner.notifyNewCapture(capture);
+      // }
     }
     logger.log('EchoDevelopment', () => {
       console.info(

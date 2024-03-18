@@ -1,37 +1,19 @@
-import { CameraProps, CropSettings, DrawImageParameters } from '@types';
+import { CropSettings, DrawImageParameters } from '@types';
 import { CanvasHandler } from './canvasHandler';
-import { CoreCamera } from './coreCamera';
 
 /**
  * This object is concerned with the altering of captures done with the camera.
  */
-class Postprocessor extends CoreCamera {
-  protected _capture?: Blob;
-  protected _canvas: HTMLCanvasElement;
-  public _canvasHandler: CanvasHandler;
+class Postprocessor {
+  private _canvasHandler: CanvasHandler;
 
-  constructor(props: CameraProps) {
-    super(props);
-    this._canvas = props.canvas;
-    this._canvasHandler = new CanvasHandler({
-      canvas: props.canvas,
-      standardCanvasDimensions: {
-        width: this.viewfinder.videoWidth,
-        height: this.viewfinder.videoHeight
-      }
-    });
+  constructor(canvas: HTMLCanvasElement) {
+    const ocanvas = new OffscreenCanvas(canvas.width, canvas.height);
+    this._canvasHandler = new CanvasHandler(ocanvas);
   }
 
-  protected get capture(): Blob | undefined {
-    return this._capture;
-  }
-
-  protected set capture(capture: Blob | undefined) {
-    this._capture = capture;
-  }
-
-  public get canvasHandler() {
-    return this._canvasHandler;
+  private get _canvas() {
+    return this._canvasHandler.canvas;
   }
 
   /**
@@ -44,16 +26,17 @@ class Postprocessor extends CoreCamera {
    * - sHeight: The height of the new cropped image.
    * @returns {Promise<Blob>} The cropped image.
    */
-  protected async crop(settings: CropSettings): Promise<Blob> {
+  public async crop(
+    image: ImageData,
+    settings: CropSettings
+  ): Promise<ImageData> {
     if (settings.sx < 0 || settings.sy < 0)
       throw new Error('sx or sy is below 0');
     if (settings.sx > this._canvas.height)
       throw new Error('sx is bigger than canvas');
     if (settings.sy > this._canvas.width)
       throw new Error('sy is bigger than canvas');
-    const bitmap = await createImageBitmap(
-      await this._canvasHandler.getBlobLegacy()
-    );
+
     const params: DrawImageParameters = {
       sx: settings.sx,
       sy: settings.sy,
@@ -65,17 +48,18 @@ class Postprocessor extends CoreCamera {
       dWidth: settings.sWidth
     };
 
-    return await this._canvasHandler.draw(bitmap, params);
+    return this._canvasHandler.draw(image, params);
   }
 
   /**
    * Scales the image by a given factor, or no less than 50x50, and returns the new scaled image as blob.
    */
-  protected async scale(byFactor: number): Promise<Blob> {
+  public async scale(byFactor: number): Promise<ImageData> {
     if (byFactor <= 0) throw new Error('The scale factor cannot be 0 or less.');
-    const bitmap = await createImageBitmap(
-      await this._canvasHandler.getBlobLegacy()
-    );
+    const imageData = this._canvasHandler.getCanvasContents({
+      sHeight: this._canvas.height,
+      sWidth: this._canvas.width
+    });
 
     const params: DrawImageParameters = {
       sx: 0,
@@ -93,7 +77,7 @@ class Postprocessor extends CoreCamera {
       params.dHeight = this._canvas.height;
       params.dWidth = this._canvas.width;
     }
-    return await this._canvasHandler.draw(bitmap, params);
+    return this._canvasHandler.draw(imageData, params);
   }
 
   /**
@@ -101,7 +85,7 @@ class Postprocessor extends CoreCamera {
    * This method is considered the best in terms of compression,
    * but in some cases it can recolour text to be the same as the background.
    */
-  protected async blackAndWhite(): Promise<Blob> {
+  protected async blackAndWhite(): Promise<ImageData> {
     console.warn(
       'This function will not do anything at the moment. Check sWidth and sHeight on next line'
     );
@@ -138,7 +122,7 @@ class Postprocessor extends CoreCamera {
    * Recolours the image to be grayscale.
    * This is less effective for compression than B&W, but is safer.
    */
-  protected async grayscale(): Promise<Blob> {
+  protected async grayscale(): Promise<ImageData> {
     console.warn(
       'This function will not do anything at the moment. Check sWidth and sHeight on next line'
     );

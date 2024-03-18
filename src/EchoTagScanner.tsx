@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from 'react';
 import { logger } from '@utils';
 import {
   CameraCouldNotBeStartedAlert,

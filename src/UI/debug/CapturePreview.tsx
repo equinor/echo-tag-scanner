@@ -1,4 +1,4 @@
-import React, { SyntheticEvent, useState } from 'react';
+import React, { SyntheticEvent, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { Button, Icon } from '@equinor/eds-core-react';
@@ -6,6 +6,7 @@ import { useEffectAsync } from '@equinor/echo-utils';
 
 import { zIndexes } from '@const';
 import { isNewCaptureEvent } from '@utils';
+import { arrow_back, arrow_forward } from '@equinor/eds-icons';
 
 type PreviewDimensions = {
   width: number;
@@ -25,11 +26,8 @@ export const CapturePreview = (): JSX.Element | null => {
     { url: string; size: number }[]
   >([]);
 
-  useEffectAsync(async () => {
-    globalThis.addEventListener('ets-capture', updateImageUrlFromEvent);
-
-    async function updateImageUrlFromEvent(event: Event) {
-      console.log('Debug image running', event);
+  useEffect(() => {
+    function handleCaptures(event: Event) {
       if (isNewCaptureEvent(event)) {
         // New event, clean up previous
         captureDetails.forEach((detail) => URL.revokeObjectURL(detail.url));
@@ -43,11 +41,10 @@ export const CapturePreview = (): JSX.Element | null => {
         setShow(true);
       }
     }
-    return globalThis.removeEventListener(
-      'ets-capture',
-      updateImageUrlFromEvent
-    );
-  }, []);
+
+    globalThis.addEventListener('ets-capture', handleCaptures);
+    return () => globalThis.removeEventListener('ets-capture', handleCaptures);
+  }, [captureDetails]);
 
   function closePreview() {
     if (captureDetails) {
@@ -76,23 +73,40 @@ function Carousel({ imageDetails }: CarouselProps) {
   const [index, setIndex] = useState(0);
 
   function next() {
-    const nextIndex = index >= imageDetails.length ? 0 : index + 1;
+    let nextIndex = index + 1;
+
+    if (nextIndex >= imageDetails.length) {
+      nextIndex = 0;
+    }
+
     setIndex(nextIndex);
   }
 
   function prev() {
-    const nextIndex = index <= 0 ? imageDetails.length : index - 1;
+    let nextIndex = index - 1;
+
+    if (nextIndex < 0) {
+      nextIndex = imageDetails.length;
+    }
+
     setIndex(nextIndex);
   }
 
   return (
     <CarouselContainer>
-      <PrevButton variant="ghost_icon" onClick={prev}>
-        <Icon name="arrow_back_small" />
+      <PrevButton variant="contained_icon" onClick={prev}>
+        <Icon data={arrow_back} color="black" />
       </PrevButton>
-      <OneImage url={imageDetails[index].url} size={imageDetails[index].size} />
-      <NextButton variant="ghost_icon" onClick={next}>
-        <Icon name="arrow_forward_small" />
+      <OneImage
+        // Added key here so that react creates a new component when index is changed
+        // to help with onmount dimensions calculations
+        key={index}
+        description={`${index + 1}/${imageDetails.length}`}
+        url={imageDetails[index].url}
+        size={imageDetails[index].size}
+      />
+      <NextButton variant="contained_icon" onClick={next}>
+        <Icon data={arrow_forward} color="black" />
       </NextButton>
     </CarouselContainer>
   );
@@ -101,22 +115,37 @@ function Carousel({ imageDetails }: CarouselProps) {
 type OneImageProps = {
   url: string;
   size: number;
+  description: string;
 };
 
-function OneImage({ url, size }: OneImageProps) {
+function OneImage({ url, size, description }: OneImageProps) {
   const [dimensions, setDimensions] = useState<
     { width: number; height: number } | undefined
   >(undefined);
 
-  function onImageLoad(event: SyntheticEvent<HTMLImageElement>) {
-    // TODO: resolve image size here
-    setDimensions({ width: 300, height: 300 });
-  }
+  useEffectAsync(
+    async (signal) => {
+      const img = document.createElement('img');
+      img.onload = () => {
+        if (!signal.aborted)
+          setDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+      };
+      img.src = url;
+
+      return () => {
+        // This will interrupt loading of the image
+        img.src = '';
+      };
+    },
+    [url]
+  );
 
   return (
-    <>
-      <PreviewImage src={url} onLoad={onImageLoad} />
+    <div>
+      <PreviewImage src={url} />
       <div>
+        {description && <>Image: {description}</>}
+        <br />
         {dimensions && (
           <>
             Dimensions:{' '}
@@ -128,7 +157,7 @@ function OneImage({ url, size }: OneImageProps) {
         <br />
         Size: <output>{size / 1000} kilobytes.</output>
       </div>
-    </>
+    </div>
   );
 }
 

@@ -91,14 +91,11 @@ export class TagScanner extends Camera {
       extractHeight /= this.zoom;
     }
 
-    const blobs: Array<Blob> = [];
-    scans.forEach(async (scan) => {
-      const croppedScan = await this.performCropping(scan);
+    const blobs: Array<Promise<Blob>> = [];
+    scans.forEach((scan) => {
+      // const croppedScan = await this.performCropping(scan);
       // TODO: here we probably need "extractWidht/height" used? See below.
-      const blob =
-        await this.canvasHandler.createBlobFromImageData(croppedScan);
-
-      blobs.push(blob);
+      blobs.push(this.canvasHandler.createBlobFromImageData(scan));
       // capture = await this._canvasHandler.getCanvasContentAsBlob({
       //   sx: 0,
       //   sy: 0,
@@ -107,7 +104,8 @@ export class TagScanner extends Camera {
       // });
     });
 
-    return blobs;
+    const settled = await Promise.all(blobs);
+    return settled;
   }
 
   /**

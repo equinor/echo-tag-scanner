@@ -66,7 +66,7 @@ export function isNewCaptureEvent(
     event.detail.captures != null &&
     Array.isArray(event.detail.captures)
   ) {
-    if (event.captures[0] instanceof Blob) {
+    if (event.detail.captures[0] instanceof Blob) {
       return true;
     }
   }

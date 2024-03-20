@@ -3,7 +3,8 @@ import {
   CameraResolution,
   DrawImageParameters,
   ZoomSteps,
-  ZoomEventDetail
+  ZoomEventDetail,
+  NewCaptureEventDetail
 } from '@types';
 import {
   logger,
@@ -27,7 +28,6 @@ import { ErrorRegistry } from '@const';
 class Camera extends CoreCamera {
   /** Is the torch turned on or not. */
   private _torchState = false;
-  private _captureUrl: string | undefined;
   private _orientationChangeHandler:
     | 'DeviceOrientationAPI'
     | 'MatchMedia'
@@ -59,7 +59,6 @@ class Camera extends CoreCamera {
     MediaStream.prototype.toString = reportMediaStream;
   }
 
-  private _intervalId?: NodeJS.Timeout;
   /**
    * Determines an interval based on amount of wanted photos and duration to run and returns these.
    * @param amount The amount of captures wanted.
@@ -70,32 +69,13 @@ class Camera extends CoreCamera {
     amount: number,
     duration: number
   ): Promise<ImageData[]> {
-    const interval = duration / amount;
-    const bursts: Array<Promise<ImageData>> = [];
-
-    this._intervalId = setInterval(() => {
-      bursts.push(this.capturePhoto());
-
-      if (bursts.length === amount) {
-        clearInterval(this._intervalId);
-      }
-    }, interval);
-
     try {
-      const settledBursts = await Promise.all(bursts);
+      const settledBursts = await this._asyncBurst(amount, duration);
       return settledBursts;
     } catch (error) {
       clearInterval(this._intervalId);
       throw new Error('Failed to burst capture photos.');
     }
-  }
-
-  public get captureUrl(): string | undefined {
-    return this._captureUrl;
-  }
-
-  public set captureUrl(newUrl: string | undefined) {
-    this._captureUrl = newUrl;
   }
 
   public get orientationChangeHandler() {
@@ -152,22 +132,6 @@ class Camera extends CoreCamera {
       );
     }
   };
-
-  /** Pauses the viewfinder.
-   * @returns {boolean} A boolean indicating if the viewfinder is paused.
-   */
-  public pauseViewfinder(): boolean {
-    this.viewfinder.pause();
-    return this.viewfinder.paused;
-  }
-
-  /** Resumes the viewfinder
-   * @returns {boolean} A boolean indicating if the viewfinder is paused.
-   */
-  public resumeViewfinder(): boolean {
-    this.viewfinder.play();
-    return this.viewfinder.paused;
-  }
 
   /** Stops the camera and cleans up the orientation observer.
    * If this is invoked, the viewfinder cannot be resumed again.
@@ -237,20 +201,29 @@ class Camera extends CoreCamera {
     }
   }
 
-  /**
-   * Accepts a new capture, creates an object URL from it and dispatches an event containing the new object URL.
-   */
-  public notifyNewCapture(newCapture: Blob) {
-    // Revoke the previous object URL if it exists.
-    if (this._captureUrl) URL.revokeObjectURL(this._captureUrl);
+  // #region Utils
+  private _intervalId?: NodeJS.Timeout;
+  private async _asyncBurst(
+    amount: number,
+    duration: number
+  ): Promise<ImageData[]> {
+    const interval = duration / amount;
 
-    this._captureUrl = URL.createObjectURL(newCapture);
-    globalThis.dispatchEvent(
-      new CustomEvent('ets-capture', {
-        detail: { url: this._captureUrl, size: newCapture.size }
-      })
-    );
+    return new Promise((resolve) => {
+      const bursts: Array<ImageData> = [];
+
+      this._intervalId = setInterval(() => {
+        bursts.push(this.capturePhoto());
+
+        if (bursts.length === amount) {
+          clearInterval(this._intervalId);
+          resolve(bursts);
+        }
+      }, interval);
+    });
   }
+
+  // #endregion
 }
 
 export { Camera };

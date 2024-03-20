@@ -8,7 +8,7 @@ import {
 /**
  * This object implements different operations on the postprocessing canvas.
  */
-class CanvasHandler {
+export class CanvasHandler {
   private readonly _standardCanvasDimensions: CanvasDimensions;
   private _canvas: HTMLCanvasElement | OffscreenCanvas;
   private _canvasContext:
@@ -21,7 +21,7 @@ class CanvasHandler {
         'Could not construct CanvasHandler. The canvas element reference is missing.'
       );
 
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d', { willReadFrequently: true });
     if (!context) {
       throw new Error('Did not get a reference to a new canvas context');
     }
@@ -45,10 +45,10 @@ class CanvasHandler {
    * Accepts an image source and draws it onto the canvas with the drawing instructions.
    * @returns {Blob} A blob representation of the new canvas.
    */
-  public async draw(
+  public draw(
     image: CanvasImageSource | ImageData,
     params: DrawImageParameters
-  ): Promise<ImageData> {
+  ): ImageData {
     if (params.dWidth === 0 || params.dHeight === 0) {
       throw new Error(
         'Could not draw image onto a canvas with zero height or width'
@@ -195,5 +195,3 @@ class CanvasHandler {
     this._canvasContext?.beginPath();
   }
 }
-
-export { CanvasHandler };

@@ -1,14 +1,11 @@
-import React, { useRef, useState } from 'react';
-import { Camera } from '@cameraLogic';
+import React, { SyntheticEvent, useState } from 'react';
 import styled from 'styled-components';
-import { Button } from '@equinor/eds-core-react';
-import { zIndexes } from '@const';
-import EchoUtils from '@equinor/echo-utils';
-import { isNewCaptureEvent } from '@utils';
 
-interface CapturePreviewProps {
-  camera: Camera;
-}
+import { Button, Icon } from '@equinor/eds-core-react';
+import { useEffectAsync } from '@equinor/echo-utils';
+
+import { zIndexes } from '@const';
+import { isNewCaptureEvent } from '@utils';
 
 type PreviewDimensions = {
   width: number;
@@ -21,28 +18,29 @@ type Preview = {
   size: number;
 };
 
-export const CapturePreview = (
-  props: CapturePreviewProps
-): JSX.Element | null => {
-  const [preview, setPreview] = useState<Preview | undefined>(undefined);
-  const imageElement = useRef<HTMLImageElement | null>(null);
+export const CapturePreview = (): JSX.Element | null => {
+  const [show, setShow] = useState(false);
 
-  EchoUtils.Hooks.useEffectAsync(async () => {
-    globalThis.addEventListener(
-      'ets-capture',
-      async (e) => await updateImageUrlFromEvent(e)
-    );
+  const [captureDetails, setCaptureDetails] = useState<
+    { url: string; size: number }[]
+  >([]);
+
+  useEffectAsync(async () => {
+    globalThis.addEventListener('ets-capture', updateImageUrlFromEvent);
 
     async function updateImageUrlFromEvent(event: Event) {
+      console.log('Debug image running', event);
       if (isNewCaptureEvent(event)) {
-        const previewDimensions: PreviewDimensions =
-          await getPreviewImageDimensions(event.detail.url);
+        // New event, clean up previous
+        captureDetails.forEach((detail) => URL.revokeObjectURL(detail.url));
 
-        setPreview({
-          url: event.detail.url,
-          size: event.detail.size,
-          dimensions: previewDimensions
-        });
+        // Store object urls
+        const urls = event.detail.captures.map((capture) => ({
+          url: URL.createObjectURL(capture),
+          size: capture.size
+        }));
+        setCaptureDetails(urls);
+        setShow(true);
       }
     }
     return globalThis.removeEventListener(
@@ -51,48 +49,106 @@ export const CapturePreview = (
     );
   }, []);
 
-  // We ignore this in order to avoid complications with useCallback.
-  // This components only runs in development.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   function closePreview() {
-    if (preview) {
-      URL.revokeObjectURL(preview.url);
+    if (captureDetails) {
+      captureDetails.forEach((detail) => URL.revokeObjectURL(detail.url));
     }
-    setPreview(undefined);
+    setCaptureDetails([]);
+    setShow(false);
   }
 
-  function getPreviewImageDimensions(
-    imageUrl: string
-  ): Promise<PreviewDimensions> {
-    return new Promise((resolve) => {
-      const tmpImageEl = document.createElement('img');
-      tmpImageEl.src = imageUrl;
-      tmpImageEl.onload = () => {
-        resolve({
-          width: tmpImageEl.naturalWidth,
-          height: tmpImageEl.naturalHeight
-        });
-      };
-    });
+  if (!show) {
+    return null;
   }
 
-  if (preview?.dimensions) {
-    return (
-      <CapturePreviewContainer id="capture-preview">
-        <PreviewImage ref={imageElement} src={preview.url} />
-        <Button onClick={closePreview}>Close</Button>
-        <div>
-          Dimensions:{' '}
-          <output>
-            {preview.dimensions.width}x{preview.dimensions.height}.
-          </output>
-          <br />
-          Size: <output>{preview.size / 1000} kilobytes.</output>
-        </div>
-      </CapturePreviewContainer>
-    );
-  } else return null;
+  return (
+    <CapturePreviewContainer id="capture-preview">
+      <Carousel imageDetails={captureDetails} />
+      <Button onClick={closePreview}>Close</Button>
+    </CapturePreviewContainer>
+  );
 };
+
+type CarouselProps = {
+  imageDetails: { url: string; size: number }[];
+};
+function Carousel({ imageDetails }: CarouselProps) {
+  const [index, setIndex] = useState(0);
+
+  function next() {
+    const nextIndex = index >= imageDetails.length ? 0 : index + 1;
+    setIndex(nextIndex);
+  }
+
+  function prev() {
+    const nextIndex = index <= 0 ? imageDetails.length : index - 1;
+    setIndex(nextIndex);
+  }
+
+  return (
+    <CarouselContainer>
+      <PrevButton variant="ghost_icon" onClick={prev}>
+        <Icon name="arrow_back_small" />
+      </PrevButton>
+      <OneImage url={imageDetails[index].url} size={imageDetails[index].size} />
+      <NextButton variant="ghost_icon" onClick={next}>
+        <Icon name="arrow_forward_small" />
+      </NextButton>
+    </CarouselContainer>
+  );
+}
+
+type OneImageProps = {
+  url: string;
+  size: number;
+};
+
+function OneImage({ url, size }: OneImageProps) {
+  const [dimensions, setDimensions] = useState<
+    { width: number; height: number } | undefined
+  >(undefined);
+
+  function onImageLoad(event: SyntheticEvent<HTMLImageElement>) {
+    // TODO: resolve image size here
+    setDimensions({ width: 300, height: 300 });
+  }
+
+  return (
+    <>
+      <PreviewImage src={url} onLoad={onImageLoad} />
+      <div>
+        {dimensions && (
+          <>
+            Dimensions:{' '}
+            <output>
+              {dimensions.width}x{dimensions.height}.
+            </output>
+          </>
+        )}
+        <br />
+        Size: <output>{size / 1000} kilobytes.</output>
+      </div>
+    </>
+  );
+}
+
+const CarouselContainer = styled.div`
+  position: relative;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+`;
+
+const PrevButton = styled(Button)`
+  position: absolute;
+  left: 0;
+  top: 50%;
+`;
+const NextButton = styled(Button)`
+  position: absolute;
+  right: 0;
+  top: 50%;
+`;
 
 const PreviewImage = styled.img`
   max-height: var(--scanning-area-height-portrait);

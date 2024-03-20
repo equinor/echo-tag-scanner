@@ -63,15 +63,11 @@ export function isNewCaptureEvent(
 ): event is CustomEvent<NewCaptureEventDetail> {
   if (
     isCustomEvent(event) &&
-    event.detail != null &&
-    typeof event.detail === 'object'
+    event.detail.captures != null &&
+    Array.isArray(event.detail.captures)
   ) {
-    if ('url' in event.detail && 'size' in event.detail) {
-      if (typeof event.detail.url === 'string' && event.detail.url.length > 0) {
-        if (typeof event.detail.size === 'number') {
-          return true;
-        }
-      }
+    if (event.captures[0] instanceof Blob) {
+      return true;
     }
   }
   return false;

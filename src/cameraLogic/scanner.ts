@@ -30,6 +30,7 @@ export class TagScanner extends Camera {
     return this._scanningArea;
   }
 
+  // TODO: this should take into consideration the scanningarea and zoom
   public async performCropping(image: ImageData): Promise<ImageData> {
     // clientWidth and clientHeight is used to get the dimensions without the border.
     const scanningAreaWidth = this._scanningArea.clientWidth;
@@ -63,19 +64,13 @@ export class TagScanner extends Camera {
     });
   }
 
-  // Prepare for a new scan by resetting the camera.
-  public async prepareNewScan() {
-    this.canvasHandler.clearCanvas();
-    this.resumeViewfinder();
-  }
-
   /**
    * Runs a series of captures in a set interval and appends them to a list.
    * @returns {Blob[]} A list of blobs.
    */
   public async scan(): Promise<Blob[]> {
-    const timer = new Timer({ maxTime: 3000 });
-    timer.start();
+    // const timer = new Timer({ maxTime: 3000 });
+    // timer.start();
 
     const scans = await this.burstCapturePhoto(
       this._scanRetries,
@@ -87,6 +82,7 @@ export class TagScanner extends Camera {
     // !isProduction &&
     //   Debugger.logImageStats(scans, 'The postprocessed photos.', timer.stop());
 
+    // TODO: ensure performCropping handles different zooms
     let extractWidth = this._scanningArea.clientWidth;
     let extractHeight = this._scanningArea.clientHeight;
 
@@ -101,6 +97,7 @@ export class TagScanner extends Camera {
       // TODO: here we probably need "extractWidht/height" used? See below.
       const blob =
         await this.canvasHandler.createBlobFromImageData(croppedScan);
+
       blobs.push(blob);
       // capture = await this._canvasHandler.getCanvasContentAsBlob({
       //   sx: 0,

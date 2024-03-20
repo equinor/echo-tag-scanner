@@ -92,7 +92,7 @@ class CoreCamera {
   /**
    * Captures a photo using the entire video feed, and stores it as a drawing on the postprocessing canvas.
    */
-  public async capturePhoto(): Promise<ImageData> {
+  public capturePhoto(): ImageData {
     this._canvasHandler.clearCanvas();
 
     const params: DrawImageParameters = {

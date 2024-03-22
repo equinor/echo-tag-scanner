@@ -3,6 +3,7 @@ import { CoreCamera, TagScanner } from '@cameraLogic';
 import {
   CroppingStats,
   FlatScanAttemptLogEntry,
+  NewCaptureEventDetail,
   ValidationStats
 } from '@types';
 
@@ -59,8 +60,8 @@ Camera software Information
 #################################
 Camera resolution:
    ${tagScanner.viewfinder.videoWidth}x${tagScanner.viewfinder.videoHeight}@${
-      tagScanner.videoTrack?.getSettings().frameRate
-    }fps.
+     tagScanner.videoTrack?.getSettings().frameRate
+   }fps.
 Aspect ratio: ${
       tagScanner.viewfinder.videoWidth / tagScanner.viewfinder.videoHeight
     }
@@ -156,25 +157,9 @@ Intrinsic offset from left-edge: ${sx}.
       const scanningArea = document.getElementById('scanning-area');
 
       if (scanningArea) {
-        tagScanner.prepareNewScan();
-        let capture = await tagScanner.capturePhoto();
-        capture = await tagScanner.performCropping();
-        const scanningAreaWidth = tagScanner.scanningArea.clientWidth;
-        const scanningAreaHeight = tagScanner.scanningArea.clientHeight;
-
-        if (tagScanner.zoomMethod.type === 'simulated') {
-          capture = await tagScanner.canvasHandler.getCanvasContentAsBlob({
-            sWidth: scanningAreaWidth / tagScanner.zoom,
-            sHeight: scanningAreaHeight / tagScanner.zoom
-          });
-        } else {
-          capture = await tagScanner._canvasHandler.getCanvasContentAsBlob({
-            sWidth: scanningAreaWidth,
-            sHeight: scanningAreaHeight
-          });
-        }
-
-        tagScanner.notifyNewCapture(capture);
+        // Scan here
+        const scans = await tagScanner.scan();
+        Debugger.notifyNewCapture(...scans);
       }
     }
     logger.log('EchoDevelopment', () => {
@@ -264,5 +249,16 @@ Intrinsic offset from left-edge: ${sx}.
         console.groupEnd();
       }
     });
+  }
+
+  /**
+   * Accepts a new capture, creates an object URL from it and dispatches an event containing the new object URL.
+   */
+  public static notifyNewCapture(...newCaptures: Blob[]) {
+    globalThis.dispatchEvent(
+      new CustomEvent<NewCaptureEventDetail>('ets-capture', {
+        detail: { captures: newCaptures }
+      })
+    );
   }
 }

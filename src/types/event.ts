@@ -9,6 +9,5 @@ export type ZoomEventDetail = {
 };
 
 export type NewCaptureEventDetail = {
-  url: string;
-  size: number;
+  captures: Blob[];
 };

@@ -1,9 +1,10 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import styled from "styled-components";
-import { isCustomZoomEvent } from "@utils";
-import { zIndexes } from "@const";
-import { ScanningArea } from "./ScanningArea";
-import { Backdrop } from "@ui";
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import styled from 'styled-components';
+
+import { isCustomZoomEvent } from '@utils';
+import { zIndexes } from '@const';
+import { Backdrop } from '@ui';
+import { ScanningArea } from './ScanningArea';
 
 interface ViewfinderProps {
   setCanvasRef: Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
@@ -30,17 +31,17 @@ type ZoomBehavior = {
 const Viewfinder = (props: ViewfinderProps): JSX.Element => {
   const [zoomBehaviour, setZoomBehaviour] = useState<ZoomBehavior>({
     zoomFactor: 1,
-    translateOffset: 50,
+    translateOffset: 50
   });
 
   useEffect(function mountSimulatedZoomEventListener() {
-    globalThis.addEventListener("camera-zoom", (event) => {
+    globalThis.addEventListener('camera-zoom', (event) => {
       if (isCustomZoomEvent(event)) {
         let offset = 50;
         if (event.detail.zoomFactor !== 1) offset /= event.detail.zoomFactor;
         setZoomBehaviour({
           zoomFactor: event.detail.zoomFactor,
-          translateOffset: offset,
+          translateOffset: offset
         });
       }
     });
@@ -78,14 +79,13 @@ const SafeAreaCover = styled.div`
   bottom: 0;
   width: 100vw;
   height: env(safe-area-inset-bottom, 0);
-  z-index ${zIndexes.overlays};
+  z-index: ${zIndexes.overlays};
   background-color: white;
 
-  
   @media screen and (orientation: landscape) {
     bottom: unset;
     left: 0;
-    
+
     // The safe areas turns out to not be part of viewport.
     height: calc(100vh + env(safe-area-inset-bottom));
 
@@ -93,7 +93,7 @@ const SafeAreaCover = styled.div`
     // It was not possible to declare a 0 width whenever the safe-area-cover element is not needed.
     width: calc(env(safe-area-inset-left, 0) + var(--echo-sidebar-width));
   }
-  
+
   @media screen and (min-width: 928px) {
     width: 0;
   }

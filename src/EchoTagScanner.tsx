@@ -1,4 +1,7 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from 'react';
+import styled from 'styled-components';
+
+import { zIndexes } from '@const';
 import { logger } from '@utils';
 import {
   CameraCouldNotBeStartedAlert,
@@ -8,8 +11,6 @@ import {
   ZoomTutorial
 } from '@ui';
 import { useGetMediastream } from '@hooks';
-import styled from 'styled-components';
-import { zIndexes } from '@const';
 
 /**
  * This component will handle all of the initial React setup and renders before control is handed to the classes.

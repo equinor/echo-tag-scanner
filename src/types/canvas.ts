@@ -29,11 +29,6 @@ export type AllowedMimeTypes =
   | 'image/jpeg'
   | 'image/tiff';
 
-export interface CanvasHandlerProps {
-  canvas: HTMLCanvasElement;
-  standardCanvasDimensions: CanvasDimensions;
-}
-
 export type CropSettings = Pick<
   DrawImageParameters,
   'sx' | 'sy' | 'sWidth' | 'sHeight'

@@ -21,7 +21,7 @@ export const Dialogues = (props: DialogueWrapperProps) => {
             tagSummary={props.validatedTags}
             onTagSearch={props.tagSearch}
             onClose={() => {
-              props.tagScanner.prepareNewScan().then(props.resetValidatedTags);
+              props.resetValidatedTags();
             }}
           />
         )}

@@ -29,7 +29,6 @@ export function useValidatedTags(
   }
 
   function handleNoTagsFound() {
-    tagScanner?.resumeViewfinder();
     setValidatedTags([]);
   }
 

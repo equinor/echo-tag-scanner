@@ -16,6 +16,10 @@ class Postprocessor {
     return this._canvasHandler.canvas;
   }
 
+  private get _context() {
+    return this._canvasHandler.canvasContext;
+  }
+
   /**
    * Performs a crop operation on the current contents of the canvas with the provided settings.
    * The canvas itself will also be cropped as a result.
@@ -30,23 +34,30 @@ class Postprocessor {
     image: ImageData,
     settings: CropSettings
   ): Promise<ImageData> {
+    // Modify canvas to match and draw image.
+    // This also clears the canvas data.
+    this._canvas.width = settings.sWidth;
+    this._canvas.height = settings.sHeight;
+
     if (settings.sx < 0 || settings.sy < 0)
       throw new Error('sx or sy is below 0');
-    if (settings.sx > this._canvas.height)
-      throw new Error('sx is bigger than canvas');
-    if (settings.sy > this._canvas.width)
-      throw new Error('sy is bigger than canvas');
 
     const params: DrawImageParameters = {
       sx: settings.sx,
       sy: settings.sy,
       sWidth: settings.sWidth,
       sHeight: settings.sHeight,
-      dx: 0,
-      dy: 0,
+      dx: -settings.sx,
+      dy: -settings.sy,
       dHeight: settings.sHeight,
       dWidth: settings.sWidth
     };
+
+    //FIXME?????? WHY DOES THESE PARAMS WORK????
+
+    // draw image
+
+    // return get contents
 
     return this._canvasHandler.draw(image, params);
   }

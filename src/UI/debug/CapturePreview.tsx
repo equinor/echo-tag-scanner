@@ -86,7 +86,7 @@ function Carousel({ imageDetails }: CarouselProps) {
     let nextIndex = index - 1;
 
     if (nextIndex < 0) {
-      nextIndex = imageDetails.length;
+      nextIndex = imageDetails.length - 1;
     }
 
     setIndex(nextIndex);

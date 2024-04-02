@@ -1,9 +1,7 @@
 import { TagSummaryDto } from '@equinor/echo-search';
-import {
-  DeviceInformation,
-  OCRPayload,
-  ParsedComputerVisionResponse
-} from '@types';
+import { DeviceInformation } from '@equinor/echo-utils';
+
+import { OCRPayload, ParsedComputerVisionResponse } from '@types';
 
 export interface ScannerProps extends CameraProps {
   ocrService: OCRService;

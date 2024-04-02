@@ -10,8 +10,6 @@ export * from './debug';
 export * from './typeGuards';
 export * from './localstorage';
 export * from './filtering';
-export * from './device';
 export * from './orientation';
 export * from './reassembly';
 export * from './timer/timer';
-export * from './deviceSummary';

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
-import EchoUtils from '@equinor/echo-utils';
+import { deviceInfo, useEffectAsync } from '@equinor/echo-utils';
 
 import { ScannerProps } from '@types';
-import { deviceInformationAgent, isProduction } from '@utils';
+import { isProduction } from '@utils';
 import { OCR } from '@services';
 
 import { TagScanner } from '../cameraLogic/scanner';
@@ -13,7 +13,6 @@ type CameraInfrastructure = {
   tagScanner?: TagScanner;
 };
 
-const { useEffectAsync } = EchoUtils.Hooks;
 export function useMountScanner(
   viewfinder: HTMLVideoElement,
   canvas: HTMLCanvasElement,
@@ -27,7 +26,7 @@ export function useMountScanner(
       mediaStream: stream,
       viewfinder,
       canvas,
-      deviceInformation: deviceInformationAgent.deviceInformation,
+      deviceInformation: deviceInfo,
       scanningArea,
       ocrService: new OCR()
     };

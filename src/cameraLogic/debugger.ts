@@ -1,4 +1,6 @@
-import { deviceInformationAgent, logger } from '@utils';
+import { deviceInfo } from '@equinor/echo-utils';
+
+import { logger } from '@utils';
 import { CoreCamera, TagScanner } from '@cameraLogic';
 import {
   CroppingStats,
@@ -16,12 +18,9 @@ export class Debugger {
       tagScanner.orientationChangeHandler || 'No orientation handler set.'
     );
     console.info(
-      'Using userAgentData -> ' + Boolean(deviceInformationAgent.uaDataValues)
-    );
-    console.info(
       `Resolution -> ${tagScanner.videoTrackSettings?.width}x${tagScanner.videoTrackSettings?.height}@${tagScanner.videoTrackSettings?.frameRate}fps.`
     );
-    console.table(deviceInformationAgent.deviceInformation);
+    console.table(deviceInfo.getDeviceDetails());
     console.groupEnd();
   }
   /**

@@ -9,12 +9,12 @@ import { ErrorRegistry } from '@const';
 import {
   CameraProps,
   CameraResolution,
-  DeviceInformation,
   DrawImageParameters,
   ZoomMethod,
   ZoomSteps
 } from '@types';
 import { CanvasHandler } from './canvasHandler';
+import { DeviceInformation } from '@equinor/echo-utils';
 
 /**
  * This object is concerned with the core features of a camera.

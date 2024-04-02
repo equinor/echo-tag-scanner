@@ -4,10 +4,10 @@ import EchoUtils from '@equinor/echo-utils';
 
 import { ScannerProps } from '@types';
 import { deviceInformationAgent, isProduction } from '@utils';
+import { OCR } from '@services';
 
 import { TagScanner } from '../cameraLogic/scanner';
 import { Debugger } from '../cameraLogic/debugger';
-import { OCR } from '../cameraLogic';
 
 type CameraInfrastructure = {
   tagScanner?: TagScanner;

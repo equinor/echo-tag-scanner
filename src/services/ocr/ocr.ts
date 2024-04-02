@@ -22,11 +22,11 @@ import {
   Timer
 } from '@utils';
 import { ErrorRegistry, homoglyphPairs } from '@const';
-import { baseApiClient } from '../services/api/base/base';
-import { getComputerVisionOcrResources } from '../services/api/resources/resources';
+import { baseApiClient } from '../api/base/base';
+import { getComputerVisionOcrResources } from '../api/resources/resources';
 import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { randomBytes } from 'crypto';
-import { Debugger } from './debugger';
+import { Debugger } from '../../cameraLogic/debugger';
 
 export class OCR implements OCRService {
   private _attemptId?: string;

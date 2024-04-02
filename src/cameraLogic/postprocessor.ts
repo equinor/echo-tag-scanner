@@ -53,11 +53,8 @@ class Postprocessor {
       dWidth: settings.sWidth
     };
 
-    //FIXME?????? WHY DOES THESE PARAMS WORK????
-
-    // draw image
-
-    // return get contents
+    // FIXME: sending in negative destination x/y is confusing and should be fixed.
+    // Figure out what is happening here to keep dx/dy as 0,0 (since it means where we place the drawn image on the canvas)
 
     return this._canvasHandler.draw(image, params);
   }

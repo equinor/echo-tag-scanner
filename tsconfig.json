@@ -1,8 +1,14 @@
 {
-  "include": ["src"],
+  "include": [
+    "src"
+  ],
   "compilerOptions": {
     "target": "es2017",
-    "lib": ["esnext", "dom", "dom.iterable"],
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
     "allowJs": true,
     "sourceMap": true,
     "noImplicitAny": false,
@@ -20,17 +26,30 @@
       "@types/webpack-env",
       "@types/node",
       "@types/w3c-image-capture",
-      "./node_modules/user-agent-data-types"
     ],
     "baseUrl": ".",
     "paths": {
-      "@ui": ["src/UI/"],
-      "@cameraLogic": ["src/cameraLogic/"],
-      "@const": ["src/const/"],
-      "@hooks": ["src/hooks/"],
-      "@services": ["src/services/"],
-      "@types": ["src/types/"],
-      "@utils": ["src/utils/"]
+      "@ui": [
+        "src/UI/"
+      ],
+      "@cameraLogic": [
+        "src/cameraLogic/"
+      ],
+      "@const": [
+        "src/const/"
+      ],
+      "@hooks": [
+        "src/hooks/"
+      ],
+      "@services": [
+        "src/services/"
+      ],
+      "@types": [
+        "src/types/"
+      ],
+      "@utils": [
+        "src/utils/"
+      ]
     }
   }
 }

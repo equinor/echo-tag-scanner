@@ -3,7 +3,8 @@ import {
   CameraResolution,
   DrawImageParameters,
   ZoomSteps,
-  ZoomEventDetail
+  ZoomEventDetail,
+  NewCaptureEventDetail
 } from '@types';
 import {
   logger,
@@ -14,7 +15,7 @@ import {
   handleError,
   dispatchCameraResolutionEvent,
   dispatchZoomEvent,
-  defineOrientationChangeEvent,
+  defineOrientationChangeEvent
 } from '@utils';
 import { CoreCamera } from './coreCamera';
 import { Postprocessor } from './postprocessor';
@@ -24,10 +25,9 @@ import { ErrorRegistry } from '@const';
  * This object acts as a proxy towards CoreCamera.
  * From a user perspective, it is the viewfinder and camera controls.
  */
-class Camera extends Postprocessor {
+class Camera extends CoreCamera {
   /** Is the torch turned on or not. */
   private _torchState = false;
-  private _captureUrl: string | undefined;
   private _orientationChangeHandler:
     | 'DeviceOrientationAPI'
     | 'MatchMedia'
@@ -40,25 +40,42 @@ class Camera extends Postprocessor {
       this.videoTrack.addEventListener('ended', this.refreshStream.bind(this));
     }
     this._orientationChangeHandler = defineOrientationChangeEvent.call(this);
-    this.viewfinder.addEventListener("play", () => {
-      if(this.viewfinder.paused && !this.viewfinder.autoplay) {
-        const error = new Error("The camera could not be started.", {cause: "The viewfinder video element did not accept autoplaying."});
-        logger.trackError(error);
-        handleError(ErrorRegistry.autoplayFailed, error);
-      }
-    }, {once: true})
+    this.viewfinder.addEventListener(
+      'play',
+      () => {
+        if (this.viewfinder.paused && !this.viewfinder.autoplay) {
+          const error = new Error('The camera could not be started.', {
+            cause: 'The viewfinder video element did not accept autoplaying.'
+          });
+          logger.trackError(error);
+          handleError(ErrorRegistry.autoplayFailed, error);
+        }
+      },
+      { once: true }
+    );
 
     // For debugging purposes.
     MediaStreamTrack.prototype.toString = reportVideoTrack;
     MediaStream.prototype.toString = reportMediaStream;
   }
 
-  public get captureUrl(): string | undefined {
-    return this._captureUrl;
-  }
-
-  public set captureUrl(newUrl: string | undefined) {
-    this._captureUrl = newUrl;
+  /**
+   * Determines an interval based on amount of wanted photos and duration to run and returns these.
+   * @param amount The amount of captures wanted.
+   * @param duration The total duration in which the photos should be captured.
+   * @returns A Promise with list of captures.
+   */
+  public async burstCapturePhoto(
+    amount: number,
+    duration: number
+  ): Promise<ImageData[]> {
+    try {
+      const settledBursts = await this._asyncBurst(amount, duration);
+      return settledBursts;
+    } catch (error) {
+      clearInterval(this._intervalId);
+      throw new Error('Failed to burst capture photos.');
+    }
   }
 
   public get orientationChangeHandler() {
@@ -115,22 +132,6 @@ class Camera extends Postprocessor {
       );
     }
   };
-
-  /** Pauses the viewfinder.
-   * @returns {boolean} A boolean indicating if the viewfinder is paused.
-   */
-  public pauseViewfinder(): boolean {
-    this.viewfinder.pause();
-    return this.viewfinder.paused;
-  }
-
-  /** Resumes the viewfinder
-   * @returns {boolean} A boolean indicating if the viewfinder is paused.
-   */
-  public resumeViewfinder(): boolean {
-    this.viewfinder.play();
-    return this.viewfinder.paused;
-  }
 
   /** Stops the camera and cleans up the orientation observer.
    * If this is invoked, the viewfinder cannot be resumed again.
@@ -200,40 +201,29 @@ class Camera extends Postprocessor {
     }
   }
 
-  /**
-   * Captures a photo using the entire video feed, and stores it as a drawing on the postprocessing canvas.
-   */
-  public async capturePhoto(): Promise<Blob> {
-    this.canvasHandler.clearCanvas();
+  // #region Utils
+  private _intervalId?: NodeJS.Timeout;
+  private async _asyncBurst(
+    amount: number,
+    duration: number
+  ): Promise<ImageData[]> {
+    const interval = duration / amount;
 
-    const params: DrawImageParameters = {
-      sx: 0,
-      sy: 0,
-      sWidth: this.viewfinder.videoWidth,
-      sHeight: this.viewfinder.videoHeight,
-      dx: 0,
-      dy: 0,
-      dWidth: this.viewfinder.videoWidth,
-      dHeight: this.viewfinder.videoHeight
-    };
+    return new Promise((resolve) => {
+      const bursts: Array<ImageData> = [];
 
-    return await this._canvasHandler.draw(this.viewfinder, params);
+      this._intervalId = setInterval(() => {
+        bursts.push(this.capturePhoto());
+
+        if (bursts.length === amount) {
+          clearInterval(this._intervalId);
+          resolve(bursts);
+        }
+      }, interval);
+    });
   }
 
-  /**
-   * Accepts a new capture, creates an object URL from it and dispatches an event containing the new object URL.
-   */
-  public notifyNewCapture(newCapture: Blob) {
-    // Revoke the previous object URL if it exists.
-    if (this._captureUrl) URL.revokeObjectURL(this._captureUrl);
-
-    this._captureUrl = URL.createObjectURL(newCapture);
-    globalThis.dispatchEvent(
-      new CustomEvent('ets-capture', {
-        detail: { url: this._captureUrl, size: newCapture.size }
-      })
-    );
-  }
+  // #endregion
 }
 
 export { Camera };

@@ -1,67 +1,38 @@
-import { CameraProps, CroppingStats, Timers } from '@types';
+import {
+  CameraProps,
+  CroppingStats,
+  OCRService,
+  ScannerProps,
+  Timers
+} from '@types';
 import { isProduction, logScanningAttempt, Timer } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { Camera } from './camera';
-import { OCR } from './ocr';
 import { Debugger } from './debugger';
+import { Postprocessor } from './postprocessor';
 
 /**
  * This object implements tag scanning logic.
  */
+
 export class TagScanner extends Camera {
+  /** Services */
+  private _OCR: OCRService;
+  private _postProcessor: Postprocessor;
+
   private _scanRetries = 2;
   private _scanDuration = 1000; //milliseconds
-  private _OCR = new OCR({ tagScanner: this });
   private _scanningArea: HTMLElement;
 
-  constructor(props: CameraProps) {
-    super(props);
-    this._scanningArea = props.scanningArea;
-    globalThis.testPostOCR = this._OCR.testPostOCR.bind(this._OCR);
+  constructor({ ocrService, scanningArea, ...cameraProps }: ScannerProps) {
+    super(cameraProps);
+    this._scanningArea = scanningArea;
+    this._postProcessor = new Postprocessor(cameraProps.canvas);
+    this._OCR = ocrService;
   }
 
   public get scanningArea(): HTMLElement {
     return this._scanningArea;
-  }
-
-  public async performCropping(): Promise<Blob> {
-    // clientWidth and clientHeight is used to get the dimensions without the border.
-    const scanningAreaWidth = this._scanningArea.clientWidth;
-    const scanningAreaHeight = this._scanningArea.clientHeight;
-
-    // Find the (x,y) position of the scanning area on the viewfinder.
-    // TODO: Link to documentation
-    let sx = this.viewfinder.videoWidth / 2 - scanningAreaWidth / 2;
-    let sy = this.viewfinder.videoHeight / 2 - scanningAreaHeight / 2;
-    let cropWidth = scanningAreaWidth;
-    let cropHeight = scanningAreaHeight;
-
-    // If zoom value is set to something more than 1 and is simulated, additional crop calculations are done.
-    // TODO: Link to documentation
-    if (this.zoomMethod.type === 'simulated' && this.zoom === 2) {
-      sx += scanningAreaWidth / this.zoom / 2;
-      sy += scanningAreaHeight / this.zoom / 2;
-      cropWidth /= this.zoom;
-      cropHeight /= this.zoom;
-    } else if (this.zoom > 2) {
-      throw new Error(
-        `Encountered a zoom ${this.zoom} value which isn't supported.`
-      );
-    }
-
-    return await this.crop({
-      sx,
-      sy,
-      sWidth: cropWidth,
-      sHeight: cropHeight
-    });
-  }
-
-  // Prepare for a new scan by resetting the camera.
-  public async prepareNewScan() {
-    this.canvasHandler.clearCanvas();
-    this.capture = undefined;
-    this.resumeViewfinder();
   }
 
   /**
@@ -69,63 +40,33 @@ export class TagScanner extends Camera {
    * @returns {Blob[]} A list of blobs.
    */
   public async scan(): Promise<Blob[]> {
-    /** Determines the delay between captures in milliseconds. */
-    const rawCaptures = await handleGetFrames.call(this);
-    return await handlePostProcessing.call(this, rawCaptures);
+    const timer = new Timer({ maxTime: 3000 });
+    timer.start();
 
-    async function handleGetFrames(this: TagScanner): Promise<Blob[]> {
-      const timer = new Timer({ maxTime: 3000 });
-      timer.start();
+    const scans = await this.burstCapturePhoto(
+      this._scanRetries,
+      this._scanDuration
+    );
 
-      const scanInterval = this._scanDuration / this._scanRetries;
-      const scans: Blob[] = [];
-      return new Promise<Blob[]>((resolve) => {
-        const intervalId = setInterval(getFrame.bind(this), scanInterval);
+    const blobs: Array<Promise<Blob>> = [];
 
-        async function getFrame(this: TagScanner) {
-          this.capturePhoto().then((capture) => {
-            scans.push(capture);
-
-            if (scans.length === this._scanRetries) {
-              // Scanning is finished.
-              clearInterval(intervalId);
-
-              // Log some image stats and a blob preview in network tab.
-              !isProduction &&
-                Debugger.logImageStats(
-                  scans,
-                  'The postprocessed photos.',
-                  timer.stop()
-                );
-
-              resolve(scans);
-            }
-          });
-        }
-      });
+    for (let scan of scans) {
+      const croppedScan = await this._performCropping(scan);
+      // TODO: here we probably need "extractWidht/height" used? See below.
+      blobs.push(this.canvasHandler.createBlobFromImageData(croppedScan));
     }
 
-    async function handlePostProcessing(this: TagScanner, captures: Blob[]) {
-      let extractWidth = this._scanningArea.clientWidth;
-      let extractHeight = this._scanningArea.clientHeight;
+    const settled = await Promise.all(blobs);
 
-      if (this.zoomMethod.type === 'simulated') {
-        extractWidth /= this.zoom;
-        extractHeight /= this.zoom;
-      }
+    // Log some image stats and a blob preview in network tab.
+    !isProduction &&
+      Debugger.logImageStats(
+        settled,
+        'The postprocessed photos.',
+        timer.stop()
+      );
 
-      captures.forEach(async (capture) => {
-        capture = await this.performCropping();
-        capture = await this._canvasHandler.getCanvasContentAsBlob({
-          sx: 0,
-          sy: 0,
-          sWidth: extractWidth,
-          sHeight: extractHeight
-        });
-      });
-
-      return captures;
-    }
+    return settled;
   }
 
   /**
@@ -168,5 +109,38 @@ export class TagScanner extends Camera {
     }
 
     return [];
+  }
+
+  private async _performCropping(image: ImageData): Promise<ImageData> {
+    // clientWidth and clientHeight is used to get the dimensions without the border.
+    const scanningAreaWidth = this._scanningArea.clientWidth;
+    const scanningAreaHeight = this._scanningArea.clientHeight;
+
+    // Find the (x,y) position of the scanning area on the viewfinder.
+    // TODO: Link to documentation
+    let sx = this.viewfinder.videoWidth / 2 - scanningAreaWidth / 2;
+    let sy = this.viewfinder.videoHeight / 2 - scanningAreaHeight / 2;
+    let cropWidth = scanningAreaWidth;
+    let cropHeight = scanningAreaHeight;
+
+    // If zoom value is set to something more than 1 and is simulated, additional crop calculations are done.
+    // TODO: Link to documentation
+    if (this.zoomMethod.type === 'simulated' && this.zoom === 2) {
+      sx += scanningAreaWidth / this.zoom / 2;
+      sy += scanningAreaHeight / this.zoom / 2;
+      cropWidth /= this.zoom;
+      cropHeight /= this.zoom;
+    } else if (this.zoom > 2) {
+      throw new Error(
+        `Encountered a zoom ${this.zoom} value which isn't supported.`
+      );
+    }
+
+    return this._postProcessor.crop(image, {
+      sx,
+      sy,
+      sWidth: cropWidth,
+      sHeight: cropHeight
+    });
   }
 }

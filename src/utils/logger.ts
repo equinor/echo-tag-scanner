@@ -7,6 +7,7 @@ import {
 } from '@equinor/echo-core';
 import echomodule from '../../echoModule.config.json';
 import {
+  DeviceInformation,
   FlatScanAttemptLogEntry,
   OCRPayload,
   ScanAttemptLogEntry,
@@ -212,10 +213,21 @@ function logScanningAttempt(
   ocrResult?: OCRPayload,
   timers?: Timers
 ): ScanAttemptLogEntry {
+  const deviceDetails = this.deviceInformation.getDeviceDetails();
+  const deviceInformation: DeviceInformation = {
+    deviceModel: deviceDetails.deviceModel,
+    operatingSystem: deviceDetails.operatingSystem,
+    webBrowser: deviceDetails.webBrowser,
+    platform:
+      deviceDetails.platform === 'Platform not found'
+        ? undefined
+        : deviceDetails.platform
+  };
+
   let logEntry: ScanAttemptLogEntry = {
     timers: timers,
     ocrPayload: ocrResult,
-    deviceInformation: this.deviceInformation,
+    deviceInformation: deviceInformation,
     deviceUsage: {
       cameraResolution: `${this.videoTrackSettings?.width}x${this.videoTrackSettings?.height}@${this.videoTrackSettings?.frameRate}`,
       zoomMethod: this.zoomMethod.type,

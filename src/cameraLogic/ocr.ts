@@ -4,6 +4,7 @@ import {
   FailedTagValidation,
   MockWord,
   OCRPayload,
+  OCRService,
   ParsedComputerVisionResponse,
   TagValidationResult,
   ValidationStats,
@@ -18,28 +19,24 @@ import {
   reassembleSpecialTagCandidates,
   reassembleOrdinaryTagCandidates,
   filterBy,
-  Timer,
+  Timer
 } from '@utils';
 import { ErrorRegistry, homoglyphPairs } from '@const';
 import { baseApiClient } from '../services/api/base/base';
 import { getComputerVisionOcrResources } from '../services/api/resources/resources';
 import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { randomBytes } from 'crypto';
-import { TagScanner } from '@cameraLogic';
 import { Debugger } from './debugger';
 
-interface OCRProps {
-  tagScanner: TagScanner;
-}
-
-export class OCR {
+export class OCR implements OCRService {
   private _attemptId?: string;
-  private _tagScannerRef: TagScanner;
   private _tagCandidates: Word[] = [];
 
-  constructor(props: OCRProps) {
+  constructor() {
     this._attemptId = undefined;
-    this._tagScannerRef = props.tagScanner;
+
+    // Add testPostOcr function as callable from console for debugging purposes
+    globalThis.testPostOCR = this.testPostOCR.bind(this);
   }
 
   /** Generates a pseudorandom sequence of 16 bytes and returns them hex encoded. */

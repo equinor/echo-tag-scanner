@@ -1,29 +1,34 @@
-import { CameraProps, CroppingStats, Timers } from '@types';
+import {
+  CameraProps,
+  CroppingStats,
+  OCRService,
+  ScannerProps,
+  Timers
+} from '@types';
 import { isProduction, logScanningAttempt, Timer } from '@utils';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { Camera } from './camera';
-import { OCR } from './ocr';
 import { Debugger } from './debugger';
 import { Postprocessor } from './postprocessor';
 
 /**
  * This object implements tag scanning logic.
  */
+
 export class TagScanner extends Camera {
   /** Services */
-  private _OCR = new OCR({ tagScanner: this });
+  private _OCR: OCRService;
   private _postProcessor: Postprocessor;
 
   private _scanRetries = 2;
   private _scanDuration = 1000; //milliseconds
   private _scanningArea: HTMLElement;
 
-  constructor(props: CameraProps) {
-    super(props);
-    this._scanningArea = props.scanningArea;
-    this._postProcessor = new Postprocessor(props.canvas);
-
-    globalThis.testPostOCR = this._OCR.testPostOCR.bind(this._OCR);
+  constructor({ ocrService, scanningArea, ...cameraProps }: ScannerProps) {
+    super(cameraProps);
+    this._scanningArea = scanningArea;
+    this._postProcessor = new Postprocessor(cameraProps.canvas);
+    this._OCR = ocrService;
   }
 
   public get scanningArea(): HTMLElement {

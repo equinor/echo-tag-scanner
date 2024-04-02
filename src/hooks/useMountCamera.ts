@@ -1,9 +1,13 @@
 import { useState } from 'react';
+
 import EchoUtils from '@equinor/echo-utils';
+
+import { ScannerProps } from '@types';
+import { deviceInformationAgent, isProduction } from '@utils';
+
 import { TagScanner } from '../cameraLogic/scanner';
-import { CameraProps } from '@types';
-import { deviceInformationAgent, isProduction, logger } from '@utils';
 import { Debugger } from '../cameraLogic/debugger';
+import { OCR } from '../cameraLogic';
 
 type CameraInfrastructure = {
   tagScanner?: TagScanner;
@@ -19,21 +23,21 @@ export function useMountScanner(
   const [tagScanner, setCamera] = useState<TagScanner | undefined>(undefined);
 
   useEffectAsync(async (signal) => {
-    const props: CameraProps = {
+    const props: ScannerProps = {
       mediaStream: stream,
       viewfinder,
       canvas,
+      deviceInformation: deviceInformationAgent.deviceInformation,
       scanningArea,
-      deviceInformation: deviceInformationAgent.deviceInformation
+      ocrService: new OCR()
     };
 
     const camera = new TagScanner(props);
 
     if (!signal.aborted) {
       setCamera(camera);
-      
-        !isProduction && Debugger.startupLogs(camera);
-      
+
+      !isProduction && Debugger.startupLogs(camera);
     }
 
     return () => {

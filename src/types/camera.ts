@@ -1,11 +1,33 @@
-import { DeviceInformation } from '@types';
+import { TagSummaryDto } from '@equinor/echo-search';
+import {
+  DeviceInformation,
+  OCRPayload,
+  ParsedComputerVisionResponse
+} from '@types';
+
+export interface ScannerProps extends CameraProps {
+  ocrService: OCRService;
+  scanningArea: HTMLElement;
+}
+
+export interface OCRService {
+  refreshAttemptId(): Promise<string>;
+  runOCR(scan: Blob): Promise<{
+    ocrResponse: ParsedComputerVisionResponse;
+    networkRequestTimeTaken: number;
+    postOCRTimeTaken: number;
+  } | null>;
+  handleValidation(unvalidatedTags: ParsedComputerVisionResponse): Promise<{
+    validatedTags: TagSummaryDto[];
+    validationLogEntry?: OCRPayload;
+  }>;
+}
 
 export interface CameraProps {
   mediaStream: MediaStream;
   viewfinder: HTMLVideoElement;
   canvas: HTMLCanvasElement;
   additionalCaptureOptions?: MediaStreamConstraints;
-  scanningArea: HTMLElement;
   deviceInformation: DeviceInformation;
 }
 

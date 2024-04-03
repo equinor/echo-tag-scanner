@@ -1,6 +1,6 @@
-import React from "react";
-import styled from "styled-components";
-import { Button } from "@equinor/eds-core-react";
+import React from 'react';
+import styled from 'styled-components';
+import { Button } from '@equinor/eds-core-react';
 
 type CameraCouldNotBeStartedAlertProps = {
   error: Error;
@@ -13,7 +13,7 @@ const CameraCouldNotBeStartedAlert = (
     if (this instanceof OverconstrainedError) {
       return this.constraint + ' , ' + this.message + ' , ' + this.name;
     } else {
-      return this.message + ' , ' + this.name + this.cause;
+      return this.message + '\n' + this.name + ': \n' + this.cause;
     }
   };
   return (
@@ -41,7 +41,9 @@ const CameraCouldNotBeStartedAlert = (
           <p>Contact the Echo project if the issue seem to persist.</p>
 
           <TechnicalHeader>Technical information</TechnicalHeader>
-          <code>{props.error.toString()}</code>
+          <code style={{ whiteSpace: 'pre-line' }}>
+            {props.error.toString()}
+          </code>
         </Section>
         <hr />
       </Article>

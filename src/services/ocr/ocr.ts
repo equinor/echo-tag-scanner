@@ -1,13 +1,10 @@
 import { BackendError } from '@equinor/echo-base';
 import {
   ComputerVisionResponse,
-  FailedTagValidation,
   MockWord,
   OCRPayload,
   OCRService,
   ParsedComputerVisionResponse,
-  TagValidationResult,
-  ValidationStats,
   Word
 } from '@types';
 import {
@@ -18,27 +15,18 @@ import {
   uniqueStringArray,
   reassembleSpecialTagCandidates,
   reassembleOrdinaryTagCandidates,
-  filterBy,
   Timer
 } from '@utils';
 import { ErrorRegistry, homoglyphPairs } from '@const';
 import { baseApiClient } from '../api/base/base';
-import { getComputerVisionOcrResources } from '../api/resources/resources';
-import { Search, TagSummaryDto } from '@equinor/echo-search';
 import { randomBytes } from 'crypto';
 import { Debugger } from '../../cameraLogic/debugger';
+import { EchoEnv } from '@equinor/echo-core';
+import { AzureOCRValidator, OCRValidator } from './validator';
+import { TagSummaryDto } from '@equinor/echo-search';
 
-export class OCR implements OCRService {
+export class AzureOCRv2 implements OCRService {
   private _attemptId?: string;
-  private _tagCandidates: Word[] = [];
-
-  constructor() {
-    this._attemptId = undefined;
-
-    // Add testPostOcr function as callable from console for debugging purposes
-    globalThis.testPostOCR = this.testPostOCR.bind(this);
-  }
-
   /** Generates a pseudorandom sequence of 16 bytes and returns them hex encoded. */
   public get attemptId(): string {
     if (!this._attemptId)
@@ -66,25 +54,31 @@ export class OCR implements OCRService {
     });
   }
 
+  protected _tagCandidates: Word[] = [];
+  protected _validator: OCRValidator;
+
+  constructor(validator: OCRValidator = new AzureOCRValidator()) {
+    this._attemptId = undefined;
+
+    this._validator = validator;
+    // Add testPostOcr function as callable from console for debugging purposes
+    globalThis.testPostOCR = this.testPostOCR.bind(this);
+  }
+
   public async runOCR(scan: Blob): Promise<{
     ocrResponse: ParsedComputerVisionResponse;
     networkRequestTimeTaken: number;
     postOCRTimeTaken: number;
   } | null> {
-    const [url, body, init] = getComputerVisionOcrResources(scan);
     try {
       const networkRequestTimer = new Timer();
       networkRequestTimer.start();
-      const response = await baseApiClient.postAsync<ComputerVisionResponse>(
-        url,
-        body,
-        init
-      );
+      const data = await this.postOCRRequest(scan);
       const networkRequestTimeTaken = networkRequestTimer.stop();
 
       const postOCRTimer = new Timer();
       postOCRTimer.start();
-      const postProcessedResponse = this.handlePostOCR(response.data);
+      const postProcessedResponse = this.handlePostOCR(data);
       const postOCRTimeTaken = postOCRTimer.stop();
 
       return {
@@ -125,7 +119,71 @@ export class OCR implements OCRService {
     }
   }
 
-  private handlePostOCR(response: ComputerVisionResponse) {
+  public handleValidation(
+    unvalidatedTags: ParsedComputerVisionResponse
+  ): Promise<{
+    validatedTags: TagSummaryDto[];
+    validationLogEntry?: OCRPayload | undefined;
+  }> {
+    return this._validator.handleValidation(this.attemptId, unvalidatedTags);
+  }
+
+  public testPostOCR(allWordsOnLine: MockWord[]) {
+    if (!argumentIsMockWords(allWordsOnLine)) {
+      console.info('The data should have the following format: ');
+      console.info(
+        '[{text: "tag number candiate"}, {text: "another tag number candidate"}]'
+      );
+      return;
+    }
+
+    for (let i = 0; i < allWordsOnLine.length; i++) {
+      if (this.wordIsSpecialCase(allWordsOnLine[i].text)) {
+        this.sanitize(allWordsOnLine[i].text, '()');
+      } else {
+        allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
+        allWordsOnLine[i] = this.handleHomoglyphing(allWordsOnLine[i]);
+      }
+    }
+    this.resetTagCandidates();
+
+    const specialCases = reassembleSpecialTagCandidates(allWordsOnLine, '(M)');
+    specialCases.push(...reassembleSpecialTagCandidates(allWordsOnLine, '(C)'));
+
+    const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
+    this._tagCandidates = [...specialCases, ...ordinaryCases];
+
+    !isProduction &&
+      Debugger.reportFiltration(
+        this._tagCandidates.map((candidate) => candidate.text)
+      );
+
+    function argumentIsMockWords(argument: unknown): argument is MockWord[] {
+      if (Array.isArray(argument)) {
+        return argument.every((arg) => Reflect.has(arg, 'text'));
+      }
+
+      return false;
+    }
+  }
+
+  // #region Azure OCR overridable utils
+
+  protected async postOCRRequest(scan: Blob): Promise<ComputerVisionResponse> {
+    const [url, body, init] = this.getComputerVisionOcrResources(scan);
+    try {
+      const response = await baseApiClient.postAsync<ComputerVisionResponse>(
+        url,
+        body,
+        init
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  protected handlePostOCR(response: ComputerVisionResponse) {
     this.resetTagCandidates();
     let clonedResponse = structuredClone<ComputerVisionResponse>(response);
 
@@ -168,58 +226,19 @@ export class OCR implements OCRService {
     return clonedResponse;
   }
 
-  public testPostOCR(allWordsOnLine: MockWord[]) {
-    if (!argumentIsMockWords(allWordsOnLine)) {
-      console.info('The data should have the following format: ');
-      console.info(
-        '[{text: "tag number candiate"}, {text: "another tag number candidate"}]'
-      );
-      return;
-    }
-
-    for (let i = 0; i < allWordsOnLine.length; i++) {
-      if (this.wordIsSpecialCase(allWordsOnLine[i].text)) {
-        this.sanitize(allWordsOnLine[i].text, '()');
-      } else {
-        allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
-        allWordsOnLine[i] = this.handleHomoglyphing(allWordsOnLine[i]);
-      }
-    }
-    this.resetTagCandidates();
-
-    const specialCases = reassembleSpecialTagCandidates(allWordsOnLine, '(M)');
-    specialCases.push(...reassembleSpecialTagCandidates(allWordsOnLine, '(C)'));
-
-    const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
-    this._tagCandidates = [...specialCases, ...ordinaryCases];
-
-    !isProduction &&
-      Debugger.reportFiltration(
-        this._tagCandidates.map((candidate) => candidate.text)
-      );
-
-    function argumentIsMockWords(argument: unknown): argument is MockWord[] {
-      if (Array.isArray(argument)) {
-        return argument.every((arg) => Reflect.has(arg, 'text'));
-      }
-
-      return false;
-    }
-  }
-
-  private resetTagCandidates() {
+  protected resetTagCandidates() {
     this._tagCandidates = [];
   }
 
   /** Returns true if the supplied word is a possible special case tag number. */
-  private wordIsSpecialCase(word: string) {
+  protected wordIsSpecialCase(word: string) {
     return ocrFilterer.isMotorTag(word);
     // TODO: Handle "C-tags" and Line tags.
   }
   /**
    * Accepts a string, trims whitespace, and removes trailing and leading alphanumeric characters before returning it.
    */
-  private sanitize(word: string, exceptions?: string) {
+  protected sanitize(word: string, exceptions?: string) {
     word = word.trim();
     word = Array.from(word)
       .map((char) => {
@@ -232,7 +251,7 @@ export class OCR implements OCRService {
   }
 
   /** Handles the homoglyphing substitution on the word level. */
-  private handleHomoglyphing(word: Word): Word {
+  protected handleHomoglyphing(word: Word): Word {
     let original = word.text;
     let alteredOriginal: string | undefined = undefined;
     let lineTagIdentifier = '';
@@ -269,134 +288,18 @@ export class OCR implements OCRService {
     }
   }
 
-  public async handleValidation(
-    unvalidatedTags: ParsedComputerVisionResponse
-  ): Promise<{
-    validatedTags: TagSummaryDto[];
-    validationLogEntry?: OCRPayload;
-  }> {
-    const tagValidationTasks = unvalidatedTags.map((funcLocation) =>
-      createTagValidator(funcLocation)
-    );
-    const tagValidationResults = await Promise.allSettled([
-      ...tagValidationTasks
-    ]);
-    const validatedTags: TagSummaryDto[] = [];
-    const validationStats: ValidationStats[] = [];
-    let logEntry: OCRPayload | undefined;
-
-    tagValidationResults.forEach((validationResult) => {
-      if (!this._attemptId)
-        throw new Error('A pseudoranom log entry ID has not been established.');
-      // Log the successfull OCR.
-      if (validationResult.status === 'fulfilled') {
-        logEntry = {
-          id: this._attemptId,
-          isSuccess: true,
-          readText: validationResult.value.testValue,
-          validatedText: validationResult.value.validatedTagSummary.tagNo,
-          timeTaken: validationResult.value.timeTaken
-        };
-
-        // Record the fetched tag summary for use later in presentation.
-        validatedTags.push(validationResult.value.validatedTagSummary);
-        validationStats.push({
-          isSuccess: true,
-          testValue: validationResult.value.testValue,
-          correction: validationResult.value.validatedTagSummary.tagNo
-        });
-      } else if (validationResult.status === 'rejected') {
-        if ((validationResult.reason as FailedTagValidation).EchoSearchError) {
-          throw new Error(validationResult.reason);
-          // TODO: Handle or log Echo search errors here
-        } else {
-          // Log the failed OCR.
-          logEntry = {
-            id: this._attemptId,
-            isSuccess: false,
-            validatedText: undefined,
-            readText: (validationResult.reason as FailedTagValidation)
-              .testValue,
-            timeTaken: validationResult.reason.timeTaken
-          };
-          validationStats.push({
-            isSuccess: false,
-            testValue: logEntry.readText
-          });
-        }
+  protected getComputerVisionOcrResources(
+    capture: Blob
+  ): [url: string, body: Blob, requestInit: RequestInit] {
+    let url = `${EchoEnv.env().REACT_APP_API_URL}/tag-scanner/scan-image`;
+    const requestInit: RequestInit = {
+      headers: {
+        'Content-Type': 'application/octet-stream'
       }
-    });
-
-    !isProduction && Debugger.reportValidation(validationStats);
-    return {
-      validatedTags: filterBy<TagSummaryDto>('tagNo', validatedTags),
-      validationLogEntry: logEntry
     };
 
-    /**
-     * Accepts a possible tag number as string value and runs it through Echo Search for validation.
-     */
-    async function findClosestTag(possibleTagNumber: string) {
-      const result = await Search.Tags.closestTagAsync(possibleTagNumber);
-      if (result.isSuccess) {
-        return result.value;
-      }
-    }
-
-    /**
-     * Accepts a validated tag and fetches its tag summary locally.
-     */
-    async function getTagSummary(
-      validationResult: string
-    ): Promise<TagSummaryDto> {
-      return new Promise((resolve, reject) => {
-        Search.Tags.getAsync(validationResult).then((result) => {
-          if (result.isSuccess && result.value != null) {
-            resolve(result.value);
-          } else {
-            reject(result.value);
-          }
-        });
-      });
-    }
-
-    /**
-     * Returns a promise to validate a string as a tag number.
-     * @fulfill {TagValidationResult} The {TagSummaryDto} and the test value.
-     * @reject {FailedValidation} The test value
-     */
-    async function createTagValidator(
-      testValue: string
-    ): Promise<TagValidationResult> {
-      return new Promise((resolve, reject) => {
-        const validationTimer = new Timer();
-        validationTimer.start();
-        findClosestTag(testValue).then((closestTagMatch) => {
-          if (closestTagMatch) {
-            getTagSummary(closestTagMatch)
-              .then((tagSummary) =>
-                resolve({
-                  validatedTagSummary: tagSummary,
-                  testValue: testValue,
-                  timeTaken: validationTimer.stop()
-                } as TagValidationResult)
-              )
-              // An error was caught from Echo-search
-              .catch((reason) => {
-                reject({
-                  EchoSearchError: reason,
-                  testValue: testValue,
-                  timeTaken: validationTimer.stop()
-                } as FailedTagValidation);
-              });
-          } else {
-            reject({
-              testValue: testValue,
-              timeTaken: validationTimer.stop()
-            } as FailedTagValidation);
-          }
-        });
-      });
-    }
+    return [url, capture, requestInit];
   }
+
+  // #endregion
 }

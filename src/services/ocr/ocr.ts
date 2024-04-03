@@ -15,7 +15,8 @@ import {
   uniqueStringArray,
   reassembleSpecialTagCandidates,
   reassembleOrdinaryTagCandidates,
-  Timer
+  Timer,
+  combineUrls
 } from '@utils';
 import { ErrorRegistry, homoglyphPairs } from '@const';
 import { baseApiClient } from '../api/base/base';
@@ -291,7 +292,11 @@ export class AzureOCRv2 implements OCRService {
   protected getComputerVisionOcrResources(
     capture: Blob
   ): [url: string, body: Blob, requestInit: RequestInit] {
-    let url = `${EchoEnv.env().REACT_APP_API_URL}/tag-scanner/scan-image`;
+    let url = combineUrls(
+      EchoEnv.env().REACT_APP_API_URL,
+      'tag-scanner',
+      'scan-image'
+    );
     const requestInit: RequestInit = {
       headers: {
         'Content-Type': 'application/octet-stream'

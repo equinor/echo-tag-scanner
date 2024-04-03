@@ -291,7 +291,7 @@ export class AzureOCRv2 implements OCRService {
 
   protected getComputerVisionOcrResources(
     capture: Blob
-  ): [url: string, body: Blob, requestInit: RequestInit] {
+  ): [url: string, body: BodyInit, requestInit: RequestInit] {
     let url = combineUrls(
       EchoEnv.env().REACT_APP_API_URL,
       'tag-scanner',

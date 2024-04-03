@@ -16,18 +16,18 @@ import { AzureOCRv2 } from './ocr';
 export class AzureOCRv4 extends AzureOCRv2 {
   protected getComputerVisionOcrResources(
     capture: Blob
-  ): [url: string, body: Blob, requestInit: RequestInit] {
+  ): [url: string, body: BodyInit, requestInit: RequestInit] {
     let url = combineUrls(
       EchoEnv.env().REACT_APP_API_URL,
       'pdf-scanner',
       'scan-image'
     );
-    const requestInit: RequestInit = {
-      headers: {
-        'Content-Type': 'application/octet-stream'
-      }
-    };
 
-    return [url, capture, requestInit];
+    const formData = new FormData();
+    formData.append('iFormFile', capture);
+
+    const requestInit: RequestInit = {};
+
+    return [url, formData, requestInit];
   }
 }

@@ -44,9 +44,9 @@ async function performFetchAsync<TError>(
   url: string,
   init: RequestInit
 ): Promise<Response> {
-  const [method, options, body, abortSignal] = await transformRequestAsync(
-    init
-  );
+  const [method, options, body, abortSignal] =
+    await transformRequestAsync(init);
+
   const response = await EchoCore.EchoClient.fetch(
     url,
     options,
@@ -104,6 +104,11 @@ async function transformRequestAsync(
   const initheader = new Headers(init.headers);
   for (const header of initheader) {
     headerOptions[header[0]] = header[1];
+  }
+
+  // Allow browser to handle formdata content-type instead
+  if (init.body instanceof FormData) {
+    delete headerOptions['content-type'];
   }
 
   return [

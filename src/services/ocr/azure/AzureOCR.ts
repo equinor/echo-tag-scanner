@@ -1,32 +1,31 @@
+import { randomBytes } from 'crypto';
+
+import { TagSummaryDto } from '@equinor/echo-search';
 import { BackendError } from '@equinor/echo-base';
+
 import {
-  ComputerVisionResponse,
   MockWord,
   OCRPayload,
   OCRService,
   ParsedComputerVisionResponse,
-  Word
+  TextItem
 } from '@types';
 import {
+  Timer,
   handleError,
+  isProduction,
   logger,
   ocrFilterer,
-  isProduction,
-  uniqueStringArray,
-  reassembleSpecialTagCandidates,
   reassembleOrdinaryTagCandidates,
-  Timer,
-  combineUrls
+  reassembleSpecialTagCandidates
 } from '@utils';
 import { ErrorRegistry, homoglyphPairs } from '@const';
-import { baseApiClient } from '../api/base/base';
-import { randomBytes } from 'crypto';
-import { Debugger } from '../../cameraLogic/debugger';
-import { EchoEnv } from '@equinor/echo-core';
-import { AzureOCRValidator, OCRValidator } from './validator';
-import { TagSummaryDto } from '@equinor/echo-search';
+import { Debugger } from '@cameraLogic';
 
-export class AzureOCRv2 implements OCRService {
+import { baseApiClient } from '../../api/base/base';
+import { AzureOCRValidator } from './validator';
+
+export abstract class AzureOCR<Response> implements OCRService {
   private _attemptId?: string;
   /** Generates a pseudorandom sequence of 16 bytes and returns them hex encoded. */
   public get attemptId(): string {
@@ -55,69 +54,15 @@ export class AzureOCRv2 implements OCRService {
     });
   }
 
-  protected _tagCandidates: Word[] = [];
-  protected _validator: OCRValidator;
+  protected _tagCandidates: TextItem[] = [];
+  protected _validator: AzureOCRValidator;
 
-  constructor(validator: OCRValidator = new AzureOCRValidator()) {
+  constructor(validator: AzureOCRValidator = new AzureOCRValidator()) {
     this._attemptId = undefined;
 
     this._validator = validator;
     // Add testPostOcr function as callable from console for debugging purposes
     globalThis.testPostOCR = this.testPostOCR.bind(this);
-  }
-
-  public async runOCR(scan: Blob): Promise<{
-    ocrResponse: ParsedComputerVisionResponse;
-    networkRequestTimeTaken: number;
-    postOCRTimeTaken: number;
-  } | null> {
-    try {
-      const networkRequestTimer = new Timer();
-      networkRequestTimer.start();
-      const data = await this.postOCRRequest(scan);
-      const networkRequestTimeTaken = networkRequestTimer.stop();
-
-      const postOCRTimer = new Timer();
-      postOCRTimer.start();
-      const postProcessedResponse = this.handlePostOCR(data);
-      const postOCRTimeTaken = postOCRTimer.stop();
-
-      return {
-        ocrResponse: parseResponse(postProcessedResponse),
-        networkRequestTimeTaken: networkRequestTimeTaken,
-        postOCRTimeTaken: postOCRTimeTaken
-      };
-    } catch (error) {
-      if (error instanceof BackendError && error.httpStatusCode === 429) {
-        // Here we handle the event where users might go over the Computer vision usage quota.
-        // We do not percieve this as an error on the client side. The user will simply try again.
-        logger.log('EchoDevelopment', () =>
-          console.warn(
-            'The scan operation resulted in an overload in the usage quota for Computer Vision. This is normally not a problem and we simply return empty results to the users. This will prompt them to try again.'
-          )
-        );
-        return null;
-      } else {
-        logger.log('QA', () => console.error('API Error -> ', error));
-        throw handleError(ErrorRegistry.ocrError, error as Error);
-      }
-    }
-
-    /**
-     * Maps each postprocessed Word's text property into a simple array of strings.
-     */
-    function parseResponse(
-      response: ComputerVisionResponse
-    ): ParsedComputerVisionResponse {
-      const stringifiedWords: ParsedComputerVisionResponse = [];
-      response.regions.forEach((region) =>
-        region.lines.forEach((line) =>
-          line.words.forEach((word) => stringifiedWords.push(word.text))
-        )
-      );
-
-      return uniqueStringArray(stringifiedWords);
-    }
   }
 
   public handleValidation(
@@ -168,65 +113,71 @@ export class AzureOCRv2 implements OCRService {
     }
   }
 
-  // #region Azure OCR overridable utils
+  public async runOCR(scan: Blob): Promise<{
+    ocrResponse: ParsedComputerVisionResponse;
+    networkRequestTimeTaken: number;
+    postOCRTimeTaken: number;
+  } | null> {
+    try {
+      const networkRequestTimer = new Timer();
+      networkRequestTimer.start();
+      const data = await this.postOCRRequest(scan);
+      const networkRequestTimeTaken = networkRequestTimer.stop();
 
-  protected async postOCRRequest(scan: Blob): Promise<ComputerVisionResponse> {
+      const postOCRTimer = new Timer();
+      postOCRTimer.start();
+      const postProcessedResponse = this.handlePostOCR(data);
+      const postOCRTimeTaken = postOCRTimer.stop();
+
+      return {
+        ocrResponse: postProcessedResponse,
+        networkRequestTimeTaken: networkRequestTimeTaken,
+        postOCRTimeTaken: postOCRTimeTaken
+      };
+    } catch (error) {
+      if (error instanceof BackendError && error.httpStatusCode === 429) {
+        // Here we handle the event where users might go over the Computer vision usage quota.
+        // We do not percieve this as an error on the client side. The user will simply try again.
+        logger.log('EchoDevelopment', () =>
+          console.warn(
+            'The scan operation resulted in an overload in the usage quota for Computer Vision. This is normally not a problem and we simply return empty results to the users. This will prompt them to try again.'
+          )
+        );
+        return null;
+      } else {
+        logger.log('QA', () => console.error('API Error -> ', error));
+        throw handleError(ErrorRegistry.ocrError, error as Error);
+      }
+    }
+  }
+
+  protected async postOCRRequest(scan: Blob): Promise<Response> {
     const [url, body, init] = this.getComputerVisionOcrResources(scan);
     try {
-      const response = await baseApiClient.postAsync<ComputerVisionResponse>(
-        url,
-        body,
-        init
-      );
+      const response = await baseApiClient.postAsync<Response>(url, body, init);
       return response.data;
     } catch (error) {
       throw error;
     }
   }
 
-  protected handlePostOCR(response: ComputerVisionResponse) {
-    this.resetTagCandidates();
-    let clonedResponse = structuredClone<ComputerVisionResponse>(response);
+  // #region Abstracts
+  /**
+   * Parses the received OCR response into the expected ParsedComputerViwionResponse type.
+   */
+  protected abstract handlePostOCR(
+    response: Response
+  ): ParsedComputerVisionResponse;
+  /**
+   * Handles creating the Body and request headers relating to sending an image to ocr services.
+   */
+  protected abstract getComputerVisionOcrResources(
+    capture: Blob
+  ): [url: string, body: BodyInit, requestInit: RequestInit];
 
-    clonedResponse.regions.forEach((region, regionIndex) =>
-      region.lines.forEach((line, lineIndex) => {
-        const allWordsOnLine = line.words;
-        for (let i = 0; i < allWordsOnLine.length; i++) {
-          if (this.wordIsSpecialCase(allWordsOnLine[i].text)) {
-            allWordsOnLine[i].text = this.sanitize(
-              allWordsOnLine[i].text,
-              '()'
-            );
-          } else {
-            allWordsOnLine[i].text = this.sanitize(allWordsOnLine[i].text);
-            allWordsOnLine[i] = this.handleHomoglyphing(allWordsOnLine[i]);
-          }
-        }
+  // #endregion
 
-        const specialCases = reassembleSpecialTagCandidates(
-          allWordsOnLine,
-          '(M)'
-        );
-        specialCases.push(
-          ...reassembleSpecialTagCandidates(allWordsOnLine, '(C)')
-        );
-
-        const ordinaryCases = reassembleOrdinaryTagCandidates(allWordsOnLine);
-        this._tagCandidates.push(...specialCases);
-        this._tagCandidates.push(...ordinaryCases);
-
-        clonedResponse.regions[regionIndex].lines[lineIndex].words =
-          this._tagCandidates;
-      })
-    );
-
-    !isProduction &&
-      Debugger.reportFiltration(
-        this._tagCandidates.map((candidate) => candidate.text)
-      );
-    return clonedResponse;
-  }
-
+  // #region OCR Utils
   protected resetTagCandidates() {
     this._tagCandidates = [];
   }
@@ -252,7 +203,7 @@ export class AzureOCRv2 implements OCRService {
   }
 
   /** Handles the homoglyphing substitution on the word level. */
-  protected handleHomoglyphing(word: Word): Word {
+  protected handleHomoglyphing(word: TextItem): TextItem {
     let original = word.text;
     let alteredOriginal: string | undefined = undefined;
     let lineTagIdentifier = '';
@@ -288,23 +239,5 @@ export class AzureOCRv2 implements OCRService {
       return char;
     }
   }
-
-  protected getComputerVisionOcrResources(
-    capture: Blob
-  ): [url: string, body: BodyInit, requestInit: RequestInit] {
-    let url = combineUrls(
-      EchoEnv.env().REACT_APP_API_URL,
-      'tag-scanner',
-      'scan-image'
-    );
-    const requestInit: RequestInit = {
-      headers: {
-        'Content-Type': 'application/octet-stream'
-      }
-    };
-
-    return [url, capture, requestInit];
-  }
-
   // #endregion
 }

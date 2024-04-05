@@ -3,6 +3,7 @@ import { Search, TagSummaryDto } from '@equinor/echo-search';
 import {
   FailedTagValidation,
   OCRPayload,
+  OCRValidator,
   ParsedComputerVisionResponse,
   TagValidationResult,
   ValidationStats
@@ -10,15 +11,6 @@ import {
 import { Timer, filterBy, isProduction } from '@utils';
 import { Debugger } from '@cameraLogic';
 
-export interface OCRValidator {
-  handleValidation(
-    attemptId: string,
-    unvalidatedTags: ParsedComputerVisionResponse
-  ): Promise<{
-    validatedTags: TagSummaryDto[];
-    validationLogEntry?: OCRPayload;
-  }>;
-}
 export class AzureOCRValidator implements OCRValidator {
   public async handleValidation(
     attemptId: string,
@@ -28,7 +20,7 @@ export class AzureOCRValidator implements OCRValidator {
     validationLogEntry?: OCRPayload;
   }> {
     const tagValidationTasks = unvalidatedTags.map((funcLocation) =>
-      this.createTagValidator(funcLocation)
+      this.createTagValidator(funcLocation.text)
     );
     const tagValidationResults = await Promise.allSettled([
       ...tagValidationTasks

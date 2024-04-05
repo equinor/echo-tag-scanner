@@ -1,34 +1,6 @@
-type ComputerVisionResponse = {
-  language: string;
-  textAngle: number;
-  orientation: 'Up' | 'Down' | 'Left' | 'Right';
-  regions: Region[];
-  modelVersion: string;
-};
+export type MockWord = Pick<TextItem, 'text'>;
 
-type Region = {
-  boundingBox?: BoundingBox;
-  lines: Lines[];
-};
-
-export type Lines = {
-  boundingBox?: BoundingBox;
-  words: Word[];
-};
-
-export type Word = {
-  boundingBox?: BoundingBox;
+export type TextItem = {
   text: string;
 };
-
-export type MockWord = Pick<Word, 'text'>;
-
-
-/**
- * example: "462,379,497,258"
- */
-type BoundingBox = string;
-
-type ParsedComputerVisionResponse = string[];
-
-export type { ComputerVisionResponse, ParsedComputerVisionResponse };
+export type ParsedComputerVisionResponse = TextItem[];

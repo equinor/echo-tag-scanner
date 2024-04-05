@@ -1,12 +1,14 @@
-import { Word } from '../types';
+import { TextItem } from '../types';
 import { ocrFilterer } from './filtering';
 
-export function reassembleOrdinaryTagCandidates(words: Word[]): Word[] {
-  let clonedWords = structuredClone<Word[]>(words);
+export function reassembleOrdinaryTagCandidates<T extends TextItem>(
+  words: T[]
+): T[] {
+  let clonedWords = structuredClone<T[]>(words);
   clonedWords = clonedWords.filter((w) => w.text);
 
-  let reassembledTagCandidates: Word[] = [];
-  let preAssembledTagCandidates: Word[] = [];
+  let reassembledTagCandidates: T[] = [];
+  let preAssembledTagCandidates: T[] = [];
 
   /**
    * Before assembly, record any indices which are already valid tag candidates.
@@ -28,9 +30,9 @@ export function reassembleOrdinaryTagCandidates(words: Word[]): Word[] {
         if (isValidTagCandidate(assembledTag)) {
           if (!clonedWords.find((word) => word.text === assembledTag)) {
             reassembledTagCandidates.push({
-              boundingBox: clonedWords[i].boundingBox,
+              ...clonedWords[i],
               text: assembledTag
-            } as Word);
+            } as T);
           }
         }
       }
@@ -40,15 +42,15 @@ export function reassembleOrdinaryTagCandidates(words: Word[]): Word[] {
   return [...preAssembledTagCandidates, ...reassembledTagCandidates];
 }
 
-export function reassembleSpecialTagCandidates(
-  words: Word[],
+export function reassembleSpecialTagCandidates<T extends TextItem>(
+  words: T[],
   identifier: string
-): Word[] {
-  const clonedWords = structuredClone<Word[]>(words);
+): T[] {
+  const clonedWords = structuredClone<T[]>(words);
   const identifierIndex = clonedWords.findIndex((w) =>
     w.text.includes(identifier)
   );
-  const specialTagCandidates: Word[] = clonedWords.filter(
+  const specialTagCandidates: T[] = clonedWords.filter(
     (word) =>
       word.text.includes(identifier) && isValidSpecialTagCandidate(word.text)
   );
@@ -60,7 +62,7 @@ export function reassembleSpecialTagCandidates(
   const relevantWords = clonedWords.slice(0, identifierIndex + 1);
 
   let assembledSpecialCandidate: string = '';
-  const identifierWord: Word = relevantWords[identifierIndex];
+  const identifierWord: T = relevantWords[identifierIndex];
   /**
    * Here we do a series of string concats while looping backwards in the word array.
    * ["foo", "bar", "(M)", "baz", "(M)"] <-- We start from the first occurence of (M) and concat backwards.
@@ -70,7 +72,7 @@ export function reassembleSpecialTagCandidates(
       assembledSpecialCandidate =
         relevantWords[i - 1].text + assembledSpecialCandidate;
       if (isValidSpecialTagCandidate(assembledSpecialCandidate)) {
-        const clonedIdentifier = structuredClone<Word>(identifierWord);
+        const clonedIdentifier = structuredClone<T>(identifierWord);
         clonedIdentifier.text = assembledSpecialCandidate + identifierWord.text;
         specialTagCandidates.push(clonedIdentifier);
       }

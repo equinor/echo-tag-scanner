@@ -4,7 +4,7 @@ import { deviceInfo, useEffectAsync } from '@equinor/echo-utils';
 
 import { ScannerProps } from '@types';
 import { isProduction } from '@utils';
-import { OCR } from '@services';
+import { AzureOCRv4 } from '@services';
 
 import { TagScanner } from '../cameraLogic/scanner';
 import { Debugger } from '../cameraLogic/debugger';
@@ -28,7 +28,7 @@ export function useMountScanner(
       canvas,
       deviceInformation: deviceInfo,
       scanningArea,
-      ocrService: new OCR()
+      ocrService: new AzureOCRv4()
     };
 
     const camera = new TagScanner(props);

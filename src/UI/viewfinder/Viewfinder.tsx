@@ -57,8 +57,8 @@ const Viewfinder = (props: ViewfinderProps): JSX.Element => {
         muted
         disablePictureInPicture
         controls={false}
-        zoomFactor={zoomBehaviour.zoomFactor}
-        translateOffset={zoomBehaviour.translateOffset}
+        $zoomFactor={zoomBehaviour.zoomFactor}
+        $translateOffset={zoomBehaviour.translateOffset}
       />
 
       <SafeAreaCover id="safe-area-cover" />
@@ -99,9 +99,26 @@ const SafeAreaCover = styled.div`
   }
 `;
 
+const Input = styled.input.attrs<{ $size?: string; }>(props => ({
+  // we can define static props
+  type: "text",
+
+  // or we can define dynamic ones
+  $size: props.$size || "1em",
+}))`
+  color: #BF4F74;
+  font-size: 1em;
+  border: 2px solid #BF4F74;
+  border-radius: 3px;
+
+  /* here we use the dynamically computed prop */
+  margin: ${props => props.size};
+  padding: ${props => props.size};
+`;
+
 const CameraFeed = styled.video<{
-  zoomFactor: number;
-  translateOffset: number;
+  $zoomFactor: number;
+  $translateOffset: number;
 }>`
   // Centering of absolutely placed elements
   position: absolute;
@@ -110,17 +127,16 @@ const CameraFeed = styled.video<{
 
   background-color: var(--black);
   transition: all 0.3s ease;
-  z-index: ${zIndexes.viewfinder};
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
 
   //--Zoom behavior--//
   transform: translate(
-    -${(props) => String(props.translateOffset)}%,
-    -${(props) => String(props.translateOffset)}%
+    -${(props) => String(props.$translateOffset)}%,
+    -${(props) => String(props.$translateOffset)}%
   );
-  scale: ${(props) => String(props.zoomFactor)};
+  scale: ${(props) => String(props.$zoomFactor)};
 `;
 
 export { Viewfinder };

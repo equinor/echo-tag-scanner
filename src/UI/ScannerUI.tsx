@@ -54,7 +54,7 @@ function Scanner({ stream, viewfinder, canvas, scanningArea }: ScannerProps) {
         tagScanner={tagScanner}
         tagSearch={tagSearch}
         resetValidatedTags={() => {
-          tagScanner?.prepareNewScan().then(resetValidatedTags);
+          resetValidatedTags();
         }}
       />
 

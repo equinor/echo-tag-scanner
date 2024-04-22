@@ -15,7 +15,7 @@ export const DeveloperTools = (props: DeveloperToolsProps): JSX.Element => {
         viewfinder={props.viewfinder}
       />
 
-      <CapturePreview camera={props.tagScanner} />
+      <CapturePreview />
 
       <SystemInfoTrigger
         getContentsForClipboard={() => Debugger.clipboardThis(props.tagScanner)}

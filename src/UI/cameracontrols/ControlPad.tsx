@@ -61,4 +61,3 @@ const ControlPadWrapper = styled.section`
     width: var(--control-pad-width-landscape);
   }
 `;
-

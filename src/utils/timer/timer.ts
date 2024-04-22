@@ -2,7 +2,6 @@ interface TimerProps {
   maxTime?: number;
 }
 
-
 export class Timer {
   /** Time elapsed is stored as milliseconds. */
   private _timeElapsed = 0;

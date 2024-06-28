@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Icon, Button } from '@equinor/eds-core-react';
 
 export const CloseButton = (): JSX.Element => {
+  
   function goToEcho() {
     if (globalThis.history.state != null) history.back();
     else {

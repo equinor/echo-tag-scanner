@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@equinor/echo-base": "~0.7.0",
-    "@equinor/echo-cli": "^0.13.14",
+    "@equinor/echo-cli": "^0.14.8",
     "@equinor/echo-components": "^0.11.6",
     "@equinor/echo-core": "^0.9.8",
     "@equinor/echo-framework": "^0.18.11",

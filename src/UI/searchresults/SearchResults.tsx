@@ -9,7 +9,25 @@ import { zIndexes } from '@const';
 
 interface SearchResultsProps {
   tagSummary: TagSummaryDto[];
-  onTagSearch: (tagNumber: string) => void;
+  onTagSearch: (
+    argsORtagNo:
+      | string
+      | {
+          tagNo: string;
+          activeTagTab?: string;
+          activeTagSubTab?: string;
+          instCode?: string;
+          activePanelKey?: string;
+          keepLastNavigationItem?: boolean;
+          openInPanel?: boolean;
+          displayMessageOnItemNotFound?: boolean;
+        },
+    activeTagTab?: string,
+    activeTagSubTab?: string,
+    instCode?: string,
+    openInPanel?: boolean,
+    displayMessageOnItemNotFound?: boolean
+  ) => void;
   onClose: () => void;
 }
 
@@ -37,7 +55,9 @@ const SearchResults = (props: SearchResultsProps): JSX.Element | null => {
       <SearchResult
         key={index}
         expanded
-        openTagInformation={() => props.onTagSearch(tag.tagNo)}
+        openTagInformation={() =>
+          props.onTagSearch({ tagNo: tag.tagNo, openInPanel: true })
+        }
         tagNo={tag.tagNo}
         selected={false}
       >

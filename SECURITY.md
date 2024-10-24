@@ -15,4 +15,3 @@ The following information will help us triage your report more quickly:
 
 We prefer all communications to be in English.
 
----

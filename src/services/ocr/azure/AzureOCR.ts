@@ -1,5 +1,3 @@
-import { randomBytes } from 'crypto';
-
 import { TagSummaryDto } from '@equinor/echo-search';
 import { BackendError } from '@equinor/echo-base';
 
@@ -36,22 +34,10 @@ export abstract class AzureOCR<Response> implements OCRService {
     return this._attemptId;
   }
 
-  public refreshAttemptId(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      randomBytes(16, (hashError, bufferContents) => {
-        if (hashError) {
-          reject('The random ID generation failed.');
-          logger.log('Prod', () => console.error(hashError));
-
-          // Error is thrown here for now to spare the one call site from using an ugly try catch block
-          throw new Error(hashError.message);
-        }
-
-        const newId = bufferContents.toString('hex');
-        this._attemptId = newId;
-        resolve(newId);
-      });
-    });
+  public refreshAttemptId(): string {
+    const uuid = globalThis.crypto.randomUUID();
+    this._attemptId = uuid;
+    return uuid;
   }
 
   protected _tagCandidates: TextItem[] = [];

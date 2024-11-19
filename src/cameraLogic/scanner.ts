@@ -73,7 +73,7 @@ export class TagScanner extends Camera {
    * Runs OCR and tag validation on a list of blobs until a result is obtained or it reaches the end of the list.
    */
   public async ocr(scans: Blob[]): Promise<TagSummaryDto[]> {
-    await this._OCR.refreshAttemptId();
+    this._OCR.refreshAttemptId();
 
     const timers: Timers = {
       networkRequestTimeTaken: 0,

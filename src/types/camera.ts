@@ -9,7 +9,7 @@ export interface ScannerProps extends CameraProps {
 }
 
 export interface OCRService {
-  refreshAttemptId(): Promise<string>;
+  refreshAttemptId(): string;
   runOCR(scan: Blob): Promise<{
     ocrResponse: ParsedComputerVisionResponse;
     networkRequestTimeTaken: number;

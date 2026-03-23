@@ -27,7 +27,9 @@ export class CanvasHandler {
     }
 
     this._canvas = canvas;
-    this._canvasContext = context;
+    this._canvasContext = context as
+      | CanvasRenderingContext2D
+      | OffscreenCanvasRenderingContext2D;
     this._standardCanvasDimensions = {
       width: this._canvas.width,
       height: this._canvas.height

@@ -22,7 +22,9 @@ interface DebugInfoOverlayProps {
   tagScanner: TagScanner;
 }
 
-export const DebugInfoOverlay = (props: DebugInfoOverlayProps): JSX.Element => {
+export const DebugInfoOverlay = (
+  props: DebugInfoOverlayProps
+): React.JSX.Element => {
   const [debugInfo, setDebugInfo] = useState<DebugInfo>({
     viewfinder: {
       width: props.viewfinder.width,

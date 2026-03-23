@@ -28,7 +28,7 @@ type ZoomBehavior = {
  * This component represents a viewfinder which we find on modern cameras.
  * Everything in this component should be read-only (or maybe view-only), no interaction like buttons or gestures are allowed.
  */
-const Viewfinder = (props: ViewfinderProps): JSX.Element => {
+const Viewfinder = (props: ViewfinderProps): React.JSX.Element => {
   const [zoomBehaviour, setZoomBehaviour] = useState<ZoomBehavior>({
     zoomFactor: 1,
     translateOffset: 50

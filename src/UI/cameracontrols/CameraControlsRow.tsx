@@ -23,7 +23,7 @@ interface CameraControlsProps {
  * @param {callback} - The scanning action
  * @param {callback} - The torch action. If undefined, the torch button is disabled.
  */
-const CameraControlsRow = (props: CameraControlsProps): JSX.Element => {
+const CameraControlsRow = (props: CameraControlsProps): React.JSX.Element => {
   return (
     <RowGrid role="toolbar">
       {props.supportedFeatures.torch && (

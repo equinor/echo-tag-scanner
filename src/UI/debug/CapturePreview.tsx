@@ -19,7 +19,7 @@ type Preview = {
   size: number;
 };
 
-export const CapturePreview = (): JSX.Element | null => {
+export const CapturePreview = (): React.JSX.Element | null => {
   const [show, setShow] = useState(false);
 
   const [captureDetails, setCaptureDetails] = useState<

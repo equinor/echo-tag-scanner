@@ -3,7 +3,9 @@ import styled from 'styled-components';
 import { CircularProgress, Dialog } from '@equinor/eds-core-react';
 import { zIndexes } from '@const';
 
-const ScanningIndicator = (message?: string | JSX.Element): JSX.Element => {
+const ScanningIndicator = (
+  message?: string | React.JSX.Element
+): React.JSX.Element => {
   function renderMessage() {
     if (typeof message === 'string') {
       return <span>{message || 'Analyzing...'}</span>;

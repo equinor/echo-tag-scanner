@@ -9,7 +9,7 @@ interface ToastProps extends SnackbarProps {
   autoHideDuration?: number;
 }
 
-const Toast = (props: ToastProps): JSX.Element => {
+const Toast = (props: ToastProps): React.JSX.Element => {
   return (
     <Snackbar
       className={props.className}

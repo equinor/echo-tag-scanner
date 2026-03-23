@@ -187,7 +187,7 @@ class Camera extends CoreCamera {
       }
     });
 
-    function rejectZoom(reason: MediaStreamError | 'invalid range') {
+    function rejectZoom(reason: DOMException | Error | 'invalid range') {
       logger.log('QA', () => {
         console.error(
           'Encountered an error while performing native zoom. -> ',

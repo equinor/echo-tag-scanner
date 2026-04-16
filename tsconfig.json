@@ -23,7 +23,6 @@
     "moduleResolution": "node",
     "downlevelIteration": true,
     "types": [
-      "@equinor/echo-scripts",
       "@types/webpack-env",
       "@types/node",
       "@types/w3c-image-capture"

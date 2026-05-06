@@ -7,7 +7,9 @@ interface DeveloperToolsProps {
   viewfinder: HTMLVideoElement;
 }
 
-export const DeveloperTools = (props: DeveloperToolsProps): JSX.Element => {
+export const DeveloperTools = (
+  props: DeveloperToolsProps
+): React.JSX.Element => {
   return (
     <>
       <DebugInfoOverlay

@@ -3,7 +3,7 @@ import { DialogGenerator } from '@equinor/echo-components';
 import { Dialog, Progress } from '@equinor/eds-core-react';
 import './vars.css';
 
-const FallbackLoading = (): JSX.Element => {
+const FallbackLoading = (): React.JSX.Element => {
   return (
     <DialogGenerator
       title="Loading Echo Tag Scanner..."

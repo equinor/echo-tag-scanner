@@ -3,7 +3,7 @@ import { Snackbar } from '@equinor/eds-core-react';
 import { etsStorage } from '@utils';
 import styled from 'styled-components';
 
-export const ZoomTutorial = (): JSX.Element | null => {
+export const ZoomTutorial = (): React.JSX.Element | null => {
   const [dismissed, setDismissed] = useState(
     Boolean(etsStorage.read('ets-zoom-tutorial-dismissed'))
   );

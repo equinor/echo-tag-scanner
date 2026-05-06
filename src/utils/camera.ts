@@ -1,19 +1,20 @@
-import { Camera, CoreCamera } from "@cameraLogic";
+import { Camera, CoreCamera } from '@cameraLogic';
 import {
-  getNotificationDispatcher as dispatchNotification, isLocalDevelopment,
-} from "@utils";
-import { ZoomMethod } from "@types";
-import { fixedCameraSettingsRequest } from "@const";
+  getNotificationDispatcher as dispatchNotification,
+  isLocalDevelopment
+} from '@utils';
+import { ZoomMethod } from '@types';
+import { fixedCameraSettingsRequest } from '@const';
 
 function assignZoomSettings(
-  type: "min" | "max" | "step" | "value",
-  camera: Camera,
+  type: 'min' | 'max' | 'step' | 'value',
+  camera: Camera
 ): string {
-  if (type === "value") {
+  if (type === 'value') {
     if (camera.videoTrackSettings?.zoom) {
       return String(camera.videoTrackSettings.zoom);
     } else {
-      return "1";
+      return '1';
     }
   }
   if (camera.capabilities?.zoom) {
@@ -23,7 +24,7 @@ function assignZoomSettings(
   }
   // If zoom capabilities does not exist, we need to return a stringified zero
   // to prevent a stringified undefined to be assigned to the zoom slider.
-  return "0";
+  return '0';
 }
 
 /**
@@ -36,7 +37,7 @@ function getTorchToggleProvider(camera: Camera) {
     };
 
     const onToggleUnsupportedTorch = () => {
-      dispatchNotification("The torch is not supported on this device.")();
+      dispatchNotification('The torch is not supported on this device.')();
     };
 
     if (camera.capabilities?.torch) {
@@ -49,23 +50,23 @@ function getTorchToggleProvider(camera: Camera) {
 
 function determineZoomMethod(this: CoreCamera): ZoomMethod {
   // Device has native support.
-  if (this.capabilities?.zoom) {
+  const capabilities = this.capabilities;
+  if (capabilities?.zoom) {
     // Ensure the max zoom is not above 3.
-    const maxZoom = this.capabilities?.zoom.max > 3
-      ? 3
-      : this.capabilities?.zoom.max;
+    const rawMax = capabilities.zoom.max ?? 3;
+    const maxZoom = rawMax > 3 ? 3 : rawMax;
     return {
-      type: "native",
+      type: 'native',
       min: 1,
-      max: maxZoom,
+      max: maxZoom
     } as ZoomMethod;
 
     // Device does not have native support, fall back to simulated zoom.
   } else {
     return {
-      type: "simulated",
+      type: 'simulated',
       min: 1,
-      max: 2,
+      max: 2
     } as ZoomMethod;
   }
 }
@@ -90,7 +91,9 @@ function getCameraPreferences(): MediaStreamConstraints {
         ideal: cameraSettingsRequest.fps?.ideal
       },
 
-      facingMode: isLocalDevelopment ? {ideal: "environment"} : { exact: 'environment' }
+      facingMode: isLocalDevelopment
+        ? { ideal: 'environment' }
+        : { exact: 'environment' }
     },
     audio: false
   } as MediaStreamConstraints;
@@ -100,5 +103,5 @@ export {
   assignZoomSettings,
   determineZoomMethod,
   getCameraPreferences,
-  getTorchToggleProvider,
+  getTorchToggleProvider
 };

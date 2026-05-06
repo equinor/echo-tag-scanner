@@ -2,10 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { Icon, Button } from '@equinor/eds-core-react';
 
-export const CloseButton = (): JSX.Element => {
-  
+export const CloseButton = (): React.JSX.Element => {
   function goToEcho() {
-    globalThis.location.replace("/");
+    globalThis.location.replace('/');
   }
 
   return (

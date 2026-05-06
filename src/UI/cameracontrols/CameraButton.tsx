@@ -10,7 +10,7 @@ interface TorchButtonProps {
 /**
  * Returns a button for toggling the torch feature.
  */
-const TorchButton = (props: TorchButtonProps): JSX.Element => {
+const TorchButton = (props: TorchButtonProps): React.JSX.Element => {
   const torchButtonRef = useRef<HTMLButtonElement>(null);
 
   function handleTorchToggling() {
@@ -49,7 +49,7 @@ interface CaptureButtonProps {
 /**
  * Returns a custom camera tag scanning button.
  */
-const ScannerButton = (props: CaptureButtonProps): JSX.Element => {
+const ScannerButton = (props: CaptureButtonProps): React.JSX.Element => {
   if (props.isDisabled) {
     return <DisabledScannerButton id={props.id} />;
   } else if (props.isScanning) {

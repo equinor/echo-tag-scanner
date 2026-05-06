@@ -5,7 +5,7 @@ import { zIndexes } from '@const';
 import { Typography } from '@equinor/eds-core-react';
 import { isProduction } from '@utils';
 
-export const LabelAndClose = (): JSX.Element => {
+export const LabelAndClose = (): React.JSX.Element => {
   return (
     <StyledLabelAndClose role="toolbar">
       <span>

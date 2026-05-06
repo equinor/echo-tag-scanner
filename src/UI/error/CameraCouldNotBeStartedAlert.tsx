@@ -8,7 +8,7 @@ type CameraCouldNotBeStartedAlertProps = {
 
 const CameraCouldNotBeStartedAlert = (
   props: CameraCouldNotBeStartedAlertProps
-): JSX.Element => {
+): React.JSX.Element => {
   props.error.toString = function () {
     if (this instanceof OverconstrainedError) {
       return this.constraint + ' , ' + this.message + ' , ' + this.name;
@@ -60,7 +60,7 @@ const CameraCouldNotBeStartedAlert = (
   );
 };
 
-function getReasons(error: Error): JSX.Element | undefined {
+function getReasons(error: Error): React.JSX.Element | undefined {
   if (error instanceof OverconstrainedError) {
     return (
       <>

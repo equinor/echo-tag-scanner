@@ -1,4 +1,4 @@
-import React, { SyntheticEvent, useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { Button, Icon } from '@equinor/eds-core-react';
@@ -19,7 +19,7 @@ type Preview = {
   size: number;
 };
 
-export const CapturePreview = (): JSX.Element | null => {
+export const CapturePreview = (): React.JSX.Element | null => {
   const [show, setShow] = useState(false);
 
   const [captureDetails, setCaptureDetails] = useState<

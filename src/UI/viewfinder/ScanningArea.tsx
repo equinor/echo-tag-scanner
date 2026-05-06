@@ -7,7 +7,7 @@ interface ScanningAreaProps {
   setCanvasRef: Dispatch<SetStateAction<HTMLCanvasElement | undefined>>;
 }
 
-const ScanningArea = (props: ScanningAreaProps): JSX.Element => {
+const ScanningArea = (props: ScanningAreaProps): React.JSX.Element => {
   return (
     <>
       <ScanningAreaContainer

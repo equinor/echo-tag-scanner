@@ -31,7 +31,7 @@ interface SearchResultsProps {
   onClose: () => void;
 }
 
-const SearchResults = (props: SearchResultsProps): JSX.Element | null => {
+const SearchResults = (props: SearchResultsProps): React.JSX.Element | null => {
   // Log new tag summaries as they arrive.
   useEffect(() => {
     function logTagSummaries() {

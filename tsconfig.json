@@ -16,16 +16,16 @@
     "removeComments": true,
     "strict": true,
     "allowSyntheticDefaultImports": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "downlevelIteration": true,
     "types": [
-      "@equinor/echo-scripts",
       "@types/webpack-env",
       "@types/node",
-      "@types/w3c-image-capture",
+      "@types/w3c-image-capture"
     ],
     "baseUrl": ".",
     "paths": {

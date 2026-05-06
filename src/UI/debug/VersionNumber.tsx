@@ -4,7 +4,7 @@ import { isDevelopment, isQA, isLocalDevelopment } from '@utils';
 import { zIndexes } from '@const';
 import styled from 'styled-components';
 
-export const VersionNumber = (): JSX.Element => {
+export const VersionNumber = (): React.JSX.Element => {
   function getEnv() {
     if (isLocalDevelopment) return 'Local Dev';
     if (isDevelopment) return 'Dev';

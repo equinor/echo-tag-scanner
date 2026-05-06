@@ -24,6 +24,7 @@ local.log
 .env.production.local
 /webpack/remote.babel.js
 /src/staleCode/*
+/echo-dev-host-tmp
 
 env-config.js
 /public/env-config.js

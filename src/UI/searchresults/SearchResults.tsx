@@ -2,32 +2,14 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { Button } from '@equinor/eds-core-react';
 import { TagContextMenu, TagIcon, getIcon } from '@equinor/echo-components';
-import { getLegendStatusColor } from '@equinor/echo-framework';
+import { getLegendStatusColor, SetActiveTagNo } from '@equinor/echo-framework';
 import { TagSummaryDto } from '@equinor/echo-search';
 import { logger, isDevelopment } from '@utils';
 import { zIndexes } from '@const';
 
 interface SearchResultsProps {
   tagSummary: TagSummaryDto[];
-  onTagSearch: (
-    argsORtagNo:
-      | string
-      | {
-          tagNo: string;
-          activeTagTab?: string;
-          activeTagSubTab?: string;
-          instCode?: string;
-          activePanelKey?: string;
-          keepLastNavigationItem?: boolean;
-          openInPanel?: boolean;
-          displayMessageOnItemNotFound?: boolean;
-        },
-    activeTagTab?: string,
-    activeTagSubTab?: string,
-    instCode?: string,
-    openInPanel?: boolean,
-    displayMessageOnItemNotFound?: boolean
-  ) => void;
+  onTagSearch: SetActiveTagNo;
   onClose: () => void;
 }
 

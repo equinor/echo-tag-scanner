@@ -12,8 +12,7 @@ export class CanvasHandler {
   private readonly _standardCanvasDimensions: CanvasDimensions;
   private _canvas: HTMLCanvasElement | OffscreenCanvas;
   private _canvasContext:
-    | CanvasRenderingContext2D
-    | OffscreenCanvasRenderingContext2D;
+    CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
   constructor(canvas: HTMLCanvasElement | OffscreenCanvas) {
     if (!canvas)
@@ -28,8 +27,7 @@ export class CanvasHandler {
 
     this._canvas = canvas;
     this._canvasContext = context as
-      | CanvasRenderingContext2D
-      | OffscreenCanvasRenderingContext2D;
+      CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
     this._standardCanvasDimensions = {
       width: this._canvas.width,
       height: this._canvas.height

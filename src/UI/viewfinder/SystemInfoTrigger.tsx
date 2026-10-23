@@ -57,9 +57,9 @@ const InvisibleButton = styled.button`
   user-select: none;
   -webkit-user-select: none; /*Safari*/
   -moz-user-select: none; /*Firefox*/
-  outline: ${isLocalDevelopment || isDevelopment
-    ? '1px dotted var(--asBuilt)'
-    : 'inital'};
+  outline: ${
+    isLocalDevelopment || isDevelopment ? '1px dotted var(--asBuilt)' : 'inital'
+  };
 
   @media screen and (orientation: landscape) {
     top: unset;

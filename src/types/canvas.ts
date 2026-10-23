@@ -24,10 +24,7 @@ export type CanvasDimensions = {
 };
 
 export type AllowedMimeTypes =
-  | 'image/bmp'
-  | 'image/png'
-  | 'image/jpeg'
-  | 'image/tiff';
+  'image/bmp' | 'image/png' | 'image/jpeg' | 'image/tiff';
 
 export type CropSettings = Pick<
   DrawImageParameters,

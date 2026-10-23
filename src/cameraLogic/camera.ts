@@ -29,9 +29,7 @@ class Camera extends CoreCamera {
   /** Is the torch turned on or not. */
   private _torchState = false;
   private _orientationChangeHandler:
-    | 'DeviceOrientationAPI'
-    | 'MatchMedia'
-    | null;
+    'DeviceOrientationAPI' | 'MatchMedia' | null;
 
   constructor(props: CameraProps) {
     super(props);

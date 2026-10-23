@@ -21,12 +21,7 @@ export type DeviceUsage = {
   zoomValue: number;
 };
 export type WorkingPlatforms =
-  | 'Android'
-  | 'Linux'
-  | 'MacOs'
-  | 'iOS'
-  | 'iPadOS'
-  | 'Windows';
+  'Android' | 'Linux' | 'MacOs' | 'iOS' | 'iPadOS' | 'Windows';
 
 export type DeviceInformation = {
   operatingSystem: string;
@@ -50,6 +45,4 @@ export type ScanAttemptLogEntry = {
 
 /** Represents a "flattened" ScanAttemptLogEntry. */
 export type FlatScanAttemptLogEntry =
-  | (DeviceUsage & DeviceInformation)
-  | OCRPayload
-  | Timers;
+  (DeviceUsage & DeviceInformation) | OCRPayload | Timers;

@@ -64,7 +64,7 @@ export const ErrorRegistry: IErrorRegistry = {
   },
   autoplayFailed: {
     key: ErrorKey.EchoCameraRuntimeErrors,
-    severity: "high",
-    userMessage: "The web browser did not allow us to autoplay the viewfinder."
+    severity: 'high',
+    userMessage: 'The web browser did not allow us to autoplay the viewfinder.'
   }
 } as const;

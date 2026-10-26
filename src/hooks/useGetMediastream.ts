@@ -19,9 +19,8 @@ export function useGetMediastream(): Payload {
   EchoUtils.Hooks.useEffectAsync(async () => {
     try {
       const cameraPreferences = getCameraPreferences();
-      const stream = await navigator.mediaDevices.getUserMedia(
-        cameraPreferences
-      );
+      const stream =
+        await navigator.mediaDevices.getUserMedia(cameraPreferences);
       setStream(stream);
       setRequestStatus('allowed');
     } catch (cameraRequestError) {

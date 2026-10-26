@@ -1,4 +1,5 @@
 .env
+env-config.js
 env.sh
 .d.ts
 scripts/*.js

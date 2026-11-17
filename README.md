@@ -23,7 +23,7 @@ Otherwise, other bugs and improvements are recorded under [Operations](https://d
 
 1. Clone the repo
 2. ```npm install```
-4. ```npm start``` -> a webpack dev server instance is available at https://localhost:3000
+4. ```npm start``` -> a webpack dev server instance is available at https://localhost:3001
 
 ## Coding rules
 This project has no contrived coding rules or best practices from AirBnb or whatever.

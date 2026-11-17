@@ -20,35 +20,34 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "downlevelIteration": true,
+    "moduleResolution": "bundler",
+    "resolvePackageJsonExports": false,
     "types": [
       "@types/webpack-env",
       "@types/node",
       "@types/w3c-image-capture"
     ],
-    "baseUrl": ".",
     "paths": {
       "@ui": [
-        "src/UI/"
+        "./src/UI/"
       ],
       "@cameraLogic": [
-        "src/cameraLogic/"
+        "./src/cameraLogic/"
       ],
       "@const": [
-        "src/const/"
+        "./src/const/"
       ],
       "@hooks": [
-        "src/hooks/"
+        "./src/hooks/"
       ],
       "@services": [
-        "src/services/"
+        "./src/services/"
       ],
       "@types": [
-        "src/types/"
+        "./src/types/"
       ],
       "@utils": [
-        "src/utils/"
+        "./src/utils/"
       ]
     }
   }

@@ -289,7 +289,7 @@ Generate a copy-pasteable code block with one alert table for this repository.
 
 - Run `npm ci` in the repo root to verify the lockfile installs cleanly
 - Run `npm run build` — the module build should succeed
-- Run `npm start` — the local dev server should start at `https://localhost:3000`
+- Run `npm start` — the local dev server should start at `https://localhost:3001`
 - Run `npm run lint` — ESLint should pass
 - Verify `npm ls {package}` shows patched versions
 - Run `npm audit` — no new warnings introduced

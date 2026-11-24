@@ -34,8 +34,8 @@
         "@types/styled-components": "5.1.36",
         "@types/w3c-image-capture": "1.0.11",
         "@types/webpack-env": "1.18.8",
-        "@typescript-eslint/parser": "8.70.1",
-        "eslint": "10.14.0",
+        "@typescript-eslint/parser": "8.73.0",
+        "eslint": "10.15.0",
         "eslint-config-prettier": "10.1.8",
         "eslint-plugin-prettier": "5.5.7",
         "eslint-plugin-react": "7.37.5",
@@ -51,6 +51,7 @@
             "eslint": "$eslint"
         },
         "@equinor/echo-cli": {
+            "@oclif/core@5.1": "5.1.12",
             "ajv": {
                 "fast-uri@3": "^3.1.9"
             }

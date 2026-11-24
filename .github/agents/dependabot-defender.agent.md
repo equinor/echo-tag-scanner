@@ -85,7 +85,7 @@ Run all subsequent npm commands (`npm ls`, `npm audit`, `npm install`, etc.) fro
 
 1. `npm run build` — run for dependency changes; it is the project's production build
 2. `npm run lint` — run for code and dependency changes
-3. `npm start` — when build tooling or local development behavior changes, verify the dev server starts at `https://localhost:3000`
+3. `npm start` — when build tooling or local development behavior changes, verify the dev server starts at `https://localhost:3001`
 4. Run focused tests only if a relevant test exists; there is no configured test script in this repository. CI's static web app deployment workflows build and publish the app, but do not define a separate test/lint job.
 
 After each fix, log it to `docs/dependabot-session.md` and present the per-alert output (template in skill file).

@@ -28,13 +28,13 @@
         "@equinor/eds-icons": "1.6.0",
         "@eslint/compat": "2.1.1",
         "@types/jest": "30.0.0",
-        "@types/node": "20.11.27",
-        "@types/react": "19.2.18",
-        "@types/react-dom": "19.2.7",
+        "@types/node": "20.19.43",
+        "@types/react": "19.3.2",
+        "@types/react-dom": "19.3.0",
         "@types/styled-components": "5.1.36",
         "@types/w3c-image-capture": "1.0.11",
         "@types/webpack-env": "1.18.8",
-        "@typescript-eslint/parser": "8.73.0",
+        "@typescript-eslint/parser": "8.74.0",
         "eslint": "10.15.0",
         "eslint-config-prettier": "10.1.8",
         "eslint-plugin-prettier": "5.5.7",
@@ -44,7 +44,7 @@
         "prettier": "3.10.1",
         "react": "19.3.1",
         "react-dom": "19.3.1",
-        "styled-components": "6.6.0"
+        "styled-components": "6.7.0"
     },
     "overrides": {
         "eslint-plugin-react": {
